@@ -2,18 +2,18 @@
 import './scss/styles.scss';
 
 // import Sistine class
-import * as shapes from './lib/shapes';
+import * as core from './lib/core';
 import * as stage from './lib/stage';
-import * as registry from './lib/registry';
 import * as events from './lib/events';
+import { Registry } from './lib/registry';
 import * as stringutils from './utils/string';
 import * as domutils from './utils/dom';
 
 const Sistine = {
-    'core': shapes,
+    'core': core,
     'stage': stage,
-    'registry': registry,
     'events': events,
+    'registry': Registry,
     'utils': {
         'string': stringutils,
         'dom': domutils

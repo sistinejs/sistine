@@ -55,18 +55,18 @@ export class Bounds {
 }
 
 export const HitType = {
-    HT_MOVE: 0,
-    HT_SIZE: 1,
-    HT_CONTROL: 2,
+    MOVE: 0,
+    SIZE: 1,
+    CONTROL: 2,
 
-    HT_SIZE_N: 0,
-    HT_SIZE_NE: 1,
-    HT_SIZE_E: 2,
-    HT_SIZE_SE: 3,
-    HT_SIZE_S: 4,
-    HT_SIZE_SW: 5,
-    HT_SIZE_W: 6,
-    HT_SIZE_NW: 7,
+    SIZE_N: 0,
+    SIZE_NE: 1,
+    SIZE_E: 2,
+    SIZE_SE: 3,
+    SIZE_S: 4,
+    SIZE_SW: 5,
+    SIZE_W: 6,
+    SIZE_NW: 7,
 }
 
 export class HitInfo {
@@ -104,7 +104,7 @@ export class Shape {
 
     setLocation(x, y, force, silent) {
         if (x != this._bounds._x || y != this._bounds._y) {
-            var event = new LocationChanged(this._bounds._x, this._bounds._y, x, y);
+            var event = new events.LocationChanged(this._bounds._x, this._bounds._y, x, y);
             if (force || this.shouldTrigger(event)) {
                 var oldvalue = [ this._bounds._x, this._bounds._y ];
                 this._bounds._x = x;
@@ -116,7 +116,7 @@ export class Shape {
 
     setSize(w, h, force, silent) {
         if (w != this._bounds._width || h != this._bounds._height) {
-            var event = new SizeChanged(this._bounds._width, this._bounds._height, w, h);
+            var event = new events.SizeChanged(this._bounds._width, this._bounds._height, w, h);
             if (force || this.shouldTrigger(event)) {
                 var C2 = DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE;
                 if (w > C2 && h > C2) {
@@ -131,7 +131,7 @@ export class Shape {
     set(property, newValue, force, slient) {
         var oldvalue = this._configs[property];
         if (oldvalue != newvalue) {
-            event = new PropertyChanged(property, oldvalue, newvalue);
+            event = new events.PropertyChanged(property, oldvalue, newvalue);
             if (force || this.shouldTrigger(event)) {
                 this._configs[config] = newvalue;
                 if (!silent) this.trigger(event);
@@ -175,7 +175,7 @@ export class Shape {
      */
     add(shape, force, silent) {
         if (shape.parent != this) {
-            var event = new ShapeAdded(this, shape);
+            var event = new events.ShapeAdded(this, shape);
             if (force || this.shouldTrigger(event)) {
                 // remove from old parent - Important!
                 if (shape.removeFromParent()) {
@@ -197,7 +197,7 @@ export class Shape {
      */
     remove(shape, force, silent) {
         if (shape.parent == this) {
-            var event = new ShapeRemoved(this, shape);
+            var event = new events.ShapeRemoved(this, shape);
             if (force || this.shouldTrigger(event)) {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == shape) {

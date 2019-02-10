@@ -1,5 +1,7 @@
 
-class Triangle extends Shape {
+import * as core from "../core"
+
+export class Triangle extends core.Shape {
     constructor(configs) {
         super(configs);
     }

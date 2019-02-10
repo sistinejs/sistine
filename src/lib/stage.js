@@ -1,6 +1,6 @@
 
 import * as events from "./events";
-import * as core from "./shapes";
+import * as core from "./core";
 import { getcssint } from "../utils/dom"
 
 /**
