@@ -1,10 +1,14 @@
 
+import * as events from "./events";
+import * as core from "./shapes";
+import { getcssint } from "../utils/dom"
+
 /**
  * The index structure of a scene lets us re-model how we store and index shapes in a scene
  * for faster access and grouping not just by hierarchy but also to cater for various access
  * characteristics. (say by location, by attribute type, by zIndex etc)
  */
-class SceneIndex {
+export class SceneIndex {
     constructor(scene) {
         this._shapeIndexes = {};
         this._allShapes = [];
@@ -125,7 +129,7 @@ class SceneIndex {
     }
 }
 
-class SceneCanvas {
+export class SceneCanvas {
     constructor(divId, canvasId, configs) {
         this._divId = divId;
         this._canvasId = canvasId;
@@ -227,11 +231,11 @@ class SceneCanvas {
  * As far as possible this does not perform any view related operations as 
  * that is decoupled into the view entity.
  */
-class Stage extends EventHandler {
+export class Stage extends events.EventHandler {
     constructor(divId, scene, configs) {
         super();
         configs = configs || {};
-        this._viewBounds = configs.viewBounds || new Bounds();
+        this._viewBounds = configs.viewBounds || new core.Bounds();
         this._divId = divId;
         this._scene = scene;
 

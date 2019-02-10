@@ -6,12 +6,18 @@ import * as shapes from './lib/shapes';
 import * as stage from './lib/stage';
 import * as registry from './lib/registry';
 import * as events from './lib/events';
+import * as stringutils from './utils/string';
+import * as domutils from './utils/dom';
 
-Sistine = {
+const Sistine = {
     'core': shapes,
     'stage': stage,
     'registry': registry,
-    'events': events
+    'events': events,
+    'utils': {
+        'string': stringutils,
+        'dom': domutils
+    }
 }
 
 // export default UserList class

@@ -1,9 +1,9 @@
 
-function getcssint(elem, attrib) {
+export function getcssint(elem, attrib) {
     return parseInt(elem.css(attrib).replace(/px/, ""));
 }
 
-function fillChildComponent(elem) {
+export function fillChildComponent(elem) {
     var parent = elem.parent();
     var horiz_padding = getcssint(elem, "padding-left") +
                         getcssint(elem, "padding-right") +
