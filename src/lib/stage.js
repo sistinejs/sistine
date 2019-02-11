@@ -270,18 +270,19 @@ class StageTouchHandler {
         this.hitInfo = null;
         this.selectedShape = null;
         this.relatedShapes = [];
+        this._setupHandlers();
     }
 
     _setupHandlers() {
         var stage = this.stage;
         var handler = this;
-        stage.editCanvas.mousedown(function(event) { return handler.onMouseDown(event); });
-        stage.editCanvas.mouseup(function(event) { return handler.onMouseUp(event); });
-        stage.editCanvas.mouseover(function(event) { return handler.onMouseOver(event); });
-        stage.editCanvas.mouseout(function(event) { return handler.onMouseOut(event); });
-        stage.editCanvas.mouseenter(function(event) { return handler.onMouseEnter(event); });
-        stage.editCanvas.mouseleave(function(event) { return handler.onMouseLeave(event); });
-        stage.editCanvas.mousemove(function(event) { return handler.onMouseMove(event); });
+        stage.editCanvas.mousedown(function(event) { return handler._onMouseDown(event); });
+        stage.editCanvas.mouseup(function(event) { return handler._onMouseUp(event); });
+        stage.editCanvas.mouseover(function(event) { return handler._onMouseOver(event); });
+        stage.editCanvas.mouseout(function(event) { return handler._onMouseOut(event); });
+        stage.editCanvas.mouseenter(function(event) { return handler._onMouseEnter(event); });
+        stage.editCanvas.mouseleave(function(event) { return handler._onMouseLeave(event); });
+        stage.editCanvas.mousemove(function(event) { return handler._onMouseMove(event); });
     }
 
     ////  Local handling of mouse/touch events
@@ -289,23 +290,25 @@ class StageTouchHandler {
         this.currX = this.downX = event.offsetX;
         this.currY = this.downY = event.offsetY;
 
+        var mainIndex = this.stage.mainCanvas.sceneIndex;
+        var editIndex = this.stage.editCanvas.sceneIndex;
         // Get the shape that is under the mouse
-        this.hitInfo = this._mainIndex.getHitInfo(this.downX, this.downY);
+        this.hitInfo = mainIndex.getHitInfo(this.downX, this.downY);
         if (this.hitInfo != null) {
-            this._editCanvas.cursor = this.hitInfo.cursor;
+            this.stage.editCanvas.cursor = this.hitInfo.cursor;
             this.selectedShape = this.hitInfo.shape;
 
             // Get the shapes related to this shape that will change as we transform this shape
             this.relatedShapes = [];
 
             // remove the selected and related shapes from the mainIndex and add it to the edited index
-            this._mainIndex.remove(this.selectedShape);
-            this._mainIndex.removeShapes(this.relatedShapes);
-            this._editIndex.add(this.selectedShape);
-            this._editIndex.addShapes(this.relatedShapes);
-            console.log("OnDown mainIndex Shapes: ", this._mainIndex._allShapes, this._mainIndex._shapeIndexes);
-            console.log("OnDown editIndex Shapes: ", this._editIndex._allShapes, this._editIndex._shapeIndexes);
-            this.repaint();
+            mainIndex.remove(this.selectedShape);
+            mainIndex.removeShapes(this.relatedShapes);
+            editIndex.add(this.selectedShape);
+            editIndex.addShapes(this.relatedShapes);
+            console.log("OnDown mainIndex Shapes: ", mainIndex._allShapes, mainIndex._shapeIndexes);
+            console.log("OnDown editIndex Shapes: ", editIndex._allShapes, editIndex._shapeIndexes);
+            this.stage.repaint();
         }
         console.log("HitInfo: ", this.hitInfo);
     }
@@ -314,18 +317,20 @@ class StageTouchHandler {
         this.downX = null;
         this.downY = null;
 
+        var mainIndex = this.stage.mainCanvas.sceneIndex;
+        var editIndex = this.stage.editCanvas.sceneIndex;
         // Add selected and related shapes back to main index from edit index
         if (this.selectedShape != null) {
-            this._editIndex.remove(this.selectedShape);
-            this._mainIndex.add(this.selectedShape);
+            editIndex.remove(this.selectedShape);
+            mainIndex.add(this.selectedShape);
         }
-        this._editIndex.removeShapes(this.relatedShapes);
-        this._mainIndex.addShapes(this.relatedShapes);
+        editIndex.removeShapes(this.relatedShapes);
+        mainIndex.addShapes(this.relatedShapes);
         this.selectedShape = null;
         this.relatedShapes = [];
-        console.log("OnOver mainIndex Shapes: ", this._mainIndex._allShapes, this._mainIndex._shapeIndexes);
-        console.log("OnOver editIndex Shapes: ", this._editIndex._allShapes, this._editIndex._shapeIndexes);
-        this.repaint();
+        console.log("OnOver mainIndex Shapes: ", mainIndex._allShapes, mainIndex._shapeIndexes);
+        console.log("OnOver editIndex Shapes: ", editIndex._allShapes, editIndex._shapeIndexes);
+        this.stage.repaint();
     }
 
     _onMouseMove(event) { 
@@ -334,9 +339,9 @@ class StageTouchHandler {
         if (this.hitInfo != null) {
             var newHitInfo = this.hitInfo.shape.getHitInfo(this.currX, this.currY);
             if (newHitInfo != null && newHitInfo.shape == this.hitInfo.shape) {
-                this._editCanvas.cursor = newHitInfo.cursor;
+                this.stage.editCanvas.cursor = newHitInfo.cursor;
             } else {
-                this._editCanvas.cursor = "auto";
+                this.stage.editCanvas.cursor = "auto";
             }
         }
 
@@ -345,7 +350,7 @@ class StageTouchHandler {
             if (this.hitInfo != null) {
                 this.hitInfo.shape.applyHitChanges(this.hitInfo,
                                                    this.downX, this.downY, this.currX, this.currY);
-                this.repaint();
+                this.stage.repaint();
             } else {
                 // Just draw a "selection rectangle"
             }
