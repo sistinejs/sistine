@@ -9,11 +9,11 @@ export function createForToolbar(configs) {
     return create(configs);
 }
 
-export class Polygon extends core.Shape {
+export class Star extends core.Shape {
     constructor(configs) {
         super(configs);
         this._numSides = Math.max(3, configs.numSides || 5);
-        this._innerRadius = configs.innerRadius || (Math.min(this.bounds.width, this.bounds.height) / 10.0);
+        this._innerRadius = configs.innerRadius || (Math.min(this.bounds.width, this.bounds.height) / 5.0);
     }
 
     get numSides() {
@@ -36,20 +36,19 @@ export class Polygon extends core.Shape {
         var fy = cy - R;
         ctx.beginPath();
         ctx.moveTo(fx, fy);
-        console.log("Fx, Fy: ", fx, fy);
         for (var i = 1;i < n;i += 2) {
             var currangle = (Math.PI / 2.0) + (i * theta);
             var costheta = Math.cos(currangle);
             var sintheta = Math.sin(currangle);
-            var px = cx + (R * costheta);
-            var py = cy - (R * sintheta);
+            var px = cx + (innerR * costheta);
+            var py = cy - (innerR * sintheta);
             ctx.lineTo(px, py);
 
             var currangle = (Math.PI / 2.0) + ((i + 1) * theta);
             var costheta = Math.cos(currangle);
             var sintheta = Math.sin(currangle);
-            var px = cx + (innerR * costheta);
-            var py = cy - (innerR * sintheta);
+            var px = cx + (R * costheta);
+            var py = cy - (R * sintheta);
             ctx.lineTo(px, py);
         }
         ctx.lineTo(fx, fy);
