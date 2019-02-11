@@ -5,5 +5,5 @@ console.log("=============================");
 console.log("Bundle: ", Bundle);
 
 export const Registry = {
-    'default': Bundle
+    'DefaultBundle': Bundle
 }

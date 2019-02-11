@@ -130,12 +130,18 @@ export class SceneIndex {
 }
 
 export class SceneCanvas {
-    constructor(divId, canvasId, configs) {
-        this._divId = divId;
+    constructor(stage, canvasId, configs) {
+        this._stage = stage;
+        this._divId = stage.divId;
         this._canvasId = canvasId;
         this._canvas = null;
         this._zoom = 1.0;
         this._ensureCanvas();
+        this._sceneIndex = new SceneIndex();
+    }
+
+    get sceneIndex() {
+        return this._sceneIndex;
     }
 
     set cursor(c) {
@@ -147,6 +153,13 @@ export class SceneCanvas {
     get canvasId() { return this._canvasId; }
     get context() { return this._context; }
     get element() { return this._canvas; }
+
+    /**
+     * Removes this canvas and cleans ourselves up.
+     */
+    remove() {
+        this.element.remove();
+    }
 
     _ensureCanvas() {
         var divId = this._divId;
@@ -163,8 +176,30 @@ export class SceneCanvas {
         return true;
     }
 
+    get width() { this._canvas.width() }
+    get height() { this._canvas.height() }
+
     clear() {
         this.context.clearRect(0, 0, this._canvas.width(), this._canvas.height());
+    }
+
+    repaint(force) {
+        if (force || this.needsRepaint) {
+            this.clear();
+            var stage = this._stage;
+            var touchHandler = stage.touchHandler;
+            var context = this.context;
+            this.sceneIndex.forShapesInViewPort(this.viewPort, function(shape) {
+                shape.applyStyles(context);
+                shape.draw(context);
+                if (touchHandler != null) {
+                    if (shape == touchHandler.selectedShape ||
+                        (touchHandler.hitInfo != null && touchHandler.hitInfo.shape == shape)) {
+                        shape.drawControls(context);
+                    }
+                }
+            });
+        }
     }
 
     layout() {
@@ -226,117 +261,31 @@ export class SceneCanvas {
     }
 }
 
-/**
- * The stage model if where all layers and shapes are managed. 
- * As far as possible this does not perform any view related operations as 
- * that is decoupled into the view entity.
- */
-export class Stage extends events.EventHandler {
-    constructor(divId, scene, configs) {
-        super();
-        configs = configs || {};
-        this._viewBounds = configs.viewBounds || new core.Bounds();
-        this._divId = divId;
-        this._scene = scene;
-
-        // Track mouse/touch drag events
+class StageTouchHandler {
+    constructor(stage) {
+        this.stage = stage;
         this.downX = null;
         this.downY = null;
         this.currX = null;
         this.currY = null;
-        this._setupCanvases();
-        this._setupHandlers();
         this.hitInfo = null;
         this.selectedShape = null;
         this.relatedShapes = [];
     }
 
-    _setupCanvases() {
-        // Indexes maintain the different shapes require for static vs dynamic shapes
-        this._mainIndex = new SceneIndex(this._scene);
-        this._editIndex = new SceneIndex();
-
-        this._mainCanvas = new SceneCanvas(this._divId, "maincanvas_" + this._divId);
-        this._editCanvas = new SceneCanvas(this._divId, "editcanvas_" + this._divId);
-        this.layout();
-    }
-
     _setupHandlers() {
-        var stage = this;
-        this.mousedown(function(event) { return stage._onMouseDown(event); });
-        this.mouseup(function(event) { return stage._onMouseUp(event); });
-        this.mouseover(function(event) { return stage._onMouseOver(event); });
-        this.mouseout(function(event) { return stage._onMouseOut(event); });
-        this.mouseenter(function(event) { return stage._onMouseEnter(event); });
-        this.mouseleave(function(event) { return stage._onMouseLeave(event); });
-        this.mousemove(function(event) { return stage._onMouseMove(event); });
-        this.scene.addHandler(this);
+        var stage = this.stage;
+        var handler = this;
+        stage.editCanvas.mousedown(function(event) { return handler.onMouseDown(event); });
+        stage.editCanvas.mouseup(function(event) { return handler.onMouseUp(event); });
+        stage.editCanvas.mouseover(function(event) { return handler.onMouseOver(event); });
+        stage.editCanvas.mouseout(function(event) { return handler.onMouseOut(event); });
+        stage.editCanvas.mouseenter(function(event) { return handler.onMouseEnter(event); });
+        stage.editCanvas.mouseleave(function(event) { return handler.onMouseLeave(event); });
+        stage.editCanvas.mousemove(function(event) { return handler.onMouseMove(event); });
     }
-
-    get scene() {
-        return this._scene;
-    }
-
-    layout() {
-        this._mainCanvas.layout();
-        this._editCanvas.layout();
-        var canvas = this;
-        canvas.repaint();
-    }
-
-    get bounds() { return this._bounds; }
-    get viewBounds() { return this._viewBounds; }
-
-    repaint() {
-        var stage = this;
-        if (this._mainCanvas.needsRepaint) {
-            this._mainCanvas.clear();
-            this._mainIndex.forShapesInViewPort(this.viewPort, function(shape) {
-                shape.applyStyles(stage._mainCanvas.context);
-                shape.draw(stage._mainCanvas.context);
-                if (shape == stage.selectedShape ||
-                    (stage.hitInfo != null && stage.hitInfo.shape == shape)) {
-                    shape.drawControls(stage._mainCanvas.context);
-                }
-            });
-        }
-        if (this._editCanvas.needsRepaint) {
-            this._editCanvas.clear();
-            this._editIndex.forShapesInViewPort(this.viewPort, function(shape) {
-                shape.applyStyles(stage._editCanvas.context);
-                shape.draw(stage._editCanvas.context);
-                if (shape == stage.selectedShape ||
-                    (stage.hitInfo != null && stage.hitInfo.shape == shape)) {
-                    shape.drawControls(stage._editCanvas.context);
-                }
-            });
-        }
-    }
-
-    draw(context) {
-        this.scene._layers.forEach(function(layer, index) {
-            layer.draw(context);
-        });
-    }
-
-    // Make mouse handlers proxy to the canvas
-    // TODO - make source be the SceneCanvas instead of CanvasElement
-    mouseover(handler) { this._editCanvas.mouseover(handler); return this; } 
-    mouseout(handler) { this._editCanvas.mouseout(handler); return this; } 
-    mouseenter(handler) { this._editCanvas.mouseenter(handler); return this; } 
-    mouseleave(handler) { this._editCanvas.mouseleave(handler); return this; } 
-    mousedown(handler) { this._editCanvas.mousedown(handler); return this; } 
-    mouseup(handler) { this._editCanvas.mouseup(handler); return this; } 
-    mousemove(handler) { this._editCanvas.mousemove(handler); return this; }
 
     ////  Local handling of mouse/touch events
-    // What are the states our stage can be in?
-    // 1. Plain rendering - all shapes/lines etc are drawn
-    // 2. Transformation mode
-    //      - shape being moved
-    //      - shape being sized
-    //      - shape's control point being moved (could result in above two)
-    // We would have 
     _onMouseDown(event) {
         this.currX = this.downX = event.offsetX;
         this.currY = this.downY = event.offsetY;
@@ -409,13 +358,102 @@ export class Stage extends events.EventHandler {
     _onMouseLeave(event) { }
     _onMouseOver(event) { }
     _onMouseOut(event) { }
+}
+
+/**
+ * The stage model if where all layers and shapes are managed. 
+ * As far as possible this does not perform any view related operations as 
+ * that is decoupled into the view entity.
+ */
+export class Stage extends events.EventHandler {
+    constructor(divId, scene, configs) {
+        super();
+        configs = configs || {};
+        this._viewBounds = configs.viewBounds || new core.Bounds();
+        this._divId = divId;
+        this._scene = scene || new core.Scene();
+
+        // Track mouse/touch drag events
+        this._editable = false;
+        this._setupCanvases();
+        this.scene.addHandler(this);
+    }
+
+    get isEditable() {
+        return this._editable;
+    }
+
+    set isEditable(editable) {
+        if (this._editable != editable) {
+            this._editable = editable;
+            if (editable) {
+                this._setupEditCanvas();
+                this.touchHandler = new StageTouchHandler(this);
+            } else {
+                this.touchHandler = null;
+                this.editCanvas.remove();
+                this.editCanvas = null;
+            }
+        }
+    }
+
+    get topCanvas() {
+        return this.editCanvas || this.mainCanvas;
+    }
+
+    get mainCanvas() {
+        return this._mainCanvas;
+    }
+
+    get editCanvas() {
+        return this._editCanvas;
+    }
+
+    get scene() {
+        return this._scene;
+    }
+
+    get bounds() { return this._bounds; }
+    get divId() { return this._divId; }
+    get viewBounds() { return this._viewBounds; }
+
+    layout() {
+        this.mainCanvas.layout();
+        if (this.isEditable)
+            this.editCanvas.layout();
+        this.repaint();
+    }
+
+    repaint() {
+        this.mainCanvas.repaint();
+        if (this.isEditable)
+            this.editCanvas.repaint();
+    }
 
     trigger(event) {
         console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
-            this._mainIndex.add(event.shape);
+            this.mainCanvas.sceneIndex.add(event.shape);
         } else if (event.name == "ShapeRemoved") {
-            this._mainIndex.remove(event.shape);
+            this.mainCanvas.sceneIndex.remove(event.shape);
+        }
+    }
+
+    _setupCanvases() {
+        // Indexes maintain the different shapes require for static vs dynamic shapes
+        this._setupMainCanvas();
+        this._setupEditCanvas();
+        this.layout();
+    }
+
+    _setupMainCanvas() {
+        this._mainCanvas = new SceneCanvas(this, "maincanvas_" + this.divId);
+        this.mainCanvas.sceneIndex.scene = this.scene;
+    }
+
+    _setupEditCanvas() {
+        if (this.isEditable) {
+            this._editCanvas = new SceneCanvas(this, "editcanvas_" + this.divId);
         }
     }
 }

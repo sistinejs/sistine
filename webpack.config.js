@@ -34,6 +34,10 @@ module.exports = {
         new HTMLWebpackPlugin({
             template: path.resolve(__dirname, 'src/demo/index.html')
         }),
-        new webpack.HotModuleReplacementPlugin(),
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery"
+        }),
+        new webpack.HotModuleReplacementPlugin()
     ]
 };

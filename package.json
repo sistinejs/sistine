@@ -25,6 +25,6 @@
         "webpack-dev-server": ">=3.1.11"
     },
     "dependencies": {
-        "jquery-ui-bundle": "^1.12.1-migrate"
+        "jquery": "^3.3.1"
     }
 }

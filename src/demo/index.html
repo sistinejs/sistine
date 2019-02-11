@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"/>
     <script src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"/>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
             integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30="
             crossorigin="anonymous"></script>
@@ -69,7 +69,7 @@
     <div id="footer_div"></div>
 </body>
 <script>
-    iconCanvases = { };
+    iconStages = { };
     theScene = null;
     theStage = null;
 
@@ -127,7 +127,7 @@
     function setupCanvas() {
         theScene = new Sistine.core.Scene();
         theStage = new Sistine.stage.Stage("stage_div", theScene);
-        var DefaultBundle = Sistine.registry.default;
+        var DefaultBundle = Sistine.registry.DefaultBundle;
         var triangle = new DefaultBundle.triangle.Triangle({
             "x": 20, "y": 50, "width": 200, "height": 200, "lineWidth": 2
         });
@@ -142,6 +142,8 @@
         theScene.add(square);
 
         theStage.repaint();
+        theStage.isEditable = true;
+        /*
         theStage.mouseover(function(event) {
             // console.log("1. Mouse Over: " + event);
             // event.stopImmediatePropagation();
@@ -158,6 +160,7 @@
         }).mousemove(function(event) {
             // theStage.repaint();
         });
+        */
     }
 
     /**
@@ -177,7 +180,6 @@
     }
 
     function loadComponents() {
-        /*
         var shape_icons = $(".shape_icon");
         shape_icons.each(function(index, icondiv) {
             // We have divs where these buttons should go.
@@ -187,18 +189,16 @@
             // 3. Associate the button to an actual node component.
             // 4. This implies the node component corresponding to the ID will be responsible for the above.
             var $icondiv = $(icondiv)
+            var tooltip = $icondiv.text();
             $icondiv.empty()
+            $icondiv.attr("title", tooltip);
 
             var shapeId = icondiv.id.replace(/holder_/, "");
-            var nodeViewer = shape_builders[shapeId];
-            var canvasId = "canvas_" + shapeId;
-            var $child = $("<canvas class = 'shape_icon_canvas' id = '" + canvasId + "' title = '" + nodeViewer.iconLabel + "'/>");
-            $icondiv.append($child)
+            var iconStage = iconStages[shapeId] = new Sistine.stage.Stage(icondiv.id);
+            var $child = iconStage.topCanvas.element;
 
-            iconCanvases[shapeId] = new fabric.StaticCanvas(canvasId);
-            fillChildComponent($child);
-
-            var toolbarShape = nodeViewer.toolbarShape({
+            var DefaultBundle = Sistine.registry.DefaultBundle;
+            var toolbarShape = DefaultBundle[shapeId].create({
                 width: $child.width() - (
                     Sistine.utils.dom.getcssint($child, "margin-left") +
                     Sistine.utils.dom.getcssint($child, "margin-right")
@@ -208,11 +208,11 @@
                     Sistine.utils.dom.getcssint($child, "margin-bottom")
                 )
             });
-            iconCanvases[shapeId].add(toolbarShape);
-            $(canvasId).tooltip();
+            iconStage.scene.add(toolbarShape);
+            iconStage.topCanvas.element.tooltip();
 
             // Setup highlighter!
-            $child.mouseover(function(event) {
+            iconStage.topCanvas.element.mouseover(function(event) {
                 $(event.currentTarget).addClass("toolbar_button_highlighted");
             }).mouseout(function(event) {
                 $(event.currentTarget).removeClass("toolbar_button_highlighted");
@@ -222,7 +222,6 @@
                 addShapeForToolbar(id);
             });
         });
-        */
     }
 
     function addShapeForToolbar(objid) {

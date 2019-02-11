@@ -1,6 +1,10 @@
 
 import * as core from "../core"
 
+export function create(configs) {
+    return new Triangle(configs);
+}
+
 export class Triangle extends core.Shape {
     constructor(configs) {
         super(configs);
