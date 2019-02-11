@@ -430,7 +430,7 @@ export class Stage extends events.EventHandler {
     }
 
     trigger(event) {
-        console.log("Event: ", event);
+        // console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
             this.mainCanvas.sceneIndex.add(event.shape);
         } else if (event.name == "ShapeRemoved") {

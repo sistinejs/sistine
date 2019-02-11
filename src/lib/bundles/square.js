@@ -5,6 +5,10 @@ export function create(configs) {
     return new Square(configs);
 }
 
+export function createForToolbar(configs) {
+    return new Square(configs);
+}
+
 export class Square extends core.Shape {
     constructor(configs) {
         super(configs);

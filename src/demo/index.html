@@ -198,18 +198,19 @@
             var $child = iconStage.topCanvas.element;
 
             var DefaultBundle = Sistine.registry.DefaultBundle;
-            var toolbarShape = DefaultBundle[shapeId].create({
+            var margin = 3;
+            var toolbarShape = DefaultBundle[shapeId].createForToolbar({
                 lineWidth: 2,
-                x: 3,
-                y: 3,
+                x: margin,
+                y: margin,
                 width: $child.width() - (
                     Sistine.utils.dom.getcssint($child, "margin-left") +
                     Sistine.utils.dom.getcssint($child, "margin-right")
-                ) - 6,
+                ) - (margin * 2),
                 height: $child.height() - (
                     Sistine.utils.dom.getcssint($child, "margin-top") +
                     Sistine.utils.dom.getcssint($child, "margin-bottom")
-                ) - 6
+                ) - (margin * 2)
             });
             iconStage.scene.add(toolbarShape);
             iconStage.layout();

@@ -20,6 +20,8 @@ export class Bounds {
     get bottom() { return this._y + this._height; }
     get width() { return this._width; }
     get height() { return this._height; }
+    get midX() { return this._x + (this._width / 2.0) };
+    get midY() { return this._y + (this._height / 2.0) };
 
     set left(value) { this._x = value; }
     set top(value) { this._y = value; }
@@ -102,19 +104,19 @@ export class Shape {
         this._connections = [];
     }
 
-    setLocation(x, y, force, silent) {
+    setLocation(x, y, force) {
         if (x != this._bounds._x || y != this._bounds._y) {
             var event = new events.LocationChanged(this._bounds._x, this._bounds._y, x, y);
             if (force || this.shouldTrigger(event)) {
                 var oldvalue = [ this._bounds._x, this._bounds._y ];
                 this._bounds._x = x;
                 this._bounds._y = y;
-                if (!silent) this.trigger(event);
+                this.trigger(event);
             }
         }
     }
 
-    setSize(w, h, force, silent) {
+    setSize(w, h, force) {
         if (w != this._bounds._width || h != this._bounds._height) {
             var event = new events.SizeChanged(this._bounds._width, this._bounds._height, w, h);
             if (force || this.shouldTrigger(event)) {
@@ -122,19 +124,19 @@ export class Shape {
                 if (w > C2 && h > C2) {
                     this._bounds.width = w;
                     this._bounds.height = h;
-                    if (!silent) this.trigger(event);
+                    this.trigger(event);
                 }
             }
         }
     }
 
-    set(property, newValue, force, slient) {
+    set(property, newValue, force) {
         var oldvalue = this._configs[property];
         if (oldvalue != newvalue) {
             event = new events.PropertyChanged(property, oldvalue, newvalue);
             if (force || this.shouldTrigger(event)) {
                 this._configs[config] = newvalue;
-                if (!silent) this.trigger(event);
+                this.trigger(event);
             }
         }
         return this;
@@ -173,7 +175,7 @@ export class Shape {
      * Returns true if a shape was successfully added
      * false if the addition was blocked.
      */
-    add(shape, force, silent) {
+    add(shape, force) {
         if (shape.parent != this) {
             var event = new events.ShapeAdded(this, shape);
             if (force || this.shouldTrigger(event)) {
@@ -182,7 +184,7 @@ export class Shape {
                     this._children.push(shape);
                     shape.parent = this;
                     shape.scene = this.scene;
-                    if (!silent) this.trigger(event);
+                    this.trigger(event);
                     return true;
                 }
             }
@@ -195,7 +197,7 @@ export class Shape {
      * Returns true if a shape was successfully removed,
      * false if the removal was blocked.
      */
-    remove(shape, force, silent) {
+    remove(shape, force) {
         if (shape.parent == this) {
             var event = new events.ShapeRemoved(this, shape);
             if (force || this.shouldTrigger(event)) {
@@ -203,7 +205,7 @@ export class Shape {
                     if (this._children[i] == shape) {
                         this._children.splice(i, 1);
                         shape.parent = null;
-                        if (!silent) this.trigger(event);
+                        this.trigger(event);
                         return true;
                     }
                 }

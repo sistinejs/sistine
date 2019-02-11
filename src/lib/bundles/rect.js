@@ -5,6 +5,12 @@ export function create(configs) {
     return new Rectangle(configs);
 }
 
+export function createForToolbar(configs) {
+    configs.y = configs.height / 5;
+    configs.height *= 0.6;
+    return create(configs);
+}
+
 export class Rectangle extends core.Shape {
     constructor(configs) {
         super(configs);
