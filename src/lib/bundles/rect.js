@@ -1,6 +1,10 @@
 
 import * as core from "../core"
 
+export function create(configs) {
+    return new Rectangle(configs);
+}
+
 export class Rectangle extends core.Shape {
     constructor(configs) {
         super(configs);

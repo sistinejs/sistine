@@ -199,17 +199,22 @@
 
             var DefaultBundle = Sistine.registry.DefaultBundle;
             var toolbarShape = DefaultBundle[shapeId].create({
+                lineWidth: 2,
+                x: 3,
+                y: 3,
                 width: $child.width() - (
                     Sistine.utils.dom.getcssint($child, "margin-left") +
                     Sistine.utils.dom.getcssint($child, "margin-right")
-                ),
+                ) - 6,
                 height: $child.height() - (
                     Sistine.utils.dom.getcssint($child, "margin-top") +
                     Sistine.utils.dom.getcssint($child, "margin-bottom")
-                )
+                ) - 6
             });
             iconStage.scene.add(toolbarShape);
-            iconStage.topCanvas.element.tooltip();
+            iconStage.layout();
+            iconStage.repaint();
+            // iconStage.topCanvas.element.tooltip();
 
             // Setup highlighter!
             iconStage.topCanvas.element.mouseover(function(event) {

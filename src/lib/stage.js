@@ -165,8 +165,7 @@ export class SceneCanvas {
         var divId = this._divId;
         var $parent = $("#" + divId);
         this._parentDiv = $parent;
-        this._canvas = $("<canvas style='position: absolute; left: 0px; right: 0px; bottom: 0px; top: 0px' " +
-                         "id = '" + this._canvasId + "'/>");
+        this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
         $parent.append(this._canvas);
         this.layout();
         this._context = this._canvas[0].getContext("2d");
