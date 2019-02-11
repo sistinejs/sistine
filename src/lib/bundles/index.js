@@ -2,7 +2,7 @@
 import * as triangle from "./triangle"
 import * as rect from "./rect"
 import * as square from "./square"
-import * as regpolygon from "./regpolygon"
+import * as polygon from "./polygon"
 import * as star from "./star"
 import * as cog from "./cog"
 import * as rounded_rect from "./rounded_rect"
@@ -34,7 +34,7 @@ export const Bundle = {
     "triangle": triangle,
     "rect": rect,
     "square": square,
-    "regpolygon": regpolygon,
+    "polygon": polygon,
     "star": star,
     "cog": cog,
     "rounded_rect": rounded_rect,
@@ -67,7 +67,7 @@ export const Bundle = {
 "triangle",
 "rect",
 "square",
-"regpolygon",
+"polygon",
 "star",
 "cog",
 "rounded_rect",
