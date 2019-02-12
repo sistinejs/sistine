@@ -100,8 +100,8 @@ export class SceneIndex {
         var allShapes = this._allShapes;
         for (var index in allShapes) {
             var shape = allShapes[index];
-            if (shape != null) {
-                var hitInfo = shape.getHitInfo(x, y);
+            if (shape != null && shape.controller != null) {
+                var hitInfo = shape.controller.getHitInfo(x, y);
                 if (hitInfo != null) {
                     return hitInfo;
                 }
@@ -337,7 +337,8 @@ class StageTouchHandler {
         this.currX = event.offsetX;
         this.currY = event.offsetY;
         if (this.hitInfo != null) {
-            var newHitInfo = this.hitInfo.shape.getHitInfo(this.currX, this.currY);
+            var shape = this.hitInfo.shape
+            var newHitInfo = shape.controller.getHitInfo(this.currX, this.currY);
             if (newHitInfo != null && newHitInfo.shape == this.hitInfo.shape) {
                 this.stage.editCanvas.cursor = newHitInfo.cursor;
             } else {
@@ -348,8 +349,9 @@ class StageTouchHandler {
         if (this.downX != null) {
             // We are in a position to "transform" the entry pressed
             if (this.hitInfo != null) {
-                this.hitInfo.shape.applyHitChanges(this.hitInfo,
-                                                   this.downX, this.downY, this.currX, this.currY);
+                var shape = this.hitInfo.shape
+                shape.controller.applyHitChanges(this.hitInfo,
+                                                 this.downX, this.downY, this.currX, this.currY);
                 this.stage.repaint();
             } else {
                 // Just draw a "selection rectangle"

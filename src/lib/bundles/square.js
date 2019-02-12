@@ -2,19 +2,19 @@
 import * as core from "../core"
 
 export function newShape(configs) {
-    return new Shape(configs);
+    return new SquareShape(configs);
 }
 
 export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class Shape extends core.Shape {
+export class SquareShape extends core.Shape {
     constructor(configs) {
         super(configs);
         var size = Math.min(this.bounds.width, this.bounds.height);
         this.bounds._width = this.bounds._height = size;
-        this._controller = new Controller(this);
+        this._controller = new SquareController(this);
     }
 
     draw(ctx) {
@@ -33,9 +33,8 @@ export class Shape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class Controller extends core.Controller {
+export class SquareController extends core.ShapeController {
     constructor(shape) {
         super(shape);
     }
 }
-

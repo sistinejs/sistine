@@ -2,17 +2,17 @@
 import * as core from "../core"
 
 export function newShape(configs) {
-    return new Shape(configs);
+    return new TriangleShape(configs);
 }
 
 export function newShapeForToolbar(configs) {
-    return new Shape(configs);
+    return new TriangleShape(configs);
 }
 
-export class Shape extends core.Shape {
+export class TriangleShape extends core.Shape {
     constructor(configs) {
         super(configs);
-        this._controller = new Controller(this);
+        this._controller = new TriangleController(this);
     }
 
     draw(ctx) {
@@ -42,9 +42,8 @@ export class Shape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class Controller extends core.Controller {
-    constructor(triangle) {
-        super(triangle);
+export class TriangleController extends core.ShapeController {
+    constructor(shape) {
+        super(shape);
     }
 }
-

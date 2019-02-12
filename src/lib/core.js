@@ -252,6 +252,22 @@ export class Shape {
         }
     }
 
+    /**
+     * Returns true if this shape contains a particular coordinate, 
+     * false otherwise.
+     */
+    containsPoint(x, y) {
+        return this.bounds.containsPoint(x, y);
+    }
+
+    /**
+     * Returns true if this shape intersects another bounds instance,
+     * false otherwise.
+     */
+    intersects(anotherBounds) {
+        return this.bounds.intersects(anotherBounds);
+    }
+
     // Event handling
     /**
      * All events are syncronous and follow a "shouldTriggerX" followed by a 
@@ -291,7 +307,10 @@ export class Shape {
     }
 }
 
-export class Layer extends Shape { }
+export class Layer extends Shape {
+    draw(context) {
+    }
+}
 
 /**
  * The Scene is the raw model where all layers and shapes are 
@@ -525,23 +544,6 @@ export class ShapeController extends events.EventHandler {
             shape.setSize(newWidth, newHeight);
         } else if (hitInfo.hitType == HitType.CONTROL) {
         }
-    }
-
-
-    /**
-     * Returns true if this shape contains a particular coordinate, 
-     * false otherwise.
-     */
-    containsPoint(x, y) {
-        return this.shape.bounds.containsPoint(x, y);
-    }
-
-    /**
-     * Returns true if this shape intersects another bounds instance,
-     * false otherwise.
-     */
-    intersects(anotherBounds) {
-        return this.shape.bounds.intersects(anotherBounds);
     }
 }
 
