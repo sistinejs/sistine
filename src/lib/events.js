@@ -13,7 +13,7 @@ export class EventHandler {
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    trigger(event) {
+    eventTriggered(event) {
     }
 }
 

@@ -434,7 +434,7 @@ export class Stage extends events.EventHandler {
             this.editCanvas.repaint();
     }
 
-    trigger(event) {
+    eventTriggered(event) {
         // console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
             this.mainCanvas.sceneIndex.add(event.shape);

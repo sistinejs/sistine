@@ -1,97 +1,95 @@
 
-import * as triangle from "./triangle"
-import * as rect from "./rect"
-import * as square from "./square"
-import * as polygon from "./polygon"
-import * as star from "./star"
-import * as cog from "./cog"
-import * as rounded_rect from "./rounded_rect"
-import * as plus from "./plus"
-import * as circle from "./circle"
-import * as ellipse from "./ellipse"
-import * as left_arrow from "./left_arrow"
-import * as right_arrow from "./right_arrow"
-import * as double_arrow from "./double_arrow"
-import * as cylinder from "./cylinder"
-import * as left_block_arrow from "./left_block_arrow"
-import * as right_block_arrow from "./right_block_arrow"
-import * as left_chevron from "./left_chevron"
-import * as right_chevron from "./right_chevron"
-import * as straight_connector from "./straight_connector"
-import * as elbow_connector from "./elbow_connector"
-import * as curved_connector from "./curved_connector"
-import * as inmem_cache from "./inmem_cache"
-import * as dist_cache from "./dist_cache"
-import * as load_balancer from "./load_balancer"
-import * as web_server from "./web_server"
-import * as database from "./database"
-import * as btree_index from "./btree_index"
-import * as hash_index from "./hash_index"
-import * as kafka_queue from "./kafka_queue"
-import * as network_link from "./network_link"
+import * as Triangle from "./Triangle"
+import * as Rectangle from "./Rectangle"
+import * as Square from "./Square"
+import * as Polygon from "./Polygon"
+import * as Star from "./Star"
+import * as Cog from "./Cog"
+import * as RoundedRectangle from "./RoundedRectangle"
+import * as Plus from "./Plus"
+import * as Circle from "./Circle"
+import * as Ellipse from "./Ellipse"
+import * as LeftArrow from "./LeftArrow"
+import * as RightArrow from "./RightArrow"
+import * as DoubleArrow from "./DoubleArrow"
+import * as Cylinder from "./Cylinder"
+import * as LeftBlockArrow from "./LeftBlockArrow"
+import * as RightBlockArrow from "./RightBlockArrow"
+import * as LeftChevron from "./LeftChevron"
+import * as RightChevron from "./RightChevron"
+import * as StraightConnector from "./StraightConnector"
+import * as ElbowConnector from "./ElbowConnector"
+import * as CurvedConnector from "./CurvedConnector"
+import * as InMemCache from "./InMemCache"
+import * as DistributedCache from "./DistributedCache"
+import * as LoadBalancer from "./LoadBalancer"
+import * as WebServer from "./WebServer"
+import * as Database from "./Database"
+import * as BTreeIndex from "./BTreeIndex"
+import * as HashIndex from "./HashIndex"
+import * as KafkaQueue from "./KafkaQueue"
+import * as NetworkLink from "./NetworkLink"
 
 export const Bundle = {
-    "triangle": triangle,
-    "rect": rect,
-    "square": square,
-    "polygon": polygon,
-    "star": star,
-    "cog": cog,
-    "rounded_rect": rounded_rect,
-    "plus": plus,
-    "circle": circle,
-    "ellipse": ellipse,
-    "left_arrow": left_arrow,
-    "right_arrow": right_arrow,
-    "double_arrow": double_arrow,
-    "cylinder": cylinder,
-    "left_block_arrow": left_block_arrow,
-    "right_block_arrow": right_block_arrow,
-    "left_chevron": left_chevron,
-    "right_chevron": right_chevron,
-    "straight_connector": straight_connector,
-    "elbow_connector": elbow_connector,
-    "curved_connector": curved_connector,
-    "inmem_cache": inmem_cache,
-    "dist_cache": dist_cache,
-    "load_balancer": load_balancer,
-    "web_server": web_server,
-    "database": database,
-    "btree_index": btree_index,
-    "hash_index": hash_index,
-    "kafka_queue": kafka_queue,
-    "network_link": network_link
+    "Triangle": Triangle,
+    "Rectangle": Rectangle,
+    "Square": Square,
+    "Polygon": Polygon,
+    "Star": Star,
+    "Cog": Cog,
+    "RoundedRectangle": RoundedRectangle,
+    "Plus": Plus,
+    "Circle": Circle,
+    "Ellipse": Ellipse,
+    "LeftArrow": LeftArrow,
+    "RightArrow": RightArrow,
+    "DoubleArrow": DoubleArrow,
+    "Cylinder": Cylinder,
+    "LeftBlockArrow": LeftBlockArrow,
+    "RightBlockArrow": RightBlockArrow,
+    "LeftChevron": LeftChevron,
+    "RightChevron": RightChevron,
+    "StraightConnector": StraightConnector,
+    "ElbowConnector": ElbowConnector,
+    "CurvedConnector": CurvedConnector,
+    "InMemCache": InMemCache,
+    "DistributedCache": DistributedCache,
+    "LoadBalancer": LoadBalancer,
+    "WebServer": WebServer,
+    "Database": Database,
+    "BTreeIndex": BTreeIndex,
+    "HashIndex": HashIndex,
+    "KafkaQueue": KafkaQueue,
+    "NetworkLink": NetworkLink,
 }
 
-/**
-"triangle",
-"rect",
-"square",
-"polygon",
-"star",
-"cog",
-"rounded_rect",
-"plus",
-"circle",
-"ellipse",
-"left_arrow",
-"right_arrow",
-"double_arrow",
-"cylinder",
-"left_block_arrow",
-"right_block_arrow",
-"left_chevron",
-"right_chevron",
-"straight_connector",
-"elbow_connector",
-"curved_connector",
-"inmem_cache",
-"dist_cache",
-"load_balancer",
-"web_server",
-"database",
-"btree_index",
-"hash_index",
-"kafka_queue",
-"network_link",
-**/
+"Triangle",
+"Rectangle",
+"Square",
+"Polygon",
+"Star",
+"Cog",
+"RoundedRectangle",
+"Plus",
+"Circle",
+"Ellipse",
+"LeftArrow",
+"RightArrow",
+"DoubleArrow",
+"Cylinder",
+"LeftBlockArrow",
+"RightBlockArrow",
+"LeftChevron",
+"RightChevron",
+"StraightConnector",
+"ElbowConnector",
+"CurvedConnector",
+"InMemCache",
+"DistributedCache",
+"LoadBalancer",
+"WebServer",
+"Database",
+"BTreeIndex",
+"HashIndex",
+"KafkaQueue",
+"NetworkLink",

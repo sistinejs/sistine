@@ -1,1 +1,1 @@
-triangle.js
+Triangle.js

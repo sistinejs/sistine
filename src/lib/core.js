@@ -56,31 +56,6 @@ export class Bounds {
     }
 }
 
-export const HitType = {
-    MOVE: 0,
-    SIZE: 1,
-    CONTROL: 2,
-
-    SIZE_N: 0,
-    SIZE_NE: 1,
-    SIZE_E: 2,
-    SIZE_SE: 3,
-    SIZE_S: 4,
-    SIZE_SW: 5,
-    SIZE_W: 6,
-    SIZE_NW: 7,
-}
-
-export class HitInfo {
-    constructor(shape, hitType, hitIndex, cursor, savedInfo) {
-        this.shape = shape;
-        this.hitType = hitType || 0;
-        this.hitIndex = hitIndex || 0;
-        this.cursor = cursor || "auto";
-        this.savedInfo = savedInfo || {};
-    }
-}
-
 const ShapeGlobals = {
     _shapeCounter: 1
 }
@@ -102,6 +77,11 @@ export class Shape {
         this._scene = null;
         this._children = [];
         this._connections = [];
+        this._controller = null;
+    }
+
+    get controller() {
+        return this._controller;
     }
 
     setLocation(x, y, force) {
@@ -111,7 +91,7 @@ export class Shape {
                 var oldvalue = [ this._bounds._x, this._bounds._y ];
                 this._bounds._x = x;
                 this._bounds._y = y;
-                this.trigger(event);
+                this.eventTriggered(event);
             }
         }
     }
@@ -124,7 +104,7 @@ export class Shape {
                 if (w > C2 && h > C2) {
                     this._bounds.width = w;
                     this._bounds.height = h;
-                    this.trigger(event);
+                    this.eventTriggered(event);
                 }
             }
         }
@@ -136,7 +116,7 @@ export class Shape {
             event = new events.PropertyChanged(property, oldvalue, newvalue);
             if (force || this.shouldTrigger(event)) {
                 this._configs[config] = newvalue;
-                this.trigger(event);
+                this.eventTriggered(event);
             }
         }
         return this;
@@ -184,7 +164,7 @@ export class Shape {
                     this._children.push(shape);
                     shape.parent = this;
                     shape.scene = this.scene;
-                    this.trigger(event);
+                    this.eventTriggered(event);
                     return true;
                 }
             }
@@ -205,108 +185,13 @@ export class Shape {
                     if (this._children[i] == shape) {
                         this._children.splice(i, 1);
                         shape.parent = null;
-                        this.trigger(event);
+                        this.eventTriggered(event);
                         return true;
                     }
                 }
             }
         }
         return false;
-    }
-
-    /**
-     * Returns the "topmost" shape that can be hit at a given coordinate.
-     */
-    getHitInfo(x, y) {
-        var l = this.bounds.left;
-        var r = this.bounds.right;
-        var t = this.bounds.top;
-        var b = this.bounds.bottom;
-        var sizePoints = [
-            [[(l + r) / 2, t], "n-resize"],
-            [[r, t], "ne-resize"],
-            [[r, (t + b) / 2], "e-resize"],
-            [[r, b], "se-resize"],
-            [[(l + r) / 2, b], "s-resize"],
-            [[l, b], "sw-resize"],
-            [[l, (t + b) / 2], "w-resize"],
-            [[l, t], "nw-resize"],
-        ]
-        for (var i in sizePoints) {
-            var hti = sizePoints[i];
-            var px = hti[0][0];
-            var py = hti[0][1];
-            var cursor = hti[1];
-            if (x >= px - DEFAULT_CONTROL_SIZE && x <= px + DEFAULT_CONTROL_SIZE &&
-                y >= py - DEFAULT_CONTROL_SIZE && y <= py + DEFAULT_CONTROL_SIZE) {
-                return new HitInfo(this, HitType.SIZE, i, cursor, this.bounds.copy());
-            }
-        }
-        if (this.bounds.containsPoint(x, y)) {
-            return new HitInfo(this, HitType.MOVE, 0, "move", this.bounds.copy());
-        }
-        return null;
-    }
-
-    applyHitChanges(hitInfo, downX, downY, currX, currY) {
-        var savedInfo = hitInfo.savedInfo;
-        var deltaX = currX - downX;
-        var deltaY = currY - downY;
-        if (hitInfo.hitType == HitType.MOVE) {
-            this.setLocation(savedInfo.left + deltaX, savedInfo.top + deltaY);
-        } else if (hitInfo.hitType == HitType.SIZE) {
-            var newTop = savedInfo.top;
-            var newLeft = savedInfo.left;
-            var newHeight = savedInfo.height;
-            var newWidth = savedInfo.width;
-            if (hitInfo.hitIndex == HitType.SIZE_N) {
-                newHeight -= deltaY;
-                newTop += deltaY;
-            } else if (hitInfo.hitIndex == HitType.SIZE_NE) {
-                newHeight -= deltaY;
-                newWidth += deltaX;
-                newTop += deltaY;
-            } else if (hitInfo.hitIndex == HitType.SIZE_E) {
-                newWidth += deltaX;
-            } else if (hitInfo.hitIndex == HitType.SIZE_SE) {
-                newHeight += deltaY;
-                newWidth += deltaX;
-            } else if (hitInfo.hitIndex == HitType.SIZE_S) {
-                newHeight += deltaY;
-            } else if (hitInfo.hitIndex == HitType.SIZE_SW) {
-                newHeight += deltaY;
-                newWidth -= deltaX;
-                newLeft += deltaX;
-            } else if (hitInfo.hitIndex == HitType.SIZE_W) {
-                newLeft += deltaX;
-                newWidth -= deltaX;
-            } else if (hitInfo.hitIndex == HitType.SIZE_NW) {
-                newHeight -= deltaY;
-                newTop += deltaY;
-                newLeft += deltaX;
-                newWidth -= deltaX;
-            }
-            this.setLocation(newLeft, newTop);
-            this.setSize(newWidth, newHeight);
-        } else if (hitInfo.hitType == HitType.CONTROL) {
-        }
-    }
-
-
-    /**
-     * Returns true if this shape contains a particular coordinate, 
-     * false otherwise.
-     */
-    containsPoint(x, y) {
-        return this.bounds.containsPoint(x, y);
-    }
-
-    /**
-     * Returns true if this shape intersects another bounds instance,
-     * false otherwise.
-     */
-    intersects(anotherBounds) {
-        return this.bounds.intersects(anotherBounds);
     }
 
     removeFromParent() {
@@ -383,7 +268,10 @@ export class Shape {
         // Many listeners for all events etc.
         if (this.scene) {
             event.source = this;
-            return this.scene.shouldTrigger(event);
+            var out = true;
+            if (this._controller)
+                out = this._controller.shouldTrigger(event) != false;
+            return out && (this.scene.shouldTrigger(event) != false);
         }
         return true;
     }
@@ -392,18 +280,18 @@ export class Shape {
      * This is called after a particular change has been approved to notify that a change has
      * indeed gone through.
      */
-    trigger(event) {
+    eventTriggered(event) {
         if (this.scene) {
             event.source = this;
-            return this.scene.trigger(event);
+            var out = this.scene.eventTriggered(event) != false;
+            if (this._controller) 
+                out = out && (this._controller.eventTriggered(event) != false);
+            return out;
         }
     }
 }
 
-export class Layer extends Shape {
-    draw(ctx) {
-    }
-}
+export class Layer extends Shape { }
 
 /**
  * The Scene is the raw model where all layers and shapes are 
@@ -502,10 +390,158 @@ export class Scene extends events.EventHandler {
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    trigger(event) {
+    eventTriggered(event) {
         for (var i = 0, L = this._eventHandlers.length;i < L;i++) {
-            this._eventHandlers[i].trigger(event);
+            this._eventHandlers[i].eventTriggered(event);
         }
+    }
+}
+
+/////////////// Controllers 
+
+export const HitType = {
+    MOVE: 0,
+    SIZE: 1,
+    CONTROL: 2,
+
+    SIZE_N: 0,
+    SIZE_NE: 1,
+    SIZE_E: 2,
+    SIZE_SE: 3,
+    SIZE_S: 4,
+    SIZE_SW: 5,
+    SIZE_W: 6,
+    SIZE_NW: 7,
+}
+
+export class HitInfo {
+    constructor(shape, hitType, hitIndex, cursor, savedInfo) {
+        this.shape = shape;
+        this.hitType = hitType || 0;
+        this.hitIndex = hitIndex || 0;
+        this.cursor = cursor || "auto";
+        this.savedInfo = savedInfo || {};
+    }
+}
+
+/**
+ * ShapeControllers provide information needed to facilitate updates to a shape as 
+ * well as in accepting events to make updates to shapes.
+ */
+export class ShapeController extends events.EventHandler {
+    constructor(shape) {
+        super();
+        this._shape = shape;
+    }
+
+    get shape() {
+        return this._shape;
+    }
+
+    /**
+     * This is called after a particular change has been approved to notify that a change has
+     * indeed gone through.
+     */
+    eventTriggered(event) {
+        if (this.shape == event.source) {
+        }
+    }
+
+    /**
+     * Returns the "topmost" shape that can be hit at a given coordinate.
+     */
+    getHitInfo(x, y) {
+        var bounds = this.shape.bounds;
+        var l = bounds.left;
+        var r = bounds.right;
+        var t = bounds.top;
+        var b = bounds.bottom;
+        var sizePoints = [
+            [[(l + r) / 2, t], "n-resize"],
+            [[r, t], "ne-resize"],
+            [[r, (t + b) / 2], "e-resize"],
+            [[r, b], "se-resize"],
+            [[(l + r) / 2, b], "s-resize"],
+            [[l, b], "sw-resize"],
+            [[l, (t + b) / 2], "w-resize"],
+            [[l, t], "nw-resize"],
+        ]
+        for (var i in sizePoints) {
+            var hti = sizePoints[i];
+            var px = hti[0][0];
+            var py = hti[0][1];
+            var cursor = hti[1];
+            if (x >= px - DEFAULT_CONTROL_SIZE && x <= px + DEFAULT_CONTROL_SIZE &&
+                y >= py - DEFAULT_CONTROL_SIZE && y <= py + DEFAULT_CONTROL_SIZE) {
+                return new HitInfo(this.shape, HitType.SIZE, i, cursor, bounds.copy());
+            }
+        }
+        if (bounds.containsPoint(x, y)) {
+            return new HitInfo(this.shape, HitType.MOVE, 0, "move", bounds.copy());
+        }
+        return null;
+    }
+
+    applyHitChanges(hitInfo, downX, downY, currX, currY) {
+        var savedInfo = hitInfo.savedInfo;
+        var deltaX = currX - downX;
+        var deltaY = currY - downY;
+        var shape = this.shape;
+        if (hitInfo.hitType == HitType.MOVE) {
+            shape.setLocation(savedInfo.left + deltaX, savedInfo.top + deltaY);
+        } else if (hitInfo.hitType == HitType.SIZE) {
+            var newTop = savedInfo.top;
+            var newLeft = savedInfo.left;
+            var newHeight = savedInfo.height;
+            var newWidth = savedInfo.width;
+            if (hitInfo.hitIndex == HitType.SIZE_N) {
+                newHeight -= deltaY;
+                newTop += deltaY;
+            } else if (hitInfo.hitIndex == HitType.SIZE_NE) {
+                newHeight -= deltaY;
+                newWidth += deltaX;
+                newTop += deltaY;
+            } else if (hitInfo.hitIndex == HitType.SIZE_E) {
+                newWidth += deltaX;
+            } else if (hitInfo.hitIndex == HitType.SIZE_SE) {
+                newHeight += deltaY;
+                newWidth += deltaX;
+            } else if (hitInfo.hitIndex == HitType.SIZE_S) {
+                newHeight += deltaY;
+            } else if (hitInfo.hitIndex == HitType.SIZE_SW) {
+                newHeight += deltaY;
+                newWidth -= deltaX;
+                newLeft += deltaX;
+            } else if (hitInfo.hitIndex == HitType.SIZE_W) {
+                newLeft += deltaX;
+                newWidth -= deltaX;
+            } else if (hitInfo.hitIndex == HitType.SIZE_NW) {
+                newHeight -= deltaY;
+                newTop += deltaY;
+                newLeft += deltaX;
+                newWidth -= deltaX;
+            }
+            shape.setLocation(newLeft, newTop);
+            shape.setSize(newWidth, newHeight);
+        } else if (hitInfo.hitType == HitType.CONTROL) {
+        }
+    }
+
+
+    /**
+     * Returns true if this shape contains a particular coordinate, 
+     * false otherwise.
+     */
+    containsPoint(x, y) {
+        return this.shape.bounds.containsPoint(x, y);
+    }
+
+    /**
+     * Returns true if this shape intersects another bounds instance,
+     * false otherwise.
+     */
+    intersects(anotherBounds) {
+        return this.shape.bounds.intersects(anotherBounds);
     }
 }
 
