@@ -63,6 +63,7 @@ export const Bundle = {
     "NetworkLink": NetworkLink,
 }
 
+/*
 "Triangle",
 "Rectangle",
 "Square",
@@ -93,3 +94,4 @@ export const Bundle = {
 "HashIndex",
 "KafkaQueue",
 "NetworkLink",
+*/
