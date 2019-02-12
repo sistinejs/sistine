@@ -27,6 +27,8 @@ export class Bounds {
     set top(value) { this._y = value; }
     set x(value) { this._x = value; }
     set y(value) { this._y = value; }
+    set midX(value) { this._x = value - (this._width / 2.0); }
+    set midY(value) { this._y = value - (this._height / 2.0); }
     set right(value) { this._width = value - this._x; }
     set bottom(value) { this._height = value - this._y; }
     set width(value) { this._width = value; }
