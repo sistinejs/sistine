@@ -4,6 +4,143 @@ import * as core from "./core";
 import { getcssint } from "../utils/dom"
 
 /**
+ * A Pane is a wrapper over our drawing element/context.   Shapes can be drawn at 
+ * exactly one pane at a time.  Panes help us give the idea of 'depth' in our stage 
+ * so we can different shapes based on their level of intensity (in activity and
+ * refresh rates etc).
+ */
+export class Pane {
+    constructor(stage, canvasId, configs) {
+        this._stage = stage;
+        this._divId = stage.divId;
+        this._canvasId = canvasId;
+        this._canvas = null;
+        this._zoom = 1.0;
+        this._ensureCanvas();
+        this._sceneIndex = new SceneIndex();
+    }
+
+    get sceneIndex() {
+        return this._sceneIndex;
+    }
+
+    set cursor(c) {
+        c = c || "auto";
+        this._canvas.css("cursor", c);
+    }
+
+    get divId() { return this._divId; }
+    get canvasId() { return this._canvasId; }
+    get context() { return this._context; }
+    get element() { return this._canvas; }
+
+    /**
+     * Removes this canvas and cleans ourselves up.
+     */
+    remove() {
+        this.element.remove();
+    }
+
+    _ensureCanvas() {
+        var divId = this._divId;
+        var $parent = $("#" + divId);
+        this._parentDiv = $parent;
+        this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
+        $parent.append(this._canvas);
+        this.layout();
+        this._context = this._canvas[0].getContext("2d");
+    }
+
+    get needsRepaint() {
+        return true;
+    }
+
+    get width() { this._canvas.width() }
+    get height() { this._canvas.height() }
+
+    clear() {
+        this.context.clearRect(0, 0, this._canvas.width(), this._canvas.height());
+    }
+
+    repaint(force) {
+        if (force || this.needsRepaint) {
+            this.clear();
+            var stage = this._stage;
+            var touchHandler = stage.touchHandler;
+            var context = this.context;
+            this.sceneIndex.forShapesInViewPort(this.viewPort, this, function(shape) {
+                shape.applyStyles(context);
+                shape.draw(context);
+                if (touchHandler != null) {
+                    if (shape == touchHandler.selectedShape ||
+                        (touchHandler.hitInfo != null && touchHandler.hitInfo.shape == shape)) {
+                        shape.drawControls(context);
+                    }
+                }
+            });
+        }
+    }
+
+    layout() {
+        var $parent = this._parentDiv;
+        var elem = this._canvas;
+        var horiz_padding = getcssint(elem, "padding-left") +
+                            getcssint(elem, "padding-right") +
+                            getcssint(elem, "margin-left") +
+                            getcssint(elem, "margin-right") +
+                            getcssint($parent, "border-left") +
+                            getcssint($parent, "border-right");
+        var vert_padding  = getcssint(elem, "padding-top") +
+                            getcssint(elem, "padding-bottom") +
+                            getcssint(elem, "margin-top") +
+                            getcssint(elem, "margin-bottom") +
+                            getcssint($parent, "border-top") +
+                            getcssint($parent, "border-bottom");
+        var finalHeight = $parent.height() - vert_padding;
+        var finalWidth = $parent.width() - horiz_padding;
+        elem.height(finalHeight);
+        elem.width(finalWidth);
+        elem[0].width = finalWidth;
+        elem[0].height = finalHeight;
+    }
+
+    mouseover(handler) {
+        this._canvas.mouseover(handler);
+        return this;
+    }
+
+    mouseout(handler) {
+        this._canvas.mouseout(handler);
+        return this;
+    }
+
+    mouseenter(handler) {
+        this._canvas.mouseenter(handler);
+        return this;
+    }
+
+    mouseleave(handler) {
+        this._canvas.mouseleave(handler);
+        return this;
+    }
+
+    mousedown(handler) {
+        this._canvas.mousedown(handler);
+        return this;
+    }
+
+    mouseup(handler) {
+        this._canvas.mouseup(handler);
+        return this;
+    }
+
+    mousemove(handler) {
+        this._canvas.mousemove(handler);
+        return this;
+    }
+}
+
+/**
  * The index structure of a scene lets us re-model how we store and index shapes in a scene
  * for faster access and grouping not just by hierarchy but also to cater for various access
  * characteristics. (say by location, by attribute type, by zIndex etc)
@@ -29,9 +166,9 @@ export class SceneIndex {
     }
 
     /**
-     * Applies a visitor for shapes in a given view port.
+     * Applies a visitor for shapes in a given view port in a given pane.
      */
-    forShapesInViewPort(viewPort, visitor) {
+    forShapesInViewPort(pane, viewPort, visitor) {
         var allShapes = this._allShapes;
         for (var index in allShapes) {
             var shape = allShapes[index];
@@ -126,137 +263,6 @@ export class SceneIndex {
             var child = shape.children[index];
             this._reIndexShape(child);
         }
-    }
-}
-
-export class Pane {
-    constructor(stage, canvasId, configs) {
-        this._stage = stage;
-        this._divId = stage.divId;
-        this._canvasId = canvasId;
-        this._canvas = null;
-        this._zoom = 1.0;
-        this._ensureCanvas();
-        this._sceneIndex = new SceneIndex();
-    }
-
-    get sceneIndex() {
-        return this._sceneIndex;
-    }
-
-    set cursor(c) {
-        c = c || "auto";
-        this._canvas.css("cursor", c);
-    }
-
-    get divId() { return this._divId; }
-    get canvasId() { return this._canvasId; }
-    get context() { return this._context; }
-    get element() { return this._canvas; }
-
-    /**
-     * Removes this canvas and cleans ourselves up.
-     */
-    remove() {
-        this.element.remove();
-    }
-
-    _ensureCanvas() {
-        var divId = this._divId;
-        var $parent = $("#" + divId);
-        this._parentDiv = $parent;
-        this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
-        $parent.append(this._canvas);
-        this.layout();
-        this._context = this._canvas[0].getContext("2d");
-    }
-
-    get needsRepaint() {
-        return true;
-    }
-
-    get width() { this._canvas.width() }
-    get height() { this._canvas.height() }
-
-    clear() {
-        this.context.clearRect(0, 0, this._canvas.width(), this._canvas.height());
-    }
-
-    repaint(force) {
-        if (force || this.needsRepaint) {
-            this.clear();
-            var stage = this._stage;
-            var touchHandler = stage.touchHandler;
-            var context = this.context;
-            this.sceneIndex.forShapesInViewPort(this.viewPort, function(shape) {
-                shape.applyStyles(context);
-                shape.draw(context);
-                if (touchHandler != null) {
-                    if (shape == touchHandler.selectedShape ||
-                        (touchHandler.hitInfo != null && touchHandler.hitInfo.shape == shape)) {
-                        shape.drawControls(context);
-                    }
-                }
-            });
-        }
-    }
-
-    layout() {
-        var $parent = this._parentDiv;
-        var elem = this._canvas;
-        var horiz_padding = getcssint(elem, "padding-left") +
-                            getcssint(elem, "padding-right") +
-                            getcssint(elem, "margin-left") +
-                            getcssint(elem, "margin-right") +
-                            getcssint($parent, "border-left") +
-                            getcssint($parent, "border-right");
-        var vert_padding  = getcssint(elem, "padding-top") +
-                            getcssint(elem, "padding-bottom") +
-                            getcssint(elem, "margin-top") +
-                            getcssint(elem, "margin-bottom") +
-                            getcssint($parent, "border-top") +
-                            getcssint($parent, "border-bottom");
-        var finalHeight = $parent.height() - vert_padding;
-        var finalWidth = $parent.width() - horiz_padding;
-        elem.height(finalHeight);
-        elem.width(finalWidth);
-        elem[0].width = finalWidth;
-        elem[0].height = finalHeight;
-    }
-
-    mouseover(handler) {
-        this._canvas.mouseover(handler);
-        return this;
-    }
-
-    mouseout(handler) {
-        this._canvas.mouseout(handler);
-        return this;
-    }
-
-    mouseenter(handler) {
-        this._canvas.mouseenter(handler);
-        return this;
-    }
-
-    mouseleave(handler) {
-        this._canvas.mouseleave(handler);
-        return this;
-    }
-
-    mousedown(handler) {
-        this._canvas.mousedown(handler);
-        return this;
-    }
-
-    mouseup(handler) {
-        this._canvas.mouseup(handler);
-        return this;
-    }
-
-    mousemove(handler) {
-        this._canvas.mousemove(handler);
-        return this;
     }
 }
 
