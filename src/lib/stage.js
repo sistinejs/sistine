@@ -74,8 +74,7 @@ export class Pane {
                 shape.applyStyles(context);
                 shape.draw(context);
                 if (touchHandler != null) {
-                    if (shape == touchHandler.selectedShape ||
-                        (touchHandler.hitInfo != null && touchHandler.hitInfo.shape == shape)) {
+                    if ((touchHandler.hitInfo != null && touchHandler.hitInfo.shape == shape)) {
                         shape.drawControls(context);
                     }
                 }
@@ -290,8 +289,6 @@ class StageTouchHandler {
         this.currX = null;
         this.currY = null;
         this.hitInfo = null;
-        this.selectedShape = null;
-        this.relatedShapes = [];
         this._editPane = this.stage.addPane("edit");
         this._setupHandlers();
     }
@@ -321,26 +318,20 @@ class StageTouchHandler {
         this.hitInfo = shapeIndex.getHitInfo(this.downX, this.downY);
         if (this.hitInfo != null) {
             this._editPane.cursor = this.hitInfo.cursor;
-            this.selectedShape = this.hitInfo.shape;
-
-            // Get the shapes related to this shape that will change as we transform this shape
-            this.relatedShapes = [];
 
             // remove the selected and related shapes from the mainIndex and add it to the edited index
-            shapeIndex.setPane(this.selectedShape, "edit");
+            shapeIndex.setPane(this.hitInfo.shape, "edit");
             this.stage.repaint();
         }
         console.log("HitInfo: ", this.hitInfo);
     }
 
     _onMouseUp(event) {
+        this.currX = event.offsetX;
+        this.currY = event.offsetY;
         this.downX = null;
         this.downY = null;
-
-        var shapeIndex = this.stage.shapeIndex;
-        shapeIndex.setPane(this.selectedShape, "main");
-        this.selectedShape = null;
-        this.relatedShapes = [];
+        this.stage.shapeIndex.setPane(this.hitInfo.shape, "main");
         this.stage.repaint();
     }
 
@@ -368,7 +359,6 @@ class StageTouchHandler {
                 // Just draw a "selection rectangle"
             }
         }
-        // console.log("Selected Shape: ", this.currX, this.currY, this.selectedShape, new Date());
     }
 
     _onMouseEnter(event) { }
