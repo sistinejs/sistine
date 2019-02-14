@@ -112,6 +112,16 @@ export class Shape {
         }
     }
 
+    setAngle(theta, force) {
+        if (theta != this._configs.angle) {
+            var event = new events.AngleChanged(this.angle, theta);
+            if (force || this.shouldTrigger(event)) {
+                this._configs.angle = theta;
+                this.eventTriggered(event);
+            }
+        }
+    }
+
     set(property, newValue, force) {
         var oldvalue = this._configs[property];
         if (oldvalue != newvalue) {
@@ -122,6 +132,18 @@ export class Shape {
             }
         }
         return this;
+    }
+
+    move(dx, dy, force) {
+        return this.setLocation(this.bounds.x + dx, this.bounds.y + dy, force);
+    }
+
+    scale(dx, dy, force) {
+        return this.setSize(this.bounds.width * dx, this.bounds.height * dy, force);
+    }
+
+    rotate(dtheta, dy, force) {
+        return this.setAngle(this.angle + dtheta);
     }
 
     get(name) {

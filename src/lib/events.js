@@ -49,6 +49,16 @@ export class SizeChanged extends Event {
     get name() { return "SizeChanged"; };
 }
 
+export class AngleChanged extends Event {
+    constructor(oldAngle, newAngle) {
+        super(null)
+        this.oldAngle = oldAngle;
+        this.newAngle = newAngle;
+    }
+
+    get name() { return "AngleChanged"; };
+}
+
 export class PropertiesChanged extends Event {
     constructor(property, oldValue, newValue) {
         super(null)
