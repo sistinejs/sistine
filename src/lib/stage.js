@@ -152,6 +152,7 @@ export class ShapeIndex {
         this._shapeIndexes = {};
         this._allShapes = [];
         this.scene = scene;
+        this.defaultPane = null;
     }
 
     get scene() {
@@ -169,7 +170,7 @@ export class ShapeIndex {
 
     setPane(shape, pane) {
         if (shape != null)
-            shape.pane = pane;
+            shape.pane = pane.name;
     }
 
     /**
@@ -179,8 +180,15 @@ export class ShapeIndex {
         var allShapes = this._allShapes;
         for (var index in allShapes) {
             var shape = allShapes[index];
-            if (shape != null && shape.pane == pane && shape.intersects(viewPort)) {
-                visitor(shape);
+            if (shape != null) {
+                var spane = shape.pane || null;
+                if (spane == null) {
+                    if (pane.name == this.defaultPane) {
+                        visitor(shape);
+                    }
+                } else if (spane == pane.name) {
+                    visitor(shape);
+                }
             }
         }
     }
@@ -193,6 +201,7 @@ export class ShapeIndex {
      * A new shape is added to the index.
      */
     add(shape) {
+        shape.pane = shape.pane || null;
         // See if shape already has an index assigned to it
         if (this.shapeExists(shape)) {
             var index = this._shapeIndexes[shape.id];
@@ -311,7 +320,7 @@ class StageTouchHandler {
         // Get the shape that is under the mouse
         this.hitInfo = shapeIndex.getHitInfo(this.downX, this.downY);
         if (this.hitInfo != null) {
-            this.stage.editPane.cursor = this.hitInfo.cursor;
+            this._editPane.cursor = this.hitInfo.cursor;
             this.selectedShape = this.hitInfo.shape;
 
             // Get the shapes related to this shape that will change as we transform this shape
@@ -342,9 +351,9 @@ class StageTouchHandler {
             var shape = this.hitInfo.shape
             var newHitInfo = shape.controller.getHitInfo(this.currX, this.currY);
             if (newHitInfo != null && newHitInfo.shape == this.hitInfo.shape) {
-                this.stage.editPane.cursor = newHitInfo.cursor;
+                this._editPane.cursor = newHitInfo.cursor;
             } else {
-                this.stage.editPane.cursor = "auto";
+                this._editPane.cursor = "auto";
             }
         }
 
@@ -381,6 +390,7 @@ export class Stage extends events.EventHandler {
         this._divId = divId;
         this._scene = scene || new core.Scene();
         this._shapeIndex = new ShapeIndex(scene);
+        this._shapeIndex.defaultPane = "main";
 
         // Track mouse/touch drag events
         this._editable = false;
