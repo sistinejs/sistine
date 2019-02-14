@@ -10,18 +10,15 @@ import { getcssint } from "../utils/dom"
  * refresh rates etc).
  */
 export class Pane {
-    constructor(stage, canvasId, configs) {
+    constructor(name, stage, canvasId) {
+        this._name = name;
         this._stage = stage;
+        this._needsRepaint = true;
         this._divId = stage.divId;
         this._canvasId = canvasId;
         this._canvas = null;
         this._zoom = 1.0;
         this._ensureCanvas();
-        this._sceneIndex = new SceneIndex();
-    }
-
-    get sceneIndex() {
-        return this._sceneIndex;
     }
 
     set cursor(c) {
@@ -29,6 +26,7 @@ export class Pane {
         this._canvas.css("cursor", c);
     }
 
+    get name() { return this._name; }
     get divId() { return this._divId; }
     get canvasId() { return this._canvasId; }
     get context() { return this._context; }
@@ -52,7 +50,11 @@ export class Pane {
     }
 
     get needsRepaint() {
-        return true;
+        return this._needsRepaint;
+    }
+
+    set needsRepaint(n) {
+        return this._needsRepaint = n;
     }
 
     get width() { this._canvas.width() }
@@ -68,7 +70,7 @@ export class Pane {
             var stage = this._stage;
             var touchHandler = stage.touchHandler;
             var context = this.context;
-            this.sceneIndex.forShapesInViewPort(this.viewPort, this, function(shape) {
+            stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
                 shape.applyStyles(context);
                 shape.draw(context);
                 if (touchHandler != null) {
@@ -145,7 +147,7 @@ export class Pane {
  * for faster access and grouping not just by hierarchy but also to cater for various access
  * characteristics. (say by location, by attribute type, by zIndex etc)
  */
-export class SceneIndex {
+export class ShapeIndex {
     constructor(scene) {
         this._shapeIndexes = {};
         this._allShapes = [];
@@ -165,6 +167,11 @@ export class SceneIndex {
         }
     }
 
+    setPane(shape, pane) {
+        if (shape != null)
+            shape.pane = pane;
+    }
+
     /**
      * Applies a visitor for shapes in a given view port in a given pane.
      */
@@ -172,7 +179,7 @@ export class SceneIndex {
         var allShapes = this._allShapes;
         for (var index in allShapes) {
             var shape = allShapes[index];
-            if (shape != null && shape.intersects(viewPort)) {
+            if (shape != null && shape.pane == pane && shape.intersects(viewPort)) {
                 visitor(shape);
             }
         }
@@ -276,19 +283,23 @@ class StageTouchHandler {
         this.hitInfo = null;
         this.selectedShape = null;
         this.relatedShapes = [];
+        this._editPane = this.stage.addPane("edit");
         this._setupHandlers();
     }
 
+    detach() {
+        this.stage.removePane("edit");
+    }
+
     _setupHandlers() {
-        var stage = this.stage;
         var handler = this;
-        stage.editPane.mousedown(function(event) { return handler._onMouseDown(event); });
-        stage.editPane.mouseup(function(event) { return handler._onMouseUp(event); });
-        stage.editPane.mouseover(function(event) { return handler._onMouseOver(event); });
-        stage.editPane.mouseout(function(event) { return handler._onMouseOut(event); });
-        stage.editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
-        stage.editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
-        stage.editPane.mousemove(function(event) { return handler._onMouseMove(event); });
+        this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
+        this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
+        this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
+        this._editPane.mouseout(function(event) { return handler._onMouseOut(event); });
+        this._editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
+        this._editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
+        this._editPane.mousemove(function(event) { return handler._onMouseMove(event); });
     }
 
     ////  Local handling of mouse/touch events
@@ -296,10 +307,9 @@ class StageTouchHandler {
         this.currX = this.downX = event.offsetX;
         this.currY = this.downY = event.offsetY;
 
-        var mainIndex = this.stage.mainPane.sceneIndex;
-        var editIndex = this.stage.editPane.sceneIndex;
+        var shapeIndex = this.stage.shapeIndex;
         // Get the shape that is under the mouse
-        this.hitInfo = mainIndex.getHitInfo(this.downX, this.downY);
+        this.hitInfo = shapeIndex.getHitInfo(this.downX, this.downY);
         if (this.hitInfo != null) {
             this.stage.editPane.cursor = this.hitInfo.cursor;
             this.selectedShape = this.hitInfo.shape;
@@ -308,12 +318,7 @@ class StageTouchHandler {
             this.relatedShapes = [];
 
             // remove the selected and related shapes from the mainIndex and add it to the edited index
-            mainIndex.remove(this.selectedShape);
-            mainIndex.removeShapes(this.relatedShapes);
-            editIndex.add(this.selectedShape);
-            editIndex.addShapes(this.relatedShapes);
-            console.log("OnDown mainIndex Shapes: ", mainIndex._allShapes, mainIndex._shapeIndexes);
-            console.log("OnDown editIndex Shapes: ", editIndex._allShapes, editIndex._shapeIndexes);
+            shapeIndex.setPane(this.selectedShape, "edit");
             this.stage.repaint();
         }
         console.log("HitInfo: ", this.hitInfo);
@@ -323,19 +328,10 @@ class StageTouchHandler {
         this.downX = null;
         this.downY = null;
 
-        var mainIndex = this.stage.mainPane.sceneIndex;
-        var editIndex = this.stage.editPane.sceneIndex;
-        // Add selected and related shapes back to main index from edit index
-        if (this.selectedShape != null) {
-            editIndex.remove(this.selectedShape);
-            mainIndex.add(this.selectedShape);
-        }
-        editIndex.removeShapes(this.relatedShapes);
-        mainIndex.addShapes(this.relatedShapes);
+        var shapeIndex = this.stage.shapeIndex;
+        shapeIndex.setPane(this.selectedShape, "main");
         this.selectedShape = null;
         this.relatedShapes = [];
-        console.log("OnOver mainIndex Shapes: ", mainIndex._allShapes, mainIndex._shapeIndexes);
-        console.log("OnOver editIndex Shapes: ", editIndex._allShapes, editIndex._shapeIndexes);
         this.stage.repaint();
     }
 
@@ -384,10 +380,12 @@ export class Stage extends events.EventHandler {
         this._viewBounds = configs.viewBounds || new core.Bounds();
         this._divId = divId;
         this._scene = scene || new core.Scene();
+        this._shapeIndex = new ShapeIndex(scene);
 
         // Track mouse/touch drag events
         this._editable = false;
-        this._setupPanes();
+        this._panes = [];
+        this.addPane("main");
         this.scene.addHandler(this);
     }
 
@@ -399,30 +397,46 @@ export class Stage extends events.EventHandler {
         if (this._editable != editable) {
             this._editable = editable;
             if (editable) {
-                this._setupEditPane();
                 this.touchHandler = new StageTouchHandler(this);
             } else {
-                this.touchHandler = null;
-                this.editPane.remove();
-                this.editPane = null;
+                this.touchHandler.detach();
+                this.touchHandler.null;
             }
         }
     }
 
-    get topPane() {
-        return this.editPane || this.mainPane;
+    addPane(name) {
+        var newPane = new Pane(name, this, name + "pane_" + this.divId);
+        this._panes.push(newPane);
+        this.layout();
+        return newPane;
     }
 
-    get mainPane() {
-        return this._mainPane;
+    removePane(name) {
+        for (var i = this._panes.length;i >= 0;i--) {
+            var pane = this._panes[i];
+            if (pane.name == name) {
+                pane.remove();
+                this._panes.splice(i, 1);
+                return
+            }
+        }
     }
 
-    get editPane() {
-        return this._editPane;
+    getPane(name) {
+        for (var i = this._panes.length - 1; i >= 0;i--)  {
+            if (this._panes[i].name == name) {
+                return this._panes[i];
+            }
+        }
     }
 
     get scene() {
         return this._scene;
+    }
+
+    get shapeIndex() {
+        return this._shapeIndex;
     }
 
     get bounds() { return this._bounds; }
@@ -430,42 +444,20 @@ export class Stage extends events.EventHandler {
     get viewBounds() { return this._viewBounds; }
 
     layout() {
-        this.mainPane.layout();
-        if (this.isEditable)
-            this.editPane.layout();
+        for (var i = this._panes.length - 1; i >= 0;i--) this._panes[i].layout();
         this.repaint();
     }
 
     repaint() {
-        this.mainPane.repaint();
-        if (this.isEditable)
-            this.editPane.repaint();
+        for (var i = this._panes.length - 1; i >= 0;i--) this._panes[i].repaint();
     }
 
     eventTriggered(event) {
         // console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
-            this.mainPane.sceneIndex.add(event.shape);
+            this.shapeIndex.add(event.shape);
         } else if (event.name == "ShapeRemoved") {
-            this.mainPane.sceneIndex.remove(event.shape);
-        }
-    }
-
-    _setupPanes() {
-        // Indexes maintain the different shapes require for static vs dynamic shapes
-        this._setupMainPane();
-        this._setupEditPane();
-        this.layout();
-    }
-
-    _setupMainPane() {
-        this._mainPane = new Pane(this, "maincanvas_" + this.divId);
-        this.mainPane.sceneIndex.scene = this.scene;
-    }
-
-    _setupEditPane() {
-        if (this.isEditable) {
-            this._editPane = new Pane(this, "editcanvas_" + this.divId);
+            this.shapeIndex.remove(event.shape);
         }
     }
 }
