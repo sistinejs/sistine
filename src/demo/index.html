@@ -193,7 +193,7 @@
 
             var shapeId = icondiv.id.replace(/holder_/, "");
             var iconStage = iconStages[shapeId] = new Sistine.stage.Stage(icondiv.id);
-            var $child = iconStage.topCanvas.element;
+            var $child = iconStage.topPane.element;
 
             var DefaultBundle = Sistine.registry.DefaultBundle;
             var margin = 3;
@@ -213,10 +213,10 @@
             iconStage.scene.add(toolbarShape);
             iconStage.layout();
             iconStage.repaint();
-            // iconStage.topCanvas.element.tooltip();
+            // iconStage.topPane.element.tooltip();
 
             // Setup highlighter!
-            iconStage.topCanvas.element.mouseover(function(event) {
+            iconStage.topPane.element.mouseover(function(event) {
                 $(event.currentTarget).addClass("toolbar_button_highlighted");
             }).mouseout(function(event) {
                 $(event.currentTarget).removeClass("toolbar_button_highlighted");

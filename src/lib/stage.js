@@ -129,7 +129,7 @@ export class SceneIndex {
     }
 }
 
-export class SceneCanvas {
+export class Pane {
     constructor(stage, canvasId, configs) {
         this._stage = stage;
         this._divId = stage.divId;
@@ -276,13 +276,13 @@ class StageTouchHandler {
     _setupHandlers() {
         var stage = this.stage;
         var handler = this;
-        stage.editCanvas.mousedown(function(event) { return handler._onMouseDown(event); });
-        stage.editCanvas.mouseup(function(event) { return handler._onMouseUp(event); });
-        stage.editCanvas.mouseover(function(event) { return handler._onMouseOver(event); });
-        stage.editCanvas.mouseout(function(event) { return handler._onMouseOut(event); });
-        stage.editCanvas.mouseenter(function(event) { return handler._onMouseEnter(event); });
-        stage.editCanvas.mouseleave(function(event) { return handler._onMouseLeave(event); });
-        stage.editCanvas.mousemove(function(event) { return handler._onMouseMove(event); });
+        stage.editPane.mousedown(function(event) { return handler._onMouseDown(event); });
+        stage.editPane.mouseup(function(event) { return handler._onMouseUp(event); });
+        stage.editPane.mouseover(function(event) { return handler._onMouseOver(event); });
+        stage.editPane.mouseout(function(event) { return handler._onMouseOut(event); });
+        stage.editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
+        stage.editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
+        stage.editPane.mousemove(function(event) { return handler._onMouseMove(event); });
     }
 
     ////  Local handling of mouse/touch events
@@ -290,12 +290,12 @@ class StageTouchHandler {
         this.currX = this.downX = event.offsetX;
         this.currY = this.downY = event.offsetY;
 
-        var mainIndex = this.stage.mainCanvas.sceneIndex;
-        var editIndex = this.stage.editCanvas.sceneIndex;
+        var mainIndex = this.stage.mainPane.sceneIndex;
+        var editIndex = this.stage.editPane.sceneIndex;
         // Get the shape that is under the mouse
         this.hitInfo = mainIndex.getHitInfo(this.downX, this.downY);
         if (this.hitInfo != null) {
-            this.stage.editCanvas.cursor = this.hitInfo.cursor;
+            this.stage.editPane.cursor = this.hitInfo.cursor;
             this.selectedShape = this.hitInfo.shape;
 
             // Get the shapes related to this shape that will change as we transform this shape
@@ -317,8 +317,8 @@ class StageTouchHandler {
         this.downX = null;
         this.downY = null;
 
-        var mainIndex = this.stage.mainCanvas.sceneIndex;
-        var editIndex = this.stage.editCanvas.sceneIndex;
+        var mainIndex = this.stage.mainPane.sceneIndex;
+        var editIndex = this.stage.editPane.sceneIndex;
         // Add selected and related shapes back to main index from edit index
         if (this.selectedShape != null) {
             editIndex.remove(this.selectedShape);
@@ -340,9 +340,9 @@ class StageTouchHandler {
             var shape = this.hitInfo.shape
             var newHitInfo = shape.controller.getHitInfo(this.currX, this.currY);
             if (newHitInfo != null && newHitInfo.shape == this.hitInfo.shape) {
-                this.stage.editCanvas.cursor = newHitInfo.cursor;
+                this.stage.editPane.cursor = newHitInfo.cursor;
             } else {
-                this.stage.editCanvas.cursor = "auto";
+                this.stage.editPane.cursor = "auto";
             }
         }
 
@@ -381,7 +381,7 @@ export class Stage extends events.EventHandler {
 
         // Track mouse/touch drag events
         this._editable = false;
-        this._setupCanvases();
+        this._setupPanes();
         this.scene.addHandler(this);
     }
 
@@ -393,26 +393,26 @@ export class Stage extends events.EventHandler {
         if (this._editable != editable) {
             this._editable = editable;
             if (editable) {
-                this._setupEditCanvas();
+                this._setupEditPane();
                 this.touchHandler = new StageTouchHandler(this);
             } else {
                 this.touchHandler = null;
-                this.editCanvas.remove();
-                this.editCanvas = null;
+                this.editPane.remove();
+                this.editPane = null;
             }
         }
     }
 
-    get topCanvas() {
-        return this.editCanvas || this.mainCanvas;
+    get topPane() {
+        return this.editPane || this.mainPane;
     }
 
-    get mainCanvas() {
-        return this._mainCanvas;
+    get mainPane() {
+        return this._mainPane;
     }
 
-    get editCanvas() {
-        return this._editCanvas;
+    get editPane() {
+        return this._editPane;
     }
 
     get scene() {
@@ -424,42 +424,42 @@ export class Stage extends events.EventHandler {
     get viewBounds() { return this._viewBounds; }
 
     layout() {
-        this.mainCanvas.layout();
+        this.mainPane.layout();
         if (this.isEditable)
-            this.editCanvas.layout();
+            this.editPane.layout();
         this.repaint();
     }
 
     repaint() {
-        this.mainCanvas.repaint();
+        this.mainPane.repaint();
         if (this.isEditable)
-            this.editCanvas.repaint();
+            this.editPane.repaint();
     }
 
     eventTriggered(event) {
         // console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
-            this.mainCanvas.sceneIndex.add(event.shape);
+            this.mainPane.sceneIndex.add(event.shape);
         } else if (event.name == "ShapeRemoved") {
-            this.mainCanvas.sceneIndex.remove(event.shape);
+            this.mainPane.sceneIndex.remove(event.shape);
         }
     }
 
-    _setupCanvases() {
+    _setupPanes() {
         // Indexes maintain the different shapes require for static vs dynamic shapes
-        this._setupMainCanvas();
-        this._setupEditCanvas();
+        this._setupMainPane();
+        this._setupEditPane();
         this.layout();
     }
 
-    _setupMainCanvas() {
-        this._mainCanvas = new SceneCanvas(this, "maincanvas_" + this.divId);
-        this.mainCanvas.sceneIndex.scene = this.scene;
+    _setupMainPane() {
+        this._mainPane = new Pane(this, "maincanvas_" + this.divId);
+        this.mainPane.sceneIndex.scene = this.scene;
     }
 
-    _setupEditCanvas() {
+    _setupEditPane() {
         if (this.isEditable) {
-            this._editCanvas = new SceneCanvas(this, "editcanvas_" + this.divId);
+            this._editPane = new Pane(this, "editcanvas_" + this.divId);
         }
     }
 }
