@@ -20,15 +20,15 @@ export class Bounds {
     get bottom() { return this._y + this._height; }
     get width() { return this._width; }
     get height() { return this._height; }
-    get midX() { return this._x + (this._width / 2.0) };
-    get midY() { return this._y + (this._height / 2.0) };
+    get centerX() { return this._x + (this._width / 2.0) };
+    get centerY() { return this._y + (this._height / 2.0) };
 
     set left(value) { this._x = value; }
     set top(value) { this._y = value; }
     set x(value) { this._x = value; }
     set y(value) { this._y = value; }
-    set midX(value) { this._x = value - (this._width / 2.0); }
-    set midY(value) { this._y = value - (this._height / 2.0); }
+    set centerX(value) { this._x = value - (this._width / 2.0); }
+    set centerY(value) { this._y = value - (this._height / 2.0); }
     set right(value) { this._width = value - this._x; }
     set bottom(value) { this._height = value - this._y; }
     set width(value) { this._width = value; }
@@ -88,9 +88,9 @@ export class Shape {
 
     setLocation(x, y, force) {
         if (x != this._bounds._x || y != this._bounds._y) {
-            var event = new events.LocationChanged(this._bounds._x, this._bounds._y, x, y);
+            var oldValue = [ this._bounds._x, this._bounds._y ];
+            var event = new events.PropertyChanged("location", oldValue, [ x, y ]);
             if (force || this.shouldTrigger(event)) {
-                var oldvalue = [ this._bounds._x, this._bounds._y ];
                 this._bounds._x = x;
                 this._bounds._y = y;
                 this.eventTriggered(event);
@@ -98,9 +98,22 @@ export class Shape {
         }
     }
 
+    setCenter(x, y, force) {
+        if (x != this._bounds.centerX || y != this._bounds.centerY) {
+            var oldValue = [ this._bounds.midX, this._bounds.midY ];
+            var event = new events.PropertyChanged("center", oldValue, [x, y]);
+            if (force || this.shouldTrigger(event)) {
+                this._bounds.midX = x;
+                this._bounds.midY = y;
+                this.eventTriggered(event);
+            }
+        }
+    }
+
     setSize(w, h, force) {
         if (w != this._bounds._width || h != this._bounds._height) {
-            var event = new events.SizeChanged(this._bounds._width, this._bounds._height, w, h);
+            var oldValue = [ this._bounds._width, this._bounds._height ];
+            var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
             if (force || this.shouldTrigger(event)) {
                 var C2 = DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE;
                 if (w > C2 && h > C2) {
@@ -114,7 +127,7 @@ export class Shape {
 
     setAngle(theta, force) {
         if (theta != this._configs.angle) {
-            var event = new events.AngleChanged(this.angle, theta);
+            var event = new events.PropertyChanged("angle", this.angle, theta);
             if (force || this.shouldTrigger(event)) {
                 this._configs.angle = theta;
                 this.eventTriggered(event);
@@ -123,11 +136,11 @@ export class Shape {
     }
 
     set(property, newValue, force) {
-        var oldvalue = this._configs[property];
-        if (oldvalue != newvalue) {
-            event = new events.PropertyChanged(property, oldvalue, newvalue);
+        var oldValue = this._configs[property];
+        if (oldValue != newValue) {
+            event = new events.PropertyChanged(property, oldValue, newValue);
             if (force || this.shouldTrigger(event)) {
-                this._configs[config] = newvalue;
+                this._configs[property] = newValue;
                 this.eventTriggered(event);
             }
         }
@@ -246,6 +259,21 @@ export class Shape {
         if (this.get("strokeStyle")) {
             ctx.strokeStyle = this.get("strokeStyle");
         }
+    }
+
+    applyTransforms(ctx) {
+        if (this.get("angle")) {
+            ctx.save(); 
+            var cx = this.bounds.centerX;
+            var cy = this.bounds.centerY;
+            ctx.translate(cx, cy);
+            ctx.rotate((Math.PI * this.get("angle")) / 180.0);
+            ctx.translate(-cx, -cy);
+        }
+    }
+
+    revertTransforms(ctx) {
+        ctx.restore(); 
     }
 
     drawControls(ctx, options) {
@@ -529,9 +557,12 @@ export class ShapeController extends events.EventHandler {
         var savedInfo = hitInfo.savedInfo;
         var deltaX = currX - downX;
         var deltaY = currY - downY;
+        console.log("Delta: ", deltaX, deltaY);
         var shape = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
-            shape.setLocation(savedInfo.left + deltaX, savedInfo.top + deltaY);
+            console.log("Bounds Before: ", shape.bounds);
+            shape.move(deltaX, deltaY);
+            console.log("Bounds  After: ", shape.bounds);
         } else if (hitInfo.hitType == HitType.SIZE) {
             var newTop = savedInfo.top;
             var newLeft = savedInfo.left;
