@@ -144,6 +144,11 @@ export class Pane {
         this._canvas.mousemove(handler);
         return this;
     }
+
+    contextmenu(handler) {
+        this._canvas.contextmenu(handler);
+        return this;
+    }
 }
 
 /**
@@ -316,6 +321,7 @@ class StageTouchHandler {
 
     _setupHandlers() {
         var handler = this;
+        this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
         this._editPane.click(function(event) { return handler._onClick(event); });
         this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
         this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
@@ -332,10 +338,14 @@ class StageTouchHandler {
     }
 
     ////  Local handling of mouse/touch events
+    _onContextMenu(event) {
+        console.log("Context Menu Clicked");
+        return false;
+    }
+
     _onClick(event) { }
 
     _onMouseDown(event) {
-        console.log("Down: ", event);
         this.currX = this.downX = event.offsetX;
         this.currY = this.downY = event.offsetY;
 
@@ -355,7 +365,6 @@ class StageTouchHandler {
         } else {
             this.hitInfos = {};
         }
-        console.log("HitInfos: ", this.hitInfos);
     }
 
     _onMouseUp(event) {
@@ -511,7 +520,7 @@ export class Stage extends events.EventHandler {
     }
 
     eventTriggered(event) {
-        console.log("Event: ", event);
+        // console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
             this.shapeIndex.add(event.shape);
         } else if (event.name == "ShapeRemoved") {
