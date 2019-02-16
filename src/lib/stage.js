@@ -71,13 +71,13 @@ export class Pane {
             var touchHandler = stage.touchHandler;
             var context = this.context;
             stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
+                shape.applyTransforms(context);
                 shape.applyStyles(context);
                 shape.draw(context);
-                if (touchHandler != null) {
-                    if ((touchHandler.hitInfo != null && touchHandler.hitInfo.shape == shape)) {
-                        shape.drawControls(context);
-                    }
+                if (touchHandler != null && touchHandler.isShapeSelected(shape)) {
+                    shape.drawControls(context);
                 }
+                shape.revertTransforms(context);
             });
         }
     }
@@ -103,6 +103,11 @@ export class Pane {
         elem.width(finalWidth);
         elem[0].width = finalWidth;
         elem[0].height = finalHeight;
+    }
+
+    click(handler) {
+        this._canvas.click(handler);
+        return this;
     }
 
     mouseover(handler) {
@@ -288,7 +293,7 @@ class StageTouchHandler {
         this.downY = null;
         this.currX = null;
         this.currY = null;
-        this.hitInfo = null;
+        this.hitInfos = {};
         this._editPane = this.stage.addPane("edit");
         this._setupHandlers();
     }
@@ -297,8 +302,21 @@ class StageTouchHandler {
         this.stage.removePane("edit");
     }
 
+    isShapeSelected(shape) {
+        return shape.id in this.hitInfos;
+    }
+    
+    addHitInfo(hitInfo) {
+        this.hitInfos[hitInfo.shape.id] = hitInfo;
+    }
+
+    removeHitInfo(hitInfo) {
+        delete this.hitInfos[hitInfo.shape.id];
+    }
+
     _setupHandlers() {
         var handler = this;
+        this._editPane.click(function(event) { return handler._onClick(event); });
         this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
         this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
         this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
@@ -308,22 +326,36 @@ class StageTouchHandler {
         this._editPane.mousemove(function(event) { return handler._onMouseMove(event); });
     }
 
+    _selectingMultipleShapes(event) {
+        console.log("MetaKey: ", event.metaKey);
+        return event.metaKey;
+    }
+
     ////  Local handling of mouse/touch events
+    _onClick(event) { }
+
     _onMouseDown(event) {
+        console.log("Down: ", event);
         this.currX = this.downX = event.offsetX;
         this.currY = this.downY = event.offsetY;
 
-        var shapeIndex = this.stage.shapeIndex;
-        // Get the shape that is under the mouse
-        this.hitInfo = shapeIndex.getHitInfo(this.downX, this.downY);
-        if (this.hitInfo != null) {
-            this._editPane.cursor = this.hitInfo.cursor;
-
-            // remove the selected and related shapes from the mainIndex and add it to the edited index
-            shapeIndex.setPane(this.hitInfo.shape, "edit");
-            this.stage.repaint();
+        if (!this._selectingMultipleShapes(event)) {
+            this.hitInfos = {};
         }
-        console.log("HitInfo: ", this.hitInfo);
+
+        // Get the shape that is under the mouse
+        var shapeIndex = this.stage.shapeIndex;
+        var hitInfo = shapeIndex.getHitInfo(this.downX, this.downY);
+        if (hitInfo != null) {
+            var shape = hitInfo.shape;
+            this._editPane.cursor = hitInfo.cursor;
+            shapeIndex.setPane(shape, "edit");
+            this.addHitInfo(hitInfo);
+            this.stage.repaint();
+        } else {
+            this.hitInfos = {};
+        }
+        console.log("HitInfos: ", this.hitInfos);
     }
 
     _onMouseUp(event) {
@@ -331,18 +363,37 @@ class StageTouchHandler {
         this.currY = event.offsetY;
         this.downX = null;
         this.downY = null;
-        this.stage.shapeIndex.setPane(this.hitInfo.shape, "main");
+        if (!this._selectingMultipleShapes(event)) {
+            this.selectedShapes = [];
+        }
+
+        // Get the shape that is under the mouse
+        if (this.hitInfo != null) {
+            var shape = this.hitInfo.shape;
+            var index = this.selectedShapes.indexOf(shape.id);
+            if (this.isShapeSelected(shape)) {
+                this.selectShape(shape, false);
+                shapeIndex.setPane(shape, "main");
+            } else {
+                this.selectShape(shape, true);
+                shapeIndex.setPane(shape, "edit");
+            }
+        }
         this.stage.repaint();
     }
 
     _onMouseMove(event) { 
         this.currX = event.offsetX;
         this.currY = event.offsetY;
-        if (this.hitInfo != null) {
-            var shape = this.hitInfo.shape
-            var newHitInfo = shape.controller.getHitInfo(this.currX, this.currY);
-            if (newHitInfo != null && newHitInfo.shape == this.hitInfo.shape) {
-                this._editPane.cursor = newHitInfo.cursor;
+        console.log(this.currX, this.currY);
+        var currHitInfo = null;
+        for (var shapeId in this.hitInfos) {
+            var hitInfo = this.hitInfos[shapeId];
+            var shape = hitInfo.shape
+            currHitInfo = shape.controller.getHitInfo(this.currX, this.currY);
+            if (currHitInfo != null && currHitInfo.shape == hitInfo.shape) {
+                this._editPane.cursor = currHitInfo.cursor;
+                break;
             } else {
                 this._editPane.cursor = "auto";
             }
@@ -350,13 +401,20 @@ class StageTouchHandler {
 
         if (this.downX != null) {
             // We are in a position to "transform" the entry pressed
-            if (this.hitInfo != null) {
-                var shape = this.hitInfo.shape
-                shape.controller.applyHitChanges(this.hitInfo,
+            if (currHitInfo != null) {
+                var shape = currHitInfo.shape;
+                var currHitInfo = this.hitInfos[shape.id];
+                shape.controller.applyHitChanges(currHitInfo,
                                                  this.downX, this.downY, this.currX, this.currY);
-                this.stage.repaint();
+                this._editPane.repaint();
             } else {
                 // Just draw a "selection rectangle"
+                var x = Math.min(this.downX, this.currX);
+                var y = Math.min(this.downY, this.currY);
+                var w = Math.abs(this.downX - this.currX);
+                var h = Math.abs(this.downY - this.currY);
+                this._editPane.repaint();
+                this._editPane.context.strokeRect(x, y, w, h);
             }
         }
     }
@@ -453,11 +511,13 @@ export class Stage extends events.EventHandler {
     }
 
     eventTriggered(event) {
-        // console.log("Event: ", event);
+        console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
             this.shapeIndex.add(event.shape);
         } else if (event.name == "ShapeRemoved") {
             this.shapeIndex.remove(event.shape);
+        } else if (event.name == "PropertyChanged") {
         }
+        this.repaint();
     }
 }

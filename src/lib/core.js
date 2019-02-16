@@ -561,7 +561,7 @@ export class ShapeController extends events.EventHandler {
         var shape = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
             console.log("Bounds Before: ", shape.bounds);
-            shape.move(deltaX, deltaY);
+            shape.setLocation(savedInfo.left + deltaX, savedInfo.top + deltaY);
             console.log("Bounds  After: ", shape.bounds);
         } else if (hitInfo.hitType == HitType.SIZE) {
             var newTop = savedInfo.top;
