@@ -25,41 +25,7 @@ export class Event {
     get name() { return "Event"; };
 }
 
-export class LocationChanged extends Event {
-    constructor(oldX, oldY, newX, newY) {
-        super(null)
-        this.oldX = oldX;
-        this.newX = newX;
-        this.oldY = oldY;
-        this.newY = newY;
-    }
-
-    get name() { return "LocationChanged"; };
-}
-
-export class SizeChanged extends Event {
-    constructor(oldWidth, oldHeight, newWidth, newHeight) {
-        super(null)
-        this.oldWidth = oldWidth;
-        this.newWidth = newWidth;
-        this.oldHeight = oldHeight;
-        this.newHeight = newHeight;
-    }
-
-    get name() { return "SizeChanged"; };
-}
-
-export class AngleChanged extends Event {
-    constructor(oldAngle, newAngle) {
-        super(null)
-        this.oldAngle = oldAngle;
-        this.newAngle = newAngle;
-    }
-
-    get name() { return "AngleChanged"; };
-}
-
-export class PropertiesChanged extends Event {
+export class PropertyChanged extends Event {
     constructor(property, oldValue, newValue) {
         super(null)
         this.property = property;
