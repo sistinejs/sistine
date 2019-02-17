@@ -17,7 +17,7 @@ export class Pane {
         this._divId = stage.divId;
         this._canvasId = canvasId;
         this._canvas = null;
-        this._zoom = 1.0;
+        this._parentDiv = $("#" + stage.divId);
         this._ensureCanvas();
         this._refCount = 1;
     }
@@ -45,10 +45,8 @@ export class Pane {
 
     _ensureCanvas() {
         var divId = this._divId;
-        var $parent = $("#" + divId);
-        this._parentDiv = $parent;
         this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
-        $parent.append(this._canvas);
+        this._parentDiv.append(this._canvas);
         this.layout();
         this._context = this._canvas[0].getContext("2d");
     }
@@ -107,66 +105,6 @@ export class Pane {
         elem.width(finalWidth);
         elem[0].width = finalWidth;
         elem[0].height = finalHeight;
-    }
-
-    click(handler) {
-        this._canvas.click(handler);
-        return this;
-    }
-
-    mouseover(handler) {
-        this._canvas.mouseover(handler);
-        return this;
-    }
-
-    keydown(handler) {
-        this._canvas.keydown(handler);
-        return this;
-    }
-
-    keyup(handler) {
-        this._canvas.keyup(handler);
-        return this;
-    }
-
-    keypress(handler) {
-        this._canvas.keypress(handler);
-        return this;
-    }
-
-    mouseout(handler) {
-        this._canvas.mouseout(handler);
-        return this;
-    }
-
-    mouseenter(handler) {
-        this._canvas.mouseenter(handler);
-        return this;
-    }
-
-    mouseleave(handler) {
-        this._canvas.mouseleave(handler);
-        return this;
-    }
-
-    mousedown(handler) {
-        this._canvas.mousedown(handler);
-        return this;
-    }
-
-    mouseup(handler) {
-        this._canvas.mouseup(handler);
-        return this;
-    }
-
-    mousemove(handler) {
-        this._canvas.mousemove(handler);
-        return this;
-    }
-
-    contextmenu(handler) {
-        this._canvas.contextmenu(handler);
-        return this;
     }
 }
 
@@ -308,8 +246,14 @@ export class Stage extends events.EventHandler {
     constructor(divId, scene, configs) {
         super();
         configs = configs || {};
-        this._viewBounds = configs.viewBounds || new core.Bounds();
+
+        // The boundaries of the "Stage"
+        this._bounds = new core.Bounds();
+        this._zoom = 1.0;
+        this._offsetX = this._offsetY = 0;
+
         this._divId = divId;
+        this._parentDiv = $("#" + divId);
         this._scene = scene || new core.Scene();
         this._shapeIndex = new ShapeIndex(scene);
         this._shapeIndex.defaultPane = "main";
@@ -322,6 +266,11 @@ export class Stage extends events.EventHandler {
 
         // Information regarding Selections
         this.selection = new Selection(this);
+    }
+
+    get element() {
+        console.log("ParentDiv: ", this._parentDiv);
+        return this._parentDiv;
     }
 
     get isEditable() {
@@ -407,6 +356,29 @@ export class Stage extends events.EventHandler {
         }
         this.repaint();
     }
+
+    _setupHandler(element, method, handler) {
+        var source = this;
+        element[method](function(event) {
+            event.theSource = source;
+            handler(event);
+        });
+        return this;
+    }
+
+    keypress(handler) { return this._setupHandler(this.element, "keypress", handler); }
+    keyup(handler) { return this._setupHandler(this.element, "keyup", handler); }
+    keydown(handler) { return this._setupHandler(this.element, "keydown", handler); }
+
+    click(handler) { return this._setupHandler(this.element, "click", handler); }
+    mouseover(handler) { return this._setupHandler(this.element, "mouseover", handler); }
+    mouseout(handler) { return this._setupHandler(this.element, "mouseout", handler); }
+    mouseenter(handler) { return this._setupHandler(this.element, "mouseenter", handler); }
+    mouseleave(handler) { return this._setupHandler(this.element, "mouseleave", handler); }
+    mousedown(handler) { return this._setupHandler(this.element, "mousedown", handler); }
+    mouseup(handler) { return this._setupHandler(this.element, "mouseup", handler); }
+    mousemove(handler) { return this._setupHandler(this.element, "mousemove", handler); }
+    contextmenu(handler) { return this._setupHandler(this.element, "contextmenu", handler); }
 }
 
 class StageKeyHandler {
@@ -417,9 +389,9 @@ class StageKeyHandler {
         this._editPane.element.attr("tabindex", 1);
 
         var handler = this;
-        this._editPane.keypress(function(event) { return handler._onKeyPress(event); });
-        this._editPane.keyup(function(event) { return handler._onKeyUp(event); });
-        this._editPane.keydown(function(event) { return handler._onKeyDown(event); });
+        this.stage.keypress(function(event) { return handler._onKeyPress(event); });
+        this.stage.keyup(function(event) { return handler._onKeyUp(event); });
+        this.stage.keydown(function(event) { return handler._onKeyDown(event); });
     }
 
     detach() {
@@ -479,15 +451,15 @@ class StageTouchHandler {
         this._editPane = this.stage.acquirePane("edit");
 
         var handler = this;
-        this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
-        this._editPane.click(function(event) { return handler._onClick(event); });
-        this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
-        this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
-        this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
-        this._editPane.mouseout(function(event) { return handler._onMouseOut(event); });
-        this._editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
-        this._editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
-        this._editPane.mousemove(function(event) { return handler._onMouseMove(event); });
+        this.stage.contextmenu(function(event) { return handler._onContextMenu(event); });
+        this.stage.click(function(event) { return handler._onClick(event); });
+        this.stage.mousedown(function(event) { return handler._onMouseDown(event); });
+        this.stage.mouseup(function(event) { return handler._onMouseUp(event); });
+        this.stage.mouseover(function(event) { return handler._onMouseOver(event); });
+        this.stage.mouseout(function(event) { return handler._onMouseOut(event); });
+        this.stage.mouseenter(function(event) { return handler._onMouseEnter(event); });
+        this.stage.mouseleave(function(event) { return handler._onMouseLeave(event); });
+        this.stage.mousemove(function(event) { return handler._onMouseMove(event); });
     }
 
     detach() {
