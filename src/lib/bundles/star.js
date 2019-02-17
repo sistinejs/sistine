@@ -3,6 +3,7 @@
 import * as core from "../core"
 
 export function newShape(configs) {
+    configs = configs || {};
     return new StarShape(configs);
 }
 

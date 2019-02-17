@@ -3,13 +3,15 @@
 import * as core from "../core"
 
 export function newShape(configs) {
+    configs = configs || {};
     return new EllipseShape(configs);
 }
 
 export function newShapeForToolbar(configs) {
+    configs = configs || {};
     configs.y = configs.height / 4;
     configs.height *= 0.7;
-    return new EllipseShape(configs);
+    return newShape(configs);
 }
 
 export class EllipseShape extends core.Shape {

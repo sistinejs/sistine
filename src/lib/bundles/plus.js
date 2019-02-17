@@ -3,11 +3,12 @@
 import * as core from "../core"
 
 export function newShape(configs) {
+    configs = configs || {};
     return new PlusShape(configs);
 }
 
 export function newShapeForToolbar(configs) {
-    return new PlusShape(configs);
+    return newShape(configs);
 }
 
 export class PlusShape extends core.Shape {

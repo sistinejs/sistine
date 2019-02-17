@@ -389,6 +389,7 @@ class StageTouchHandler {
         this.currX = null;
         this.currY = null;
         this.selectingMultiple = false;
+        this._shapeForCreation = null;
 
         // Max time before a mouse down goes from a "click" to a "hold"
         this.clickThresholdTime = 500;
@@ -399,6 +400,14 @@ class StageTouchHandler {
 
     detach() {
         this.stage.removePane("edit");
+    }
+
+    get shapeForCreation() {
+        return this._shapeForCreation;
+    }
+
+    set shapeForCreation(s) {
+        this._shapeForCreation = s;
     }
 
     _setupHandlers() {
@@ -431,27 +440,31 @@ class StageTouchHandler {
         this.currX = this.downX = event.offsetX;
         this.currY = this.downY = event.offsetY;
         this.downTime = event.timeStamp;
-        this.selectingMultiple = this._selectingMultipleShapes(event);
         this.downHitInfo = null;
         var shapeIndex = this.stage.shapeIndex;
         var selection = this.stage.selection;
-        if (event.button == 0) {
-            // We have alt button down so allow multiple shapes to be added
-            var hitShape = shapeIndex.getShapeAt(this.downX, this.downY);
-            if (hitShape == null) {
-                selection.clear();
-            } else {
-                this.downHitInfo = hitShape.controller.getHitInfo(this.downX, this.downY);
-                if (this.selectingMultiple) {
-                    selection.toggle(hitShape);
-                } else if ( ! selection.contains(hitShape)) {
-                    // On clear and add a new shape if it is not already selected
+
+        if (this._shapeForCreation != null) {
+        } else {
+            this.selectingMultiple = this._selectingMultipleShapes(event);
+            if (event.button == 0) {
+                // We have alt button down so allow multiple shapes to be added
+                var hitShape = shapeIndex.getShapeAt(this.downX, this.downY);
+                if (hitShape == null) {
                     selection.clear();
-                    selection.toggle(hitShape);
+                } else {
+                    this.downHitInfo = hitShape.controller.getHitInfo(this.downX, this.downY);
+                    if (this.selectingMultiple) {
+                        selection.toggleMembership(hitShape);
+                    } else if ( ! selection.contains(hitShape)) {
+                        // On clear and add a new shape if it is not already selected
+                        selection.clear();
+                        selection.toggleMembership(hitShape);
+                    }
                 }
+                selection.checkpointShapes(this.downHitInfo);
+                this.stage.repaint();
             }
-            selection.checkpointShapes(this.downHitInfo);
-            this.stage.repaint();
         }
     }
 
@@ -470,11 +483,11 @@ class StageTouchHandler {
             if ( ! this.selectingMultiple) {
                 console.log("Mouse Up, isClick: ", isClick);
                 if (isClick) {
-                    // this was a click so just "toggle" the shape selection
+                    // this was a click so just "toggleMembership" the shape selection
                     var shapeIndex = this.stage.shapeIndex;
                     var hitShape = shapeIndex.getShapeAt(this.currX, this.currY);
                     selection.clear();
-                    selection.toggle(hitShape);
+                    selection.toggleMembership(hitShape);
                 } else {
                     console.log("HitApplyDone");
                 }
@@ -490,34 +503,40 @@ class StageTouchHandler {
         this.currY = event.offsetY;
         var selection = this.stage.selection;
         console.log(this.currX, this.currY);
-        selection.forEach(function(self, shape) {
-            var currHitInfo = shape.controller.getHitInfo(self.currX, self.currY);
-            if (currHitInfo != null) {
-                self._editPane.cursor = currHitInfo.cursor;
-                return false;
-            } else {
-                self._editPane.cursor = "auto";
-            }
-        }, this);
-
-        if (this.downX != null) {
-            // We are in a position to "transform" the entry pressed
-            var shapesFound = false;
+        if (this._shapeForCreation != null) {
+            // This mode is when we are showing a cross hair for creating an object
+            this._editPane.cursor = "crosshair";
+        } else {
+            // Mouse is not primed for "creating" an object
             selection.forEach(function(self, shape) {
-                shapesFound = true;
-                var savedInfo = selection.getSavedInfo(shape);
-                shape.controller.applyHitChanges(self.downHitInfo, savedInfo,
-                                                 self.downX, self.downY,
-                                                 self.currX, self.currY);
+                var currHitInfo = shape.controller.getHitInfo(self.currX, self.currY);
+                if (currHitInfo != null) {
+                    self._editPane.cursor = currHitInfo.cursor;
+                    return false;
+                } else {
+                    self._editPane.cursor = "auto";
+                }
             }, this);
-            this._editPane.repaint();
-            if ( ! shapesFound ) {
-                // Just draw a "selection rectangle"
-                var x = Math.min(this.downX, this.currX);
-                var y = Math.min(this.downY, this.currY);
-                var w = Math.abs(this.downX - this.currX);
-                var h = Math.abs(this.downY - this.currY);
-                this._editPane.context.strokeRect(x, y, w, h);
+
+            if (this.downX != null) {
+                // We are in a position to "transform" the entry pressed
+                var shapesFound = false;
+                selection.forEach(function(self, shape) {
+                    shapesFound = true;
+                    var savedInfo = selection.getSavedInfo(shape);
+                    shape.controller.applyHitChanges(self.downHitInfo, savedInfo,
+                                                     self.downX, self.downY,
+                                                     self.currX, self.currY);
+                }, this);
+                this._editPane.repaint();
+                if ( ! shapesFound ) {
+                    // Just draw a "selection rectangle"
+                    var x = Math.min(this.downX, this.currX);
+                    var y = Math.min(this.downY, this.currY);
+                    var w = Math.abs(this.downX - this.currX);
+                    var h = Math.abs(this.downY - this.currY);
+                    this._editPane.context.strokeRect(x, y, w, h);
+                }
             }
         }
     }
@@ -531,7 +550,7 @@ class StageTouchHandler {
 class Selection {
     constructor(stage) {
         this.stage = stage;
-        this.selectedShapes = {};
+        this.shapes = {};
         this.downHitInfo = null;
         this.savedInfos = {};
         this._count = 0;
@@ -542,32 +561,32 @@ class Selection {
     }
 
     forEach(handler, self) {
-        for (var shapeId in this.selectedShapes) {
-            var shape = this.selectedShapes[shapeId];
+        for (var shapeId in this.shapes) {
+            var shape = this.shapes[shapeId];
             if (handler(self, shape, this) == false)
                 break;
         }
     }
 
     contains(shape) {
-        return shape.id in this.selectedShapes;
+        return shape.id in this.shapes;
     }
     
     add(shape) {
-        if ( ! (shape.id in this.selectedShapes)) {
+        if ( ! (shape.id in this.shapes)) {
             this._count ++;
         }
-        this.selectedShapes[shape.id] = shape;
+        this.shapes[shape.id] = shape;
         this.savedInfos[shape.id] = shape.controller.snapshotFor();
         this.stage.shapeIndex.setPane(shape, "edit");
     }
 
     remove(shape) {
-        if ( shape.id in this.selectedShapes ) {
+        if ( shape.id in this.shapes ) {
             this._count --;
         }
         this.stage.shapeIndex.setPane(shape, "main");
-        delete this.selectedShapes[shape.id];
+        delete this.shapes[shape.id];
         delete this.savedInfos[shape.id];
     }
 
@@ -582,7 +601,7 @@ class Selection {
         return this.savedInfos[shape.id];
     }
 
-    toggle(shape) {
+    toggleMembership(shape) {
         if (shape == null) return false;
         if (this.contains(shape)) {
             this.remove(shape);
@@ -595,11 +614,17 @@ class Selection {
 
     clear() {
         var shapeIndex = this.stage.shapeIndex;
-        for (var shapeId in this.selectedShapes) {
-            var shape = this.selectedShapes[shapeId];
+        for (var shapeId in this.shapes) {
+            var shape = this.shapes[shapeId];
             shapeIndex.setPane(shape, "main");
         }
         this.savedInfos = {};
-        this.selectedShapes = {};
+        this.shapes = {};
+    }
+
+    /**
+     * Create a group out of the elements in this Selection.
+     */
+    group() {
     }
 }

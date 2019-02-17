@@ -2,11 +2,12 @@
 import * as core from "../core"
 
 export function newShape(configs) {
+    configs = configs || {};
     return new TriangleShape(configs);
 }
 
 export function newShapeForToolbar(configs) {
-    return new TriangleShape(configs);
+    return newShape(configs);
 }
 
 export class TriangleShape extends core.Shape {

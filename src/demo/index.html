@@ -256,14 +256,16 @@
                 $(event.currentTarget).removeClass("toolbar_button_highlighted");
             }).click(function(event) {
                 // Add the shape on the canvas at the center
-                var id = event.currentTarget.id.replace(/canvas_/, "");
+                var id = event.currentTarget.id.replace(/mainpane_holder_/, "");
                 addShapeForToolbar(id);
             });
         });
     }
 
     function addShapeForToolbar(objid) {
-        console.log("Clicked: " + objid);
+        var DefaultBundle = Sistine.registry.DefaultBundle;
+        console.log("Toolbar Clicked: " + objid);
+        theStage.touchHandler.shapeForCreation = DefaultBundle[objid].newShape();
         // what is needed here:
         // 1. see which shape was clicked
         // 2. Find canvas bounds and viewport
