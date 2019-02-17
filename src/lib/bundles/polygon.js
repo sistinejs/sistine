@@ -1,5 +1,6 @@
 
 import * as core from "../core"
+import * as geom from "../../utils/geom"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -27,24 +28,20 @@ export class PolygonShape extends core.Shape {
         var theta = (Math.PI * 2.0) / n;
         var cx = this.bounds.centerX;
         var cy = this.bounds.centerY;
-        var radius = this.bounds.innerRadius;
-        console.log("N, R, theta: ", n, radius, theta);
+        var A = this.bounds.width / 2.0;
+        var B = this.bounds.height / 2.0;
 
-        var fx = cx;
-        var fy = cy - radius;
+        var p0 = [0,0];
+        var pi = [0,0];
+        geom.pointOnEllipse(A, B, Math.PI / 2.0, p0);
         ctx.beginPath();
-        ctx.moveTo(fx, fy);
-        console.log("Fx, Fy: ", fx, fy);
+        ctx.moveTo(cx + p0[0], cy + p0[1]);
         for (var i = 1;i < n;i++) {
             var currangle = (Math.PI / 2.0) + (i * theta);
-            var costheta = Math.cos(currangle);
-            var sintheta = Math.sin(currangle);
-            var px = cx + (radius * costheta);
-            var py = cy - (radius * sintheta);
-            ctx.lineTo(px, py);
-            console.log("Px, Py: ", px, py);
+            geom.pointOnEllipse(A, B, currangle, pi);
+            ctx.lineTo(cx + pi[0], cy + pi[1]);
         }
-        ctx.lineTo(fx, fy);
+        ctx.lineTo(cx + p0[0], cy + p0[1]);
         if (this.fillStyle) {
             ctx.fill();
         }

@@ -15,7 +15,7 @@ export class StarShape extends core.Shape {
     constructor(configs) {
         super(configs);
         this._numSides = Math.max(3, configs.numSides || 5);
-        this._innerRadius = configs.innerRadius || (Math.min(this.bounds.width, this.bounds.height) / 5.0);
+        this._innerRadius = configs.innerRadius || null;
         this._controller = new StarController(this);
     }
 
@@ -24,7 +24,7 @@ export class StarShape extends core.Shape {
     }
 
     get innerRadius() {
-        return this._innerRadius;
+        return this._innerRadius || (this.bounds.innerRadius / 3.0);
     }
 
     draw(ctx) {
@@ -33,7 +33,7 @@ export class StarShape extends core.Shape {
         var cx = this.bounds.centerX;
         var cy = this.bounds.centerY;
         var R = Math.min(this.bounds.width, this.bounds.height) / 2.0;
-        var innerR = this._innerRadius;
+        var innerR = this.innerRadius;
 
         var fx = cx;
         var fy = cy - R;

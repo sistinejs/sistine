@@ -18,6 +18,11 @@ export class SquareShape extends core.Shape {
         this._controller = new SquareController(this);
     }
 
+    setSize(w, h, force) {
+        w = h = Math.min(w, h);
+        return super.setSize(w, h, force);
+    }
+
     draw(ctx) {
         var size = Math.min(this.bounds.width, this.bounds.height);
         var left = (this.bounds.left + this.bounds.right - size) / 2;
