@@ -75,6 +75,7 @@ export class Shape {
         configs.name = configs.name || "";
         configs.angle = configs.angle || 0;
         configs.zIndex = configs.zIndex || 0;
+        configs.lineWidth = configs.lineWidth || 1;
         this._prev = this._next = null;
         this._bounds = new Bounds(configs)
         this._scene = null;

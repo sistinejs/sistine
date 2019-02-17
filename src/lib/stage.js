@@ -445,6 +445,11 @@ class StageTouchHandler {
         var selection = this.stage.selection;
 
         if (this._shapeForCreation != null) {
+            console.log("Creating: ", this._shapeForCreation);
+            selection.clear();
+            this._shapeForCreation.setLocation(this.downX, this.downY);
+            this.stage.shapeIndex.setPane(this._shapeForCreation, "edit");
+            this.stage.scene.add(this._shapeForCreation);
         } else {
             this.selectingMultiple = this._selectingMultipleShapes(event);
             if (event.button == 0) {
@@ -479,21 +484,27 @@ class StageTouchHandler {
         this.downX = null;
         this.downY = null;
 
-        if (event.button == 0) {
-            if ( ! this.selectingMultiple) {
-                console.log("Mouse Up, isClick: ", isClick);
-                if (isClick) {
-                    // this was a click so just "toggleMembership" the shape selection
-                    var shapeIndex = this.stage.shapeIndex;
-                    var hitShape = shapeIndex.getShapeAt(this.currX, this.currY);
-                    selection.clear();
-                    selection.toggleMembership(hitShape);
-                } else {
-                    console.log("HitApplyDone");
-                }
-            }
+        if (this._shapeForCreation != null) {
+            // only add a new shape once!
+            this._shapeForCreation = null;
+            this._editPane.cursor = "auto";
         } else {
-            console.log("Mouse Over, Button: ", event.button);
+            if (event.button == 0) {
+                if ( ! this.selectingMultiple) {
+                    console.log("Mouse Up, isClick: ", isClick);
+                    if (isClick) {
+                        // this was a click so just "toggleMembership" the shape selection
+                        var shapeIndex = this.stage.shapeIndex;
+                        var hitShape = shapeIndex.getShapeAt(this.currX, this.currY);
+                        selection.clear();
+                        selection.toggleMembership(hitShape);
+                    } else {
+                        console.log("HitApplyDone");
+                    }
+                }
+            } else {
+                console.log("Mouse Over, Button: ", event.button);
+            }
         }
         this.stage.repaint();
     }
@@ -506,6 +517,10 @@ class StageTouchHandler {
         if (this._shapeForCreation != null) {
             // This mode is when we are showing a cross hair for creating an object
             this._editPane.cursor = "crosshair";
+            if (this.downX != null) {
+                this._shapeForCreation.setSize(this.currX - this.downX,
+                                             this.currY - this.downY);
+            }
         } else {
             // Mouse is not primed for "creating" an object
             selection.forEach(function(self, shape) {
