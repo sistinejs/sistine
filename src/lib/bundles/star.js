@@ -29,8 +29,8 @@ export class StarShape extends core.Shape {
     draw(ctx) {
         var n = 2 * this._numSides;
         var theta = (Math.PI * 2.0) / n;
-        var cx = this.bounds.midX;
-        var cy = this.bounds.midY;
+        var cx = this.bounds.centerX;
+        var cy = this.bounds.centerY;
         var R = Math.min(this.bounds.width, this.bounds.height) / 2.0;
         var innerR = this._innerRadius;
 

@@ -24,9 +24,9 @@ export class PolygonShape extends core.Shape {
     draw(ctx) {
         var n = this._numSides;
         var theta = (Math.PI * 2.0) / n;
-        var cx = this.bounds.midX;
-        var cy = this.bounds.midY;
-        var radius = Math.min(this.bounds.width, this.bounds.height) / 2.0;
+        var cx = this.bounds.centerX;
+        var cy = this.bounds.centerY;
+        var radius = this.bounds.innerRadius;
         console.log("N, R, theta: ", n, radius, theta);
 
         var fx = cx;

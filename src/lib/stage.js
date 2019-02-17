@@ -255,18 +255,14 @@ export class ShapeIndex {
     }
 
     /**
-     * Given a coordinate (x,y) returns the most suitable "hit info".  Hit Info 
-     * represents a shape and what info about what can be "done" to a shape at that coordinate.
+     * Given a coordinate (x,y) returns the topmost shape that contains this point.
      */
-    getHitInfo(x, y) {
+    getShapeAt(x, y) {
         var allShapes = this._allShapes;
         for (var index in allShapes) {
             var shape = allShapes[index];
-            if (shape != null && shape.controller != null) {
-                var hitInfo = shape.controller.getHitInfo(x, y);
-                if (hitInfo != null) {
-                    return hitInfo;
-                }
+            if (shape != null && shape.containsPoint(x, y)) {
+                return shape;
             }
         }
         return null;
@@ -289,149 +285,6 @@ export class ShapeIndex {
             this._reIndexShape(child);
         }
     }
-}
-
-class StageTouchHandler {
-    constructor(stage) {
-        this.stage = stage;
-        this.downX = null;
-        this.downY = null;
-        this.currX = null;
-        this.currY = null;
-        this.hitInfos = {};
-        this._editPane = this.stage.addPane("edit");
-        this._setupHandlers();
-    }
-
-    detach() {
-        this.stage.removePane("edit");
-    }
-
-    isShapeSelected(shape) {
-        return shape.id in this.hitInfos;
-    }
-    
-    addHitInfo(hitInfo) {
-        this.hitInfos[hitInfo.shape.id] = hitInfo;
-    }
-
-    removeHitInfo(hitInfo) {
-        delete this.hitInfos[hitInfo.shape.id];
-    }
-
-    _setupHandlers() {
-        var handler = this;
-        this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
-        this._editPane.click(function(event) { return handler._onClick(event); });
-        this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
-        this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
-        this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
-        this._editPane.mouseout(function(event) { return handler._onMouseOut(event); });
-        this._editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
-        this._editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
-        this._editPane.mousemove(function(event) { return handler._onMouseMove(event); });
-    }
-
-    _selectingMultipleShapes(event) {
-        console.log("MetaKey: ", event.metaKey);
-        return event.metaKey;
-    }
-
-    ////  Local handling of mouse/touch events
-    _onContextMenu(event) {
-        console.log("Context Menu Clicked");
-        return false;
-    }
-
-    _onClick(event) { }
-
-    _onMouseDown(event) {
-        this.currX = this.downX = event.offsetX;
-        this.currY = this.downY = event.offsetY;
-
-        if (!this._selectingMultipleShapes(event)) {
-            this.hitInfos = {};
-        }
-
-        // Get the shape that is under the mouse
-        var shapeIndex = this.stage.shapeIndex;
-        var hitInfo = shapeIndex.getHitInfo(this.downX, this.downY);
-        if (hitInfo != null) {
-            var shape = hitInfo.shape;
-            this._editPane.cursor = hitInfo.cursor;
-            shapeIndex.setPane(shape, "edit");
-            this.addHitInfo(hitInfo);
-            this.stage.repaint();
-        } else {
-            this.hitInfos = {};
-        }
-    }
-
-    _onMouseUp(event) {
-        this.currX = event.offsetX;
-        this.currY = event.offsetY;
-        this.downX = null;
-        this.downY = null;
-        if (!this._selectingMultipleShapes(event)) {
-            this.selectedShapes = [];
-        }
-
-        // Get the shape that is under the mouse
-        if (this.hitInfo != null) {
-            var shape = this.hitInfo.shape;
-            var index = this.selectedShapes.indexOf(shape.id);
-            if (this.isShapeSelected(shape)) {
-                this.selectShape(shape, false);
-                shapeIndex.setPane(shape, "main");
-            } else {
-                this.selectShape(shape, true);
-                shapeIndex.setPane(shape, "edit");
-            }
-        }
-        this.stage.repaint();
-    }
-
-    _onMouseMove(event) { 
-        this.currX = event.offsetX;
-        this.currY = event.offsetY;
-        console.log(this.currX, this.currY);
-        var currHitInfo = null;
-        for (var shapeId in this.hitInfos) {
-            var hitInfo = this.hitInfos[shapeId];
-            var shape = hitInfo.shape
-            currHitInfo = shape.controller.getHitInfo(this.currX, this.currY);
-            if (currHitInfo != null && currHitInfo.shape == hitInfo.shape) {
-                this._editPane.cursor = currHitInfo.cursor;
-                break;
-            } else {
-                this._editPane.cursor = "auto";
-            }
-        }
-
-        if (this.downX != null) {
-            // We are in a position to "transform" the entry pressed
-            if (currHitInfo != null) {
-                var shape = currHitInfo.shape;
-                var currHitInfo = this.hitInfos[shape.id];
-                shape.controller.applyHitChanges(currHitInfo,
-                                                 this.downX, this.downY, this.currX, this.currY);
-                this._editPane.repaint();
-            } else {
-                // Just draw a "selection rectangle"
-                var x = Math.min(this.downX, this.currX);
-                var y = Math.min(this.downY, this.currY);
-                var w = Math.abs(this.downX - this.currX);
-                var h = Math.abs(this.downY - this.currY);
-                this._editPane.repaint();
-                this._editPane.context.strokeRect(x, y, w, h);
-            }
-        }
-    }
-
-    _onMouseEnter(event) { }
-    _onMouseLeave(event) { }
-    _onMouseOver(event) { }
-    _onMouseOut(event) { }
 }
 
 /**
@@ -529,4 +382,205 @@ export class Stage extends events.EventHandler {
         }
         this.repaint();
     }
+}
+
+class StageTouchHandler {
+    constructor(stage) {
+        this.stage = stage;
+        this.downX = null;
+        this.downY = null;
+        this.downTime = 0;
+        this.currX = null;
+        this.currY = null;
+        this.clickThresholdTime = 500;  // Max time before a mouse down goes from a "click" to a "hold"
+
+        // Information regarding Selections
+        this.selectingMultiple = false;
+        this.selectedShapes = {};
+        this.downHitInfo = null;
+        this.savedInfos = {};
+
+        this._editPane = this.stage.addPane("edit");
+        this._setupHandlers();
+
+        // What is the state of the the mouse
+        // Possble states are:
+        // "moving"     - Mouse is moving without any "Drag"
+        // "dragging"   - Mouse is dragging on the canvas
+        // "pressed"    - Mosue is pressed down without a move or a release
+        // "clicked"    - Mouse was clicked somewhere.  This is a down + up 
+        //                within a certain time frame.
+        this.mouseState = null;
+    }
+
+    detach() {
+        this.stage.removePane("edit");
+    }
+
+    isShapeSelected(shape) {
+        return shape.id in this.selectedShapes;
+    }
+    
+    addToSelection(shape) {
+        this.selectedShapes[shape.id] = shape;
+        this._editPane.cursor = shape.cursor;
+        this.stage.shapeIndex.setPane(shape, "edit");
+    }
+
+    removeFromSelection(shape) {
+        this.stage.shapeIndex.setPane(shape, "main");
+        this._editPane.cursor = "auto";
+        delete this.selectedShapes[shape.id];
+    }
+
+    toggleSelection(shape) {
+        if (this.isShapeSelected(shape)) {
+            this.removeFromSelection(shape);
+            return false;
+        } else {
+            this.addToSelection(shape);
+            return true;
+        }
+    }
+
+    clearSelection() {
+        var shapeIndex = this.stage.shapeIndex;
+        for (var shapeId in this.selectedShapes) {
+            var shape = this.selectedShapes[shapeId];
+            shapeIndex.setPane(shape, "main");
+        }
+        this.selectedShapes = {};
+    }
+
+    _setupHandlers() {
+        var handler = this;
+        this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
+        this._editPane.click(function(event) { return handler._onClick(event); });
+        this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
+        this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
+        this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
+        this._editPane.mouseout(function(event) { return handler._onMouseOut(event); });
+        this._editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
+        this._editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
+        this._editPane.mousemove(function(event) { return handler._onMouseMove(event); });
+    }
+
+    _selectingMultipleShapes(event) {
+        console.log("MetaKey, Button, Buttons: ", event.metaKey, event.button, event.buttons);
+        return event.button == 0 && event.metaKey;
+    }
+
+    ////  Local handling of mouse/touch events
+    _onContextMenu(event) {
+        console.log("Context Menu Clicked");
+        return false;
+    }
+
+    _onClick(event) { }
+
+    _onMouseDown(event) {
+        this.currX = this.downX = event.offsetX;
+        this.currY = this.downY = event.offsetY;
+        this.downTime = event.timeStamp;
+        this.selectingMultiple = this._selectingMultipleShapes(event);
+        this.downHitInfo = null;
+        var shapeIndex = this.stage.shapeIndex;
+        if (event.button == 0) {
+            // We have alt button down so allow multiple shapes to be added
+            var hitShape = shapeIndex.getShapeAt(this.downX, this.downY);
+            if (hitShape == null) {
+                this.clearSelection();
+                this.stage.repaint();
+            } else if (this.selectingMultiple) {
+                // Get the shape that is under the mouse
+                this.toggleSelection(hitShape);
+                this.stage.repaint();
+            } else if (!this.isShapeSelected(hitShape)) {
+                // On clear and add a new shape if it is not already selected
+                this.clearSelection();
+                this.toggleSelection(hitShape);
+                this.stage.repaint();
+            } else {
+                // Here we are clicking on an already selected shape
+                // so find the "hit info" for this shape.
+                this.downHitInfo = hitShape.controller.getHitInfo(this.downX, this.downY);
+                // Find the save info for all selected shapes
+                for (var shapeId in this.selectedShapes) {
+                    var controller = this.selectedShapes[shapeId].controller;
+                    this.savedInfos[shapeId] = controller.snapshotFor(this.downHitInfo);
+                }
+                console.log("Selected Hit Info", this.downHitInfo);
+                console.log("SavedInfos: ", this.savedInfos);
+            }
+        }
+    }
+
+    _onMouseUp(event) {
+        this.currX = event.offsetX;
+        this.currY = event.offsetY;
+        var currTime = event.timeStamp;
+        this.downX = null;
+        this.downY = null;
+
+        if ( ! this.selectingMultiple) {
+            var isClick = currTime - this.downTime <= this.clickThresholdTime;
+            console.log("Mouse Up, isClick: ", isClick);
+            if (isClick) {
+                // this was a click so just "toggle" the shape selection
+                var shapeIndex = this.stage.shapeIndex;
+                var hitShape = shapeIndex.getShapeAt(this.currX, this.currY);
+                this.clearSelection();
+                console.log("Up HitShape: ", hitShape);
+                if (hitShape != null) {
+                    this.toggleSelection(hitShape);
+                }
+            } else {
+                console.log("HitApplyDone");
+            }
+        }
+        this.stage.repaint();
+    }
+
+    _onMouseMove(event) { 
+        this.currX = event.offsetX;
+        this.currY = event.offsetY;
+        console.log(this.currX, this.currY);
+        var currHitShape = null;
+        for (var shapeId in this.selectedShapes) {
+            var shape = this.selectedShapes[shapeId];
+            var currHitInfo = shape.controller.getHitInfo(this.currX, this.currY);
+            if (currHitInfo != null && currHitInfo.shape == shape) {
+                this._editPane.cursor = currHitInfo.cursor;
+                break;
+            } else {
+                this._editPane.cursor = "auto";
+            }
+        }
+
+        if (this.downX != null) {
+            // We are in a position to "transform" the entry pressed
+            var shape = null;
+            for (var shapeId in this.selectedShapes) {
+                shape = this.selectedShapes[shapeId];
+                var savedInfo = this.savedInfos[shapeId];
+                shape.controller.applyHitChanges(this.downHitInfo, savedInfo,
+                                                 this.downX, this.downY,
+                                                 this.currX, this.currY);
+            }
+            this._editPane.repaint();
+            if (shape == null) {
+                // Just draw a "selection rectangle"
+                var x = Math.min(this.downX, this.currX);
+                var y = Math.min(this.downY, this.currY);
+                var w = Math.abs(this.downX - this.currX);
+                var h = Math.abs(this.downY - this.currY);
+                this._editPane.context.strokeRect(x, y, w, h);
+            }
+        }
+    }
+
+    _onMouseEnter(event) { }
+    _onMouseLeave(event) { }
+    _onMouseOver(event) { }
+    _onMouseOut(event) { }
 }

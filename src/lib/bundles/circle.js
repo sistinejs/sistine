@@ -1,5 +1,4 @@
 
-
 import * as core from "../core"
 
 export function newShape(configs) {
@@ -16,7 +15,7 @@ export class CircleShape extends core.Shape {
         this._controller = new CircleController(this);
     }
 
-    get radius() { return Math.min(this.bounds.width, this.bounds.height) / 2.0; }
+    get radius() { return this.bounds.innerRadius; }
 
     draw(ctx) {
         var lw = this.lineWidth + 1;
@@ -26,7 +25,7 @@ export class CircleShape extends core.Shape {
         var height = this.bounds.height - (2 * lw);
 
         ctx.beginPath();
-        ctx.arc(this.bounds.midX, this.bounds.midY, this.radius, 0, 2 * Math.PI);
+        ctx.arc(this.bounds.centerX, this.bounds.centerY, this.radius, 0, 2 * Math.PI);
         if (this.fillStyle) {
             ctx.fill();
         }

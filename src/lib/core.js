@@ -12,6 +12,7 @@ export class Bounds {
         this._height = configs.height || 0;
     }
 
+    get innerRadius() { return Math.min(this._width, this._height) / 2.0; }
     get left() { return this._x; }
     get top() { return this._y; }
     get x() { return this._x; }
@@ -486,12 +487,10 @@ export const HitType = {
 }
 
 export class HitInfo {
-    constructor(shape, hitType, hitIndex, cursor, savedInfo) {
-        this.shape = shape;
+    constructor(hitType, hitIndex, cursor) {
         this.hitType = hitType || 0;
         this.hitIndex = hitIndex || 0;
         this.cursor = cursor || "auto";
-        this.savedInfo = savedInfo || {};
     }
 }
 
@@ -544,25 +543,26 @@ export class ShapeController extends events.EventHandler {
             var cursor = hti[1];
             if (x >= px - DEFAULT_CONTROL_SIZE && x <= px + DEFAULT_CONTROL_SIZE &&
                 y >= py - DEFAULT_CONTROL_SIZE && y <= py + DEFAULT_CONTROL_SIZE) {
-                return new HitInfo(this.shape, HitType.SIZE, i, cursor, bounds.copy());
+                return new HitInfo(HitType.SIZE, i, cursor);
             }
         }
         if (bounds.containsPoint(x, y)) {
-            return new HitInfo(this.shape, HitType.MOVE, 0, "move", bounds.copy());
+            return new HitInfo(HitType.MOVE, 0, "move");
         }
         return null;
     }
 
-    applyHitChanges(hitInfo, downX, downY, currX, currY) {
-        var savedInfo = hitInfo.savedInfo;
+    snapshotFor(hitInfo) {
+        return this.shape.bounds.copy();
+    }
+
+    applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
         console.log("Delta: ", deltaX, deltaY);
         var shape = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
-            console.log("Bounds Before: ", shape.bounds);
             shape.setLocation(savedInfo.left + deltaX, savedInfo.top + deltaY);
-            console.log("Bounds  After: ", shape.bounds);
         } else if (hitInfo.hitType == HitType.SIZE) {
             var newTop = savedInfo.top;
             var newLeft = savedInfo.left;
