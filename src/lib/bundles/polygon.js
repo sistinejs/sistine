@@ -19,6 +19,11 @@ export class PolygonShape extends core.Shape {
         this._controller = new PolygonController(this);
     }
 
+    setSize(w, h, force) {
+        w = h = Math.min(w, h);
+        return super.setSize(w, h, force);
+    }
+
     get numSides() {
         return this._numSides;
     }

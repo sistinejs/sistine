@@ -19,6 +19,11 @@ export class StarShape extends core.Shape {
         this._controller = new StarController(this);
     }
 
+    setSize(w, h, force) {
+        w = h = Math.min(w, h);
+        return super.setSize(w, h, force);
+    }
+
     get numSides() {
         return this._numSides;
     }

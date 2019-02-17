@@ -5,135 +5,6 @@ import * as panes from "./panes";
 import { getcssint } from "../utils/dom"
 
 /**
- * The index structure of a scene lets us re-model how we store and index shapes in a scene
- * for faster access and grouping not just by hierarchy but also to cater for various access
- * characteristics. (say by location, by attribute type, by zIndex etc)
- */
-export class ShapeIndex {
-    constructor(scene) {
-        this._shapeIndexes = {};
-        this._allShapes = [];
-        this.scene = scene;
-        this.defaultPane = null;
-    }
-
-    get scene() {
-        return this._scene || null;
-    }
-
-    set scene(s) {
-        if (s != this._scene) {
-            this._scene = s;
-            this._shapeIndexes = {};
-            this._allShapes = [];
-            this.reIndex();     // Build the index for this new scene!
-        }
-    }
-
-    setPane(shape, pane) {
-        if (shape != null)
-            shape.pane = pane.name;
-    }
-
-    /**
-     * Applies a visitor for shapes in a given view port in a given pane.
-     */
-    forShapesInViewPort(pane, viewPort, visitor) {
-        var allShapes = this._allShapes;
-        for (var index in allShapes) {
-            var shape = allShapes[index];
-            if (shape != null) {
-                var spane = shape.pane || null;
-                if (spane == null) {
-                    if (pane.name == this.defaultPane) {
-                        visitor(shape);
-                    }
-                } else if (spane == pane.name) {
-                    visitor(shape);
-                }
-            }
-        }
-    }
-
-    shapeExists(shape) {
-        return shape.id in this._shapeIndexes;
-    }
-
-    /**
-     * A new shape is added to the index.
-     */
-    add(shape) {
-        shape.pane = shape.pane || null;
-        // See if shape already has an index assigned to it
-        if (this.shapeExists(shape)) {
-            var index = this._shapeIndexes[shape.id];
-            if (this._allShapes[index] != null) {
-                throw Error("Adding shape again without removing it first");
-            }
-            this._allShapes[index] = shape;
-        } else {
-            this._shapeIndexes[shape.id] = this._allShapes.length;
-            this._allShapes.push(shape);
-        }
-    }
-
-    addShapes(shapes) {
-        for (var i in shapes) {
-            this.add(shapes[i]);
-        }
-    }
-
-    /**
-     * Remove a shape from the index.
-     */
-    remove(shape) {
-        if (!this.shapeExists(shape)) {
-            throw Error("Shape does not exist in this index.");
-        }
-        var index = this._shapeIndexes[shape.id];
-        this._allShapes[index] = null;
-    }
-
-    removeShapes(shapes) {
-        for (var i in shapes) {
-            this.remove(shapes[i]);
-        }
-    }
-
-    /**
-     * Given a coordinate (x,y) returns the topmost shape that contains this point.
-     */
-    getShapeAt(x, y) {
-        var allShapes = this._allShapes;
-        for (var index in allShapes) {
-            var shape = allShapes[index];
-            if (shape != null && shape.containsPoint(x, y)) {
-                return shape;
-            }
-        }
-        return null;
-    }
-
-    reIndex() {
-        var scene = this._scene;
-        if (scene) {
-            for (var index in scene.layers) {
-                var layer = scene.layers[index];
-                this._reIndexShape(layer);
-            }
-        }
-    }
-
-    _reIndexShape(shape) {
-        this.add(shape);
-        for (var index in shape.children) {
-            var child = shape.children[index];
-            this._reIndexShape(child);
-        }
-    }
-}
-
-/**
  * The stage model if where all layers and shapes are managed. 
  * As far as possible this does not perform any view related operations as 
  * that is decoupled into the view entity.
@@ -730,5 +601,134 @@ class Selection {
      * Create a group out of the elements in this Selection.
      */
     group() {
+    }
+}
+
+/**
+ * The index structure of a scene lets us re-model how we store and index shapes in a scene
+ * for faster access and grouping not just by hierarchy but also to cater for various access
+ * characteristics. (say by location, by attribute type, by zIndex etc)
+ */
+export class ShapeIndex {
+    constructor(scene) {
+        this._shapeIndexes = {};
+        this._allShapes = [];
+        this.scene = scene;
+        this.defaultPane = null;
+    }
+
+    get scene() {
+        return this._scene || null;
+    }
+
+    set scene(s) {
+        if (s != this._scene) {
+            this._scene = s;
+            this._shapeIndexes = {};
+            this._allShapes = [];
+            this.reIndex();     // Build the index for this new scene!
+        }
+    }
+
+    setPane(shape, pane) {
+        if (shape != null)
+            shape.pane = pane.name;
+    }
+
+    /**
+     * Applies a visitor for shapes in a given view port in a given pane.
+     */
+    forShapesInViewPort(pane, viewPort, visitor) {
+        var allShapes = this._allShapes;
+        for (var index in allShapes) {
+            var shape = allShapes[index];
+            if (shape != null) {
+                var spane = shape.pane || null;
+                if (spane == null) {
+                    if (pane.name == this.defaultPane) {
+                        visitor(shape);
+                    }
+                } else if (spane == pane.name) {
+                    visitor(shape);
+                }
+            }
+        }
+    }
+
+    shapeExists(shape) {
+        return shape.id in this._shapeIndexes;
+    }
+
+    /**
+     * A new shape is added to the index.
+     */
+    add(shape) {
+        shape.pane = shape.pane || null;
+        // See if shape already has an index assigned to it
+        if (this.shapeExists(shape)) {
+            var index = this._shapeIndexes[shape.id];
+            if (this._allShapes[index] != null) {
+                throw Error("Adding shape again without removing it first");
+            }
+            this._allShapes[index] = shape;
+        } else {
+            this._shapeIndexes[shape.id] = this._allShapes.length;
+            this._allShapes.push(shape);
+        }
+    }
+
+    addShapes(shapes) {
+        for (var i in shapes) {
+            this.add(shapes[i]);
+        }
+    }
+
+    /**
+     * Remove a shape from the index.
+     */
+    remove(shape) {
+        if (!this.shapeExists(shape)) {
+            throw Error("Shape does not exist in this index.");
+        }
+        var index = this._shapeIndexes[shape.id];
+        this._allShapes[index] = null;
+    }
+
+    removeShapes(shapes) {
+        for (var i in shapes) {
+            this.remove(shapes[i]);
+        }
+    }
+
+    /**
+     * Given a coordinate (x,y) returns the topmost shape that contains this point.
+     */
+    getShapeAt(x, y) {
+        var allShapes = this._allShapes;
+        for (var index in allShapes) {
+            var shape = allShapes[index];
+            if (shape != null && shape.containsPoint(x, y)) {
+                return shape;
+            }
+        }
+        return null;
+    }
+
+    reIndex() {
+        var scene = this._scene;
+        if (scene) {
+            for (var index in scene.layers) {
+                var layer = scene.layers[index];
+                this._reIndexShape(layer);
+            }
+        }
+    }
+
+    _reIndexShape(shape) {
+        this.add(shape);
+        for (var index in shape.children) {
+            var child = shape.children[index];
+            this._reIndexShape(child);
+        }
     }
 }

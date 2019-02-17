@@ -59,8 +59,8 @@ export class Pane {
         this._needsRepaint = n;
     }
 
-    get width() { this._canvas.width() }
-    get height() { this._canvas.height() }
+    get width() { return this._canvas.width(); }
+    get height() { return this._canvas.height(); }
 
     clear() {
         this.context.clearRect(0, 0, this._canvas.width(), this._canvas.height());
@@ -119,13 +119,16 @@ export class BGPane extends Pane {
         super(name, stage, canvasId);
     }
 
+    clear() {
+        var ctx = this.context;
+        ctx.fillStyle = "#c6cbd3";
+        ctx.fillRect(0, 0, this.width, this.height);
+    }
+
     repaint(force) {
         if (force || this.needsRepaint) {
-            this.clear();
             var stage = this._stage;
-            var ctx = this.context;
-            ctx.fillStyle = "yellow";
-            ctx.fillRect(20, 30, 100, 200);
+            this.clear();
         }
     }
 }
