@@ -1,4 +1,54 @@
 
+export class EventDispatcher {
+    constructor() {
+        this._handlers = [];
+    }
+
+    addHandler(handler) {
+        for (var i = 0;i < this._handlers.length;i++) {
+            if (this._handlers[i] == handler) 
+                return ;
+        }
+        this._handlers.push(handler);
+    }
+
+    removeHandler(handler) {
+        for (var i = 0;i < this._handlers.length; i++) {
+            if (this._handlers[i] == handler) {
+                this._handlers.splice(i, 1);
+                return
+            }
+        }
+    }
+
+    shouldTrigger(event) {
+        for (var i = 0, L = this._handlers.length;i < L;i++) {
+            var handler = this._handlers[i];
+            if (handler.shouldTrigger(event) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    triggerEvent(event) {
+        for (var i = this._handlers.length - 1;i >= 0;i--) {
+            var handler = this._handlers[i];
+            if (handler.eventTriggered(event) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    dispatchEvent(event, task) {
+        if (this.shouldTrigger(event) == false)
+            return false;
+        task();
+        return this.triggerEvent(event);
+    }
+}
+
 export class EventHandler {
     /**
      * All events are syncronous and follow a "shouldTriggerX" followed by a 

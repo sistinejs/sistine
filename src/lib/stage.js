@@ -518,8 +518,11 @@ class StageTouchHandler {
             // This mode is when we are showing a cross hair for creating an object
             this._editPane.cursor = "crosshair";
             if (this.downX != null) {
-                this._shapeForCreation.setSize(this.currX - this.downX,
-                                             this.currY - this.downY);
+                var minX = Math.min(this.downX, this.currX);
+                var minY = Math.min(this.downY, this.currY);
+                this._shapeForCreation.setLocation(minX, minY);
+                this._shapeForCreation.setSize(Math.abs(this.currX - this.downX),
+                                             Math.abs(this.currY - this.downY));
             }
         } else {
             // Mouse is not primed for "creating" an object

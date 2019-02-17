@@ -92,7 +92,7 @@ export class Shape {
         if (x != this._bounds._x || y != this._bounds._y) {
             var oldValue = [ this._bounds._x, this._bounds._y ];
             var event = new events.PropertyChanged("location", oldValue, [ x, y ]);
-            if (force || this.shouldTrigger(event)) {
+            if (force || this.shouldTrigger(event) != false) {
                 this._bounds._x = x;
                 this._bounds._y = y;
                 this.eventTriggered(event);
@@ -104,7 +104,7 @@ export class Shape {
         if (x != this._bounds.centerX || y != this._bounds.centerY) {
             var oldValue = [ this._bounds.midX, this._bounds.midY ];
             var event = new events.PropertyChanged("center", oldValue, [x, y]);
-            if (force || this.shouldTrigger(event)) {
+            if (force || this.shouldTrigger(event) != false) {
                 this._bounds.midX = x;
                 this._bounds.midY = y;
                 this.eventTriggered(event);
@@ -116,7 +116,7 @@ export class Shape {
         if (w != this._bounds._width || h != this._bounds._height) {
             var oldValue = [ this._bounds._width, this._bounds._height ];
             var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
-            if (force || this.shouldTrigger(event)) {
+            if (force || this.shouldTrigger(event) != false) {
                 var C2 = DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE;
                 if (w > C2 && h > C2) {
                     this._bounds.width = w;
@@ -130,7 +130,7 @@ export class Shape {
     setAngle(theta, force) {
         if (theta != this._configs.angle) {
             var event = new events.PropertyChanged("angle", this.angle, theta);
-            if (force || this.shouldTrigger(event)) {
+            if (force || this.shouldTrigger(event) != false) {
                 this._configs.angle = theta;
                 this.eventTriggered(event);
             }
@@ -141,7 +141,7 @@ export class Shape {
         var oldValue = this._configs[property];
         if (oldValue != newValue) {
             event = new events.PropertyChanged(property, oldValue, newValue);
-            if (force || this.shouldTrigger(event)) {
+            if (force || this.shouldTrigger(event) != false) {
                 this._configs[property] = newValue;
                 this.eventTriggered(event);
             }
@@ -197,7 +197,7 @@ export class Shape {
     add(shape, force) {
         if (shape.parent != this) {
             var event = new events.ShapeAdded(this, shape);
-            if (force || this.shouldTrigger(event)) {
+            if (force || this.shouldTrigger(event) != false) {
                 // remove from old parent - Important!
                 if (shape.removeFromParent()) {
                     this._children.push(shape);
@@ -219,7 +219,7 @@ export class Shape {
     remove(shape, force) {
         if (shape.parent == this) {
             var event = new events.ShapeRemoved(this, shape);
-            if (force || this.shouldTrigger(event)) {
+            if (force || this.shouldTrigger(event) != false) {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == shape) {
                         this._children.splice(i, 1);
