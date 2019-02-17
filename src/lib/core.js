@@ -235,7 +235,7 @@ export class Shape {
 
     removeFromParent() {
         if (this.parent == null) return true;
-        if (this.parent.remove(shape)) {
+        if (this.parent.remove(this)) {
             this.parent = null;
             return true;
         }

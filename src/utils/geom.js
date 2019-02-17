@@ -20,7 +20,7 @@ export function pointOnRect(W, H, theta, out) {
 
 export function pointOnEllipse(A, B, theta, out) {
     while (theta > 2 * Math.PI) theta -= (2 * Math.PI);
-    var epsilon = 0.01;
+    var epsilon = 0.0001;
     if (Math.abs(theta) < epsilon) {
         // close to 0
         out[0] = A;

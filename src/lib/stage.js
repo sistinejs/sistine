@@ -115,6 +115,21 @@ export class Pane {
         return this;
     }
 
+    keydown(handler) {
+        this._canvas.keydown(handler);
+        return this;
+    }
+
+    keyup(handler) {
+        this._canvas.keyup(handler);
+        return this;
+    }
+
+    keypress(handler) {
+        this._canvas.keypress(handler);
+        return this;
+    }
+
     mouseout(handler) {
         this._canvas.mouseout(handler);
         return this;
@@ -395,6 +410,7 @@ class StageTouchHandler {
         this.clickThresholdTime = 500;
 
         this._editPane = this.stage.addPane("edit");
+        this._editPane.element.attr("tabindex", 1);
         this._setupHandlers();
     }
 
@@ -414,6 +430,9 @@ class StageTouchHandler {
         var handler = this;
         this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
         this._editPane.click(function(event) { return handler._onClick(event); });
+        this._editPane.keypress(function(event) { return handler._onKeyPress(event); });
+        this._editPane.keyup(function(event) { return handler._onKeyUp(event); });
+        this._editPane.keydown(function(event) { return handler._onKeyDown(event); });
         this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
         this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
         this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
@@ -432,6 +451,20 @@ class StageTouchHandler {
     _onContextMenu(event) {
         console.log("Context Menu Clicked");
         return false;
+    }
+
+    _onKeyPress(event) { console.log("KeyPress: ", event); }
+    _onKeyDown(event) { console.log("KeyDown: ", event); }
+    _onKeyUp(event) {
+        console.log("KeyUp: ", event);
+        var shapes = this.stage.selection.allShapes;
+        if (event.key == "Backspace") {
+            this.stage.selection.clear();
+            for (var i = 0;i < shapes.length;i++) {
+                shapes[i].removeFromParent();
+            }
+        }
+        this.stage.repaint();
     }
 
     _onClick(event) { }
@@ -559,10 +592,22 @@ class StageTouchHandler {
         }
     }
 
-    _onMouseEnter(event) { }
-    _onMouseLeave(event) { }
-    _onMouseOver(event) { }
-    _onMouseOut(event) { }
+    _onMouseEnter(event) { 
+        console.log("Entered: ", event);
+        this._editPane.element.focus();
+    }
+    _onMouseLeave(event) { 
+        console.log("Left: ", event);
+        this._editPane.element.blur();
+    }
+    _onMouseOver(event) {
+        console.log("Went Over: ", event);
+        this._editPane.element.focus();
+    }
+    _onMouseOut(event) { 
+        console.log("Went Out: ", event);
+        this._editPane.element.blur();
+    }
 }
 
 class Selection {
@@ -576,6 +621,14 @@ class Selection {
 
     get count() {
         return this._count;
+    }
+
+    get allShapes() {
+        var out = [];
+        this.forEach(function(self, shape) {
+            out.push(shape);
+        }, this);
+        return out;
     }
 
     forEach(handler, self) {
