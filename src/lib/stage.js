@@ -54,7 +54,7 @@ export class Pane {
     }
 
     set needsRepaint(n) {
-        return this._needsRepaint = n;
+        this._needsRepaint = n;
     }
 
     get width() { this._canvas.width() }
