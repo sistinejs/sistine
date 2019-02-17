@@ -1,0 +1,131 @@
+
+import * as events from "./events";
+import * as core from "./core";
+import { getcssint } from "../utils/dom"
+
+/**
+ * A Pane is a wrapper over our drawing element/context.   Shapes can be drawn at 
+ * exactly one pane at a time.  Panes help us give the idea of 'depth' in our stage 
+ * so we can different shapes based on their level of intensity (in activity and
+ * refresh rates etc).
+ */
+export class Pane {
+    constructor(name, stage, canvasId) {
+        this._name = name;
+        this._stage = stage;
+        this._needsRepaint = true;
+        this._divId = stage.divId;
+        this._canvasId = canvasId;
+        this._canvas = null;
+        this._parentDiv = $("#" + stage.divId);
+        this._ensureCanvas();
+        this._refCount = 1;
+    }
+
+    acquire() { this._refCount += 1; }
+    release() { this._refCount -= 1; }
+
+    set cursor(c) {
+        c = c || "auto";
+        this._canvas.css("cursor", c);
+    }
+
+    get name() { return this._name; }
+    get divId() { return this._divId; }
+    get canvasId() { return this._canvasId; }
+    get context() { return this._context; }
+    get element() { return this._canvas; }
+
+    /**
+     * Removes this canvas and cleans ourselves up.
+     */
+    remove() {
+        this.element.remove();
+    }
+
+    _ensureCanvas() {
+        var divId = this._divId;
+        this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
+        this._parentDiv.append(this._canvas);
+        this.layout();
+        this._context = this._canvas[0].getContext("2d");
+    }
+
+    get needsRepaint() {
+        return this._needsRepaint;
+    }
+
+    set needsRepaint(n) {
+        this._needsRepaint = n;
+    }
+
+    get width() { this._canvas.width() }
+    get height() { this._canvas.height() }
+
+    clear() {
+        this.context.clearRect(0, 0, this._canvas.width(), this._canvas.height());
+    }
+
+    layout() {
+        var $parent = this._parentDiv;
+        var elem = this._canvas;
+        var horiz_padding = getcssint(elem, "padding-left") +
+                            getcssint(elem, "padding-right") +
+                            getcssint(elem, "margin-left") +
+                            getcssint(elem, "margin-right") +
+                            getcssint($parent, "border-left") +
+                            getcssint($parent, "border-right");
+        var vert_padding  = getcssint(elem, "padding-top") +
+                            getcssint(elem, "padding-bottom") +
+                            getcssint(elem, "margin-top") +
+                            getcssint(elem, "margin-bottom") +
+                            getcssint($parent, "border-top") +
+                            getcssint($parent, "border-bottom");
+        var finalHeight = $parent.height() - vert_padding;
+        var finalWidth = $parent.width() - horiz_padding;
+        elem.height(finalHeight);
+        elem.width(finalWidth);
+        elem[0].width = finalWidth;
+        elem[0].height = finalHeight;
+    }
+}
+
+export class ShapesPane extends Pane {
+    constructor(name, stage, canvasId) {
+        super(name, stage, canvasId);
+    }
+
+    repaint(force) {
+        if (force || this.needsRepaint) {
+            this.clear();
+            var stage = this._stage;
+            var touchHandler = stage.touchHandler;
+            var context = this.context;
+            stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
+                shape.applyTransforms(context);
+                shape.applyStyles(context);
+                shape.draw(context);
+                if (touchHandler != null && stage.selection.contains(shape)) {
+                    shape.drawControls(context);
+                }
+                shape.revertTransforms(context);
+            });
+        }
+    }
+}
+
+export class BGPane extends Pane {
+    constructor(name, stage, canvasId) {
+        super(name, stage, canvasId);
+    }
+
+    repaint(force) {
+        if (force || this.needsRepaint) {
+            this.clear();
+            var stage = this._stage;
+            var ctx = this.context;
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(20, 30, 100, 200);
+        }
+    }
+}

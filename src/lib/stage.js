@@ -1,112 +1,8 @@
 
 import * as events from "./events";
 import * as core from "./core";
+import * as panes from "./panes";
 import { getcssint } from "../utils/dom"
-
-/**
- * A Pane is a wrapper over our drawing element/context.   Shapes can be drawn at 
- * exactly one pane at a time.  Panes help us give the idea of 'depth' in our stage 
- * so we can different shapes based on their level of intensity (in activity and
- * refresh rates etc).
- */
-export class Pane {
-    constructor(name, stage, canvasId) {
-        this._name = name;
-        this._stage = stage;
-        this._needsRepaint = true;
-        this._divId = stage.divId;
-        this._canvasId = canvasId;
-        this._canvas = null;
-        this._parentDiv = $("#" + stage.divId);
-        this._ensureCanvas();
-        this._refCount = 1;
-    }
-
-    acquire() { this._refCount += 1; }
-    release() { this._refCount -= 1; }
-
-    set cursor(c) {
-        c = c || "auto";
-        this._canvas.css("cursor", c);
-    }
-
-    get name() { return this._name; }
-    get divId() { return this._divId; }
-    get canvasId() { return this._canvasId; }
-    get context() { return this._context; }
-    get element() { return this._canvas; }
-
-    /**
-     * Removes this canvas and cleans ourselves up.
-     */
-    remove() {
-        this.element.remove();
-    }
-
-    _ensureCanvas() {
-        var divId = this._divId;
-        this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
-        this._parentDiv.append(this._canvas);
-        this.layout();
-        this._context = this._canvas[0].getContext("2d");
-    }
-
-    get needsRepaint() {
-        return this._needsRepaint;
-    }
-
-    set needsRepaint(n) {
-        this._needsRepaint = n;
-    }
-
-    get width() { this._canvas.width() }
-    get height() { this._canvas.height() }
-
-    clear() {
-        this.context.clearRect(0, 0, this._canvas.width(), this._canvas.height());
-    }
-
-    repaint(force) {
-        if (force || this.needsRepaint) {
-            this.clear();
-            var stage = this._stage;
-            var touchHandler = stage.touchHandler;
-            var context = this.context;
-            stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
-                shape.applyTransforms(context);
-                shape.applyStyles(context);
-                shape.draw(context);
-                if (touchHandler != null && stage.selection.contains(shape)) {
-                    shape.drawControls(context);
-                }
-                shape.revertTransforms(context);
-            });
-        }
-    }
-
-    layout() {
-        var $parent = this._parentDiv;
-        var elem = this._canvas;
-        var horiz_padding = getcssint(elem, "padding-left") +
-                            getcssint(elem, "padding-right") +
-                            getcssint(elem, "margin-left") +
-                            getcssint(elem, "margin-right") +
-                            getcssint($parent, "border-left") +
-                            getcssint($parent, "border-right");
-        var vert_padding  = getcssint(elem, "padding-top") +
-                            getcssint(elem, "padding-bottom") +
-                            getcssint(elem, "margin-top") +
-                            getcssint(elem, "margin-bottom") +
-                            getcssint($parent, "border-top") +
-                            getcssint($parent, "border-bottom");
-        var finalHeight = $parent.height() - vert_padding;
-        var finalWidth = $parent.width() - horiz_padding;
-        elem.height(finalHeight);
-        elem.width(finalWidth);
-        elem[0].width = finalWidth;
-        elem[0].height = finalHeight;
-    }
-}
 
 /**
  * The index structure of a scene lets us re-model how we store and index shapes in a scene
@@ -247,6 +143,10 @@ export class Stage extends events.EventHandler {
         super();
         configs = configs || {};
 
+        // By default stages are not editable
+        this._editable = false;
+        this._showBackground = false;
+
         // The boundaries of the "Stage"
         this._bounds = new core.Bounds();
         this._zoom = 1.0;
@@ -259,8 +159,9 @@ export class Stage extends events.EventHandler {
         this._shapeIndex.defaultPane = "main";
 
         // Track mouse/touch drag events
-        this._editable = false;
         this._panes = [];
+
+        // Main panel where shapes are drawn at rest
         this._mainPane = this.acquirePane("main");
         this.scene.addHandler(this);
 
@@ -271,6 +172,22 @@ export class Stage extends events.EventHandler {
     get element() {
         console.log("ParentDiv: ", this._parentDiv);
         return this._parentDiv;
+    }
+
+    get showBackground() {
+        return this._showBackground;
+    }
+
+    set showBackground(show) {
+        if (this._showBackground != show) {
+            this._showBackground = show;
+            if (show) {
+                this.bgHandler = new StageBackgroundHandler(this);
+            } else {
+                this.bgHandler.detach();
+                this.bgHandler.null;
+            }
+        }
     }
 
     get isEditable() {
@@ -292,10 +209,11 @@ export class Stage extends events.EventHandler {
         }
     }
 
-    acquirePane(name) {
+    acquirePane(name, PaneClass) {
+        PaneClass = PaneClass || panes.ShapesPane;
         var pane = this.getPane(name);
         if (pane == null) {
-            pane = new Pane(name, this, name + "pane_" + this.divId);
+            pane = new PaneClass(name, this, name + "pane_" + this.divId);
             this._panes.push(pane);
             this.layout();
         } else {
@@ -321,6 +239,33 @@ export class Stage extends events.EventHandler {
         for (var i = this._panes.length - 1; i >= 0;i--)  {
             if (this._panes[i].name == name) {
                 return this._panes[i];
+            }
+        }
+    }
+
+    get numPanes() {
+        return this._panes.length;
+    }
+
+    indexOfPane(pane) {
+        for (var i = this._panes.length;i >= 0;i--) {
+            if (this._panes[i] == pane) return i;
+        }
+        return -1;
+    }
+
+    movePane(pane, newIndex) {
+        var currIndex = this.indexOfPane(pane);
+        if (newIndex < 0) newIndex = this._panes.length;
+        if (currIndex >= 0 && currIndex != newIndex) {
+            this._panes.splice(currIndex, 1);
+            this._panes.splice(newIndex, 0, pane);
+            var elem = pane.element.detach();
+            if (newIndex >= this.element.children().length) {
+                this.element.append(pane.element);
+            } else {
+                var child = $(this.element.children()[newIndex]);
+                pane.element.insertBefore(child);
             }
         }
     }
@@ -387,6 +332,7 @@ class StageKeyHandler {
 
         this._editPane = this.stage.acquirePane("edit");
         this._editPane.element.attr("tabindex", 1);
+        this.stage.movePane(this._editPane, -1);
 
         var handler = this;
         this.stage.keypress(function(event) { return handler._onKeyPress(event); });
@@ -433,6 +379,75 @@ class StageKeyHandler {
         this.stage.repaint();
     }
 }
+
+class StageBackgroundHandler {
+    constructor(stage) {
+        this.stage = stage;
+        this.downX = null;
+        this.downY = null;
+        this.downTime = 0;
+        this.currX = null;
+        this.currY = null;
+
+        // Max time before a mouse down goes from a "click" to a "hold"
+        this.clickThresholdTime = 500;
+
+        this._bgPane = this.stage.acquirePane("bg", panes.BGPane);
+        this.stage.movePane(this._bgPane, 0);
+
+        var handler = this;
+        this.stage.contextmenu(function(event) { return handler._onContextMenu(event); });
+        this.stage.click(function(event) { return handler._onClick(event); });
+        this.stage.mousedown(function(event) { return handler._onMouseDown(event); });
+        this.stage.mouseup(function(event) { return handler._onMouseUp(event); });
+        this.stage.mouseover(function(event) { return handler._onMouseOver(event); });
+        this.stage.mouseout(function(event) { return handler._onMouseOut(event); });
+        this.stage.mouseenter(function(event) { return handler._onMouseEnter(event); });
+        this.stage.mouseleave(function(event) { return handler._onMouseLeave(event); });
+        this.stage.mousemove(function(event) { return handler._onMouseMove(event); });
+    }
+
+    detach() {
+        this.stage.releasePane("bg");
+    }
+
+    ////  Local handling of mouse/touch events
+    _onContextMenu(event) {
+        console.log("BG Context Menu Clicked");
+        return false;
+    }
+
+    _onClick(event) { }
+
+    _onMouseDown(event) {
+        this.currX = this.downX = event.offsetX;
+        this.currY = this.downY = event.offsetY;
+        this.downTime = event.timeStamp;
+    }
+
+    _onMouseUp(event) {
+        this.currX = event.offsetX;
+        this.currY = event.offsetY;
+        var currTime = event.timeStamp;
+        var timeDelta = currTime - this.downTime;
+        var isClick = timeDelta <= this.clickThresholdTime;
+        this.downTime = null;
+        this.downX = null;
+        this.downY = null;
+    }
+
+    _onMouseMove(event) { 
+        this.currX = event.offsetX;
+        this.currY = event.offsetY;
+        console.log("BG: ", this.currX, this.currY);
+    }
+
+    _onMouseEnter(event) { }
+    _onMouseLeave(event) { }
+    _onMouseOver(event) { }
+    _onMouseOut(event) { }
+}
+
 
 class StageTouchHandler {
     constructor(stage) {
