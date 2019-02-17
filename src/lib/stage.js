@@ -19,7 +19,11 @@ export class Pane {
         this._canvas = null;
         this._zoom = 1.0;
         this._ensureCanvas();
+        this._refCount = 1;
     }
+
+    acquire() { this._refCount += 1; }
+    release() { this._refCount -= 1; }
 
     set cursor(c) {
         c = c || "auto";
@@ -313,7 +317,7 @@ export class Stage extends events.EventHandler {
         // Track mouse/touch drag events
         this._editable = false;
         this._panes = [];
-        this.addPane("main");
+        this._mainPane = this.acquirePane("main");
         this.scene.addHandler(this);
 
         // Information regarding Selections
@@ -329,27 +333,37 @@ export class Stage extends events.EventHandler {
             this._editable = editable;
             if (editable) {
                 this.touchHandler = new StageTouchHandler(this);
+                this.keyHandler = new StageKeyHandler(this);
             } else {
+                this.keyHandler.detach();
+                this.keyHandler.null;
                 this.touchHandler.detach();
                 this.touchHandler.null;
             }
         }
     }
 
-    addPane(name) {
-        var newPane = new Pane(name, this, name + "pane_" + this.divId);
-        this._panes.push(newPane);
-        this.layout();
-        return newPane;
+    acquirePane(name) {
+        var pane = this.getPane(name);
+        if (pane == null) {
+            pane = new Pane(name, this, name + "pane_" + this.divId);
+            this._panes.push(pane);
+            this.layout();
+        } else {
+            pane.acquire();
+        }
+        return pane;
     }
 
-    removePane(name) {
+    releasePane(name) {
         for (var i = this._panes.length;i >= 0;i--) {
             var pane = this._panes[i];
             if (pane.name == name) {
-                pane.remove();
-                this._panes.splice(i, 1);
-                return
+                if ( ! pane.release() ) {
+                    pane.remove();
+                    this._panes.splice(i, 1);
+                    return ;
+                }
             }
         }
     }
@@ -395,6 +409,41 @@ export class Stage extends events.EventHandler {
     }
 }
 
+class StageKeyHandler {
+    constructor(stage) {
+        this.stage = stage;
+
+        this._editPane = this.stage.acquirePane("edit");
+        this._editPane.element.attr("tabindex", 1);
+        this._setupHandlers();
+    }
+
+    detach() {
+        this.stage.releasePane("edit");
+    }
+
+    _setupHandlers() {
+        var handler = this;
+        this._editPane.keypress(function(event) { return handler._onKeyPress(event); });
+        this._editPane.keyup(function(event) { return handler._onKeyUp(event); });
+        this._editPane.keydown(function(event) { return handler._onKeyDown(event); });
+    }
+
+    _onKeyPress(event) { console.log("KeyPress: ", event); }
+    _onKeyDown(event) { console.log("KeyDown: ", event); }
+    _onKeyUp(event) {
+        console.log("KeyUp: ", event);
+        var shapes = this.stage.selection.allShapes;
+        if (event.key == "Backspace") {
+            this.stage.selection.clear();
+            for (var i = 0;i < shapes.length;i++) {
+                shapes[i].removeFromParent();
+            }
+        }
+        this.stage.repaint();
+    }
+}
+
 class StageTouchHandler {
     constructor(stage) {
         this.stage = stage;
@@ -409,13 +458,12 @@ class StageTouchHandler {
         // Max time before a mouse down goes from a "click" to a "hold"
         this.clickThresholdTime = 500;
 
-        this._editPane = this.stage.addPane("edit");
-        this._editPane.element.attr("tabindex", 1);
+        this._editPane = this.stage.acquirePane("edit");
         this._setupHandlers();
     }
 
     detach() {
-        this.stage.removePane("edit");
+        this.stage.releasePane("edit");
     }
 
     get shapeForCreation() {
@@ -430,9 +478,6 @@ class StageTouchHandler {
         var handler = this;
         this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
         this._editPane.click(function(event) { return handler._onClick(event); });
-        this._editPane.keypress(function(event) { return handler._onKeyPress(event); });
-        this._editPane.keyup(function(event) { return handler._onKeyUp(event); });
-        this._editPane.keydown(function(event) { return handler._onKeyDown(event); });
         this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
         this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
         this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
@@ -451,20 +496,6 @@ class StageTouchHandler {
     _onContextMenu(event) {
         console.log("Context Menu Clicked");
         return false;
-    }
-
-    _onKeyPress(event) { console.log("KeyPress: ", event); }
-    _onKeyDown(event) { console.log("KeyDown: ", event); }
-    _onKeyUp(event) {
-        console.log("KeyUp: ", event);
-        var shapes = this.stage.selection.allShapes;
-        if (event.key == "Backspace") {
-            this.stage.selection.clear();
-            for (var i = 0;i < shapes.length;i++) {
-                shapes[i].removeFromParent();
-            }
-        }
-        this.stage.repaint();
     }
 
     _onClick(event) { }
