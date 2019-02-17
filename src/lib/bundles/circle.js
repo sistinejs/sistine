@@ -18,6 +18,11 @@ export class CircleShape extends core.Shape {
 
     get radius() { return this.bounds.innerRadius; }
 
+    setSize(w, h, force) {
+        w = h = Math.min(w, h);
+        return super.setSize(w, h, force);
+    }
+
     draw(ctx) {
         var lw = this.lineWidth + 1;
         var x = this.bounds.x + lw;
