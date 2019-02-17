@@ -415,26 +415,44 @@ class StageKeyHandler {
 
         this._editPane = this.stage.acquirePane("edit");
         this._editPane.element.attr("tabindex", 1);
-        this._setupHandlers();
-    }
 
-    detach() {
-        this.stage.releasePane("edit");
-    }
-
-    _setupHandlers() {
         var handler = this;
         this._editPane.keypress(function(event) { return handler._onKeyPress(event); });
         this._editPane.keyup(function(event) { return handler._onKeyUp(event); });
         this._editPane.keydown(function(event) { return handler._onKeyDown(event); });
     }
 
+    detach() {
+        this.stage.releasePane("edit");
+    }
+
     _onKeyPress(event) { console.log("KeyPress: ", event); }
-    _onKeyDown(event) { console.log("KeyDown: ", event); }
+    _onKeyDown(event) { 
+        console.log("KeyDown: ", event); 
+        if (event.key == "ArrowLeft") {
+            this.stage.selection.forEach(function(self, shape) {
+                shape.move(-1, 0);
+            }, this);
+        } else if (event.key == "ArrowUp") {
+            this.stage.selection.forEach(function(self, shape) {
+                shape.move(0, -1);
+            }, this);
+        } else if (event.key == "ArrowDown") {
+            this.stage.selection.forEach(function(self, shape) {
+                shape.move(0, 1);
+            }, this);
+        } else if (event.key == "ArrowRight") {
+            this.stage.selection.forEach(function(self, shape) {
+                shape.move(1, 0);
+            }, this);
+        }
+        this.stage.repaint();
+    }
+
     _onKeyUp(event) {
         console.log("KeyUp: ", event);
-        var shapes = this.stage.selection.allShapes;
         if (event.key == "Backspace") {
+            var shapes = this.stage.selection.allShapes;
             this.stage.selection.clear();
             for (var i = 0;i < shapes.length;i++) {
                 shapes[i].removeFromParent();
@@ -459,7 +477,17 @@ class StageTouchHandler {
         this.clickThresholdTime = 500;
 
         this._editPane = this.stage.acquirePane("edit");
-        this._setupHandlers();
+
+        var handler = this;
+        this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
+        this._editPane.click(function(event) { return handler._onClick(event); });
+        this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
+        this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
+        this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
+        this._editPane.mouseout(function(event) { return handler._onMouseOut(event); });
+        this._editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
+        this._editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
+        this._editPane.mousemove(function(event) { return handler._onMouseMove(event); });
     }
 
     detach() {
@@ -472,19 +500,6 @@ class StageTouchHandler {
 
     set shapeForCreation(s) {
         this._shapeForCreation = s;
-    }
-
-    _setupHandlers() {
-        var handler = this;
-        this._editPane.contextmenu(function(event) { return handler._onContextMenu(event); });
-        this._editPane.click(function(event) { return handler._onClick(event); });
-        this._editPane.mousedown(function(event) { return handler._onMouseDown(event); });
-        this._editPane.mouseup(function(event) { return handler._onMouseUp(event); });
-        this._editPane.mouseover(function(event) { return handler._onMouseOver(event); });
-        this._editPane.mouseout(function(event) { return handler._onMouseOut(event); });
-        this._editPane.mouseenter(function(event) { return handler._onMouseEnter(event); });
-        this._editPane.mouseleave(function(event) { return handler._onMouseLeave(event); });
-        this._editPane.mousemove(function(event) { return handler._onMouseMove(event); });
     }
 
     _selectingMultipleShapes(event) {
