@@ -87,6 +87,7 @@ export class Pane {
         elem.width(finalWidth);
         elem[0].width = finalWidth;
         elem[0].height = finalHeight;
+        this.needsRepaint = true;
     }
 }
 
@@ -110,6 +111,7 @@ export class ShapesPane extends Pane {
                 }
                 shape.revertTransforms(context);
             });
+            this.needsRepaint = false;
         }
     }
 }
@@ -117,6 +119,24 @@ export class ShapesPane extends Pane {
 export class BGPane extends Pane {
     constructor(name, stage, canvasId) {
         super(name, stage, canvasId);
+        // Space between ruler lines on the background
+        this._lineSpacing = 50;
+        this._lineColor = "darkGray";
+    }
+
+    get lineSpacing() { return this._lineSpacing; }
+    get lineColor() { return this._lineColor; }
+    set lineSpacing(value) {
+        if (this._lineSpacing != value) {
+            this._lineSpacing = value;
+            this.needsRepaint = true;
+        }
+    }
+    set lineColor(value) {
+        if (this._lineColor != value) {
+            this._lineColor = value;
+            this.needsRepaint = true;
+        }
     }
 
     clear() {
@@ -129,6 +149,23 @@ export class BGPane extends Pane {
         if (force || this.needsRepaint) {
             var stage = this._stage;
             this.clear();
+            var ctx = this.context;
+            var width = this.width;
+            var height = this.height;
+            var space = this.lineSpacing;
+            ctx.strokeStyle = this.lineColor;
+
+            ctx.beginPath()
+            for (var i = 10; i < height; i += space) {
+                ctx.moveTo(0, i);
+                ctx.lineTo(width, i);
+		    }
+            for (var i = 10; i < width; i += space) {
+		        ctx.moveTo(i, 0);
+		        ctx.lineTo(i,width/2);
+		    }
+            ctx.stroke();
+            this.needsRepaint = false;
         }
     }
 }

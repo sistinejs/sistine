@@ -112,6 +112,7 @@ export class Stage extends events.EventHandler {
                 return this._panes[i];
             }
         }
+        return null;
     }
 
     get numPanes() {
@@ -158,19 +159,37 @@ export class Stage extends events.EventHandler {
         this.repaint();
     }
 
-    repaint() {
-        for (var i = this._panes.length - 1; i >= 0;i--) this._panes[i].repaint();
+    repaint(force) {
+        for (var i = this._panes.length - 1; i >= 0;i--)
+            this._panes[i].repaint(force);
+    }
+
+    setShapePane(shape, pane) {
+        if (shape.pane != pane) {
+            this.paneNeedsRepaint(shape.pane);
+            this.shapeIndex.setPane(shape, "edit");
+            this.paneNeedsRepaint(shape.pane);
+        }
     }
 
     eventTriggered(event) {
         // console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
             this.shapeIndex.add(event.shape);
+            this.paneNeedsRepaint(event.shape.pane)
         } else if (event.name == "ShapeRemoved") {
             this.shapeIndex.remove(event.shape);
+            this.paneNeedsRepaint(event.shape.pane)
         } else if (event.name == "PropertyChanged") {
+            this.paneNeedsRepaint(event.source.pane)
         }
         this.repaint();
+    }
+
+    paneNeedsRepaint(name) {
+        var pane = this.getPane(name);
+        if (pane == null) pane = this._mainPane;
+        pane.needsRepaint = true;
     }
 
     _setupHandler(element, method, handler) {
@@ -553,14 +572,14 @@ class Selection {
         }
         this.shapes[shape.id] = shape;
         this.savedInfos[shape.id] = shape.controller.snapshotFor();
-        this.stage.shapeIndex.setPane(shape, "edit");
+        this.stage.setShapePane(shape, "edit");
     }
 
     remove(shape) {
         if ( shape.id in this.shapes ) {
             this._count --;
         }
-        this.stage.shapeIndex.setPane(shape, "main");
+        this.stage.setShapePane(shape, "main");
         delete this.shapes[shape.id];
         delete this.savedInfos[shape.id];
     }
@@ -590,8 +609,7 @@ class Selection {
     clear() {
         var shapeIndex = this.stage.shapeIndex;
         for (var shapeId in this.shapes) {
-            var shape = this.shapes[shapeId];
-            shapeIndex.setPane(shape, "main");
+            this.stage.setShapePane(this.shapes[shapeId], "main");
         }
         this.savedInfos = {};
         this.shapes = {};
@@ -631,8 +649,9 @@ export class ShapeIndex {
     }
 
     setPane(shape, pane) {
-        if (shape != null)
-            shape.pane = pane.name;
+        if (shape != null && shape.pane != pane) {
+            shape.pane = pane;
+        }
     }
 
     /**
@@ -675,6 +694,7 @@ export class ShapeIndex {
             this._shapeIndexes[shape.id] = this._allShapes.length;
             this._allShapes.push(shape);
         }
+        shape.pane = shape.pane || this.defaultPane;
     }
 
     addShapes(shapes) {
