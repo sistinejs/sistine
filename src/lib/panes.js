@@ -152,17 +152,24 @@ export class BGPane extends Pane {
             var ctx = this.context;
             var width = this.width;
             var height = this.height;
-            var space = this.lineSpacing;
+            var space = this.lineSpacing * stage.zoom;
             ctx.strokeStyle = this.lineColor;
 
-            ctx.beginPath()
-            for (var i = 10; i < height; i += space) {
-                ctx.moveTo(0, i);
-                ctx.lineTo(width, i);
+            ctx.beginPath();
+            var startX = -stage.zoom * stage.offsetX;
+            var startY = -stage.zoom * stage.offsetY;
+            // Horiz lines
+            for (var currY = startY; currY < height; currY += space) {
+                if (currY > 0) {
+                    ctx.moveTo(0, currY);
+                    ctx.lineTo(width, currY);
+                }
 		    }
-            for (var i = 10; i < width; i += space) {
-		        ctx.moveTo(i, 0);
-		        ctx.lineTo(i,width/2);
+            for (var currX = startX; currX < width; currX += space) {
+                if (currX > 0) {
+                    ctx.moveTo(currX, 0);
+                    ctx.lineTo(currX, height);
+                }
 		    }
             ctx.stroke();
             this.needsRepaint = false;

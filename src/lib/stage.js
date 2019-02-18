@@ -13,13 +13,17 @@ export class Stage extends events.EventHandler {
     constructor(divId, scene, configs) {
         super();
         configs = configs || {};
+        configs.x = configs.x || 0;
+        configs.y = configs.y || 0;
+        configs.width = configs.width || 1000;
+        configs.height = configs.height || 1000;
 
         // By default stages are not editable
         this._editable = false;
         this._showBackground = false;
 
         // The boundaries of the "Stage"
-        this._bounds = new core.Bounds();
+        this._bounds = new core.Bounds(configs);
         this._zoom = 1.0;
         this._offsetX = this._offsetY = 0;
 
@@ -38,6 +42,38 @@ export class Stage extends events.EventHandler {
 
         // Information regarding Selections
         this.selection = new Selection(this);
+    }
+
+    get bounds() { return this._bounds; }
+
+    get zoom() { return this._zoom; }
+    setZoom(z) {
+        if (z < 0) z = 1;
+        if (z > 10) z = 10;
+        if (this._zoom != z) {
+            this._zoom = z;
+            this.paneNeedsRepaint(null);
+            this.repaint();
+        }
+    }
+
+    get offsetX() { return this._offsetX; }
+    get offsetY() { return this._offsetY; }
+    setOffset(x, y) {
+        if (x < this._bounds.x) x = this._bounds.x;
+        if (y < this._bounds.y) y = this._bounds.y;
+        if (x > this._bounds.right) {
+            x = this._bounds.right;
+        }
+        if (y > this._bounds.bottom) {
+            y = this._bounds.bottom;
+        }
+        if (this._offsetX != x || this._offsetY != y) {
+            this._offsetX = x;
+            this._offsetY = y;
+            this.paneNeedsRepaint(null);
+            this.repaint();
+        }
     }
 
     get element() {
@@ -187,9 +223,17 @@ export class Stage extends events.EventHandler {
     }
 
     paneNeedsRepaint(name) {
-        var pane = this.getPane(name);
-        if (pane == null) pane = this._mainPane;
-        pane.needsRepaint = true;
+        name = name || null;
+        if (name == null) {
+            // all panes
+            for (var i = 0;i < this._panes.length;i++) {
+                this._panes[i].needsRepaint = true;
+            }
+        } else {
+            var pane = this.getPane(name);
+            if (pane == null) pane = this._mainPane;
+            pane.needsRepaint = true;
+        }
     }
 
     _setupHandler(element, method, handler) {
@@ -468,7 +512,8 @@ class StageTouchHandler {
     _onMouseMove(event) { 
         this.currX = event.offsetX;
         this.currY = event.offsetY;
-        var selection = this.stage.selection;
+        var stage = this.stage;
+        var selection = stage.selection;
         console.log(this.currX, this.currY);
         if (this._shapeForCreation != null) {
             // This mode is when we are showing a cross hair for creating an object
@@ -502,7 +547,7 @@ class StageTouchHandler {
                                                      self.downX, self.downY,
                                                      self.currX, self.currY);
                 }, this);
-                this._editPane.repaint();
+                stage.paneNeedsRepaint("edit");
                 if ( ! shapesFound ) {
                     // Just draw a "selection rectangle"
                     var x = Math.min(this.downX, this.currX);
