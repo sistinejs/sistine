@@ -52,7 +52,9 @@ export class Stage extends events.EventHandler {
         if (z > 10) z = 10;
         if (this._zoom != z) {
             this._zoom = z;
-            this.paneNeedsRepaint(null);
+            this._panes.forEach(function(pane, index) {
+                pane.setZoom(z);
+            });
             this.repaint();
         }
     }
@@ -71,7 +73,9 @@ export class Stage extends events.EventHandler {
         if (this._offsetX != x || this._offsetY != y) {
             this._offsetX = x;
             this._offsetY = y;
-            this.paneNeedsRepaint(null);
+            this._panes.forEach(function(pane, index) {
+                pane.setOffset(x, y);
+            });
             this.repaint();
         }
     }

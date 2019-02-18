@@ -17,9 +17,39 @@ export class Pane {
         this._divId = stage.divId;
         this._canvasId = canvasId;
         this._canvas = null;
+        this._zoom = 1.0;
+        this._offsetX = this._offsetY = 0;
         this._parentDiv = $("#" + stage.divId);
         this._ensureCanvas();
         this._refCount = 1;
+    }
+
+    get zoom() { return this._zoom; }
+    setZoom(z) {
+        if (z < 0) z = 1;
+        if (z > 10) z = 10;
+        if (this._zoom != z) {
+            this._zoom = z;
+            this.needsRepaint = true;
+        }
+    }
+
+    get offsetX() { return this._offsetX; }
+    get offsetY() { return this._offsetY; }
+    setOffset(x, y) {
+        if (x < this._bounds.x) x = this._bounds.x;
+        if (y < this._bounds.y) y = this._bounds.y;
+        if (x > this._bounds.right) {
+            x = this._bounds.right;
+        }
+        if (y > this._bounds.bottom) {
+            y = this._bounds.bottom;
+        }
+        if (this._offsetX != x || this._offsetY != y) {
+            this._offsetX = x;
+            this._offsetY = y;
+            this.needsRepaint = true;
+        }
     }
 
     acquire() { this._refCount += 1; }
@@ -152,12 +182,13 @@ export class BGPane extends Pane {
             var ctx = this.context;
             var width = this.width;
             var height = this.height;
-            var space = this.lineSpacing * stage.zoom;
+            var zoom = this.zoom;
+            var space = this.lineSpacing * zoom;
             ctx.strokeStyle = this.lineColor;
 
             ctx.beginPath();
-            var startX = -stage.zoom * stage.offsetX;
-            var startY = -stage.zoom * stage.offsetY;
+            var startX = -zoom * this.offsetX;
+            var startY = -zoom * this.offsetY;
             // Horiz lines
             for (var currY = startY; currY < height; currY += space) {
                 if (currY > 0) {
