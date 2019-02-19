@@ -14,7 +14,7 @@ module.exports = (env, options) => {
             template: path.resolve(__dirname, 'src/demo/index.html')
         }),
         new HtmlWebpackIncludeAssetsPlugin({
-            assets: [ './src/demo/index.css' ],
+            assets: [ './src/demo/demo.css' ],
             append: true
         }),
         new webpack.ProvidePlugin({

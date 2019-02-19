@@ -12,7 +12,36 @@
             crossorigin="anonymous"></script>
 </head>
 <body>
-    <div id="header_div"></div>
+    <div id="header_div">
+        <div class = "toolbar_button_group">
+            <button class = "toolbar_button" id = "tb_group_shapes">Group</button>
+            <button class = "toolbar_button" id = "tb_ungroup_shapes">Ungroup</button>
+            <button class = "toolbar_button" id = "tb_bring_to_front">Bring to Front</button>
+            <button class = "toolbar_button" id = "tb_send_to_back">Send to Back</button>
+            <button class = "toolbar_button" id = "tb_bring_forward">Bring Forward</button>
+            <button class = "toolbar_button" id = "tb_send_backward">Send Backward</button>
+        </div>
+        <div class = "toolbar_button_group">
+            <button class = "toolbar_button" id = "tb_zoom_in">Zoom In</button>
+            <button class = "toolbar_button" id = "tb_zoom_out">Zoom Out</button>
+        </div>
+        <div class = "toolbar_button_group">
+            <button class = "toolbar_button" id = "tb_undo">Undo</button>
+            <button class = "toolbar_button" id = "tb_redo">Redo</button>
+            <button class = "toolbar_button" id = "tb_cut">Cut</button>
+            <button class = "toolbar_button" id = "tb_copy">Copy</button>
+            <button class = "toolbar_button" id = "tb_paste">Paste</button>
+        </div>
+        <div class = "toolbar_button_group">
+            <button class = "toolbar_button" id = "tb_pointer">Pointer</button>
+            <button class = "toolbar_button" id = "tb_hand_tool">Hand Tool</button>
+            <button class = "toolbar_button" id = "tb_line_tool">Line Tool</button>
+            <button class = "toolbar_button" id = "tb_line_width">Line Width</button>
+        </div>
+        <div class = "toolbar_button_group">
+            <button class = "toolbar_button" id = "tb_share">Share</button>
+        </div>
+    </div>
     <div id="center_div">
         <div id="toolpanel_div">
             <div id = "toolbar_accordian">
@@ -109,6 +138,7 @@
     $(document).ready(function() {
         setupElements();
         loadComponents();
+        setupHeaderToolbar();
     });
 
     function setupElements() {
@@ -241,12 +271,30 @@
             }).click(function(event) {
                 // Add the shape on the canvas at the center
                 var id = event.currentTarget.id.replace(/mainpane_holder_/, "");
-                addShapeForToolbar(id);
+                addShapeFromToolbar(id);
             });
         });
     }
 
-    function addShapeForToolbar(objid) {
+    function setupHeaderToolbar() {
+        var toolbar_buttons = $(".toolbar_button");
+        toolbar_buttons.each(function(index, tbbutton) {
+            var $tbbutton = $(tbbutton);
+            var label = $tbbutton.text();
+            $tbbutton.empty()
+            $tbbutton.attr("title", label);
+
+            var buttonId = tbbutton.id.replace(/tb_/, "");
+            var iconId = "tb_icon_" + buttonId;
+            var buttonImage = $("<img src = '" + "./src/demo/icons/" + buttonId + ".png' />");
+            $tbbutton.button({
+                iconPosition: "top"
+            }).append(buttonImage);
+            Sistine.utils.dom.fillChildComponent(buttonImage);
+        });
+    }
+
+    function addShapeFromToolbar(objid) {
         var DefaultBundle = Sistine.registry.DefaultBundle;
         console.log("Toolbar Clicked: " + objid);
         theStage.touchHandler.shapeForCreation = DefaultBundle[objid].newShape();

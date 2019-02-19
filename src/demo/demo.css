@@ -1,0 +1,146 @@
+
+:root {
+    --header-height: 30px;
+    --toolpanel-width: 320px;
+    --footer-height: 0px;
+    --split-bar-width: 10px;
+    --shape-icon-size: 50px;
+}
+
+#header_div {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: var(--header-height);
+    border: solid 0px green;
+}
+
+.toolbar_button_group {
+    float: left;
+    height: 100%;
+    border-right : solid 2px darkGray;
+    padding-left : 10px;
+    padding-right : 10px;
+}
+
+.toolbar_button {
+    float: left;
+    outline-width: 0px !important;
+    padding: 0px;
+    height: var(--header-height);
+    width: var(--header-height);
+}
+
+#footer_div {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: var(--footer-height);
+    border: solid 0px blue;
+}
+
+#center_div {
+    position: absolute;
+    top: var(--header-height);
+    bottom: var(--footer-height);
+    left: 0px;
+    right: 0px;
+    border: solid 0px green;
+}
+
+#splitbar {
+    position: absolute;
+    cursor: ew-resize;
+    top: 0px;
+    bottom: 0px;
+    left: var(--toolpanel-width);
+    width: var(--split-bar-width);
+    background-color: gray;
+}
+
+#toolpanel_div {
+    position: absolute;
+    border: solid 1px black;
+    left: 0px;
+    width: var(--toolpanel-width);
+    top: 0;
+    bottom: 0;
+    overflow: scroll;
+}
+
+#toolbar_accordian {
+    position: absolute;
+    border: solid 0px brown;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+}
+
+#stage_div {
+    position: absolute;
+    border: solid 1px black;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.shape_icon {
+    float: left;
+    margin: 5px;
+    width: var(--shape-icon-size);
+    height: var(--shape-icon-size);
+    border: solid 0px blue;
+}
+
+.shape_icon_canvas {
+    width: var(--shape-icon-size);
+    height: var(--shape-icon-size);
+    padding: 2px;
+    margin: 2px;
+    border: solid 0px red;
+}
+
+.toolbar_section_div {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.ui-accordion .ui-accordion-content {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.toolbar_button_highlighted {
+    border: solid 2px gray;
+}
+
+/* Toolbar Button Icons */
+.tb_icon_bring_forward { background-image: url(./src/demo/icons/bring_forward.png); }
+.tb_icon_bring_to_front { background-image: url(./src/demo/icons/bring_to_front.png); }
+.tb_icon_color_wheel { background-image: url(./src/demo/icons/color_wheel.png); }
+.tb_icon_comment { background-image: url(./src/demo/icons/comment.png); }
+.tb_icon_copy { background-image: url(./src/demo/icons/copy.png); }
+.tb_icon_cut { background-image: url(./src/demo/icons/cut.png); }
+.tb_icon_group_shapes { background-image: url(./src/demo/icons/group_shapes.png); }
+.tb_icon_hand_tool { background-image: url(./src/demo/icons/hand_tool.png); }
+.tb_icon_line_tool { background-image: url(./src/demo/icons/line_tool.png); }
+.tb_icon_line_width { background-image: url(./src/demo/icons/line_width.png); }
+.tb_icon_link { background-image: url(./src/demo/icons/link.png); }
+.tb_icon_redo { background-image: url(./src/demo/icons/redo.png); }
+.tb_icon_save { background-image: url(./src/demo/icons/save.png); }
+.tb_icon_search { background-image: url(./src/demo/icons/search.png); }
+.tb_icon_send_backward { background-image: url(./src/demo/icons/send_backward.png); }
+.tb_icon_send_to_back { background-image: url(./src/demo/icons/send_to_back.png); }
+.tb_icon_settings { background-image: url(./src/demo/icons/settings.png); }
+.tb_icon_share { background-image: url(./src/demo/icons/share.png); }
+.tb_icon_undo { background-image: url(./src/demo/icons/undo.png); }
+.tb_icon_ungroup_shapes { background-image: url(./src/demo/icons/ungroup_shapes.png); }
+.tb_icon_zoom_in { background-image: url(./src/demo/icons/zoom_in.png); }
+.tb_icon_zoom_out { background-image: url(./src/demo/icons/zoom_out.png); }

@@ -137,7 +137,6 @@ export class Pane {
     clear(ctx) {
         var p1 = this.toWorld(0, 0);
         var p2 = this.toWorld(this.width, this.height);
-        console.log("BG Size: ", this.width, this.height, ", P1: ", p1.x, p1.y, ", P2: ", p2.x, p2.y);
         var fillStyle = this.get("fillStyle");
         if (fillStyle) {
             ctx.fillStyle = fillStyle;
