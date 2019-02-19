@@ -4,6 +4,13 @@ import * as core from "./core";
 import * as panes from "./panes";
 import { getcssint } from "../utils/dom"
 
+export class TouchMode {
+    constructor(mode, data) {
+        this.mode = mode;
+        this.data = data;
+    }
+}
+
 /**
  * The stage model if where all layers and shapes are managed. 
  * As far as possible this does not perform any view related operations as 
@@ -42,6 +49,9 @@ export class Stage extends events.EventHandler {
 
         // Information regarding Selections
         this.selection = new Selection(this);
+
+        // The touch mode passes information on what each of the handlers are ok to perform
+        this.touchMode = null;
     }
 
     get bounds() { return this._bounds; }
@@ -255,6 +265,7 @@ export class Stage extends events.EventHandler {
     mouseup(handler) { return this._setupHandler(this.element, "mouseup", handler); }
     mousemove(handler) { return this._setupHandler(this.element, "mousemove", handler); }
     contextmenu(handler) { return this._setupHandler(this.element, "contextmenu", handler); }
+    scroll(handler) { return this._setupHandler(this.element, "scroll", handler); }
 }
 
 class StageKeyHandler {
@@ -334,6 +345,7 @@ class StageBackgroundHandler {
         this.stage.mouseenter(function(event) { return handler._onMouseEnter(event); });
         this.stage.mouseleave(function(event) { return handler._onMouseLeave(event); });
         this.stage.mousemove(function(event) { return handler._onMouseMove(event); });
+        this.stage.scroll(function(event) { return handler._onScroll(event); });
     }
 
     detach() {
@@ -344,6 +356,10 @@ class StageBackgroundHandler {
     _onContextMenu(event) {
         console.log("BG Context Menu Clicked");
         return false;
+    }
+
+    _onScroll(event) {
+        console.log("Scroll Event: ", event);
     }
 
     _onClick(event) { }
