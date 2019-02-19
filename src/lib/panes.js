@@ -62,15 +62,15 @@ export class Pane {
      */
     toScreen(x, y, result) {
         result = result || new core.Point(x, y);
-        result.x = this.zoom * (result.x - this.offset.x);
-        result.y = this.zoom * (result.y - this.offset.y);
+        result.x = this.zoom * (x - this.offset.x);
+        result.y = this.zoom * (y - this.offset.y);
         return result;
     }
 
     toWorld(x, y, result) {
         result = result || new core.Point(x, y);
-        result.x = (result.x / this.zoom) + this.offset.x;
-        result.y = (result.y / this.zoom) + this.offset.y;
+        result.x = (x / this.zoom) + this.offset.x;
+        result.y = (y / this.zoom) + this.offset.y;
         return result;
     }
 
@@ -95,6 +95,23 @@ export class Pane {
         this.element.remove();
     }
 
+    repaint(force) {
+        if (force || this.needsRepaint) {
+            var ctx = this.context;
+            if (this.transformChanged) {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(this.zoom, this.zoom);
+                ctx.translate(-this.offset.x, -this.offset.y);
+                this.transformChanged = false;
+            }
+            this.clear(ctx);
+            ctx.save();
+            this.draw(ctx);
+            ctx.restore();
+            this.needsRepaint = false;
+        }
+    }
+
     _ensureCanvas() {
         var divId = this._divId;
         this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
@@ -117,12 +134,7 @@ export class Pane {
     /**
      * Clears the pane completely.
      */
-    clear() {
-        var ctx = this.context;
-        if (this.transformChanged) {
-            ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offset.x, -this.offset.y);
-            this.transformChanged = true;
-        }
+    clear(ctx) {
         var p1 = this.toWorld(0, 0);
         var p2 = this.toWorld(this.width, this.height);
         ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
@@ -165,24 +177,19 @@ export class ShapesPane extends Pane {
         super(name, stage, canvasId);
     }
 
-    repaint(force) {
-        if (force || this.needsRepaint) {
-            this.clear();
-            var stage = this._stage;
-            var touchHandler = stage.touchHandler;
-            var context = this.context;
-            context.setTransform(1, 0, 0, 1, this.offset.x, this.offset.y);
-            stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
-                shape.applyTransforms(context);
-                shape.applyStyles(context);
-                shape.draw(context);
-                if (touchHandler != null && stage.selection.contains(shape)) {
-                    shape.drawControls(context);
-                }
-                shape.revertTransforms(context);
-            });
-            this.needsRepaint = false;
-        }
+    draw(ctx) {
+        var stage = this._stage;
+        var touchHandler = stage.touchHandler;
+        var context = this.context;
+        stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
+            shape.applyTransforms(context);
+            shape.applyStyles(context);
+            shape.draw(context);
+            if (touchHandler != null && stage.selection.contains(shape)) {
+                shape.drawControls(context);
+            }
+            shape.revertTransforms(context);
+        });
     }
 }
 
@@ -210,35 +217,30 @@ export class BGPane extends Pane {
         }
     }
 
-    repaint(force) {
-        if (force || this.needsRepaint) {
-            var stage = this._stage;
-            this.clear();
-            var ctx = this.context;
-            var width = this.width;
-            var height = this.height;
-            var zoom = this.zoom;
-            var space = this.lineSpacing;
-            ctx.strokeStyle = this.lineColor;
+    draw(ctx) {
+        var ctx = this.context;
+        var width = this.width;
+        var height = this.height;
+        var zoom = this.zoom;
+        var space = this.lineSpacing;
+        ctx.strokeStyle = this.lineColor;
 
-            ctx.beginPath();
-            var startX = this.offset.x;
-            var startY = this.offset.y;
-            // Horiz lines
-            for (var currY = startY; currY < height; currY += space) {
-                if (currY > 0) {
-                    ctx.moveTo(0, currY);
-                    ctx.lineTo(width, currY);
-                }
-		    }
-            for (var currX = startX; currX < width; currX += space) {
-                if (currX > 0) {
-                    ctx.moveTo(currX, 0);
-                    ctx.lineTo(currX, height);
-                }
-		    }
-            ctx.stroke();
-            this.needsRepaint = false;
+        ctx.beginPath();
+        var startX = this.offset.x;
+        var startY = this.offset.y;
+        // Horiz lines
+        for (var currY = startY; currY < height; currY += space) {
+            if (currY > 0) {
+                ctx.moveTo(0, currY);
+                ctx.lineTo(width, currY);
+            }
         }
+        for (var currX = startX; currX < width; currX += space) {
+            if (currX > 0) {
+                ctx.moveTo(currX, 0);
+                ctx.lineTo(currX, height);
+            }
+        }
+        ctx.stroke();
     }
 }

@@ -75,7 +75,6 @@ export class Stage extends events.EventHandler {
     }
 
     get element() {
-        console.log("ParentDiv: ", this._parentDiv);
         return this._parentDiv;
     }
 
@@ -350,14 +349,13 @@ class StageBackgroundHandler {
     _onClick(event) { }
 
     _onMouseDown(event) {
-        this.currPoint = new core.Point(event.offsetX, event.offsetY);
-        this.downPoint = new core.Point(event.offsetX, event.offsetY);
+        this.currPoint = this._bgPane.toWorld(event.offsetX, event.offsetY, this.currPoint);
+        this.downPoint = this._bgPane.toWorld(event.offsetX, event.offsetY, this.downPoint);
         this.downTime = event.timeStamp;
     }
 
     _onMouseUp(event) {
-        this.currPoint.x = event.offsetX;
-        this.currPoint.y = event.offsetY;
+        this.currPoint = this._bgPane.toWorld(event.offsetX, event.offsetY, this.currPoint);
         var currTime = event.timeStamp;
         var timeDelta = currTime - this.downTime;
         var isClick = timeDelta <= this.clickThresholdTime;
@@ -366,8 +364,7 @@ class StageBackgroundHandler {
     }
 
     _onMouseMove(event) { 
-        this.currPoint.x = event.offsetX;
-        this.currPoint.y = event.offsetY;
+        this.currPoint = this._bgPane.toWorld(event.offsetX, event.offsetY, this.currPoint);
     }
 
     _onMouseEnter(event) { }
@@ -429,8 +426,8 @@ class StageTouchHandler {
     _onClick(event) { }
 
     _onMouseDown(event) {
-        this.currPoint = new core.Point(event.offsetX, event.offsetY);
-        this.downPoint = new core.Point(event.offsetX, event.offsetY);
+        this.currPoint = this._editPane.toWorld(event.offsetX, event.offsetY, this.currPoint);
+        this.downPoint = this._editPane.toWorld(event.offsetX, event.offsetY, this.downPoint);
         this.downTime = event.timeStamp;
         this.downHitInfo = null;
         var shapeIndex = this.stage.shapeIndex;
@@ -466,8 +463,7 @@ class StageTouchHandler {
     }
 
     _onMouseUp(event) {
-        this.currPoint.x = event.offsetX;
-        this.currPoint.y = event.offsetY;
+        this.currPoint = this._editPane.toWorld(event.offsetX, event.offsetY, this.currPoint);
         var currTime = event.timeStamp;
         var timeDelta = currTime - this.downTime;
         var isClick = timeDelta <= this.clickThresholdTime;
@@ -482,7 +478,6 @@ class StageTouchHandler {
         } else {
             if (event.button == 0) {
                 if ( ! this.selectingMultiple) {
-                    console.log("Mouse Up, isClick: ", isClick);
                     if (isClick) {
                         // this was a click so just "toggleMembership" the shape selection
                         var shapeIndex = this.stage.shapeIndex;
@@ -501,12 +496,10 @@ class StageTouchHandler {
     }
 
     _onMouseMove(event) { 
-        this.currPoint.x = event.offsetX;
-        this.currPoint.y = event.offsetY;
+        this.currPoint = this._editPane.toWorld(event.offsetX, event.offsetY, this.currPoint);
         var stage = this.stage;
         var selection = stage.selection;
-        var worldPt = this._editPane.toWorld(this.currPoint.x, this.currPoint.y);
-        console.log("ScreenPt: ", this.currPoint.x, this.currPoint.y, ", WorldPt: ", worldPt.x, worldPt.y);
+        console.log("EventPt: ", event.offsetX, event.offsetY, ", WorldPt: ", this.currPoint.x, this.currPoint.y);
         if (this._shapeForCreation != null) {
             // This mode is when we are showing a cross hair for creating an object
             this._editPane.cursor = "crosshair";
@@ -553,19 +546,15 @@ class StageTouchHandler {
     }
 
     _onMouseEnter(event) { 
-        console.log("Entered: ", event);
         this._editPane.element.focus();
     }
     _onMouseLeave(event) { 
-        console.log("Left: ", event);
         this._editPane.element.blur();
     }
     _onMouseOver(event) {
-        console.log("Went Over: ", event);
         this._editPane.element.focus();
     }
     _onMouseOut(event) { 
-        console.log("Went Out: ", event);
         this._editPane.element.blur();
     }
 }
