@@ -120,27 +120,3 @@
 .toolbar_button_highlighted {
     border: solid 2px gray;
 }
-
-/* Toolbar Button Icons */
-.tb_icon_bring_forward { background-image: url(./src/demo/icons/bring_forward.png); }
-.tb_icon_bring_to_front { background-image: url(./src/demo/icons/bring_to_front.png); }
-.tb_icon_color_wheel { background-image: url(./src/demo/icons/color_wheel.png); }
-.tb_icon_comment { background-image: url(./src/demo/icons/comment.png); }
-.tb_icon_copy { background-image: url(./src/demo/icons/copy.png); }
-.tb_icon_cut { background-image: url(./src/demo/icons/cut.png); }
-.tb_icon_group_shapes { background-image: url(./src/demo/icons/group_shapes.png); }
-.tb_icon_hand_tool { background-image: url(./src/demo/icons/hand_tool.png); }
-.tb_icon_line_tool { background-image: url(./src/demo/icons/line_tool.png); }
-.tb_icon_line_width { background-image: url(./src/demo/icons/line_width.png); }
-.tb_icon_link { background-image: url(./src/demo/icons/link.png); }
-.tb_icon_redo { background-image: url(./src/demo/icons/redo.png); }
-.tb_icon_save { background-image: url(./src/demo/icons/save.png); }
-.tb_icon_search { background-image: url(./src/demo/icons/search.png); }
-.tb_icon_send_backward { background-image: url(./src/demo/icons/send_backward.png); }
-.tb_icon_send_to_back { background-image: url(./src/demo/icons/send_to_back.png); }
-.tb_icon_settings { background-image: url(./src/demo/icons/settings.png); }
-.tb_icon_share { background-image: url(./src/demo/icons/share.png); }
-.tb_icon_undo { background-image: url(./src/demo/icons/undo.png); }
-.tb_icon_ungroup_shapes { background-image: url(./src/demo/icons/ungroup_shapes.png); }
-.tb_icon_zoom_in { background-image: url(./src/demo/icons/zoom_in.png); }
-.tb_icon_zoom_out { background-image: url(./src/demo/icons/zoom_out.png); }

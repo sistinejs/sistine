@@ -22,6 +22,17 @@
             <button class = "toolbar_button" id = "tb_send_backward">Send Backward</button>
         </div>
         <div class = "toolbar_button_group">
+            <select name="selectmenu_zoom" id="zoom_option" width = "100">
+                <option>10%</option>
+                <option>25%</option>
+                <option>50%</option>
+                <option>75%</option>
+                <option selected="selected">100%</option>
+                <option>200%</option>
+                <option>400%</option>
+                <option>800%</option>
+                <option>Fit to Screen</option>
+            </select>
             <button class = "toolbar_button" id = "tb_zoom_in">Zoom In</button>
             <button class = "toolbar_button" id = "tb_zoom_out">Zoom Out</button>
         </div>
@@ -277,6 +288,7 @@
     }
 
     function setupHeaderToolbar() {
+        $("#zoom_option").selectmenu({ width : 100 });
         var toolbar_buttons = $(".toolbar_button");
         toolbar_buttons.each(function(index, tbbutton) {
             var $tbbutton = $(tbbutton);
