@@ -11,8 +11,11 @@ module.exports = (env, options) => {
         // new uglifyJsPlugin(),
         // new CleanWebpackPlugin('dist'),
         new HTMLWebpackPlugin({
-            title: "Hello Sistine",
             template: path.resolve(__dirname, 'src/demo/index.html')
+        }),
+        new HtmlWebpackIncludeAssetsPlugin({
+            assets: [ './src/demo/index.css' ],
+            append: true
         }),
         new webpack.ProvidePlugin({
             $: "jquery",
