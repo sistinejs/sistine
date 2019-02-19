@@ -29,9 +29,10 @@ export class CircleShape extends core.Shape {
         var y = this.bounds.y + lw;
         var width = this.bounds.width - (2 * lw);
         var height = this.bounds.height - (2 * lw);
+        var R = Math.max(0, this.radius);
 
         ctx.beginPath();
-        ctx.arc(this.bounds.centerX, this.bounds.centerY, this.radius, 0, 2 * Math.PI);
+        ctx.arc(this.bounds.centerX, this.bounds.centerY, R, 0, 2 * Math.PI);
         if (this.fillStyle) {
             ctx.fill();
         }

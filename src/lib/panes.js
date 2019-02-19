@@ -137,7 +137,7 @@ export class Pane {
     clear(ctx) {
         var p1 = this.toWorld(0, 0);
         var p2 = this.toWorld(this.width, this.height);
-        ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        console.log("BG Size: ", this.width, this.height, ", P1: ", p1.x, p1.y, ", P2: ", p2.x, p2.y);
         var fillStyle = this.get("fillStyle");
         if (fillStyle) {
             ctx.fillStyle = fillStyle;
@@ -168,6 +168,7 @@ export class Pane {
         elem.width(finalWidth);
         elem[0].width = finalWidth;
         elem[0].height = finalHeight;
+        this.transformChanged = true;
         this.needsRepaint = true;
     }
 }

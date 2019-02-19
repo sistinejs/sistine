@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
 // const CleanWebpackPlugin = require("clean-webpack-plugin");
 
@@ -10,6 +11,7 @@ module.exports = (env, options) => {
         // new uglifyJsPlugin(),
         // new CleanWebpackPlugin('dist'),
         new HTMLWebpackPlugin({
+            title: "Hello Sistine",
             template: path.resolve(__dirname, 'src/demo/index.html')
         }),
         new webpack.ProvidePlugin({
