@@ -1,5 +1,5 @@
 
-function setupHeaderToolbar() {
+function setupToolbar() {
     $("#zoom_option").selectmenu({ width : 100 });
     var toolbar_buttons = $(".toolbar_button");
     toolbar_buttons.each(function(index, tbbutton) {
@@ -62,6 +62,7 @@ function onPointer() {
 }
 
 function onHandTool() {
+    theStage
 }
 
 function onLineTool() {

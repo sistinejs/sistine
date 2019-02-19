@@ -16,7 +16,10 @@ module.exports = (env, options) => {
         new HtmlWebpackIncludeAssetsPlugin({
             assets: [
                 "./src/demo/css/demo.css",
-                "./src/demo/scripts/toolbars.js"
+                "./src/demo/scripts/stage.js",
+                "./src/demo/scripts/elements.js",
+                "./src/demo/scripts/toolbars.js",
+                "./src/demo/scripts/shapepanel.js"
             ],
             append: true
         }),
