@@ -10,7 +10,8 @@ import { getcssint } from "../utils/dom"
  * refresh rates etc).
  */
 export class Pane {
-    constructor(name, stage, canvasId) {
+    constructor(name, stage, canvasId, configs) {
+        this._configs = configs || {};
         this._name = name;
         this._stage = stage;
         this._needsRepaint = true;
@@ -18,10 +19,22 @@ export class Pane {
         this._canvasId = canvasId;
         this._canvas = null;
         this._zoom = 1.0;
-        this._offsetX = this._offsetY = 0;
+        this._offset = new core.Point();
         this._parentDiv = $("#" + stage.divId);
         this._ensureCanvas();
         this._refCount = 1;
+    }
+
+    get(name) {
+        return this._configs[name];
+    }
+
+    set(property, newValue, force) {
+        var oldValue = this._configs[property];
+        if (oldValue != newValue) {
+            this._configs[property] = newValue;
+        }
+        return this;
     }
 
     get zoom() { return this._zoom; }
@@ -30,26 +43,35 @@ export class Pane {
         if (z > 10) z = 10;
         if (this._zoom != z) {
             this._zoom = z;
+            this.transformChanged = true;
             this.needsRepaint = true;
         }
     }
 
-    get offsetX() { return this._offsetX; }
-    get offsetY() { return this._offsetY; }
+    get offset() { return this._offset; }
     setOffset(x, y) {
-        if (x < this._bounds.x) x = this._bounds.x;
-        if (y < this._bounds.y) y = this._bounds.y;
-        if (x > this._bounds.right) {
-            x = this._bounds.right;
-        }
-        if (y > this._bounds.bottom) {
-            y = this._bounds.bottom;
-        }
-        if (this._offsetX != x || this._offsetY != y) {
-            this._offsetX = x;
-            this._offsetY = y;
+        if (this._offset.x != x || this._offset.y != y) {
+            this._offset = new core.Point(x, y);
+            this.transformChanged = true;
             this.needsRepaint = true;
         }
+    }
+
+    /**
+     * Converts world coordinates to screen coordinates.
+     */
+    toScreen(x, y, result) {
+        result = result || new core.Point(x, y);
+        result.x = this.zoom * (result.x - this.offset.x);
+        result.y = this.zoom * (result.y - this.offset.y);
+        return result;
+    }
+
+    toWorld(x, y, result) {
+        result = result || new core.Point(x, y);
+        result.x = (result.x / this.zoom) + this.offset.x;
+        result.y = (result.y / this.zoom) + this.offset.y;
+        return result;
     }
 
     acquire() { this._refCount += 1; }
@@ -92,8 +114,25 @@ export class Pane {
     get width() { return this._canvas.width(); }
     get height() { return this._canvas.height(); }
 
+    /**
+     * Clears the pane completely.
+     */
     clear() {
-        this.context.clearRect(0, 0, this._canvas.width(), this._canvas.height());
+        var ctx = this.context;
+        if (this.transformChanged) {
+            ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.offset.x, -this.offset.y);
+            this.transformChanged = true;
+        }
+        var p1 = this.toWorld(0, 0);
+        var p2 = this.toWorld(this.width, this.height);
+        ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        var fillStyle = this.get("fillStyle");
+        if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.fillRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        } else {
+            ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        }
     }
 
     layout() {
@@ -132,6 +171,7 @@ export class ShapesPane extends Pane {
             var stage = this._stage;
             var touchHandler = stage.touchHandler;
             var context = this.context;
+            context.setTransform(1, 0, 0, 1, this.offset.x, this.offset.y);
             stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
                 shape.applyTransforms(context);
                 shape.applyStyles(context);
@@ -147,11 +187,12 @@ export class ShapesPane extends Pane {
 }
 
 export class BGPane extends Pane {
-    constructor(name, stage, canvasId) {
-        super(name, stage, canvasId);
+    constructor(name, stage, canvasId, configs) {
+        super(name, stage, canvasId, configs);
         // Space between ruler lines on the background
         this._lineSpacing = 50;
         this._lineColor = "darkGray";
+        this.set("fillStyle", this.get("fillStyle") || "#c6cbd3");
     }
 
     get lineSpacing() { return this._lineSpacing; }
@@ -169,12 +210,6 @@ export class BGPane extends Pane {
         }
     }
 
-    clear() {
-        var ctx = this.context;
-        ctx.fillStyle = "#c6cbd3";
-        ctx.fillRect(0, 0, this.width, this.height);
-    }
-
     repaint(force) {
         if (force || this.needsRepaint) {
             var stage = this._stage;
@@ -183,12 +218,12 @@ export class BGPane extends Pane {
             var width = this.width;
             var height = this.height;
             var zoom = this.zoom;
-            var space = this.lineSpacing * zoom;
+            var space = this.lineSpacing;
             ctx.strokeStyle = this.lineColor;
 
             ctx.beginPath();
-            var startX = -zoom * this.offsetX;
-            var startY = -zoom * this.offsetY;
+            var startX = this.offset.x;
+            var startY = this.offset.y;
             // Horiz lines
             for (var currY = startY; currY < height; currY += space) {
                 if (currY > 0) {

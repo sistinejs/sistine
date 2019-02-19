@@ -3,6 +3,109 @@ import * as events from "./events";
 
 export const DEFAULT_CONTROL_SIZE = 5;
 
+export class Transform {
+    /**
+     * Construct a 2D transform with 6 parameters forming the matrix:
+     *              __       __
+     *              |  a c e  |
+     *              |  b d f  |
+     *              |  0 0 1  |
+     *              --       --
+     */
+    constructor(a, b, c, d, e, f) {
+        this.set(a,b,c,d,e,f);
+    }
+
+    /**
+     * Resets the values of the transform matrix to the given values.
+     */
+    set(a, b, c, d, e, f) {
+        this.a = a || 1;
+        this.b = b || 0;
+        this.c = c || 0;
+        this.d = d || 1;
+        this.e = e || 0;
+        this.f = f || 0;
+    }
+
+    copy() {
+        return new Transform(this.a, this.b, this.c, this.d, this.e, this.f);
+    }
+
+    /**
+     * Performs ( this * another ) and returns the result as a new Transform 
+     * or into the result Transform if it is provided.
+     */
+    multiply(another, result) {
+        result = result || this;
+        var a = this.a, A = another.a;
+        var b = this.b, B = another.b;
+        var c = this.c, C = another.C;
+        var d = this.d, D = another.D;
+        var e = this.e, E = another.E;
+        var f = this.f, F = another.F;
+        var na = a * A + c * B,   nc = a * C + c * D,    ne = a * E + c * F + e;
+        var nb = b * A + d * B,   nd = b * C + d * D,    nf = b * E + d * F + f;
+        result.set(na, nb, nc, nd, ne, nf);
+        return result;
+    }
+
+    /**
+     * Applies a translation by an offset (tx,ty) onto this Transform.
+     */
+    translate(E, F, result) {
+        result = result || this;
+        result.e = this.a * E  + this.c * F + this.e;
+        result.f = this.b * E  + this.d * F + this.f;
+        return result;
+    }
+
+    /**
+     * Apply a rotation by a given angle (in radians) onto this Transform.
+     */
+    rotate(theta, result) {
+        result = result || this;
+        var costheta = Math.cos(theta);
+        var sintheta = Math.sin(theta);
+        var nx = (this.x * costheta) - (this.y * sintheta);
+        var ny = (this.y * costheta) + (this.x * sintheta);
+        result.x = nx;
+        result.y = ny;
+        return result;
+    }
+}
+
+export class Point {
+    constructor(x, y) {
+        this.x = x || 0;
+        this.y = y || 0;
+    }
+
+    move(tx, ty) {
+        this.x += tx;
+        this.y += ty;
+        return this;
+    }
+
+    rotate(theta) {
+        var costheta = Math.cos(theta);
+        var sintheta = Math.sin(theta);
+        var nx = (this.x * costheta) - (this.y * sintheta);
+        var ny = (this.y * costheta) + (this.x * sintheta);
+        this.x = nx;
+        this.y = ny;
+        return this;
+    }
+
+    transform(a, b, c, d, e, f) {
+        var x = this.x;
+        var y = this.y;
+        this.x = a * x + b * y + c;
+        this.y = d * x + e * y + f;
+        return this;
+    }
+}
+
 export class Bounds {
     constructor(configs) {
         configs = configs || {};

@@ -25,7 +25,7 @@ export class Stage extends events.EventHandler {
         // The boundaries of the "Stage"
         this._bounds = new core.Bounds(configs);
         this._zoom = 1.0;
-        this._offsetX = this._offsetY = 0;
+        this._offset = new core.Point()
 
         this._divId = divId;
         this._parentDiv = $("#" + divId);
@@ -59,20 +59,14 @@ export class Stage extends events.EventHandler {
         }
     }
 
-    get offsetX() { return this._offsetX; }
-    get offsetY() { return this._offsetY; }
+    get offset() { return this._offset; }
     setOffset(x, y) {
         if (x < this._bounds.x) x = this._bounds.x;
         if (y < this._bounds.y) y = this._bounds.y;
-        if (x > this._bounds.right) {
-            x = this._bounds.right;
-        }
-        if (y > this._bounds.bottom) {
-            y = this._bounds.bottom;
-        }
-        if (this._offsetX != x || this._offsetY != y) {
-            this._offsetX = x;
-            this._offsetY = y;
+        if (x > this._bounds.right) { x = this._bounds.right; }
+        if (y > this._bounds.bottom) { y = this._bounds.bottom; }
+        if (this._offset.x != x || this._offset.y != y) {
+            this._offset = new core.Point(x, y);
             this._panes.forEach(function(pane, index) {
                 pane.setOffset(x, y);
             });
@@ -321,11 +315,9 @@ class StageKeyHandler {
 class StageBackgroundHandler {
     constructor(stage) {
         this.stage = stage;
-        this.downX = null;
-        this.downY = null;
+        this.downPoint = null;
+        this.currPoint = new core.Point();
         this.downTime = 0;
-        this.currX = null;
-        this.currY = null;
 
         // Max time before a mouse down goes from a "click" to a "hold"
         this.clickThresholdTime = 500;
@@ -358,26 +350,24 @@ class StageBackgroundHandler {
     _onClick(event) { }
 
     _onMouseDown(event) {
-        this.currX = this.downX = event.offsetX;
-        this.currY = this.downY = event.offsetY;
+        this.currPoint = new core.Point(event.offsetX, event.offsetY);
+        this.downPoint = new core.Point(event.offsetX, event.offsetY);
         this.downTime = event.timeStamp;
     }
 
     _onMouseUp(event) {
-        this.currX = event.offsetX;
-        this.currY = event.offsetY;
+        this.currPoint.x = event.offsetX;
+        this.currPoint.y = event.offsetY;
         var currTime = event.timeStamp;
         var timeDelta = currTime - this.downTime;
         var isClick = timeDelta <= this.clickThresholdTime;
         this.downTime = null;
-        this.downX = null;
-        this.downY = null;
+        this.downPoint = null;
     }
 
     _onMouseMove(event) { 
-        this.currX = event.offsetX;
-        this.currY = event.offsetY;
-        console.log("BG: ", this.currX, this.currY);
+        this.currPoint.x = event.offsetX;
+        this.currPoint.y = event.offsetY;
     }
 
     _onMouseEnter(event) { }
@@ -390,11 +380,9 @@ class StageBackgroundHandler {
 class StageTouchHandler {
     constructor(stage) {
         this.stage = stage;
-        this.downX = null;
-        this.downY = null;
+        this.currPoint = new core.Point();
+        this.downPoint = null;
         this.downTime = 0;
-        this.currX = null;
-        this.currY = null;
         this.selectingMultiple = false;
         this._shapeForCreation = null;
 
@@ -441,8 +429,8 @@ class StageTouchHandler {
     _onClick(event) { }
 
     _onMouseDown(event) {
-        this.currX = this.downX = event.offsetX;
-        this.currY = this.downY = event.offsetY;
+        this.currPoint = new core.Point(event.offsetX, event.offsetY);
+        this.downPoint = new core.Point(event.offsetX, event.offsetY);
         this.downTime = event.timeStamp;
         this.downHitInfo = null;
         var shapeIndex = this.stage.shapeIndex;
@@ -451,18 +439,18 @@ class StageTouchHandler {
         if (this._shapeForCreation != null) {
             console.log("Creating: ", this._shapeForCreation);
             selection.clear();
-            this._shapeForCreation.setLocation(this.downX, this.downY);
+            this._shapeForCreation.setLocation(this.downPoint.x, this.downPoint.y);
             this.stage.shapeIndex.setPane(this._shapeForCreation, "edit");
             this.stage.scene.add(this._shapeForCreation);
         } else {
             this.selectingMultiple = this._selectingMultipleShapes(event);
             if (event.button == 0) {
                 // We have alt button down so allow multiple shapes to be added
-                var hitShape = shapeIndex.getShapeAt(this.downX, this.downY);
+                var hitShape = shapeIndex.getShapeAt(this.downPoint.x, this.downPoint.y);
                 if (hitShape == null) {
                     selection.clear();
                 } else {
-                    this.downHitInfo = hitShape.controller.getHitInfo(this.downX, this.downY);
+                    this.downHitInfo = hitShape.controller.getHitInfo(this.downPoint.x, this.downPoint.y);
                     if (this.selectingMultiple) {
                         selection.toggleMembership(hitShape);
                     } else if ( ! selection.contains(hitShape)) {
@@ -478,15 +466,14 @@ class StageTouchHandler {
     }
 
     _onMouseUp(event) {
-        this.currX = event.offsetX;
-        this.currY = event.offsetY;
+        this.currPoint.x = event.offsetX;
+        this.currPoint.y = event.offsetY;
         var currTime = event.timeStamp;
         var timeDelta = currTime - this.downTime;
         var isClick = timeDelta <= this.clickThresholdTime;
         var selection = this.stage.selection;
         this.downTime = null;
-        this.downX = null;
-        this.downY = null;
+        this.downPoint = null;
 
         if (this._shapeForCreation != null) {
             // only add a new shape once!
@@ -499,7 +486,7 @@ class StageTouchHandler {
                     if (isClick) {
                         // this was a click so just "toggleMembership" the shape selection
                         var shapeIndex = this.stage.shapeIndex;
-                        var hitShape = shapeIndex.getShapeAt(this.currX, this.currY);
+                        var hitShape = shapeIndex.getShapeAt(this.currPoint.x, this.currPoint.y);
                         selection.clear();
                         selection.toggleMembership(hitShape);
                     } else {
@@ -514,25 +501,26 @@ class StageTouchHandler {
     }
 
     _onMouseMove(event) { 
-        this.currX = event.offsetX;
-        this.currY = event.offsetY;
+        this.currPoint.x = event.offsetX;
+        this.currPoint.y = event.offsetY;
         var stage = this.stage;
         var selection = stage.selection;
-        console.log(this.currX, this.currY);
+        var worldPt = this._editPane.toWorld(this.currPoint.x, this.currPoint.y);
+        console.log("ScreenPt: ", this.currPoint.x, this.currPoint.y, ", WorldPt: ", worldPt.x, worldPt.y);
         if (this._shapeForCreation != null) {
             // This mode is when we are showing a cross hair for creating an object
             this._editPane.cursor = "crosshair";
-            if (this.downX != null) {
-                var minX = Math.min(this.downX, this.currX);
-                var minY = Math.min(this.downY, this.currY);
+            if (this.downPoint != null) {
+                var minX = Math.min(this.downPoint.x, this.currPoint.x);
+                var minY = Math.min(this.downPoint.y, this.currPoint.y);
                 this._shapeForCreation.setLocation(minX, minY);
-                this._shapeForCreation.setSize(Math.abs(this.currX - this.downX),
-                                             Math.abs(this.currY - this.downY));
+                this._shapeForCreation.setSize(Math.abs(this.currPoint.x - this.downPoint.x),
+                                             Math.abs(this.currPoint.y - this.downPoint.y));
             }
         } else {
             // Mouse is not primed for "creating" an object
             selection.forEach(function(self, shape) {
-                var currHitInfo = shape.controller.getHitInfo(self.currX, self.currY);
+                var currHitInfo = shape.controller.getHitInfo(self.currPoint.x, self.currPoint.y);
                 if (currHitInfo != null) {
                     self._editPane.cursor = currHitInfo.cursor;
                     return false;
@@ -541,23 +529,23 @@ class StageTouchHandler {
                 }
             }, this);
 
-            if (this.downX != null) {
+            if (this.downPoint != null) {
                 // We are in a position to "transform" the entry pressed
                 var shapesFound = false;
                 selection.forEach(function(self, shape) {
                     shapesFound = true;
                     var savedInfo = selection.getSavedInfo(shape);
                     shape.controller.applyHitChanges(self.downHitInfo, savedInfo,
-                                                     self.downX, self.downY,
-                                                     self.currX, self.currY);
+                                                     self.downPoint.x, self.downPoint.y,
+                                                     self.currPoint.x, self.currPoint.y);
                 }, this);
                 stage.paneNeedsRepaint("edit");
                 if ( ! shapesFound ) {
                     // Just draw a "selection rectangle"
-                    var x = Math.min(this.downX, this.currX);
-                    var y = Math.min(this.downY, this.currY);
-                    var w = Math.abs(this.downX - this.currX);
-                    var h = Math.abs(this.downY - this.currY);
+                    var x = Math.min(this.downPoint.x, this.currPoint.x);
+                    var y = Math.min(this.downPoint.y, this.currPoint.y);
+                    var w = Math.abs(this.downPoint.x - this.currPoint.x);
+                    var h = Math.abs(this.downPoint.y - this.currPoint.y);
                     this._editPane.context.strokeRect(x, y, w, h);
                 }
             }
