@@ -59,10 +59,11 @@ function onPaste() {
 }
 
 function onPointer() {
+    theStage.touchMode = null;
 }
 
 function onHandTool() {
-    theStage
+    theStage.touchMode = new Sistine.stage.TouchMode("hand");
 }
 
 function onLineTool() {
