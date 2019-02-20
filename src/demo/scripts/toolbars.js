@@ -1,4 +1,7 @@
 
+const TouchModes = Sistine.handlers.TouchModes;
+const TouchMode = Sistine.handlers.TouchMode;
+
 function setupToolbar() {
     $("#zoom_option").selectmenu({ width : 100 });
     var toolbar_buttons = $(".toolbar_button");
@@ -38,9 +41,11 @@ function onSendBackward() {
 }
 
 function onZoomIn() {
+    theStage.touchMode = new TouchMode(TouchModes.ZOOM_IN);
 }
 
 function onZoomOut() {
+    theStage.touchMode = new TouchMode(TouchModes.ZOOM_OUT);
 }
 
 function onUndo() {
@@ -63,7 +68,7 @@ function onPointer() {
 }
 
 function onHandTool() {
-    theStage.touchMode = new Sistine.stage.TouchMode("hand");
+    theStage.touchMode = new TouchMode(TouchModes.HAND_TOOL);
 }
 
 function onLineTool() {

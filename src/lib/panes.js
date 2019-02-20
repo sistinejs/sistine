@@ -77,11 +77,6 @@ export class Pane {
     acquire() { this._refCount += 1; }
     release() { this._refCount -= 1; }
 
-    set cursor(c) {
-        c = c || "auto";
-        this._canvas.css("cursor", c);
-    }
-
     get name() { return this._name; }
     get divId() { return this._divId; }
     get canvasId() { return this._canvasId; }

@@ -5,13 +5,6 @@ import * as panes from "./panes";
 import * as handlers from "./handlers";
 import { getcssint } from "../utils/dom"
 
-export class TouchMode {
-    constructor(mode, data) {
-        this.mode = mode;
-        this.data = data;
-    }
-}
-
 /**
  * The stage model if where all layers and shapes are managed. 
  * As far as possible this does not perform any view related operations as 
@@ -56,6 +49,11 @@ export class Stage extends events.EventHandler {
     }
 
     get bounds() { return this._bounds; }
+
+    set cursor(c) {
+        c = c || "auto";
+        this._parentDiv.css("cursor", c);
+    }
 
     get zoom() { return this._zoom; }
     setZoom(z) {

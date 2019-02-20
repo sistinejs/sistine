@@ -4,6 +4,21 @@ import * as core from "./core";
 import * as panes from "./panes";
 import { getcssint } from "../utils/dom"
 
+export const TouchModes = {
+    NONE: 0,
+    CREATE_TOOL: 1,
+    ZOOM_IN: 2,
+    ZOOM_OUT: 3,
+    HAND_TOOL: 4,
+}
+
+export class TouchMode {
+    constructor(mode, data) {
+        this.mode = mode;
+        this.data = data;
+    }
+}
+
 export class BaseKeyHandler {
     constructor(stage) {
         this.stage = stage;
@@ -199,7 +214,7 @@ export class StageTouchHandler extends BaseTouchHandler {
                 this.stage.repaint();
             }
         }
-        else if (this.stage.touchMode.mode == "create") {
+        else if (this.stage.touchMode.mode == TouchModes.CREATE) {
             var shapeForCreation = this.stage.touchMode.data;
             console.log("Creating: ", shapeForCreation);
             selection.clear();
@@ -229,10 +244,10 @@ export class StageTouchHandler extends BaseTouchHandler {
             } else {
                 console.log("Mouse Over, Button: ", event.button);
             }
-        } else if (this.stage.touchMode.mode == "create") {
+        } else if (this.stage.touchMode.mode == TouchModes.CREATE) {
             // only add a new shape once!
             this.stage.touchMode = null;
-            this._editPane.cursor = "auto";
+            this.stage.cursor = "auto";
         }
         this.stage.repaint();
     }
@@ -241,16 +256,15 @@ export class StageTouchHandler extends BaseTouchHandler {
         super._onMouseMove(event);
         var stage = this.stage;
         var selection = stage.selection;
-        console.log("EventPt: ", event.offsetX, event.offsetY, ", WorldPt: ", this.currPoint.x, this.currPoint.y);
+        console.log("EventPt: ", event.offsetX, event.offsetY, ", WorldPt: ", this.currPoint.x, this.currPoint.y, ", Mode: ", this.stage.touchMode);
         if (this.stage.touchMode == null) {
+            this.stage.cursor = "auto";
             // Mouse is not primed for "creating" an object
             selection.forEach(function(self, shape) {
                 var currHitInfo = shape.controller.getHitInfo(self.currPoint.x, self.currPoint.y);
                 if (currHitInfo != null) {
-                    self._editPane.cursor = currHitInfo.cursor;
+                    self.stage.cursor = currHitInfo.cursor;
                     return false;
-                } else {
-                    self._editPane.cursor = "auto";
                 }
             }, this);
 
@@ -271,14 +285,19 @@ export class StageTouchHandler extends BaseTouchHandler {
                     var y = Math.min(this.downPoint.y, this.currPoint.y);
                     var w = Math.abs(this.downPoint.x - this.currPoint.x);
                     var h = Math.abs(this.downPoint.y - this.currPoint.y);
-                    this._editPane.repaint();
+                    // this._editPane.repaint();
+                    // this._editPane.context.lineWidth = 1;
                     this._editPane.context.strokeRect(x, y, w, h);
                 }
             }
-        } else if (this.stage.touchMode.mode == "create") {
+        } else if (this.stage.touchMode.mode == TouchModes.ZOOM_IN) {
+            this.stage.cursor = "zoom-in";
+        } else if (this.stage.touchMode.mode == TouchModes.ZOOM_OUT) {
+            this.stage.cursor = "zoom-out";
+        } else if (this.stage.touchMode.mode == TouchModes.CREATE) {
             // This mode is when we are showing a cross hair for creating an object
+            this.stage.cursor = "crosshair";
             var shapeForCreation = this.stage.touchMode.data;
-            this._editPane.cursor = "crosshair";
             if (this.downPoint != null) {
                 var minX = Math.min(this.downPoint.x, this.currPoint.x);
                 var minY = Math.min(this.downPoint.y, this.currPoint.y);
