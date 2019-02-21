@@ -12,26 +12,27 @@ zoomHandler = null;
 function setupStage() {
     theScene = new Sistine.core.Scene();
     theStage = new Sistine.stage.Stage("stage_div", theScene);
-    var DefaultBundle = Sistine.registry.DefaultBundle;
-    var triangle = new DefaultBundle.Triangle.newShape({
-        "x": 20, "y": 50, "width": 200, "height": 200, "lineWidth": 2
-    });
-    var rect = new DefaultBundle.Rectangle.newShape({
-        "x": 200, "y": 100, "width": 100, "height": 50, "lineWidth": 2
-    });
-    var square = new DefaultBundle.Square.newShape({
-        "x": 550, "y": 100, "width": 200, "height": 100, "fillStyle": 'red'
-    });
-    theScene.add(rect);
-    theScene.add(triangle);
-    theScene.add(square);
-
-    theStage.repaint();
     theStage.isEditable = true;
     theStage.showBackground = true;
-
     // Add a zoom handler!!
     zoomHandler = new Sistine.handlers.StageViewPortHandler(theStage);
+}
+
+function addShape(objid, configs) {
+    configs = configs || {};
+    var finalConfigs = {
+        ...shapeDefaults,
+        ...configs
+    }
+    var newShape = DefaultBundle[objid].newShape(finalConfigs);
+    theScene.add(newShape);
+}
+
+function addSampleShapes() {
+    addShape("Triangle", {"x": 20, "y": 50, "width": 200, "height": 200, "lineWidth": 2});
+    addShape("Rectangle", { "x": 200, "y": 100, "width": 100, "height": 50, "lineWidth": 2 });
+    addShape("Square", { "x": 550, "y": 100, "width": 200, "height": 100, "fillStyle": 'red' });
+    theStage.repaint();
 }
 
 x = null;
