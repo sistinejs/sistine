@@ -44,7 +44,7 @@ function loadShapes() {
             // Add the shape on the canvas at the center
             var id = event.currentTarget.id.replace(/mainpane_holder_/, "");
             var configs = Object.assign({}, shapeDefaults);
-            theStage.setTouchContext(TouchModes.CREATE, DefaultBundle[objid].newShape(configs));
+            theStage.setTouchContext(TouchModes.CREATE, DefaultBundle[id].newShape(configs));
         });
     });
 }
