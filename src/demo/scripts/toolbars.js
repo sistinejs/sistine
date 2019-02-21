@@ -105,3 +105,12 @@ function onLineWidth() {
 function onShare() {
 }
 
+function onTextColor() {
+}
+
+function onLineColor() {
+}
+
+function onFillColor() {
+}
+

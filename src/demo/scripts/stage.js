@@ -1,5 +1,10 @@
 
+var DefaultBundle = Sistine.registry.DefaultBundle;
 iconStages = { };
+shapeDefaults = {
+    'strokeStyle': "black",
+    'lineWidth': 2,
+};
 theScene = null;
 theStage = null;
 zoomHandler = null;

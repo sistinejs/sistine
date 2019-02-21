@@ -16,7 +16,6 @@ function loadShapes() {
         var topPane = iconStage.getPane("main");
         var $child = topPane.element;
 
-        var DefaultBundle = Sistine.registry.DefaultBundle;
         var margin = 3;
         var toolbarShape = DefaultBundle[shapeId].newShapeForToolbar({
             lineWidth: 2,
@@ -50,7 +49,7 @@ function loadShapes() {
 }
 
 function addShapeFromToolbar(objid) {
-    var DefaultBundle = Sistine.registry.DefaultBundle;
     console.log("Toolbar Clicked: " + objid);
-    theStage.setTouchContext(TouchModes.CREATE, DefaultBundle[objid].newShape());
+    var configs = Object.assign({}, shapeDefaults);
+    theStage.setTouchContext(TouchModes.CREATE, DefaultBundle[objid].newShape(configs));
 }
