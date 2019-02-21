@@ -2,6 +2,22 @@
 const TouchModes = Sistine.handlers.TouchModes;
 const TouchMode = Sistine.handlers.TouchMode;
 
+function setupMenus() {
+    $(".menu li").hover(
+        function () {
+            $(this).addClass("ui-state-hover");
+            $("ul", $(this)).show();
+        },
+
+        function () {
+            $(this).removeClass("ui-state-hover");
+            $("ul", $(this)).hide();
+        });
+    $(".menu li ul").each(function () {
+        $(this).menu();
+    });
+}
+
 function setupToolbar() {
     $("#zoom_option").selectmenu({ width : 100 });
     var toolbar_buttons = $(".toolbar_button");
@@ -23,21 +39,27 @@ function setupToolbar() {
 }
 
 function onGroupShapes() {
+    theStage.selection.group();
 }
 
 function onUngroupShapes() {
+    theStage.selection.ungroup();
 }
 
 function onBringToFront() {
+    theStage.selection.bringToFront();
 }
 
 function onSendToBack() {
+    theStage.selection.sendToBack();
 }
 
 function onBringForward() {
+    theStage.selection.bringForward();
 }
 
 function onSendBackward() {
+    theStage.selection.sendBackward();
 }
 
 function onZoomIn() {

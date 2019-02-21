@@ -13,44 +13,79 @@
 </head>
 <body>
     <div id="header_div">
-        <div class = "toolbar_button_group">
-            <button class = "toolbar_button" id = "TB_GroupShapes">Group</button>
-            <button class = "toolbar_button" id = "TB_UngroupShapes">Ungroup</button>
-            <button class = "toolbar_button" id = "TB_BringToFront">Bring to Front</button>
-            <button class = "toolbar_button" id = "TB_SendToBack">Send to Back</button>
-            <button class = "toolbar_button" id = "TB_BringForward">Bring Forward</button>
-            <button class = "toolbar_button" id = "TB_SendBackward">Send Backward</button>
+        <div id = "toolbar_div">
+            <div class = "toolbar_button_group">
+                <button class = "toolbar_button" id = "TB_GroupShapes">Group</button>
+                <button class = "toolbar_button" id = "TB_UngroupShapes">Ungroup</button>
+                <button class = "toolbar_button" id = "TB_BringToFront">Bring to Front</button>
+                <button class = "toolbar_button" id = "TB_SendToBack">Send to Back</button>
+                <button class = "toolbar_button" id = "TB_BringForward">Bring Forward</button>
+                <button class = "toolbar_button" id = "TB_SendBackward">Send Backward</button>
+            </div>
+            <div class = "toolbar_button_group">
+                <select name="selectmenu_zoom" id="zoom_option" width = "100">
+                    <option>10%</option>
+                    <option>25%</option>
+                    <option>50%</option>
+                    <option>75%</option>
+                    <option selected="selected">100%</option>
+                    <option>200%</option>
+                    <option>400%</option>
+                    <option>800%</option>
+                    <option>Fit to Screen</option>
+                </select>
+                <button class = "toolbar_button" id = "TB_ZoomIn">Zoom In</button>
+                <button class = "toolbar_button" id = "TB_ZoomOut">Zoom Out</button>
+            </div>
+            <div class = "toolbar_button_group">
+                <button class = "toolbar_button" id = "TB_Undo">Undo</button>
+                <button class = "toolbar_button" id = "TB_Redo">Redo</button>
+                <button class = "toolbar_button" id = "TB_Cut">Cut</button>
+                <button class = "toolbar_button" id = "TB_Copy">Copy</button>
+                <button class = "toolbar_button" id = "TB_Paste">Paste</button>
+            </div>
+            <div class = "toolbar_button_group">
+                <button class = "toolbar_button" id = "TB_Pointer">Pointer</button>
+                <button class = "toolbar_button" id = "TB_HandTool">Hand Tool</button>
+                <button class = "toolbar_button" id = "TB_LineTool">Line Tool</button>
+                <button class = "toolbar_button" id = "TB_LineWidth">Line Width</button>
+            </div>
+            <div class = "toolbar_button_group">
+                <button class = "toolbar_button" id = "TB_Share">Share</button>
+            </div>
         </div>
-        <div class = "toolbar_button_group">
-            <select name="selectmenu_zoom" id="zoom_option" width = "100">
-                <option>10%</option>
-                <option>25%</option>
-                <option>50%</option>
-                <option>75%</option>
-                <option selected="selected">100%</option>
-                <option>200%</option>
-                <option>400%</option>
-                <option>800%</option>
-                <option>Fit to Screen</option>
-            </select>
-            <button class = "toolbar_button" id = "TB_ZoomIn">Zoom In</button>
-            <button class = "toolbar_button" id = "TB_ZoomOut">Zoom Out</button>
-        </div>
-        <div class = "toolbar_button_group">
-            <button class = "toolbar_button" id = "TB_Undo">Undo</button>
-            <button class = "toolbar_button" id = "TB_Redo">Redo</button>
-            <button class = "toolbar_button" id = "TB_Cut">Cut</button>
-            <button class = "toolbar_button" id = "TB_Copy">Copy</button>
-            <button class = "toolbar_button" id = "TB_Paste">Paste</button>
-        </div>
-        <div class = "toolbar_button_group">
-            <button class = "toolbar_button" id = "TB_Pointer">Pointer</button>
-            <button class = "toolbar_button" id = "TB_HandTool">Hand Tool</button>
-            <button class = "toolbar_button" id = "TB_LineTool">Line Tool</button>
-            <button class = "toolbar_button" id = "TB_LineWidth">Line Width</button>
-        </div>
-        <div class = "toolbar_button_group">
-            <button class = "toolbar_button" id = "TB_Share">Share</button>
+        <div id = "menubar_div" class = "ui-widget-header">
+            <ul class="menu">
+                <li><a href="#">File</a>
+                    <ul>
+                        <li><a href="#">New</a> </li>
+                        <li><a href="#">Open</a> </li>
+                        <li><a href="#">Save</a> </li>
+                        <li><a href="#">Save As</a> </li>
+                        <li>-</li>
+                        <li><a href="#">Import...</a></li>
+                        <li><a href="#">Export...</a></li>
+                        <li>-</li>
+                        <li><a href="#">Print...</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">Edit</a>
+                    <ul>
+                        <li><a href="#">Undo</a> </li>
+                        <li><a href="#">Redo</a> </li>
+                        <li>-</li>
+                        <li><a href="#">Cut</a> </li>
+                        <li><a href="#">Copy</a> </li>
+                        <li><a href="#">Paste</a> </li>
+                        <li><a href="#">Delete</a> </li>
+                        <li>-</li>
+                        <li><a href="#">Select All</a> </li>
+                        <li><a href="#">Group</a> </li>
+                        <li><a href="#">Ungroup</a> </li>
+                        <li><a href="#">Regroup</a> </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
     <div id="center_div">
@@ -113,6 +148,7 @@
         setupElements();
         loadShapes();
         setupToolbar();
+        setupMenus();
         setupStage();
     });
 </script>

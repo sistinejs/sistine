@@ -489,6 +489,30 @@ export class Selection {
     }
 
     /**
+     * Brings the selected forward by one level.
+     */
+    bringForward() {
+    }
+
+    /**
+     * Sends the selected backward by one level.
+     */
+    sendBackward() {
+    }
+
+    /**
+     * Brings the selected shapes to the front of the stack within their parents.
+     */
+    bringToFront() {
+    }
+
+    /**
+     * Sends the selected shapes to the back of the stack within their parents.
+     */
+    sendToBack() {
+    }
+
+    /**
      * Create a group out of the elements in this Selection.
      */
     group() {

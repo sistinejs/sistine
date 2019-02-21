@@ -1,6 +1,7 @@
 
 :root {
-    --header-height: 30px;
+    --header-height: 70px;
+    --toolbar-button-height: 30px;
     --toolpanel-width: 320px;
     --footer-height: 0px;
     --split-bar-width: 10px;
@@ -16,6 +17,27 @@
     border: solid 0px green;
 }
 
+#menubar_div {
+    position: absolute;
+    vertical-align: middle;
+    float: left;
+    height: var(--toolbar-button-height);
+    right: 0px;
+    left: 0px;
+    top: 0px;
+}
+
+#toolbar_div {
+    position: absolute;
+    border-top: solid 2px darkGray;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    height: var(--toolbar-button-height);
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+}
+
 .toolbar_button_group {
     float: left;
     height: 100%;
@@ -28,8 +50,8 @@
     float: left;
     outline-width: 0px !important;
     padding: 0px;
-    height: var(--header-height);
-    width: var(--header-height);
+    height: var(--toolbar-button-height);
+    width: var(--toolbar-button-height);
 }
 
 #footer_div {
@@ -119,4 +141,45 @@
 
 .toolbar_button_highlighted {
     border: solid 2px gray;
+}
+
+
+/********       Menu and Menubar styles         ********/
+.ui-menu, .ui-menu-item {
+    z-index: 10000;
+    width: 250px;
+}
+
+.ui-menu-item-wrapper {
+    z-index: 10000;
+}
+
+ul.menu {
+    text-align: left;
+    display: inline;
+    margin: 0;
+    padding: 15px 4px 17px 0;
+    list-style: none;
+}
+
+ul.menu li {
+    float: left;
+    margin: 0px 10px 0px 10px;
+}
+ul.menu li.ui-state-hover {
+    margin: -1px 9px -1px 9px;
+}
+.menu li a {
+    display: block;
+}
+.menu li ul {
+    display: none;
+    position: absolute;
+}
+.menu li ul li {
+    display: block;
+    float:none;
+}
+li.ui-menu-item.ui-state-hover {
+    margin: 0px;
 }
