@@ -2,6 +2,7 @@
 iconStages = { };
 theScene = null;
 theStage = null;
+zoomHandler = null;
 
 function setupStage() {
     theScene = new Sistine.core.Scene();
@@ -23,6 +24,9 @@ function setupStage() {
     theStage.repaint();
     theStage.isEditable = true;
     theStage.showBackground = true;
+
+    // Add a zoom handler!!
+    zoomHandler = new Sistine.handlers.StageViewPortHandler(theStage);
 }
 
 x = null;

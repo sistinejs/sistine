@@ -81,6 +81,10 @@ export class Point {
         this.y = y || 0;
     }
 
+    copy() {
+        return new Point(this.x, this.y);
+    }
+
     move(tx, ty) {
         this.x += tx;
         this.y += ty;

@@ -41,11 +41,11 @@ function onSendBackward() {
 }
 
 function onZoomIn() {
-    theStage.touchMode = new TouchMode(TouchModes.ZOOM_IN);
+    theStage.setTouchContext(TouchModes.ZOOM_IN);
 }
 
 function onZoomOut() {
-    theStage.touchMode = new TouchMode(TouchModes.ZOOM_OUT);
+    theStage.setTouchContext(TouchModes.ZOOM_OUT);
 }
 
 function onUndo() {
@@ -64,11 +64,11 @@ function onPaste() {
 }
 
 function onPointer() {
-    theStage.touchMode = null;
+    theStage.setTouchContext();
 }
 
 function onHandTool() {
-    theStage.touchMode = new TouchMode(TouchModes.HAND_TOOL);
+    theStage.setTouchContext(TouchModes.HAND_TOOL);
 }
 
 function onLineTool() {

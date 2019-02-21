@@ -52,6 +52,5 @@ function loadShapes() {
 function addShapeFromToolbar(objid) {
     var DefaultBundle = Sistine.registry.DefaultBundle;
     console.log("Toolbar Clicked: " + objid);
-    theStage.touchMode = new TouchMode(TouchModes.CREATE,
-                                       DefaultBundle[objid].newShape());
+    theStage.setTouchContext(TouchModes.CREATE, DefaultBundle[objid].newShape());
 }

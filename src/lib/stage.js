@@ -45,7 +45,16 @@ export class Stage extends events.EventHandler {
         this.selection = new Selection(this);
 
         // The touch mode passes information on what each of the handlers are ok to perform
-        this.touchMode = null;
+        this._touchContext = new handlers.TouchContext()
+    }
+
+    get touchContext() {
+        return this._touchContext;
+    }
+
+    setTouchContext(mode, data) {
+        this._touchContext.mode = mode || handlers.TouchModes.NONE;
+        this._touchContext.data = data;
     }
 
     get bounds() { return this._bounds; }
@@ -70,10 +79,6 @@ export class Stage extends events.EventHandler {
 
     get offset() { return this._offset; }
     setOffset(x, y) {
-        if (x < this._bounds.x) x = this._bounds.x;
-        if (y < this._bounds.y) y = this._bounds.y;
-        if (x > this._bounds.right) { x = this._bounds.right; }
-        if (y > this._bounds.bottom) { y = this._bounds.bottom; }
         if (this._offset.x != x || this._offset.y != y) {
             this._offset = new core.Point(x, y);
             this._panes.forEach(function(pane, index) {

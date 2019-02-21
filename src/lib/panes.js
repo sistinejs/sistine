@@ -16,11 +16,12 @@ export class Pane {
         this._stage = stage;
         this._needsRepaint = true;
         this._divId = stage.divId;
+        this._parentDiv = $("#" + stage.divId);
         this._canvasId = canvasId;
         this._canvas = null;
         this._zoom = 1.0;
         this._offset = new core.Point();
-        this._parentDiv = $("#" + stage.divId);
+        this._viewBounds = new core.Bounds();
         this._ensureCanvas();
         this._refCount = 1;
     }
@@ -43,8 +44,7 @@ export class Pane {
         if (z > 10) z = 10;
         if (this._zoom != z) {
             this._zoom = z;
-            this.transformChanged = true;
-            this.needsRepaint = true;
+            this._viewBoundsChanged();
         }
     }
 
@@ -52,8 +52,7 @@ export class Pane {
     setOffset(x, y) {
         if (this._offset.x != x || this._offset.y != y) {
             this._offset = new core.Point(x, y);
-            this.transformChanged = true;
-            this.needsRepaint = true;
+            this._viewBoundsChanged();
         }
     }
 
@@ -90,15 +89,25 @@ export class Pane {
         this.element.remove();
     }
 
+    /**
+     * Clears the pane completely.
+     */
+    clear(ctx) {
+        var p1 = this.toWorld(0, 0);
+        var p2 = this.toWorld(this.width, this.height);
+        var fillStyle = this.get("fillStyle");
+        if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.fillRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        } else {
+            console.log("Clearing Panel: ", this.name, p1.x, p1.y, p2.x - p1.x, p2.y - p1.y, ", VB: ", this._viewBounds);
+            ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+        }
+    }
+
     repaint(force) {
         if (force || this.needsRepaint) {
             var ctx = this.context;
-            if (this.transformChanged) {
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.scale(this.zoom, this.zoom);
-                ctx.translate(-this.offset.x, -this.offset.y);
-                this.transformChanged = false;
-            }
             this.clear(ctx);
             ctx.save();
             this.draw(ctx);
@@ -111,8 +120,8 @@ export class Pane {
         var divId = this._divId;
         this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
         this._parentDiv.append(this._canvas);
-        this.layout();
         this._context = this._canvas[0].getContext("2d");
+        this.layout();
     }
 
     get needsRepaint() {
@@ -125,21 +134,6 @@ export class Pane {
 
     get width() { return this._canvas.width(); }
     get height() { return this._canvas.height(); }
-
-    /**
-     * Clears the pane completely.
-     */
-    clear(ctx) {
-        var p1 = this.toWorld(0, 0);
-        var p2 = this.toWorld(this.width, this.height);
-        var fillStyle = this.get("fillStyle");
-        if (fillStyle) {
-            ctx.fillStyle = fillStyle;
-            ctx.fillRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
-        } else {
-            ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
-        }
-    }
 
     layout() {
         var $parent = this._parentDiv;
@@ -162,7 +156,25 @@ export class Pane {
         elem.width(finalWidth);
         elem[0].width = finalWidth;
         elem[0].height = finalHeight;
-        this.transformChanged = true;
+        this._viewBoundsChanged();
+    }
+
+
+    _viewBoundsChanged() {
+        var p1 = this.toWorld(0, 0);
+        var p2 = this.toWorld(this.width, this.height);
+        this._viewBounds.x = p1.x;
+        this._viewBounds.y = p1.y;
+        this._viewBounds.right = p2.x;
+        this._viewBounds.bottom = p2.y;
+        // this.transformChanged = true;
+        // if (this.transformChanged) {
+            var ctx = this.context;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(this.zoom, this.zoom);
+            ctx.translate(-this.offset.x, -this.offset.y);
+            // this.transformChanged = false;
+        // }
         this.needsRepaint = true;
     }
 }
@@ -221,20 +233,28 @@ export class BGPane extends Pane {
         ctx.strokeStyle = this.lineColor;
 
         ctx.beginPath();
-        var startX = this.offset.x;
+        var startX = this._viewBounds.left;
         var startY = this.offset.y;
+        var endX = this._viewBounds.right;
+        var endY = this._viewBounds.bottom;
         // Horiz lines
-        for (var currY = startY; currY < height; currY += space) {
-            if (currY > 0) {
-                ctx.moveTo(0, currY);
-                ctx.lineTo(width, currY);
-            }
+        for (var currY = 0; currY < endY; currY += space) {
+            ctx.moveTo(startX, currY);
+            ctx.lineTo(endX, currY);
         }
-        for (var currX = startX; currX < width; currX += space) {
-            if (currX > 0) {
-                ctx.moveTo(currX, 0);
-                ctx.lineTo(currX, height);
-            }
+        for (var currY = -space; currY > startY; currY -= space) {
+            ctx.moveTo(startX, currY);
+            ctx.lineTo(endX, currY);
+        }
+
+        // Vert lines
+        for (var currX = 0; currX < endX; currX += space) {
+            ctx.moveTo(currX, startY);
+            ctx.lineTo(currX, endY);
+        }
+        for (var currX = -space; currX > startX; currX -= space) {
+            ctx.moveTo(currX, startY);
+            ctx.lineTo(currX, endY);
         }
         ctx.stroke();
     }

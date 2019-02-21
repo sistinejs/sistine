@@ -5,7 +5,6 @@ function setupElements() {
     setupAccordian();
     layoutElements();
     $( window ).resize(function() { layoutElements(); });
-    setupStage();
 }
 
 function setupSplitBar() {
