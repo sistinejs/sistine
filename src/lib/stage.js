@@ -55,6 +55,9 @@ export class Stage extends events.EventHandler {
     setTouchContext(mode, data) {
         this._touchContext.mode = mode || handlers.TouchModes.NONE;
         this._touchContext.data = data;
+        if (this._touchContext.mode == handlers.TouchModes.NONE) {
+            this.cursor = "auto";
+        }
     }
 
     get bounds() { return this._bounds; }

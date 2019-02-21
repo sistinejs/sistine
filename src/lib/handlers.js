@@ -77,6 +77,8 @@ export class StageKeyHandler extends BaseKeyHandler {
             for (var i = 0;i < shapes.length;i++) {
                 shapes[i].removeFromParent();
             }
+        } else if (event.key == "Escape") {
+            this.stage.setTouchContext();
         }
         this.stage.repaint();
     }
@@ -207,7 +209,6 @@ export class StageViewPortHandler extends BaseTouchHandler {
         } else if (this.stage.touchContext.mode == TouchModes.ZOOM_OUT) {
         } else if (this.stage.touchContext.mode == TouchModes.HAND_TOOL) {
             this.stage.setTouchContext();
-            this.stage.cursor = "auto";
         }
         this.stage.repaint();
     }
@@ -386,8 +387,7 @@ export class StageTouchHandler extends BaseTouchHandler {
             this.stage.setZoom(newZoom);
         } else if (this.stage.touchContext.mode == TouchModes.CREATE) {
             // only add a new shape once!
-            this.stage.touchContext = null;
-            this.stage.cursor = "auto";
+            this.stage.setTouchContext();
         }
         this.stage.repaint();
     }
