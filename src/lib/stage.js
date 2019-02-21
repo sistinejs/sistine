@@ -275,95 +275,6 @@ export class Stage extends events.EventHandler {
     scroll(handler) { return this._setupHandler(this.element, "scroll", handler); }
 }
 
-export class Selection {
-    constructor(stage) {
-        this.stage = stage;
-        this.shapes = {};
-        this.downHitInfo = null;
-        this.savedInfos = {};
-        this._count = 0;
-    }
-
-    get count() {
-        return this._count;
-    }
-
-    get allShapes() {
-        var out = [];
-        this.forEach(function(self, shape) {
-            out.push(shape);
-        }, this);
-        return out;
-    }
-
-    forEach(handler, self) {
-        for (var shapeId in this.shapes) {
-            var shape = this.shapes[shapeId];
-            if (handler(self, shape, this) == false)
-                break;
-        }
-    }
-
-    contains(shape) {
-        return shape.id in this.shapes;
-    }
-    
-    add(shape) {
-        if ( ! (shape.id in this.shapes)) {
-            this._count ++;
-        }
-        this.shapes[shape.id] = shape;
-        this.savedInfos[shape.id] = shape.controller.snapshotFor();
-        this.stage.setShapePane(shape, "edit");
-    }
-
-    remove(shape) {
-        if ( shape.id in this.shapes ) {
-            this._count --;
-        }
-        this.stage.setShapePane(shape, "main");
-        delete this.shapes[shape.id];
-        delete this.savedInfos[shape.id];
-    }
-
-    checkpointShapes(hitInfo) {
-        // Updated the save info for all selected shapes
-        this.forEach(function(self, shape) {
-            self.savedInfos[shape.id] = shape.controller.snapshotFor(hitInfo);
-        }, this);
-    }
-
-    getSavedInfo(shape) {
-        return this.savedInfos[shape.id];
-    }
-
-    toggleMembership(shape) {
-        if (shape == null) return false;
-        if (this.contains(shape)) {
-            this.remove(shape);
-            return false;
-        } else {
-            this.add(shape);
-            return true;
-        }
-    }
-
-    clear() {
-        var shapeIndex = this.stage.shapeIndex;
-        for (var shapeId in this.shapes) {
-            this.stage.setShapePane(this.shapes[shapeId], "main");
-        }
-        this.savedInfos = {};
-        this.shapes = {};
-    }
-
-    /**
-     * Create a group out of the elements in this Selection.
-     */
-    group() {
-    }
-}
-
 /**
  * The index structure of a scene lets us re-model how we store and index shapes in a scene
  * for faster access and grouping not just by hierarchy but also to cater for various access
@@ -492,5 +403,123 @@ export class ShapeIndex {
             var child = shape.children[index];
             this._reIndexShape(child);
         }
+    }
+}
+
+export class Selection {
+    constructor(stage) {
+        this.stage = stage;
+        this.shapes = {};
+        this.downHitInfo = null;
+        this.savedInfos = {};
+        this._count = 0;
+    }
+
+    get count() {
+        return this._count;
+    }
+
+    get allShapes() {
+        var out = [];
+        this.forEach(function(self, shape) {
+            out.push(shape);
+        }, this);
+        return out;
+    }
+
+    forEach(handler, self) {
+        for (var shapeId in this.shapes) {
+            var shape = this.shapes[shapeId];
+            if (handler(self, shape, this) == false)
+                break;
+        }
+    }
+
+    contains(shape) {
+        return shape.id in this.shapes;
+    }
+    
+    add(shape) {
+        if ( ! (shape.id in this.shapes)) {
+            this._count ++;
+        }
+        this.shapes[shape.id] = shape;
+        this.savedInfos[shape.id] = shape.controller.snapshotFor();
+        this.stage.setShapePane(shape, "edit");
+    }
+
+    remove(shape) {
+        if ( shape.id in this.shapes ) {
+            this._count --;
+        }
+        this.stage.setShapePane(shape, "main");
+        delete this.shapes[shape.id];
+        delete this.savedInfos[shape.id];
+    }
+
+    checkpointShapes(hitInfo) {
+        // Updated the save info for all selected shapes
+        this.forEach(function(self, shape) {
+            self.savedInfos[shape.id] = shape.controller.snapshotFor(hitInfo);
+        }, this);
+    }
+
+    getSavedInfo(shape) {
+        return this.savedInfos[shape.id];
+    }
+
+    toggleMembership(shape) {
+        if (shape == null) return false;
+        if (this.contains(shape)) {
+            this.remove(shape);
+            return false;
+        } else {
+            this.add(shape);
+            return true;
+        }
+    }
+
+    clear() {
+        var shapeIndex = this.stage.shapeIndex;
+        for (var shapeId in this.shapes) {
+            this.stage.setShapePane(this.shapes[shapeId], "main");
+        }
+        this.savedInfos = {};
+        this.shapes = {};
+    }
+
+    /**
+     * Create a group out of the elements in this Selection.
+     */
+    group() {
+    }
+
+    /**
+     * Ungroups all elements in the current selection.  This is a no-op if number
+     * of elements in the selection is not 1 and the existing element is not a ShapeGroup.
+     */
+    ungroup() {
+    }
+
+    /**
+     * Regroups elements in the selection.  This is useful if elements are added after
+     * grouping and we want to add to existing groups consolidating multiple groups
+     * into a single group.
+     */
+    regroup() {
+    }
+
+    /**
+     * "Copies" the shapes in this selection to the clipboard along with their current state
+     * so that it can be pasted later.   The "cut" parameter also dictates whether the
+     * selected shapes are to be removed from the Scene model too.
+     */
+    copyToClipboard(cut) {
+    }
+
+    /**
+     * Paste a copy of shapes stored in the clipboard.
+     */
+    pasteFromClipboard() {
     }
 }

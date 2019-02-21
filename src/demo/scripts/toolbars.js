@@ -55,12 +55,15 @@ function onRedo() {
 }
 
 function onCut() {
+    theStage.selection.copyToClipboard(true);
 }
 
 function onCopy() {
+    theStage.selection.copyToClipboard();
 }
 
 function onPaste() {
+    theStage.selection.pasteFromClipboard();
 }
 
 function onPointer() {
