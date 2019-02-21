@@ -6,7 +6,7 @@ import { getcssint } from "../utils/dom"
 
 export const TouchModes = {
     NONE: 0,
-    CREATE_TOOL: 1,
+    CREATE: 1,
     ZOOM_IN: 2,
     ZOOM_OUT: 3,
     HAND_TOOL: 4,

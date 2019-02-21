@@ -100,7 +100,6 @@ export class Pane {
             ctx.fillStyle = fillStyle;
             ctx.fillRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
         } else {
-            console.log("Clearing Panel: ", this.name, p1.x, p1.y, p2.x - p1.x, p2.y - p1.y, ", VB: ", this._viewBounds);
             ctx.clearRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
         }
     }
