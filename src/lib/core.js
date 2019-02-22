@@ -213,6 +213,18 @@ export class Shape {
         this._controller = new ShapeController(this);
     }
 
+    forEachChild(handler, self, mutable) {
+        var shapes = this._children;
+        if (mutable == true) {
+            shapes = shapes.slice(0, shapes.length);
+        }
+        for (var index in shapes) {
+            var shape = shapes[index];
+            if (handler(shape, index, self) == false)
+                break;
+        }
+    }
+
     get controller() {
         return this._controller;
     }

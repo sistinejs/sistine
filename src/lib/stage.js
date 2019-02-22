@@ -581,6 +581,21 @@ export class Selection {
      * of elements in the selection is not 1 and the existing element is not a ShapeGroup.
      */
     ungroup() {
+        var selection = this;
+        this.forEach(function(shape, self) {
+            if (shape.isGroup) {
+                selection.remove(shape);
+                var newParent = shape.parent;
+                var bounds = shape.bounds;
+                shape.forEachChild(function(child, index, self) {
+                    newParent.add(child);
+                    child.setLocation(bounds.x + child.bounds.x,
+                                      bounds.y + child.bounds.y);
+                    selection.add(child);
+                }, this, true);
+                newParent.remove(shape);
+            }
+        }, this, true);
     }
 
     /**
