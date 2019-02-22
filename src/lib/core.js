@@ -142,6 +142,27 @@ export class Bounds {
     set width(value) { this._width = value; }
     set height(value) { this._height = value; }
 
+    /**
+     * Extends this bounds by unioning the coordinates of this one with another bounds.
+     */
+    union(another, result) {
+        result = result || this;
+        result.left = Math.min(this.left, another.left);
+        result.top = Math.min(this.top, another.top);
+        result.right = Math.max(this.right, another.right);
+        result.bottom = Math.max(this.bottom, another.bottom);
+        return result;
+    }
+
+    /**
+     * Clips this bounds by intersecting the coordinates of this one with another bounds.
+     */
+    intersect(another, result) {
+        result = result || this;
+        TBD();
+        return result;
+    }
+
     copy() {
         return new Bounds({'x': this.left, 'y': this.top, 'width': this.width, 'height': this.height});
     }
@@ -188,7 +209,7 @@ export class Shape {
         this._scene = null;
         this._children = [];
         this._connections = [];
-        this._controller = null;
+        this._controller = new ShapeController(this);
     }
 
     get controller() {
@@ -349,6 +370,15 @@ export class Shape {
         return false;
     }
 
+    // No Op
+    draw(ctx) {
+        if (this._children.length > 0) {
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 0.5;
+            ctx.strokeRect(this.bounds.left, this.bounds.top, this.bounds.width, this.bounds.height);
+        }
+    }
+
     /**
      * Draws this shape on a given context.
      */
@@ -468,10 +498,7 @@ export class Shape {
     }
 }
 
-export class Layer extends Shape {
-    draw(context) {
-    }
-}
+export class Layer extends Shape { }
 
 /**
  * The Scene is the raw model where all layers and shapes are 

@@ -32,7 +32,6 @@ export class Stage extends events.EventHandler {
         this._parentDiv = $("#" + divId);
         this._scene = scene || new core.Scene();
         this._shapeIndex = new ShapeIndex(scene);
-        this._shapeIndex.defaultPane = "main";
 
         // Track mouse/touch drag events
         this._panes = [];
@@ -284,8 +283,8 @@ export class ShapeIndex {
     constructor(scene) {
         this._shapeIndexes = {};
         this._allShapes = [];
+        this.defaultPane = "main";
         this.scene = scene;
-        this.defaultPane = null;
     }
 
     get scene() {
@@ -327,6 +326,9 @@ export class ShapeIndex {
         }
     }
 
+    /**
+     * Returns true if shape exists in this index.
+     */
     shapeExists(shape) {
         return shape.id in this._shapeIndexes;
     }
@@ -335,7 +337,7 @@ export class ShapeIndex {
      * A new shape is added to the index.
      */
     add(shape) {
-        shape.pane = shape.pane || null;
+        shape.pane = shape.pane || this.defaultPane;
         // See if shape already has an index assigned to it
         if (this.shapeExists(shape)) {
             var index = this._shapeIndexes[shape.id];
@@ -347,7 +349,6 @@ export class ShapeIndex {
             this._shapeIndexes[shape.id] = this._allShapes.length;
             this._allShapes.push(shape);
         }
-        shape.pane = shape.pane || this.defaultPane;
     }
 
     addShapes(shapes) {
@@ -371,6 +372,13 @@ export class ShapeIndex {
         for (var i in shapes) {
             this.remove(shapes[i]);
         }
+    }
+
+    /**
+     * Returns true if shape exists in this index.
+     */
+    getShape(id) {
+        return shape.id in this._shapeIndexes;
     }
 
     /**
@@ -528,17 +536,39 @@ export class Selection {
         // But if different shapes have different parents then only
         // those shapes that share a parent can be grouped together.
         var groups = {};
-        forEach(function(self, shape) {
+        this.forEach(function(self, shape) {
             var parId = shape.parent;
             if (parId) {
                 parId = shape.parent.id;
             }
             if (! (parId in groups)) {
-                groups[parId] = [];
+                groups[parId] = {
+                    parent: shape.parent,
+                    bounds: shape.bounds.copy(),
+                    shapes: []
+                };
             }
-            groups[parId].push(shape);
+            groups[parId].shapes.push(shape);
+            groups[parId].bounds.union(shape.bounds);
         }, this);
         console.log("Found Groups: ", groups);
+
+        this.clear();
+        for (var parentId in groups) {
+            var currGroup = groups[parentId];
+            var currBounds = currGroup.bounds;
+            var currParent = currGroup.parent;
+            // Here create a new shape group
+            var newParent = new core.Shape();
+            currParent.add(newParent);
+            newParent.setLocation(currBounds.x, currBounds.y);
+            newParent.setSize(currBounds.width, currBounds.height);
+            currGroup.shapes.forEach(function(child, index) {
+                newParent.add(child);
+                child.setLocation(child.bounds.x - currBounds.x, child.bounds.y - currBounds.y);
+            });
+            this.add(newParent);
+        }
     }
 
     /**

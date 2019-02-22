@@ -135,6 +135,7 @@ export class BaseTouchHandler {
         this.isClick = this.timeDelta <= this.clickThresholdTime;
         this.downTime = null;
         this.downPoint = null;
+        console.log("Up, over, enter: ", this.mouseOver, this.mouseEntered);
 
         if (this.isClick) {
             this._onMouseClick(event);
@@ -154,10 +155,18 @@ export class BaseTouchHandler {
         this.currPoint = this.toWorld(event.offsetX, event.offsetY, this.currPoint);
     }
 
-    _onMouseEnter(event) { }
-    _onMouseLeave(event) { }
-    _onMouseOver(event) { }
-    _onMouseOut(event) { }
+    _onMouseEnter(event) { 
+        this.mouseEntered = true;
+    }
+    _onMouseLeave(event) { 
+        this.mouseEntered = false;
+    }
+    _onMouseOver(event) { 
+        this.mouseOver = true;
+    }
+    _onMouseOut(event) { 
+        this.mouseOver = false;
+    }
 }
 
 export class StageBackgroundHandler extends BaseTouchHandler {
@@ -387,21 +396,25 @@ export class StageTouchHandler extends BaseTouchHandler {
             this.stage.setZoom(newZoom);
         } else if (this.stage.touchContext.mode == TouchModes.CREATE) {
             // only add a new shape once!
+            var shapeForCreation = this.stage.touchContext.data;
             this.stage.setTouchContext();
+            this.stage.shapeIndex.setPane(shapeForCreation, "main");
         }
         this.stage.repaint();
     }
 
     _onMouseEnter(event) { 
+        super._onMouseEnter(event);
         this._editPane.element.focus();
     }
     _onMouseLeave(event) { 
+        super._onMouseLeave(event);
         this._editPane.element.blur();
     }
     _onMouseOver(event) {
-        this._editPane.element.focus();
+        super._onMouseOver(event);
     }
     _onMouseOut(event) { 
-        this._editPane.element.blur();
+        super._onMouseOut(event);
     }
 }
