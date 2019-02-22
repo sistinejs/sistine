@@ -50,21 +50,21 @@ export class StageKeyHandler extends BaseKeyHandler {
     _onKeyDown(event) { 
         console.log("KeyDown: ", event); 
         if (event.key == "ArrowLeft") {
-            this.stage.selection.forEach(function(self, shape) {
+            this.stage.selection.forEach(function(shape) {
                 shape.move(-1, 0);
-            }, this);
+            });
         } else if (event.key == "ArrowUp") {
-            this.stage.selection.forEach(function(self, shape) {
+            this.stage.selection.forEach(function(shape) {
                 shape.move(0, -1);
-            }, this);
+            });
         } else if (event.key == "ArrowDown") {
-            this.stage.selection.forEach(function(self, shape) {
+            this.stage.selection.forEach(function(shape) {
                 shape.move(0, 1);
-            }, this);
+            });
         } else if (event.key == "ArrowRight") {
-            this.stage.selection.forEach(function(self, shape) {
+            this.stage.selection.forEach(function(shape) {
                 shape.move(1, 0);
-            }, this);
+            });
         }
         this.stage.repaint();
     }
@@ -320,7 +320,7 @@ export class StageTouchHandler extends BaseTouchHandler {
             console.log("EventPt: ", event.offsetX, event.offsetY, ", WorldPt: ", this.currPoint.x, this.currPoint.y, ", Mode: ", stage.touchContext);
             this.stage.cursor = "auto";
             // Mouse is not primed for "creating" an object
-            selection.forEach(function(self, shape) {
+            selection.forEach(function(shape, self) {
                 var currHitInfo = shape.controller.getHitInfo(self.currPoint.x, self.currPoint.y);
                 if (currHitInfo != null) {
                     self.stage.cursor = currHitInfo.cursor;
@@ -331,7 +331,7 @@ export class StageTouchHandler extends BaseTouchHandler {
             if (this.downPoint != null) {
                 // We are in a position to "transform" the entry pressed
                 var shapesFound = false;
-                selection.forEach(function(self, shape) {
+                selection.forEach(function(shape, self) {
                     shapesFound = true;
                     var savedInfo = selection.getSavedInfo(shape);
                     shape.controller.applyHitChanges(self.downHitInfo, savedInfo,

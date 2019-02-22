@@ -198,7 +198,8 @@ export class Shape {
     constructor(configs) {
         configs = configs || {};
         this.id = ShapeGlobals._shapeCounter++;
-        this.parent = null;
+        this._parent = null;
+        this.isGroup = false;
         this._configs = configs;
         configs.name = configs.name || "";
         configs.angle = configs.angle || 0;
@@ -289,6 +290,10 @@ export class Shape {
         return this.setAngle(this.angle + dtheta);
     }
 
+    get parent() {
+        return this._parent;
+    }
+
     get(name) {
         return this._configs[name];
     }
@@ -329,7 +334,7 @@ export class Shape {
                 // remove from old parent - Important!
                 if (shape.removeFromParent()) {
                     this._children.push(shape);
-                    shape.parent = this;
+                    shape._parent = this;
                     shape.scene = this.scene;
                     this.eventTriggered(event);
                     return true;
@@ -351,7 +356,7 @@ export class Shape {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == shape) {
                         this._children.splice(i, 1);
-                        shape.parent = null;
+                        shape._parent = null;
                         this.eventTriggered(event);
                         return true;
                     }
@@ -364,7 +369,7 @@ export class Shape {
     removeFromParent() {
         if (this.parent == null) return true;
         if (this.parent.remove(this)) {
-            this.parent = null;
+            this._parent = null;
             return true;
         }
         return false;

@@ -429,16 +429,20 @@ export class Selection {
 
     get allShapes() {
         var out = [];
-        this.forEach(function(self, shape) {
+        this.forEach(function(shape) {
             out.push(shape);
-        }, this);
+        });
         return out;
     }
 
-    forEach(handler, self) {
-        for (var shapeId in this.shapes) {
-            var shape = this.shapes[shapeId];
-            if (handler(self, shape, this) == false)
+    forEach(handler, self, mutable) {
+        var shapes = this.shapes;
+        if (mutable == true) {
+            shapes = Object.assign({}, shapes);
+        }
+        for (var shapeId in shapes) {
+            var shape = shapes[shapeId];
+            if (handler(shape, self) == false)
                 break;
         }
     }
@@ -467,7 +471,7 @@ export class Selection {
 
     checkpointShapes(hitInfo) {
         // Updated the save info for all selected shapes
-        this.forEach(function(self, shape) {
+        this.forEach(function(shape, self) {
             self.savedInfos[shape.id] = shape.controller.snapshotFor(hitInfo);
         }, this);
     }
@@ -488,7 +492,7 @@ export class Selection {
     }
 
     clear() {
-        this.forEach(function(self, shape) {
+        this.forEach(function(shape, self) {
             self.stage.setShapePane(shape, "main");
         }, this);
         this.savedInfos = {};
@@ -536,7 +540,7 @@ export class Selection {
         // But if different shapes have different parents then only
         // those shapes that share a parent can be grouped together.
         var groups = {};
-        this.forEach(function(self, shape) {
+        this.forEach(function(shape) {
             var parId = shape.parent;
             if (parId) {
                 parId = shape.parent.id;
@@ -550,7 +554,7 @@ export class Selection {
             }
             groups[parId].shapes.push(shape);
             groups[parId].bounds.union(shape.bounds);
-        }, this);
+        });
         console.log("Found Groups: ", groups);
 
         this.clear();
@@ -560,6 +564,7 @@ export class Selection {
             var currParent = currGroup.parent;
             // Here create a new shape group
             var newParent = new core.Shape();
+            newParent.isGroup = true;
             currParent.add(newParent);
             newParent.setLocation(currBounds.x, currBounds.y);
             newParent.setSize(currBounds.width, currBounds.height);
