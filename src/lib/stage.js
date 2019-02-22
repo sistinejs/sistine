@@ -217,7 +217,7 @@ export class Stage extends events.EventHandler {
     setShapePane(shape, pane) {
         if (shape.pane != pane) {
             this.paneNeedsRepaint(shape.pane);
-            this.shapeIndex.setPane(shape, "edit");
+            this.shapeIndex.setPane(shape, pane);
             this.paneNeedsRepaint(shape.pane);
         }
     }
@@ -480,12 +480,12 @@ export class Selection {
     }
 
     clear() {
-        var shapeIndex = this.stage.shapeIndex;
-        for (var shapeId in this.shapes) {
-            this.stage.setShapePane(this.shapes[shapeId], "main");
-        }
+        this.forEach(function(self, shape) {
+            self.stage.setShapePane(shape, "main");
+        }, this);
         this.savedInfos = {};
         this.shapes = {};
+        this._count = 0;
     }
 
     /**
@@ -516,6 +516,29 @@ export class Selection {
      * Create a group out of the elements in this Selection.
      */
     group() {
+        // Not enough shapes
+        if (this.count <= 1) return ;
+
+        // Collect all shapes in this selection
+        // Identify their parents.
+        // Do they all have the same parent?
+        // if all parents are "null" then they are all at the top level
+        // if they are all non null but same then they are all at teh same 
+        // level under the same parent so same as above and OK.
+        // But if different shapes have different parents then only
+        // those shapes that share a parent can be grouped together.
+        var groups = {};
+        forEach(function(self, shape) {
+            var parId = shape.parent;
+            if (parId) {
+                parId = shape.parent.id;
+            }
+            if (! (parId in groups)) {
+                groups[parId] = [];
+            }
+            groups[parId].push(shape);
+        }, this);
+        console.log("Found Groups: ", groups);
     }
 
     /**
