@@ -32,7 +32,6 @@ function loadShapes() {
         });
         iconStage.scene.add(toolbarShape);
         iconStage.layout();
-        iconStage.repaint();
         // topPane.element.tooltip();
 
         // Setup highlighter!

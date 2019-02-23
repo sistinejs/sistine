@@ -16,6 +16,7 @@ function setupStage() {
     theStage.showBackground = true;
     // Add a zoom handler!!
     zoomHandler = new Sistine.handlers.StageViewPortHandler(theStage);
+    addSampleShapes();
 }
 
 function addShape(objid, configs) {
@@ -29,10 +30,10 @@ function addShape(objid, configs) {
 }
 
 function addSampleShapes() {
-    addShape("Triangle", {"x": 20, "y": 50, "width": 200, "height": 200, "lineWidth": 2});
-    addShape("Rectangle", { "x": 200, "y": 100, "width": 100, "height": 50, "lineWidth": 2 });
-    addShape("Square", { "x": 550, "y": 100, "width": 200, "height": 100, "fillStyle": 'red' });
-    theStage.repaint();
+    addShape("Triangle", {"x": 80, "y": 150, "width": 200, "height": 200, "lineWidth": 2});
+    addShape("Circle", { "x": 200, "y": 50, "width": 100, "height": 100, "lineWidth": 2 });
+    addShape("Square", { "x": 350, "y": 50, "width": 200, "height": 100, "fillStyle": 'red' });
+    addShape("Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
 }
 
 x = null;
