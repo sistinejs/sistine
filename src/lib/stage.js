@@ -31,7 +31,7 @@ export class Stage extends events.EventHandler {
         this._divId = divId;
         this._parentDiv = $("#" + divId);
         this._scene = scene || new core.Scene();
-        this._shapeIndex = new ShapeIndex(scene);
+        this._shapeIndex = new ShapeIndex(this._scene);
 
         // Track mouse/touch drag events
         this._panes = [];
