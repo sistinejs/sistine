@@ -66,7 +66,6 @@ export class StageKeyHandler extends BaseKeyHandler {
                 shape.move(1, 0);
             });
         }
-        this.stage.repaint();
     }
 
     _onKeyUp(event) {
@@ -79,8 +78,8 @@ export class StageKeyHandler extends BaseKeyHandler {
             }
         } else if (event.key == "Escape") {
             this.stage.setTouchContext();
+            this.stage.selection.clear();
         }
-        this.stage.repaint();
     }
 }
 
@@ -123,9 +122,12 @@ export class BaseTouchHandler {
     }
 
     _onMouseDown(event) {
-        this.currPoint = this.toWorld(event.offsetX, event.offsetY, this.currPoint);
-        this.downPoint = this.toWorld(event.offsetX, event.offsetY, this.downPoint);
-        this.downTime = event.timeStamp;
+        if (event.button == 0) {
+            this.currPoint = this.toWorld(event.offsetX, event.offsetY, this.currPoint);
+            this.downPoint = this.toWorld(event.offsetX, event.offsetY, this.downPoint);
+            this.downTime = event.timeStamp;
+            console.log("CP, DP: ", this.currPoint, this.downPoint);
+        }
     }
 
     _onMouseUp(event) {
@@ -169,7 +171,7 @@ export class BaseTouchHandler {
     }
 }
 
-export class StageBackgroundHandler extends BaseTouchHandler {
+export class StageBGHandler extends BaseTouchHandler {
     constructor(stage) {
         super(stage);
 
@@ -219,7 +221,6 @@ export class StageViewPortHandler extends BaseTouchHandler {
         } else if (this.stage.touchContext.mode == TouchModes.HAND_TOOL) {
             this.stage.setTouchContext();
         }
-        this.stage.repaint();
     }
 
     _onMouseMove(event) { 
@@ -245,7 +246,6 @@ export class StageViewPortHandler extends BaseTouchHandler {
                         ", Mode: ", this.stage.touchContext);
             if (this.stage.touchContext.mode == TouchModes.HAND_TOOL) {
                 this.stage.setOffset(this.downOffset.x - deltaX, this.downOffset.y - deltaY);
-                this.stage.repaint();
             } else if (this.stage.touchContext.mode == TouchModes.ZOOM_IN) {
                 this.stage.cursor = "zoom-in";
             } else if (this.stage.touchContext.mode == TouchModes.ZOOM_OUT) {
@@ -299,7 +299,6 @@ export class StageTouchHandler extends BaseTouchHandler {
                     }
                 }
                 selection.checkpointShapes(this.downHitInfo);
-                this.stage.repaint();
             }
         }
         else if (this.stage.touchContext.mode == TouchModes.CREATE) {
@@ -339,7 +338,6 @@ export class StageTouchHandler extends BaseTouchHandler {
                                                      self.currPoint.x, self.currPoint.y);
                 }, this);
                 stage.paneNeedsRepaint("edit");
-                // this._editPane.repaint();
                 if ( ! shapesFound ) {
                     // Just draw a "selection rectangle"
                     var x = Math.min(this.downPoint.x, this.currPoint.x);
@@ -400,7 +398,6 @@ export class StageTouchHandler extends BaseTouchHandler {
             this.stage.setTouchContext();
             this.stage.shapeIndex.setPane(shapeForCreation, "main");
         }
-        this.stage.repaint();
     }
 
     _onMouseEnter(event) { 

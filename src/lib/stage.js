@@ -45,6 +45,7 @@ export class Stage extends events.EventHandler {
 
         // The touch mode passes information on what each of the handlers are ok to perform
         this._touchContext = new handlers.TouchContext()
+        this._kickOffRepaint();
     }
 
     get touchContext() {
@@ -75,7 +76,6 @@ export class Stage extends events.EventHandler {
             this._panes.forEach(function(pane, index) {
                 pane.setZoom(z);
             });
-            this.repaint();
         }
     }
 
@@ -86,7 +86,6 @@ export class Stage extends events.EventHandler {
             this._panes.forEach(function(pane, index) {
                 pane.setOffset(x, y);
             });
-            this.repaint();
         }
     }
 
@@ -102,7 +101,7 @@ export class Stage extends events.EventHandler {
         if (this._showBackground != show) {
             this._showBackground = show;
             if (show) {
-                this.bgHandler = new handlers.StageBackgroundHandler(this);
+                this.bgHandler = new handlers.StageBGHandler(this);
             } else {
                 this.bgHandler.detach();
                 this.bgHandler.null;
@@ -204,13 +203,17 @@ export class Stage extends events.EventHandler {
     get viewBounds() { return this._viewBounds; }
 
     layout() {
-        for (var i = this._panes.length - 1; i >= 0;i--) this._panes[i].layout();
-        this.repaint();
+        for (var i = this._panes.length - 1; i >= 0;i--)
+            this._panes[i].layout();
     }
 
-    repaint(force) {
-        for (var i = this._panes.length - 1; i >= 0;i--)
-            this._panes[i].repaint(force);
+    _kickOffRepaint() {
+        var self = this;
+        this.animFrameId = requestAnimationFrame(function() {
+            for (var i = self._panes.length - 1; i >= 0;i--)
+                self._panes[i].paint();
+            self._kickOffRepaint();
+        });
     }
 
     setShapePane(shape, pane) {
@@ -222,17 +225,13 @@ export class Stage extends events.EventHandler {
     }
 
     eventTriggered(event) {
-        // console.log("Event: ", event);
         if (event.name == "ShapeAdded") {
-            this.shapeIndex.add(event.shape);
             this.paneNeedsRepaint(event.shape.pane)
         } else if (event.name == "ShapeRemoved") {
-            this.shapeIndex.remove(event.shape);
             this.paneNeedsRepaint(event.shape.pane)
         } else if (event.name == "PropertyChanged") {
             this.paneNeedsRepaint(event.source.pane)
         }
-        this.repaint();
     }
 
     paneNeedsRepaint(name) {
@@ -279,12 +278,22 @@ export class Stage extends events.EventHandler {
  * for faster access and grouping not just by hierarchy but also to cater for various access
  * characteristics. (say by location, by attribute type, by zIndex etc)
  */
-export class ShapeIndex {
+export class ShapeIndex extends events.EventHandler {
     constructor(scene) {
+        super();
         this._shapeIndexes = {};
         this._allShapes = [];
         this.defaultPane = "main";
         this.scene = scene;
+    }
+
+    eventTriggered(event) {
+        if (event.name == "ShapeAdded") {
+            this.add(event.shape);
+        } else if (event.name == "ShapeRemoved") {
+            this.remove(event.shape);
+        } else if (event.name == "PropertyChanged") {
+        }
     }
 
     get scene() {
@@ -293,10 +302,16 @@ export class ShapeIndex {
 
     set scene(s) {
         if (s != this._scene) {
+            if (this._scene != null) {
+                this._scene.removeHandler(this);
+            }
             this._scene = s;
             this._shapeIndexes = {};
             this._allShapes = [];
             this.reIndex();     // Build the index for this new scene!
+            if (this._scene != null) {
+                this._scene.addHandler(this);
+            }
         }
     }
 

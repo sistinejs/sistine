@@ -104,7 +104,7 @@ export class Pane {
         }
     }
 
-    repaint(force) {
+    paint(force) {
         if (force || this.needsRepaint) {
             var ctx = this.context;
             this.clear(ctx);
@@ -127,6 +127,9 @@ export class Pane {
         return this._needsRepaint;
     }
 
+    /**
+     * Ensures that a given region needs repainting.
+     */
     set needsRepaint(n) {
         this._needsRepaint = n;
     }
@@ -183,19 +186,64 @@ export class ShapesPane extends Pane {
         super(name, stage, canvasId);
     }
 
+    /**
+     * Our drawing needs to be smarter here.
+     * We currently would have sets of regions that need to be
+     * repainted.  But since we may not be doing a recursive
+     * tree walking, we need to ensure that when a Shape "S" is being 
+     * rendered, all its parent/ancestor nodes' transforms have 
+     * already been applied.
+    *
+    * So we have the hierarchy:
+    *
+    * A -> B -> C
+    * |    |    |--- D
+    * |    |    |--- E
+    * |    |--> F
+    * |         |--- H
+    * |    |--> G
+    * |         |--- I
+    * |--- I
+    * |--- J
+    *      |--- K
+    *      |--- L
+    *
+    * If these shapes can be arrived at any order, then we need following to be met:
+    * All ancestors are drawn first.
+    * When a node, say D is draw, its ancestors' transforms are applied.
+    *
+    * For this optimization we definitely need a "topological" sorting of nodes, 
+    * This can be achieved by simply tree walking the scene graph if the entire
+    * graph is to be drawn otherwise we need better indexing.
+    */
     draw(ctx) {
+        var pane = this;
         var stage = this._stage;
         var touchHandler = stage.touchHandler;
-        var context = this.context;
         stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
-            shape.applyTransforms(context);
-            shape.applyStyles(context);
-            shape.draw(context);
+            ctx.save();
+            pane._ensureParentTransform(ctx, shape.parent);
+            shape.applyTransforms(ctx);
+            shape.applyStyles(ctx);
+            shape.draw(ctx);
             if (touchHandler != null && stage.selection.contains(shape)) {
-                shape.drawControls(context);
+                shape.drawControls(ctx);
             }
-            shape.revertTransforms(context);
+            shape.revertTransforms(ctx);
+            ctx.restore();
         });
+    }
+
+    _ensureParentTransform(ctx, shape) {
+        if (shape) {
+            this._ensureParentTransform(ctx, shape.parent);
+            var angle = shape.get("angle");
+            var cx = shape.bounds.centerX;
+            var cy = shape.bounds.centerY;
+            ctx.translate(cx, cy);
+            ctx.rotate((Math.PI * shape.get("angle")) / 180.0);
+            ctx.translate(shape.bounds.x - cx, shape.bounds.y - cy);
+        }
     }
 }
 
