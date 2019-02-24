@@ -220,18 +220,61 @@ export class ShapesPane extends Pane {
         var pane = this;
         var stage = this._stage;
         var touchHandler = stage.touchHandler;
-        stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
-            ctx.save();
-            pane._ensureParentTransform(ctx, shape.parent);
-            shape.applyTransforms(ctx);
-            shape.applyStyles(ctx);
+        var byWalking = true;
+        if (byWalking) {
+            var scene = stage.scene;
+            for (var i = 0;i < scene.layers.length;i++) {
+                var layer = scene.layers[i];
+                this.drawShape(ctx, layer, stage, this.viewPort);
+            }
+        } else {
+            stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
+                if (!shape.isVisible) return ;
+                ctx.save();
+                pane._ensureParentTransform(ctx, shape.parent);
+                shape.applyTransforms(ctx);
+                shape.applyStyles(ctx);
+                shape.draw(ctx);
+                if (touchHandler != null && stage.selection.contains(shape)) {
+                    shape.drawControls(ctx);
+                }
+                shape.revertTransforms(ctx);
+                ctx.restore();
+            });
+        }
+    }
+
+    drawShape(ctx, shape, stage, clipBounds) {
+        // TODO: Update clip bounds as necessary
+        if (!shape.isVisible) return;
+        var touchHandler = stage.touchHandler;
+        var belongsToPane = shape.pane == this.name;
+        shape.applyTransforms(ctx);
+        shape.applyStyles(ctx);
+        if (belongsToPane) {
             shape.draw(ctx);
+        }
+        // Now draw all the children
+        if (shape.hasChildren) {
+            // ctx.save();
+            // var angle = shape.get("angle");
+            var cx = 0; // shape.bounds.centerX;
+            var cy = 0; // shape.bounds.centerY;
+            // ctx.translate(cx, cy);
+            // ctx.rotate((Math.PI * shape.get("angle")) / 180.0);
+            ctx.translate(shape.bounds.x - cx, shape.bounds.y - cy);
+            shape.forEachChild(function(child, index, self) {
+                self.drawShape(ctx, child, stage, clipBounds);
+            }, this);
+            ctx.translate(cx - shape.bounds.x, cy - shape.bounds.y);
+            // ctx.restore();
+        }
+        if (belongsToPane) {
             if (touchHandler != null && stage.selection.contains(shape)) {
                 shape.drawControls(ctx);
             }
-            shape.revertTransforms(ctx);
-            ctx.restore();
-        });
+        }
+        shape.revertTransforms(ctx);
     }
 
     _ensureParentTransform(ctx, shape) {

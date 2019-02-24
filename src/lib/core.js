@@ -147,10 +147,14 @@ export class Bounds {
      */
     union(another, result) {
         result = result || this;
-        result.left = Math.min(this.left, another.left);
-        result.top = Math.min(this.top, another.top);
-        result.right = Math.max(this.right, another.right);
-        result.bottom = Math.max(this.bottom, another.bottom);
+        var newLeft = Math.min(this.left, another.left);
+        var newTop = Math.min(this.top, another.top);
+        var newRight = Math.max(this.right, another.right);
+        var newBottom = Math.max(this.bottom, another.bottom);
+        result.left = newLeft;
+        result.top = newTop;
+        result.right = newRight;
+        result.bottom = newBottom;
         return result;
     }
 
@@ -209,6 +213,7 @@ export class Shape {
         this._bounds = new Bounds(configs)
         this._scene = null;
         this._children = [];
+        this.isVisible = true;
         this._connections = [];
         this._controller = new ShapeController(this);
     }
@@ -302,13 +307,11 @@ export class Shape {
         return this.setAngle(this.angle + dtheta);
     }
 
-    get parent() {
-        return this._parent;
-    }
-
-    get(name) {
-        return this._configs[name];
-    }
+    childAtIndex(i) { return this._children[i]; } 
+    get hasChildren() { return this._children.length > 0; } 
+    get childCount() { return this._children.length; } 
+    get parent() { return this._parent; } 
+    get(name) { return this._configs[name]; }
 
     get bounds() { return this._bounds; }
     get name() { return this.get("name"); }
@@ -522,7 +525,7 @@ export class Layer extends Shape { }
  * managed.  As far as possible this does not perform any view 
  * related operations as that is decoupled into the view entity.
  */
-export class Scene extends events.EventHandler {
+export class Scene extends events.EventDispatcher {
     constructor(configs) {
         super();
         configs = configs || {};
@@ -530,24 +533,13 @@ export class Scene extends events.EventHandler {
         this._layers = []
         this.addLayer();
         this._selectedLayer = 0;
-        this._eventHandlers = [];
-    }
-
-    addHandler(handler) {
-        var i = this._eventHandlers.indexOf(handler);
-        if (i < 0) {
-            this._eventHandlers.push(handler);
-        }
-    }
-
-    removeHandler(handler) {
-        var i = this._eventHandlers.indexOf(handler);
-        if (i >= 0) {
-            this._eventHandlers.splice(i, 1);
-        }
     }
 
     get bounds() { return this._bounds; }
+
+    layerAtIndex(index) {
+        return this._layers[index];
+    }
 
     get layers() {
         return this._layers;
@@ -593,31 +585,6 @@ export class Scene extends events.EventHandler {
             this._layers.splice(index, 0, layer);
         }
         return layer;
-    }
-
-    // Event handling
-    /**
-     * All events are syncronous and follow a "shouldTriggerX" followed by a 
-     * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
-     * of the event there by preventing a certain change that may be going on.
-     */
-    shouldTrigger(event) {
-        for (var i = 0, L = this._eventHandlers.length;i < L;i++) {
-            if (!this._eventHandlers[i].shouldTrigger(event)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * This is called after a particular change has been approved to notify that 
-     * a change has indeed gone through.
-     */
-    eventTriggered(event) {
-        for (var i = 0, L = this._eventHandlers.length;i < L;i++) {
-            this._eventHandlers[i].eventTriggered(event);
-        }
     }
 }
 

@@ -319,6 +319,9 @@ export class ShapeIndex extends events.EventHandler {
         if (shape != null && shape.pane != pane) {
             shape.pane = pane;
         }
+        shape.forEachChild(function(child, index, self) {
+            self.setPane(child, pane);
+        }, this);
     }
 
     /**
@@ -399,12 +402,24 @@ export class ShapeIndex extends events.EventHandler {
     /**
      * Given a coordinate (x,y) returns the topmost shape that contains this point.
      */
-    getShapeAt(x, y) {
-        var allShapes = this._allShapes;
-        for (var index in allShapes) {
-            var shape = allShapes[index];
-            if (shape != null && shape.containsPoint(x, y)) {
-                return shape;
+    getShapeAt(x, y, root) {
+        root = root || null;
+        if (root == null) {
+            var L = this.scene.layerCount;
+            for (var i = 0; i < L;i++) {
+                var layer = this.scene.layerAtIndex(i);
+                var shape = this.getShapeAt(x, y, layer);
+                if (shape != null) {
+                    return shape;
+                }
+            }
+        } else {
+            // Go through all of root's children to see if its children has it
+            for (var i = 0;i < root.childCount;i++) {
+                var shape = root.childAtIndex(i);
+                if (shape.containsPoint(x, y)) {
+                    return shape;
+                }
             }
         }
         return null;
