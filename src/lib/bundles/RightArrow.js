@@ -30,14 +30,14 @@ export class RightArrowShape extends core.Shape {
         var tp = width * this._tipPullback;
 
         ctx.beginPath();
-        ctx.moveTo(x + width, y + (height - sh) / 2);
-        ctx.lineTo(x + width, y + (height + sh) / 2);
-        ctx.lineTo(x + tl, y + (height + sh) / 2);
-        ctx.lineTo(x + tl - tp, y + height);
-        ctx.lineTo(x, y + height / 2);
-        ctx.lineTo(x + tl + tp, y);
-        ctx.lineTo(x + tl, y + (height - sh) / 2);
-        ctx.lineTo(x + width, y + (height - sh) / 2);
+        ctx.moveTo(x, y + (height - sh) / 2);
+        ctx.lineTo(x, y + (height + sh) / 2);
+        ctx.lineTo(x + width - tl, y + (height + sh) / 2);
+        ctx.lineTo(x + width - tl - tp, y + height);
+        ctx.lineTo(x + width, y + height / 2);
+        ctx.lineTo(x + width - tl - tp, y);
+        ctx.lineTo(x + width - tl, y + (height - sh) / 2);
+        ctx.lineTo(x, y + (height - sh) / 2);
         if (this.fillStyle) {
             ctx.fill();
         }
