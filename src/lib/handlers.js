@@ -205,7 +205,14 @@ export class StageViewPortHandler extends BaseTouchHandler {
     }
 
     toWorld(x, y, result) {
-        return this._bgPane.toWorld(x, y, result);
+        result = result || new core.Point(x, y);
+        if (this.downPoint != null) {
+            result.x = (x / this._bgPane.zoom) + this.downOffset.x;
+            result.y = (y / this._bgPane.zoom) + this.downOffset.y;
+            return result;
+        } else {
+            return this._bgPane.toWorld(x, y, result);
+        }
     }
 
     _onMouseDown(event) {
@@ -219,7 +226,7 @@ export class StageViewPortHandler extends BaseTouchHandler {
         if (this.stage.touchContext.mode == TouchModes.ZOOM_IN) {
         } else if (this.stage.touchContext.mode == TouchModes.ZOOM_OUT) {
         } else if (this.stage.touchContext.mode == TouchModes.HAND_TOOL) {
-            this.stage.setTouchContext();
+            // this.stage.setTouchContext();
         }
     }
 
@@ -328,7 +335,10 @@ export class StageTouchHandler extends BaseTouchHandler {
         var stage = this.stage;
         var selection = stage.selection;
         if (this.stage.touchContext.mode == TouchModes.NONE) {
-            console.log("EventPt: ", event.offsetX, event.offsetY, ", WorldPt: ", this.currPoint.x, this.currPoint.y, ", Mode: ", stage.touchContext);
+            console.log("EventPt: ", event.offsetX, event.offsetY,
+                        ", WorldPt: ", this.currPoint.x, this.currPoint.y,
+                        ", Mode: ", stage.touchContext,
+                        ", Offset: ", this._editPane.offset);
             this.stage.cursor = "auto";
             // Mouse is not primed for "creating" an object
             selection.forEach(function(shape, self) {
