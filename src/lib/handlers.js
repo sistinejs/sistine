@@ -284,8 +284,20 @@ export class StageTouchHandler extends BaseTouchHandler {
         if (this.stage.touchContext.mode == TouchModes.NONE) {
             this.selectingMultiple = this._selectingMultipleShapes(event);
             if (event.button == 0) {
-                // We have alt button down so allow multiple shapes to be added
-                var hitShape = shapeIndex.getShapeAt(this.downPoint.x, this.downPoint.y);
+                // See if first any existing items in our selection can handle this "down"
+                var hitShape = null;
+                selection.forEach(function(shape, self) {
+                    var currHitInfo = shape.controller.getHitInfo(self.currPoint.x, self.currPoint.y);
+                    if (currHitInfo != null) {
+                        self.stage.cursor = currHitInfo.cursor;
+                        hitShape = shape;
+                        return false;
+                    }
+                }, this);
+
+                if (hitShape == null) {
+                    hitShape = shapeIndex.getShapeAt(this.downPoint.x, this.downPoint.y);
+                }
                 if (hitShape == null) {
                     selection.clear();
                 } else {

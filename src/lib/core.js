@@ -1,5 +1,6 @@
 
 import * as events from "./events";
+import * as geom from "../utils/geom"
 
 export const DEFAULT_CONTROL_SIZE = 5;
 
@@ -458,12 +459,13 @@ export class Shape {
     }
 
     applyTransforms(ctx) {
-        if (this.get("angle")) {
+        var angle = this.get("angle");
+        if (angle) {
             ctx.save(); 
             var cx = this.bounds.centerX;
             var cy = this.bounds.centerY;
             ctx.translate(cx, cy);
-            ctx.rotate((Math.PI * this.get("angle")) / 180.0);
+            ctx.rotate(angle);
             ctx.translate(-cx, -cy);
         }
     }
@@ -498,6 +500,17 @@ export class Shape {
                            DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE,
                            DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE);
         }
+        // Draw the "rotation" control
+        ctx.beginPath();
+        geom.pathEllipse(ctx, this.bounds.right + 30 - DEFAULT_CONTROL_SIZE, 
+                         this.bounds.centerY - DEFAULT_CONTROL_SIZE, 
+                         DEFAULT_CONTROL_SIZE * 2, DEFAULT_CONTROL_SIZE * 2);
+        ctx.fillStyle = 'green';
+        ctx.fill();
+        ctx.moveTo(this.bounds.centerX, this.bounds.centerY);
+        ctx.lineTo(this.bounds.right + 30, this.bounds.centerY);
+        ctx.strokeStyle = 'blue';
+        ctx.stroke();
     }
 
     /**
@@ -660,7 +673,8 @@ export class Scene extends events.EventDispatcher {
 export const HitType = {
     MOVE: 0,
     SIZE: 1,
-    CONTROL: 2,
+    ROTATE: 2,
+    CONTROL: 3,
 
     SIZE_N: 0,
     SIZE_NE: 1,
@@ -732,6 +746,13 @@ export class ShapeController extends events.EventHandler {
                 return new HitInfo(HitType.SIZE, i, cursor);
             }
         }
+
+        var rotX = bounds.right + 30;
+        var rotY = bounds.centerY;
+        if (x >= rotX - DEFAULT_CONTROL_SIZE && x <= rotX + DEFAULT_CONTROL_SIZE &&
+            y >= rotY - DEFAULT_CONTROL_SIZE && y <= rotY + DEFAULT_CONTROL_SIZE) {
+            return new HitInfo(HitType.ROTATE, 0, "grab");
+        }
         if (bounds.containsPoint(x, y)) {
             return new HitInfo(HitType.MOVE, 0, "move");
         }
@@ -739,7 +760,7 @@ export class ShapeController extends events.EventHandler {
     }
 
     snapshotFor(hitInfo) {
-        return this.shape.bounds.copy();
+        return {'bounds': this.shape.bounds.copy(), angle: this.shape.angle};
     }
 
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
@@ -748,12 +769,13 @@ export class ShapeController extends events.EventHandler {
         var shape = this.shape;
         console.log("Delta: ", deltaX, deltaY, shape.isGroup);
         if (hitInfo.hitType == HitType.MOVE) {
-            shape.setLocation(savedInfo.left + deltaX, savedInfo.top + deltaY);
+            shape.setLocation(savedInfo.bounds.left + deltaX,
+                              savedInfo.bounds.top + deltaY);
         } else if (hitInfo.hitType == HitType.SIZE) {
-            var newTop = savedInfo.top;
-            var newLeft = savedInfo.left;
-            var newHeight = savedInfo.height;
-            var newWidth = savedInfo.width;
+            var newTop = savedInfo.bounds.top;
+            var newLeft = savedInfo.bounds.left;
+            var newHeight = savedInfo.bounds.height;
+            var newWidth = savedInfo.bounds.width;
             if (hitInfo.hitIndex == HitType.SIZE_N) {
                 newHeight -= deltaY;
                 newTop += deltaY;
@@ -783,6 +805,27 @@ export class ShapeController extends events.EventHandler {
             }
             shape.setLocation(newLeft, newTop);
             shape.setSize(newWidth, newHeight);
+        } else if (hitInfo.hitType == HitType.ROTATE) {
+            var centerX = shape.bounds.centerX;
+            var centerY = shape.bounds.centerY;
+            var deltaX = currX - centerX;
+            var deltaY = currY - centerY;
+            var newAngle = 0;
+            if (deltaX == 0) {
+                if (deltaY > 0) {
+                    newAngle = Math.PI / 2;
+                } else {
+                    newAngle = Math.PI * 3 / 2;
+                }
+            } else {
+                newAngle = Math.atan(deltaY / deltaX);
+            }
+            if (deltaX < 0) {
+                newAngle += Math.PI;
+            }
+            console.log("Rotating: ", deltaX, deltaY,
+                        (deltaX == 0 ? "Inf" : deltaY / deltaX), newAngle);
+            shape.setAngle(newAngle);
         } else if (hitInfo.hitType == HitType.CONTROL) {
         }
     }
