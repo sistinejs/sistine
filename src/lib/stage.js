@@ -558,9 +558,6 @@ export class Selection {
      * Create a group out of the elements in this Selection.
      */
     group() {
-        // Not enough shapes
-        if (this.count <= 1) return ;
-
         // Collect all shapes in this selection
         // Identify their parents.
         // Do they all have the same parent?
@@ -592,16 +589,18 @@ export class Selection {
             var currGroup = groups[parentId];
             var currBounds = currGroup.bounds;
             var currParent = currGroup.parent;
-            // Here create a new shape group
-            var newParent = new core.Group();
-            currParent.add(newParent);
-            newParent.setLocation(currBounds.x, currBounds.y);
-            newParent.setSize(currBounds.width, currBounds.height);
-            currGroup.shapes.forEach(function(child, index) {
-                newParent.add(child);
-                child.setLocation(child.bounds.x - currBounds.x, child.bounds.y - currBounds.y);
-            });
-            this.add(newParent);
+            // Here create a new shape group if we have atleast 2 shapes
+            if (currGroup.shapes.length > 1)  {
+                var newParent = new core.Group();
+                currParent.add(newParent);
+                newParent.setLocation(currBounds.x, currBounds.y);
+                newParent.setSize(currBounds.width, currBounds.height);
+                currGroup.shapes.forEach(function(child, index) {
+                    newParent.add(child);
+                    child.setLocation(child.bounds.x - currBounds.x, child.bounds.y - currBounds.y);
+                });
+                this.add(newParent);
+            }
         }
     }
 
