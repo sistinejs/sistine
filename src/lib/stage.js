@@ -531,27 +531,39 @@ export class Selection {
     }
 
     /**
-     * Brings the selected forward by one level.
+     * Brings the selected shapes forward by one level within their parents.
      */
     bringForward() {
+        this.forEach(function(shape) {
+            shape.parent.bringForward(shape);
+        });
     }
 
     /**
-     * Sends the selected backward by one level.
+     * Sends the selected shapes backward by one level within their parents.
      */
     sendBackward() {
+        this.forEach(function(shape) {
+            shape.parent.sendBackward(shape);
+        });
     }
 
     /**
      * Brings the selected shapes to the front of the stack within their parents.
      */
     bringToFront() {
+        this.forEach(function(shape) {
+            shape.parent.bringToFront(shape);
+        });
     }
 
     /**
      * Sends the selected shapes to the back of the stack within their parents.
      */
     sendToBack() {
+        this.forEach(function(shape) {
+            shape.parent.sendToBack(shape);
+        });
     }
 
     /**

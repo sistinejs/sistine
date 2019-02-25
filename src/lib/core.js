@@ -380,7 +380,8 @@ export class Shape {
      * Returns true if a shape was successfully added
      * false if the addition was blocked.
      */
-    add(shape) {
+    add(shape, index) {
+        index = index || -1;
         if (shape.parent != this) {
             var event = new events.ShapeAdded(this, shape);
             if (this.shouldTrigger(event) != false) {
@@ -428,7 +429,56 @@ export class Shape {
         return false;
     }
 
-    // No Op
+    /**
+     * Brings a child shape forward by one level.
+     */
+    bringForward(shape) {
+        if (shape.parent != this) return ;
+        var index = this._children.indexOf(shape);
+        if (index >= 0 && index < this._children.length - 1) {
+            var temp = this._children[index];
+            this._children[index] = this._children[index + 1];
+            this._children[index + 1] = temp;
+        }
+    }
+
+    /**
+     * Sends a child shape backward by one index.
+     */
+    sendBackward(shape) {
+        if (shape.parent != this) return ;
+        var index = this._children.indexOf(shape);
+        if (index > 0) {
+            var temp = this._children[index];
+            this._children[index] = this._children[index - 1];
+            this._children[index - 1] = temp;
+        }
+    }
+
+    /**
+     * Brings a child shape to the front of the child stack.
+     */
+    bringToFront(shape) {
+        if (shape.parent != this) return ;
+        var index = this._children.indexOf(shape);
+        if (index >= 0 && index < this._children.length - 1) {
+            this._children.splice(index, 1);
+            this._children.push(shape);
+        }
+    }
+
+    /**
+     * Sends a child shape to the back of the child stack.
+     */
+    sendToBack(shape) {
+        if (shape.parent != this) return ;
+        var index = this._children.indexOf(shape);
+        if (index > 0) {
+            this._children.splice(index, 1);
+            this._children.splice(0, 0, shape);
+        }
+    }
+
     draw(ctx) {
         if (this._children.length > 0) {
             ctx.strokeStyle = 'black';
@@ -505,13 +555,13 @@ export class Shape {
         }
         // Draw the "rotation" control
         ctx.beginPath();
-        geom.pathEllipse(ctx, this.bounds.right + 30 - DEFAULT_CONTROL_SIZE, 
+        geom.pathEllipse(ctx, this.bounds.right + 50 - DEFAULT_CONTROL_SIZE, 
                          this.bounds.centerY - DEFAULT_CONTROL_SIZE, 
                          DEFAULT_CONTROL_SIZE * 2, DEFAULT_CONTROL_SIZE * 2);
         ctx.fillStyle = 'green';
         ctx.fill();
-        ctx.moveTo(this.bounds.centerX, this.bounds.centerY);
-        ctx.lineTo(this.bounds.right + 30, this.bounds.centerY);
+        ctx.moveTo(this.bounds.right, this.bounds.centerY);
+        ctx.lineTo(this.bounds.right + 50, this.bounds.centerY);
         ctx.strokeStyle = 'blue';
         ctx.stroke();
     }
@@ -751,7 +801,7 @@ export class ShapeController extends events.EventHandler {
             }
         }
 
-        var rotX = bounds.right + 30;
+        var rotX = bounds.right + 50;
         var rotY = bounds.centerY;
         if (x >= rotX - DEFAULT_CONTROL_SIZE && x <= rotX + DEFAULT_CONTROL_SIZE &&
             y >= rotY - DEFAULT_CONTROL_SIZE && y <= rotY + DEFAULT_CONTROL_SIZE) {
