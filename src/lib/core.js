@@ -687,7 +687,8 @@ export const HitType = {
 }
 
 export class HitInfo {
-    constructor(hitType, hitIndex, cursor) {
+    constructor(shape, hitType, hitIndex, cursor) {
+        this.hitShape = shape;
         this.hitType = hitType || 0;
         this.hitIndex = hitIndex || 0;
         this.cursor = cursor || "auto";
@@ -743,7 +744,7 @@ export class ShapeController extends events.EventHandler {
             var cursor = hti[1];
             if (x >= px - DEFAULT_CONTROL_SIZE && x <= px + DEFAULT_CONTROL_SIZE &&
                 y >= py - DEFAULT_CONTROL_SIZE && y <= py + DEFAULT_CONTROL_SIZE) {
-                return new HitInfo(HitType.SIZE, i, cursor);
+                return new HitInfo(this.shape, HitType.SIZE, i, cursor);
             }
         }
 
@@ -751,10 +752,10 @@ export class ShapeController extends events.EventHandler {
         var rotY = bounds.centerY;
         if (x >= rotX - DEFAULT_CONTROL_SIZE && x <= rotX + DEFAULT_CONTROL_SIZE &&
             y >= rotY - DEFAULT_CONTROL_SIZE && y <= rotY + DEFAULT_CONTROL_SIZE) {
-            return new HitInfo(HitType.ROTATE, 0, "grab");
+            return new HitInfo(this.shape, HitType.ROTATE, 0, "grab");
         }
         if (bounds.containsPoint(x, y)) {
-            return new HitInfo(HitType.MOVE, 0, "move");
+            return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
@@ -806,8 +807,8 @@ export class ShapeController extends events.EventHandler {
             shape.setLocation(newLeft, newTop);
             shape.setSize(newWidth, newHeight);
         } else if (hitInfo.hitType == HitType.ROTATE) {
-            var centerX = shape.bounds.centerX;
-            var centerY = shape.bounds.centerY;
+            var centerX = hitInfo.hitShape.bounds.centerX;
+            var centerY = hitInfo.hitShape.bounds.centerY;
             var deltaX = currX - centerX;
             var deltaY = currY - centerY;
             var newAngle = 0;
