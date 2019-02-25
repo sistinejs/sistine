@@ -593,8 +593,7 @@ export class Selection {
             var currBounds = currGroup.bounds;
             var currParent = currGroup.parent;
             // Here create a new shape group
-            var newParent = new core.Shape();
-            newParent.isGroup = true;
+            var newParent = new core.Group();
             currParent.add(newParent);
             newParent.setLocation(currBounds.x, currBounds.y);
             newParent.setSize(currBounds.width, currBounds.height);

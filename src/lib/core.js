@@ -234,76 +234,113 @@ export class Shape {
         return this._controller;
     }
 
-    setLocation(x, y, force) {
-        if (x != this._bounds._x || y != this._bounds._y) {
-            var oldValue = [ this._bounds._x, this._bounds._y ];
-            var event = new events.PropertyChanged("location", oldValue, [ x, y ]);
-            if (force || this.shouldTrigger(event) != false) {
-                this._bounds._x = x;
-                this._bounds._y = y;
-                this.eventTriggered(event);
-            }
-        }
-    }
-
-    setCenter(x, y, force) {
-        if (x != this._bounds.centerX || y != this._bounds.centerY) {
-            var oldValue = [ this._bounds.midX, this._bounds.midY ];
-            var event = new events.PropertyChanged("center", oldValue, [x, y]);
-            if (force || this.shouldTrigger(event) != false) {
-                this._bounds.midX = x;
-                this._bounds.midY = y;
-                this.eventTriggered(event);
-            }
-        }
-    }
-
-    setSize(w, h, force) {
-        if (w != this._bounds._width || h != this._bounds._height) {
-            var oldValue = [ this._bounds._width, this._bounds._height ];
-            var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
-            if (force || this.shouldTrigger(event) != false) {
-                var C2 = DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE;
-                if (w > C2 && h > C2) {
-                    this._bounds.width = w;
-                    this._bounds.height = h;
-                    this.eventTriggered(event);
-                }
-            }
-        }
-    }
-
-    setAngle(theta, force) {
-        if (theta != this._configs.angle) {
-            var event = new events.PropertyChanged("angle", this.angle, theta);
-            if (force || this.shouldTrigger(event) != false) {
-                this._configs.angle = theta;
-                this.eventTriggered(event);
-            }
-        }
-    }
-
-    set(property, newValue, force) {
+    canSetProperty(property, newValue) {
         var oldValue = this._configs[property];
-        if (oldValue != newValue) {
-            event = new events.PropertyChanged(property, oldValue, newValue);
-            if (force || this.shouldTrigger(event) != false) {
-                this._configs[property] = newValue;
-                this.eventTriggered(event);
-            }
-        }
-        return this;
+        if (oldValue == newValue) 
+            return null;
+        var event = new events.PropertyChanged(property, oldValue, newValue);
+        if (this.shouldTrigger(event) == false)
+            return null;
+        return event;
     }
 
-    move(dx, dy, force) {
-        return this.setLocation(this.bounds.x + dx, this.bounds.y + dy, force);
+    set(property, newValue) {
+        var event = this.canSetProperty(property, newValue);
+        if (event == null)
+            return false;
+        this._configs[property] = newValue;
+        this.eventTriggered(event);
+        return true;
     }
 
-    scale(dx, dy, force) {
-        return this.setSize(this.bounds.width * dx, this.bounds.height * dy, force);
+    canSetLocation(x, y) {
+        if (x == this._bounds._x && y == this._bounds._y)
+            return null;
+        var oldValue = [ this._bounds._x, this._bounds._y ];
+        var event = new events.PropertyChanged("location", oldValue, [ x, y ]);
+        if (this.shouldTrigger(event) == false) 
+            return null;
+        return event;
     }
 
-    rotate(dtheta, dy, force) {
+    setLocation(x, y) {
+        var event = this.canSetLocation(x, y);
+        if (event == null) return false;
+        this._bounds._x = x;
+        this._bounds._y = y;
+        this.eventTriggered(event);
+        return true;
+    }
+
+    canSetCenter(x, y) {
+        if (x == this._bounds.centerX && y == this._bounds.centerY)
+            return null;
+        var oldValue = [ this._bounds.midX, this._bounds.midY ];
+        var event = new events.PropertyChanged("center", oldValue, [x, y]);
+        if (this.shouldTrigger(event) == false) 
+            return null;
+        return event;
+    }
+
+    setCenter(x, y) {
+        event = this.canSetCenter(x, y);
+        if (event == null) return false;
+        this._bounds.midX = x;
+        this._bounds.midY = y;
+        this.eventTriggered(event);
+        return true;
+    }
+
+    canSetSize(w, h) {
+        var oldWidth = this._bounds._width;
+        var oldHeight = this._bounds._height;
+        if (w == oldWidth && h == oldHeight)
+            return null;
+        var oldValue = [ oldWidth, oldHeight ];
+        var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
+        if (this.shouldTrigger(event) == false)
+            return null;
+        var C2 = DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE;
+        if (w <= C2 || h <= C2)
+            return null;
+        return event;
+    }
+
+    setSize(w, h) {
+        var event = this.canSetSize(w, h);
+        if (event == null) return false;
+        this._bounds.width = w;
+        this._bounds.height = h;
+        this.eventTriggered(event);
+        return true;
+    }
+
+    canSetAngle(theta) {
+        if (theta == this._configs.angle) 
+            return null;
+        var event = new events.PropertyChanged("angle", this.angle, theta);
+        if (this.shouldTrigger(event) == false)
+            return null;
+        return event;
+    }
+
+    setAngle(theta) {
+        var event = this.canSetAngle(theta);
+        if (event == null) return false;
+        this._configs.angle = theta;
+        this.eventTriggered(event);
+        return true;
+    }
+
+    move(dx, dy) {
+        return this.setLocation(this.bounds.x + dx, this.bounds.y + dy);
+    }
+
+    scale(dx, dy) {
+        return this.setSize(this.bounds.width * dx, this.bounds.height * dy);
+    }
+
+    rotate(dtheta, dy) {
         return this.setAngle(this.angle + dtheta);
     }
 
@@ -342,10 +379,10 @@ export class Shape {
      * Returns true if a shape was successfully added
      * false if the addition was blocked.
      */
-    add(shape, force) {
+    add(shape) {
         if (shape.parent != this) {
             var event = new events.ShapeAdded(this, shape);
-            if (force || this.shouldTrigger(event) != false) {
+            if (this.shouldTrigger(event) != false) {
                 // remove from old parent - Important!
                 if (shape.removeFromParent()) {
                     this._children.push(shape);
@@ -364,10 +401,10 @@ export class Shape {
      * Returns true if a shape was successfully removed,
      * false if the removal was blocked.
      */
-    remove(shape, force) {
+    remove(shape) {
         if (shape.parent == this) {
             var event = new events.ShapeRemoved(this, shape);
-            if (force || this.shouldTrigger(event) != false) {
+            if (this.shouldTrigger(event) != false) {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == shape) {
                         this._children.splice(i, 1);
@@ -504,8 +541,8 @@ export class Shape {
     }
 
     /**
-     * This is called after a particular change has been approved to notify that a change has
-     * indeed gone through.
+     * This is called after a particular change has been approved to 
+     * notify that a change has indeed gone through.
      */
     eventTriggered(event) {
         if (this.scene) {
@@ -519,6 +556,36 @@ export class Shape {
 }
 
 export class Layer extends Shape { }
+
+/**
+ * Creating explicit group class to handle groups of objects so that we 
+ * can extend this to performing layouts etc on child chapes.
+ */
+export class Group extends Shape {
+    constructor(configs) {
+        super(configs);
+        this.isGroup = true;
+    }
+
+    canSetSize(w, h) {
+        var event = super.canSetSize(w, h);
+        if (event != null) {
+            // check if children sizes can be set.
+        }
+        return event;
+    }
+
+    /**
+     * This is called after a particular change has been approved to 
+     * notify that a change has indeed gone through.
+     */
+    eventTriggered(event) {
+        super.eventTriggered(event);
+        if (event.name == "PropertyChanged" && event.property == "bounds") {
+            // adjust child sizes
+        }
+    }
+}
 
 /**
  * The Scene is the raw model where all layers and shapes are 
@@ -678,8 +745,8 @@ export class ShapeController extends events.EventHandler {
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
-        console.log("Delta: ", deltaX, deltaY);
         var shape = this.shape;
+        console.log("Delta: ", deltaX, deltaY, shape.isGroup);
         if (hitInfo.hitType == HitType.MOVE) {
             shape.setLocation(savedInfo.left + deltaX, savedInfo.top + deltaY);
         } else if (hitInfo.hitType == HitType.SIZE) {
