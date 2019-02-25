@@ -16,6 +16,7 @@ export class LeftArrowShape extends core.Shape {
         this._shaftWidth = configs.shaftWidth || 0.4;
         this._tipLength = configs.tipLength || 0.4;
         this._tipPullback = configs.tipPullback || 0;
+        this._backDepth = configs.backDepth || 0;
         this._controller = new LeftArrowController(this);
     }
 
@@ -28,9 +29,13 @@ export class LeftArrowShape extends core.Shape {
         var sh = height * this._shaftWidth;
         var tl = width * this._tipLength;
         var tp = width * this._tipPullback;
+        var bd = width * this._backDepth;
 
         ctx.beginPath();
         ctx.moveTo(x + width, y + (height - sh) / 2);
+        if (bd > 0) {
+            ctx.lineTo(x + width - bd, y + height / 2);
+        }
         ctx.lineTo(x + width, y + (height + sh) / 2);
         ctx.lineTo(x + tl, y + (height + sh) / 2);
         ctx.lineTo(x + tl - tp, y + height);

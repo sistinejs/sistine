@@ -41,8 +41,6 @@ export class DoubleArrowShape extends core.Shape {
         ctx.lineTo(x + tl, y + (height + sh) / 2);
         ctx.lineTo(x + tp + tl, y + height);
         ctx.lineTo(x, y + height / 2);
-        /*
-        */
         if (this.fillStyle) {
             ctx.fill();
         }
