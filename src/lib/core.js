@@ -471,7 +471,10 @@ export class Shape {
     }
 
     revertTransforms(ctx) {
-        ctx.restore(); 
+        var angle = this.get("angle");
+        if (angle) {
+            ctx.restore(); 
+        }
     }
 
     drawControls(ctx, options) {
