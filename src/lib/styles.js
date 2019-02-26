@@ -3,18 +3,27 @@ export class Style {
     constructor() {
         this._realValue = null;
         this._context = null;
+        this._x = null;
+        this._y = null;
     }
 
-    forContext(ctx) {
-        if (this._realValue == null || this._context != ctx) {
+    forContext(shape, ctx) {
+        if (this._hasChanged(shape, ctx)) {
+            this._x = shape.bounds.x;
+            this._y = shape.bounds.y;
             this._context = ctx;
-            this._realValue = this._createStyle(ctx);
+            this._realValue = this._createStyle(shape, ctx);
         }
         return this._realValue;
     }
 
-    apply(property, ctx) {
-        ctx[property] = this.forContext(ctx);
+    apply(shape, property, ctx) {
+        ctx[property] = this.forContext(shape, ctx);
+    }
+
+    _hasChanged(shape, ctx) {
+        return this._realValue == null || this._context != ctx ||
+                shape.bounds.x != this._x || shape.bounds.y != this._y;
     }
 }
 
@@ -24,7 +33,7 @@ export class Literal extends Style {
         this._value = value;
     }
 
-    _createStyle(ctx) {
+    _createStyle(shape, ctx) {
         return this._value;
     }
 }
@@ -55,8 +64,9 @@ export class LinearGradient extends Gradient {
         this.y1 = y1;
     }
 
-    _createStyle(ctx) {
-        var out = ctx.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+    _createStyle(shape, ctx) {
+        var out = ctx.createLinearGradient(this.x0 + this._x, this.y0 + this._y,
+                                           this.x1 + this._x, this.y1 + this._y);
         this._stops.forEach(function(value) {
             out.addColorStop(value[0], value[1]);
         });
@@ -75,9 +85,9 @@ export class RadialGradient extends Gradient {
         this.r1 = r1;
     }
 
-    _createStyle(ctx) {
-        var out = ctx.createRadialGradient(this.x0, this.y0, this.r0,
-                                           this.x1, this.y1, this.r1);
+    _createStyle(shape, ctx) {
+        var out = ctx.createRadialGradient(this.x0 + this._x, this.y0 + this._y, this.r0,
+                                           this.x1 + this._x, this.y1 + this._y, this.r1);
         this._stops.forEach(function(value) {
             out.addColorStop(value[0], value[1]);
         });
@@ -100,7 +110,7 @@ export class Pattern extends Style {
         return out;
     }
 
-    _createStyle(ctx) {
+    _createStyle(shape, ctx) {
         return ctx.createPattern(this.element, this._repeatType)
     }
 }

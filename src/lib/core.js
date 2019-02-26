@@ -583,10 +583,10 @@ export class Shape {
      */
     applyStyles(ctx, options) {
         if (this.fillStyle) {
-            this.fillStyle.apply("fillStyle", ctx);
+            this.fillStyle.apply(this, "fillStyle", ctx);
         }
         if (this.strokeStyle) {
-            this.strokeStyle.apply("strokeStyle", ctx);
+            this.strokeStyle.apply(this, "strokeStyle", ctx);
         }
         if (this.lineJoin) {
             ctx.lineJoin = this.lineJoin;

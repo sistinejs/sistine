@@ -36,7 +36,7 @@ function addSampleShapes() {
                           .addStop(1, "white");
     addShape("Triangle", {"x": 80, "y": 150, "width": 200, "height": 200, "lineWidth": 2, "fillStyle": grd1});
 
-    var grd2 = new Sistine.styles.RadialGradient(250, 100, 20, 250, 100, 50)
+    var grd2 = new Sistine.styles.RadialGradient(50, 50, 20, 50, 50, 50)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");
     addShape("Circle", { "x": 200, "y": 50, "width": 100, "height": 100, "lineWidth": 2, "fillStyle": grd2});
