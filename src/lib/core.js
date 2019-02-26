@@ -27,8 +27,22 @@ export class Transform {
         this.d = d || 1;
         this.e = e || 0;
         this.f = f || 0;
+        this.timeStamp = Date.now();
     }
 
+    /**
+     * Applies this transform to a point and returns the result.
+     */
+    apply(x, y, result) {
+        result = result || new Point();
+        result.x = this.a * x + this.c * y + this.e;
+        result.y = this.b * x + this.d * y + this.f;
+        return result;
+    }
+
+    /**
+     * Creates a new copy of this Transform.
+     */
     copy() {
         return new Transform(this.a, this.b, this.c, this.d, this.e, this.f);
     }
@@ -56,8 +70,19 @@ export class Transform {
      */
     translate(E, F, result) {
         result = result || this;
-        result.e = this.a * E  + this.c * F + this.e;
-        result.f = this.b * E  + this.d * F + this.f;
+        var ne = this.a * E  + this.c * F + this.e;
+        var nf = this.b * E  + this.d * F + this.f;
+        result.e = ne;
+        result.f = nf;
+        result.timeStamp = Date.now();
+        return result;
+    }
+
+    scale(sx, sy, result) {
+        result = result || this;
+        result.a = this.a * sx;
+        result.d = this.d * sy;
+        result.timeStamp = Date.now();
         return result;
     }
 
@@ -68,10 +93,13 @@ export class Transform {
         result = result || this;
         var costheta = Math.cos(theta);
         var sintheta = Math.sin(theta);
-        var nx = (this.x * costheta) - (this.y * sintheta);
-        var ny = (this.y * costheta) + (this.x * sintheta);
-        result.x = nx;
-        result.y = ny;
+        var a = this.a, c = this.c;
+        var b = this.b, d = this.d;
+        result.a = a * costheta + c * sintheta;
+        result.b = b * costheta + d * sintheta;
+        result.c = a * -sintheta + c * costheta;
+        result.d = b * -sintheta + d * costheta;
+        result.timeStamp = Date.now();
         return result;
     }
 }
@@ -208,6 +236,7 @@ export class Shape {
         this._configs = configs;
         configs.name = configs.name || "";
         configs.angle = configs.angle || 0;
+        configs.scale = configs.scale || new Point(1, 1);
         configs.zIndex = configs.zIndex || 0;
         configs.lineWidth = configs.lineWidth || 2;
         this._prev = this._next = null;
@@ -217,6 +246,83 @@ export class Shape {
         this.isVisible = true;
         this._connections = [];
         this._controller = new ShapeController(this);
+        this._globalTransform = new Transform();
+        this._lastTransformed = Date.now();
+    }
+
+    childAtIndex(i) { return this._children[i]; } 
+    get hasChildren() { return this._children.length > 0; } 
+    get childCount() { return this._children.length; } 
+    get parent() { return this._parent; } 
+    get(name) { return this._configs[name]; }
+
+    get bounds() { return this._bounds; }
+    get name() { return this.get("name"); }
+    get angle() { return this.get("angle"); }
+    get zIndex() { return this.get("zIndex"); }
+    get lineWidth() { return this.get("lineWidth"); }
+    get lineJoin() { return this.get("lineJoin"); }
+    get lineCap() { return this.get("lineCap"); }
+    get strokeStyle() { return this.get("strokeStyle"); }
+    get fillStyle() { return this.get("fillStyle"); }
+    get miterLimit() { return this.get("miterLimit"); }
+
+    get scene() { return this._scene; } 
+    get controller() { return this._controller; }
+
+    /**
+    * There are two ways to handle coordinates.  Globally or Locally
+    * In Global method, a global coordinate (say on the screen) remains as is
+    * and each element on the screen can tell you if a given global point 
+    * lies within itself.   This is great when we are doing things like
+    * handling mouse/touch hits to see where a global point falls within 
+    * a shape.
+    *
+    * In the local method, the global coordinates are converted into a 
+    * local system each time it is needed.  This way the shape does not need to know about screen coordinates and transformations etc.
+    *
+    * The second method is easier from the Shape's perspective but the global 
+    * point has to be transformed through each parent in the hierarchy while doing a hit test.
+    *
+    * With the first method, a global transform change on a parent will modify the global transform parameter for all its children.   So if we expect transformations to be small enough making this parameter change in all children is not bad.
+    *
+    * But a transform could happen either via animation or via ui controls, so if a high refresh rate is required a tree walk to update this parameter could be expensive.  Instead updating on read could be a better option by seeing if a parent's transform has changed and only updating if the timestamp is newer.
+    */
+    get globalTransform() {
+        var gt = this._globalTransform;
+        if (this._parent != null) {
+            var pt = this._parent.globalTransform;
+            if (pt.timeStamp > gt.timeStamp ||
+                this._lastTransformed > gt.timeStamp) {
+                // updated ourselves
+                this._globalTransform = this._updateTransform(pt.copy());
+            }
+        } else if (this._lastTransformed > gt.timeStamp) {
+            this._globalTransform = this._updateTransform();
+        }
+        return this._globalTransform;
+    }
+    _updateTransform(result) {
+        result = result || new Transform();
+        var cx = this._bounds.centerX;
+        var cy = this._bounds.centerY;
+        // Notice we are doing "invserse transforms here"
+        // since we need to map a point "back" to global form
+        result.translate(cx, cy)
+              .rotate(- this.angle)
+              .scale(1.0 / this._configs.scale.x, 1.0 / this._configs.scale.y)
+              .translate(-cx, -cy);
+        console.log("updated transform: ", this, result);
+        return result;
+    }
+
+    set scene(s) {
+        if (this.scene != s) {
+            this._scene = s;
+            for (var i = 0, L = this._children.length;i < L;i++) {
+                this._children[i].scene = s;
+            }
+        }
     }
 
     forEachChild(handler, self, mutable) {
@@ -229,10 +335,6 @@ export class Shape {
             if (handler(shape, index, self) == false)
                 break;
         }
-    }
-
-    get controller() {
-        return this._controller;
     }
 
     canSetProperty(property, newValue) {
@@ -269,6 +371,7 @@ export class Shape {
         if (event == null) return false;
         this._bounds._x = x;
         this._bounds._y = y;
+        this._lastTransformed = Date.now();
         this.eventTriggered(event);
         return true;
     }
@@ -286,8 +389,9 @@ export class Shape {
     setCenter(x, y) {
         event = this.canSetCenter(x, y);
         if (event == null) return false;
-        this._bounds.midX = x;
-        this._bounds.midY = y;
+        this._bounds.centerX = x;
+        this._bounds.centerY = y;
+        this._lastTransformed = Date.now();
         this.eventTriggered(event);
         return true;
     }
@@ -312,6 +416,7 @@ export class Shape {
         if (event == null) return false;
         this._bounds.width = w;
         this._bounds.height = h;
+        this._lastTransformed = Date.now();
         this.eventTriggered(event);
         return true;
     }
@@ -329,7 +434,16 @@ export class Shape {
         var event = this.canSetAngle(theta);
         if (event == null) return false;
         this._configs.angle = theta;
+        this._lastTransformed = Date.now();
         this.eventTriggered(event);
+        return true;
+    }
+
+    setScale(sx, sy) {
+        if (sx == 0 || sy == 0) return false;
+        this.configs._scaleX = sx;
+        this.configs._scaleY = sy;
+        this._lastTransformed = Date.now();
         return true;
     }
 
@@ -343,36 +457,6 @@ export class Shape {
 
     rotate(dtheta, dy) {
         return this.setAngle(this.angle + dtheta);
-    }
-
-    childAtIndex(i) { return this._children[i]; } 
-    get hasChildren() { return this._children.length > 0; } 
-    get childCount() { return this._children.length; } 
-    get parent() { return this._parent; } 
-    get(name) { return this._configs[name]; }
-
-    get bounds() { return this._bounds; }
-    get name() { return this.get("name"); }
-    get angle() { return this.get("angle"); }
-    get zIndex() { return this.get("zIndex"); }
-    get lineWidth() { return this.get("lineWidth"); }
-    get lineJoin() { return this.get("lineJoin"); }
-    get lineCap() { return this.get("lineCap"); }
-    get strokeStyle() { return this.get("strokeStyle"); }
-    get fillStyle() { return this.get("fillStyle"); }
-    get miterLimit() { return this.get("miterLimit"); }
-
-    get scene() {
-        return this._scene;
-    }
-
-    set scene(s) {
-        if (this.scene != s) {
-            this._scene = s;
-            for (var i = 0, L = this._children.length;i < L;i++) {
-                this._children[i].scene = s;
-            }
-        }
     }
 
     /**
@@ -571,7 +655,8 @@ export class Shape {
      * false otherwise.
      */
     containsPoint(x, y) {
-        return this.bounds.containsPoint(x, y);
+        var newp = this.globalTransform.apply(x, y, {});
+        return this.bounds.containsPoint(newp.x, newp.y);
     }
 
     /**
@@ -774,7 +859,10 @@ export class ShapeController extends events.EventHandler {
     /**
      * Returns the "topmost" shape that can be hit at a given coordinate.
      */
-    getHitInfo(x, y) {
+    getHitInfo(gx, gy) {
+        var newp = this.shape.globalTransform.apply(gx, gy, {});
+        var x = newp.x;
+        var y = newp.y;
         var bounds = this.shape.bounds;
         var l = bounds.left;
         var r = bounds.right;
@@ -790,6 +878,7 @@ export class ShapeController extends events.EventHandler {
             [[l, (t + b) / 2], "w-resize"],
             [[l, t], "nw-resize"],
         ]
+        console.log("gx, gy, x, y: ", gx, gy, x, y, ", Bounds: ", bounds);
         for (var i in sizePoints) {
             var hti = sizePoints[i];
             var px = hti[0][0];
@@ -805,7 +894,7 @@ export class ShapeController extends events.EventHandler {
         var rotY = bounds.centerY;
         if (x >= rotX - DEFAULT_CONTROL_SIZE && x <= rotX + DEFAULT_CONTROL_SIZE &&
             y >= rotY - DEFAULT_CONTROL_SIZE && y <= rotY + DEFAULT_CONTROL_SIZE) {
-            return new HitInfo(this.shape, HitType.ROTATE, 0, "grab");
+            return new HitInfo(this.shape, HitType.ROTATE, 0, "rotate");
         }
         if (bounds.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");

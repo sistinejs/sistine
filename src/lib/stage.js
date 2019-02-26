@@ -3,6 +3,7 @@ import * as events from "./events";
 import * as core from "./core";
 import * as panes from "./panes";
 import * as handlers from "./handlers";
+import * as cursors from "./cursors";
 import { getcssint } from "../utils/dom"
 
 /**
@@ -43,6 +44,8 @@ export class Stage extends events.EventHandler {
         // Information regarding Selections
         this.selection = new Selection(this);
 
+        this.cursorMap = Object.assign({}, cursors.DefaultCursorMap);
+
         // The touch mode passes information on what each of the handlers are ok to perform
         this._touchContext = new handlers.TouchContext()
         this._kickOffRepaint();
@@ -64,6 +67,9 @@ export class Stage extends events.EventHandler {
 
     set cursor(c) {
         c = c || "auto";
+        if (c in this.cursorMap) {
+            c = this.cursorMap[c];
+        }
         this._parentDiv.css("cursor", c);
     }
 

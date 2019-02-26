@@ -65,6 +65,10 @@ module.exports = (env, options) => {
                         'postcss-loader', 
                         'sass-loader'
                     ]
+                },
+                {
+                    test: /\.(png|svg|jpg|gif)$/,
+                    use: [ 'url-loader' ]
                 }
             ]
         },

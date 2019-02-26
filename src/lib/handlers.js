@@ -246,11 +246,6 @@ export class StageViewPortHandler extends BaseTouchHandler {
         if (this.downPoint != null) {
             var deltaX = this.currPoint.x - this.downPoint.x;
             var deltaY = this.currPoint.y - this.downPoint.y;
-            console.log("ViewPortHandler EventPt: ", event.offsetX, event.offsetY, 
-                        ", WorldPt: ", this.currPoint.x, this.currPoint.y, 
-                        ", DownOff: ", this.downOffset.x, this.downOffset.y,
-                        ", Delta: ", deltaX, deltaY,
-                        ", Mode: ", this.stage.touchContext);
             if (this.stage.touchContext.mode == TouchModes.HAND_TOOL) {
                 this.stage.setOffset(this.downOffset.x - deltaX, this.downOffset.y - deltaY);
             } else if (this.stage.touchContext.mode == TouchModes.ZOOM_IN) {
@@ -335,10 +330,6 @@ export class StageTouchHandler extends BaseTouchHandler {
         var stage = this.stage;
         var selection = stage.selection;
         if (this.stage.touchContext.mode == TouchModes.NONE) {
-            console.log("EventPt: ", event.offsetX, event.offsetY,
-                        ", WorldPt: ", this.currPoint.x, this.currPoint.y,
-                        ", Mode: ", stage.touchContext,
-                        ", Offset: ", this._editPane.offset);
             this.stage.cursor = "auto";
             // Mouse is not primed for "creating" an object
             selection.forEach(function(shape, self) {
