@@ -1,8 +1,38 @@
 
-class Gradient {
+export class Style {
     constructor() {
-        this._stops = [];
         this._realValue = null;
+        this._context = null;
+    }
+
+    forContext(ctx) {
+        if (this._realValue == null || this._context != ctx) {
+            this._context = ctx;
+            this._realValue = this._createStyle(ctx);
+        }
+        return this._realValue;
+    }
+
+    apply(property, ctx) {
+        ctx[property] = this.forContext(ctx);
+    }
+}
+
+export class Literal extends Style {
+    constructor(value) {
+        super();
+        this._value = value;
+    }
+
+    _createStyle(ctx) {
+        return this._value;
+    }
+}
+
+export class Gradient extends Style {
+    constructor() {
+        super();
+        this._stops = [];
     }
 
     addStop(stop, color, index) {
@@ -12,17 +42,7 @@ class Gradient {
         } else {
             this._stops.splice(index, 0, [stop, color]);
         }
-    }
-
-    forContext(ctx) {
-        if (this._realValue == null) {
-            this._realValue = this._createStyle();
-            var gradient = this;
-            this._stops.forEach(function(value) {
-                gradient._realValue.addColorStop(value[0], value[1]);
-            });
-        }
-        return this._realValue;
+        return this;
     }
 }
 
@@ -36,7 +56,11 @@ export class LinearGradient extends Gradient {
     }
 
     _createStyle(ctx) {
-        return ctx.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+        var out = ctx.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+        this._stops.forEach(function(value) {
+            out.addColorStop(value[0], value[1]);
+        });
+        return out;
     }
 }
 
@@ -52,12 +76,18 @@ export class RadialGradient extends Gradient {
     }
 
     _createStyle(ctx) {
-        return ctx.createLinearGradient(this.x0, this.y0, this.r0, this.x1, this.y1, this.r1);
+        var out = ctx.createRadialGradient(this.x0, this.y0, this.r0,
+                                           this.x1, this.y1, this.r1);
+        this._stops.forEach(function(value) {
+            out.addColorStop(value[0], value[1]);
+        });
+        return out;
     }
 }
 
-export class Pattern {
+export class Pattern extends Style {
     constructor(elementOrId, repeatType) {
+        super();
         this._elementOrId = elementOrId;
         this._repeatType = repeatType;
     }
@@ -74,4 +104,3 @@ export class Pattern {
         return ctx.createPattern(this.element, this._repeatType)
     }
 }
-

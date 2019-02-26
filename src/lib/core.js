@@ -1,5 +1,6 @@
 
 import * as events from "./events";
+import * as styles from "./styles";
 import * as geom from "../utils/geom"
 
 export const DEFAULT_CONTROL_SIZE = 5;
@@ -248,6 +249,12 @@ export class Shape {
         this._controller = new ShapeController(this);
         this._globalTransform = new Transform();
         this._lastTransformed = Date.now();
+        if (typeof configs.fillStyle === "string") {
+            configs.fillStyle = new styles.Literal(configs.fillStyle);
+        }
+        if (typeof configs.strokeStyle === "string") {
+            configs.strokeStyle = new styles.Literal(configs.strokeStyle);
+        }
     }
 
     childAtIndex(i) { return this._children[i]; } 
@@ -575,20 +582,20 @@ export class Shape {
      * Draws this shape on a given context.
      */
     applyStyles(ctx, options) {
-        if (this.get("fillStyle")) {
-            ctx.fillStyle = this.get("fillStyle");
+        if (this.fillStyle) {
+            this.fillStyle.apply("fillStyle", ctx);
         }
-        if (this.get("lineJoin")) {
-            ctx.lineJoin = this.get("lineJoin");
+        if (this.strokeStyle) {
+            this.strokeStyle.apply("strokeStyle", ctx);
         }
-        if (this.get("lineCap")) {
-            ctx.lineCap = this.get("lineCap");
+        if (this.lineJoin) {
+            ctx.lineJoin = this.lineJoin;
         }
-        if (this.get("lineWidth")) {
-            ctx.lineWidth = this.get("lineWidth");
+        if (this.lineCap) {
+            ctx.lineCap = this.lineCap;
         }
-        if (this.get("strokeStyle")) {
-            ctx.strokeStyle = this.get("strokeStyle");
+        if (this.lineWidth) {
+            ctx.lineWidth = this.lineWidth;
         }
     }
 
