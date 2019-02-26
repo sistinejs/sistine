@@ -458,7 +458,7 @@ export class Shape {
     }
 
     canSetAngle(theta) {
-        if (theta == this._configs.angle) 
+        if (theta == this._angle) 
             return null;
         var event = new events.PropertyChanged("angle", this.angle, theta);
         if (this.shouldTrigger(event) == false)
@@ -469,7 +469,7 @@ export class Shape {
     setAngle(theta) {
         var event = this.canSetAngle(theta);
         if (event == null) return false;
-        this._configs.angle = theta;
+        this._angle = theta;
         this._lastTransformed = Date.now();
         this.eventTriggered(event);
         return true;
@@ -930,7 +930,7 @@ export class ShapeController extends events.EventHandler {
         var rotY = bounds.centerY;
         if (x >= rotX - DEFAULT_CONTROL_SIZE && x <= rotX + DEFAULT_CONTROL_SIZE &&
             y >= rotY - DEFAULT_CONTROL_SIZE && y <= rotY + DEFAULT_CONTROL_SIZE) {
-            return new HitInfo(this.shape, HitType.ROTATE, 0, "rotate");
+            return new HitInfo(this.shape, HitType.ROTATE, 0, "grab");
         }
         if (bounds.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
