@@ -232,6 +232,7 @@ export class Shape {
     constructor(configs) {
         configs = configs || {};
         this.id = ShapeGlobals._shapeCounter++;
+        this._scene = null;
         this._parent = null;
         this.isGroup = false;
         this._configs = configs;
@@ -242,10 +243,12 @@ export class Shape {
         configs.lineWidth = configs.lineWidth || 2;
         this._prev = this._next = null;
         this._bounds = new Bounds(configs)
-        this._scene = null;
+        // The reference width and height denote the "original" width and height
+        // for this shape and is used as a way to know what the current "scale" is.
+        this._refWidth = this._bounds.width;
+        this._refHeight = this._bounds.height;
         this._children = [];
         this.isVisible = true;
-        this._connections = [];
         this._controller = new ShapeController(this);
         this._globalTransform = new Transform();
         this._lastTransformed = Date.now();
@@ -980,4 +983,3 @@ export class ShapeController extends events.EventHandler {
         }
     }
 }
-

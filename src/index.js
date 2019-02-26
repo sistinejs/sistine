@@ -3,6 +3,7 @@ import './scss/styles.scss';
 
 // import Sistine class
 import * as core from './lib/core';
+import * as path from './lib/path';
 import * as panes from './lib/panes';
 import * as stage from './lib/stage';
 import * as styles from './lib/styles';
@@ -14,6 +15,7 @@ import * as domutils from './utils/dom';
 
 const Sistine = {
     'core': core,
+    'path': path,
     'panes': panes,
     'stage': stage,
     'styles': styles,
