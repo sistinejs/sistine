@@ -235,50 +235,76 @@ export class Shape {
         this._scene = null;
         this._parent = null;
         this.isGroup = false;
-        this._configs = configs;
-        configs.name = configs.name || "";
-        configs.angle = configs.angle || 0;
-        configs.scale = configs.scale || new Point(1, 1);
-        configs.zIndex = configs.zIndex || 0;
-        configs.lineWidth = configs.lineWidth || 2;
-        this._prev = this._next = null;
+        this.isVisible = true;
+        this._children = [];
+        this._globalTransform = new Transform();
+        this._lastTransformed = Date.now();
+
         this._bounds = new Bounds(configs)
         // The reference width and height denote the "original" width and height
         // for this shape and is used as a way to know what the current "scale" is.
         this._refWidth = this._bounds.width;
         this._refHeight = this._bounds.height;
-        this._children = [];
-        this.isVisible = true;
         this._controller = new ShapeController(this);
-        this._globalTransform = new Transform();
-        this._lastTransformed = Date.now();
-        if (typeof configs.fillStyle === "string") {
-            configs.fillStyle = new styles.Literal(configs.fillStyle);
-        }
-        if (typeof configs.strokeStyle === "string") {
-            configs.strokeStyle = new styles.Literal(configs.strokeStyle);
-        }
+
+        // Observable properties
+        this.name = configs.name || "";
+        this.angle = configs.angle || 0;
+        this.scale = configs.scale || new Point(1, 1);
+        this.zIndex = configs.zIndex || 0;
+        this.lineWidth = configs.lineWidth || 2;
+        this.lineJoin = configs.lineJoin || null;
+        this.lineCap = configs.lineCap || null;
+        this.miterLimit = configs.miterLimit || null;
+        this.fillStyle = configs.fillStyle || null;
+        this.strokeStyle = configs.strokeStyle || null;
     }
 
     childAtIndex(i) { return this._children[i]; } 
     get hasChildren() { return this._children.length > 0; } 
     get childCount() { return this._children.length; } 
     get parent() { return this._parent; } 
-    get(name) { return this._configs[name]; }
-
     get bounds() { return this._bounds; }
-    get name() { return this.get("name"); }
-    get angle() { return this.get("angle"); }
-    get zIndex() { return this.get("zIndex"); }
-    get lineWidth() { return this.get("lineWidth"); }
-    get lineJoin() { return this.get("lineJoin"); }
-    get lineCap() { return this.get("lineCap"); }
-    get strokeStyle() { return this.get("strokeStyle"); }
-    get fillStyle() { return this.get("fillStyle"); }
-    get miterLimit() { return this.get("miterLimit"); }
-
     get scene() { return this._scene; } 
     get controller() { return this._controller; }
+
+    // Observable Properties that will trigger change events
+    get name() { return this._name; }
+    set name(value) { return this.set("name", value); }
+
+    get angle() { return this._angle; }
+    set angle(value) { return this.set("angle", value); }
+
+    get zIndex() { return this._zIndex; }
+    set zIndex(value) { return this.set("zIndex", value); }
+
+    get lineWidth() { return this._lineWidth; }
+    set lineWidth(value) { return this.set("lineWidth", value); }
+
+    get lineJoin() { return this._lineJoin; }
+    set lineJoin(value) { return this.set("lineJoin", value); }
+
+    get lineCap() { return this._lineCap; }
+    set lineCap(value) { return this.set("lineCap", value); }
+
+    get miterLimit() { return this._miterLimit; }
+    set miterLimit(value) { return this.set("miterLimit", value); }
+
+    get strokeStyle() { return this._strokeStyle; }
+    set strokeStyle(value) { 
+        if (value != null && typeof value === "string") {
+            value = new styles.Literal(value);
+        }
+        return this.set("strokeStyle", value); 
+    }
+
+    get fillStyle() { return this._fillStyle; }
+    set fillStyle(value) { 
+        if (value != null && typeof value === "string") {
+            value = new styles.Literal(value);
+        }
+        return this.set("fillStyle", value); 
+    }
 
     /**
     * There are two ways to handle coordinates.  Globally or Locally
@@ -320,7 +346,7 @@ export class Shape {
         // since we need to map a point "back" to global form
         result.translate(cx, cy)
               .rotate(- this.angle)
-              .scale(1.0 / this._configs.scale.x, 1.0 / this._configs.scale.y)
+              .scale(1.0 / this.scale.x, 1.0 / this.scale.y)
               .translate(-cx, -cy);
         console.log("updated transform: ", this, result);
         return result;
@@ -348,7 +374,7 @@ export class Shape {
     }
 
     canSetProperty(property, newValue) {
-        var oldValue = this._configs[property];
+        var oldValue = this["_" + property];
         if (oldValue == newValue) 
             return null;
         var event = new events.PropertyChanged(property, oldValue, newValue);
@@ -361,7 +387,7 @@ export class Shape {
         var event = this.canSetProperty(property, newValue);
         if (event == null)
             return false;
-        this._configs[property] = newValue;
+        this["_" + property] = newValue;
         this.eventTriggered(event);
         return true;
     }
@@ -603,7 +629,7 @@ export class Shape {
     }
 
     applyTransforms(ctx) {
-        var angle = this.get("angle");
+        var angle = this.angle;
         if (angle) {
             ctx.save(); 
             var cx = this.bounds.centerX;
@@ -615,7 +641,7 @@ export class Shape {
     }
 
     revertTransforms(ctx) {
-        var angle = this.get("angle");
+        var angle = this.angle;
         if (angle) {
             ctx.restore(); 
         }
