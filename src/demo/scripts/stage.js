@@ -27,6 +27,7 @@ function addShape(objid, configs) {
     }
     var newShape = DefaultBundle[objid].newShape(finalConfigs);
     theScene.add(newShape);
+    return newShape;
 }
 
 function addSampleShapes() {

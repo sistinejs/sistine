@@ -5,6 +5,7 @@ import './scss/styles.scss';
 import * as core from './lib/core';
 import * as panes from './lib/panes';
 import * as stage from './lib/stage';
+import * as styles from './lib/styles';
 import * as handlers from './lib/handlers';
 import * as events from './lib/events';
 import { Registry } from './lib/registry';
@@ -15,6 +16,7 @@ const Sistine = {
     'core': core,
     'panes': panes,
     'stage': stage,
+    'styles': styles,
     'handlers': handlers,
     'events': events,
     'registry': Registry,
