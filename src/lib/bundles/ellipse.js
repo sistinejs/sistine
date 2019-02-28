@@ -1,7 +1,8 @@
 
 
-import * as core from "../core"
-import * as geom from "../../utils/geom"
+import * as shapes from "../Core/shapes"
+import * as controller from "../Core/controller"
+import * as geom from "../Utils/geom"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -15,7 +16,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class EllipseShape extends core.Shape {
+export class EllipseShape extends shapes.Shape {
     constructor(configs) {
         super(configs);
         this._controller = new EllipseController(this);
@@ -45,7 +46,7 @@ export class EllipseShape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class EllipseController extends core.ShapeController {
+export class EllipseController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

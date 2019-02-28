@@ -1,6 +1,6 @@
 
-import * as events from "./events";
-import * as core from "./core";
+import * as events from "../core/events";
+import * as geom from "../core/geom";
 import * as panes from "./panes";
 import * as handlers from "./handlers";
 import * as cursors from "./cursors";
@@ -25,9 +25,9 @@ export class Stage extends events.EventHandler {
         this._showBackground = false;
 
         // The boundaries of the "Stage"
-        this._bounds = new core.Bounds(configs);
+        this._bounds = new geom.Bounds(configs);
         this._zoom = 1.0;
-        this._offset = new core.Point()
+        this._offset = new geom.Point()
 
         this._divId = divId;
         this._parentDiv = $("#" + divId);
@@ -88,7 +88,7 @@ export class Stage extends events.EventHandler {
     get offset() { return this._offset; }
     setOffset(x, y) {
         if (this._offset.x != x || this._offset.y != y) {
-            this._offset = new core.Point(x, y);
+            this._offset = new geom.Point(x, y);
             this._panes.forEach(function(pane, index) {
                 pane.setOffset(x, y);
             });

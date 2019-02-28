@@ -1,10 +1,10 @@
 
-import * as core from "./core"
+import * as shapes from "./shapes"
 
 /**
  * A wrapper over a path.
  */
-export class Path extends core.Shape {
+export class Path extends shapes.Shape {
     constructor(configs) {
         super(configs);
         this._commands = [];

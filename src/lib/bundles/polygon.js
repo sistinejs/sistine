@@ -1,6 +1,7 @@
 
-import * as core from "../core"
-import * as geom from "../../utils/geom"
+import * as shapes from "../Core/shapes"
+import * as controller from "../Core/controller"
+import * as geom from "../Utils/geom"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -11,7 +12,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class PolygonShape extends core.Shape {
+export class PolygonShape extends shapes.Shape {
     constructor(configs) {
         super(configs);
         this._numSides = Math.max(3, configs.numSides || 5);
@@ -59,7 +60,7 @@ export class PolygonShape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class PolygonController extends core.ShapeController {
+export class PolygonController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

@@ -1,6 +1,5 @@
 
-import * as events from "./events";
-import * as core from "./core";
+import * as geom from "../core/geom";
 import { getcssint } from "../utils/dom"
 
 /**
@@ -20,8 +19,8 @@ export class Pane {
         this._canvasId = canvasId;
         this._canvas = null;
         this._zoom = 1.0;
-        this._offset = new core.Point();
-        this._viewBounds = new core.Bounds();
+        this._offset = new geom.Point();
+        this._viewBounds = new geom.Bounds();
         this._ensureCanvas();
         this._refCount = 1;
     }
@@ -51,7 +50,7 @@ export class Pane {
     get offset() { return this._offset; }
     setOffset(x, y) {
         if (this._offset.x != x || this._offset.y != y) {
-            this._offset = new core.Point(x, y);
+            this._offset = new geom.Point(x, y);
             this._viewBoundsChanged();
         }
     }
@@ -60,14 +59,14 @@ export class Pane {
      * Converts world coordinates to screen coordinates.
      */
     toScreen(x, y, result) {
-        result = result || new core.Point(x, y);
+        result = result || new geom.Point(x, y);
         result.x = this.zoom * (x - this.offset.x);
         result.y = this.zoom * (y - this.offset.y);
         return result;
     }
 
     toWorld(x, y, result) {
-        result = result || new core.Point(x, y);
+        result = result || new geom.Point(x, y);
         result.x = (x / this.zoom) + this.offset.x;
         result.y = (y / this.zoom) + this.offset.y;
         return result;

@@ -1,6 +1,5 @@
 
-import * as events from "./events";
-import * as core from "./core";
+import * as core from "../core/geom";
 import * as panes from "./panes";
 import { getcssint } from "../utils/dom"
 
@@ -87,7 +86,7 @@ export class BaseTouchHandler {
     constructor(stage) {
         this.stage = stage;
         this.downPoint = null;
-        this.currPoint = new core.Point();
+        this.currPoint = new geom.Point();
         this.isClick = false;
         this.timeDelta = 0;
         this.currTime = 0;
@@ -205,7 +204,7 @@ export class StageViewPortHandler extends BaseTouchHandler {
     }
 
     toWorld(x, y, result) {
-        result = result || new core.Point(x, y);
+        result = result || new geom.Point(x, y);
         if (this.downPoint != null) {
             result.x = (x / this._bgPane.zoom) + this.downOffset.x;
             result.y = (y / this._bgPane.zoom) + this.downOffset.y;
