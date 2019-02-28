@@ -1,17 +1,14 @@
 
 // import Sistine class
-import * as core from './Core/index';
-import * as views from './Views/index';
+import { Core } from './Core/index';
+import { Views } from './Views/index';
 import { Registry } from './registry';
-import * as utils from './Utils/index';
+import { Utils } from './Utils/index';
 
-const Sistine = {
-    'Core': core,
-    'Views': views,
-    'Utils': utils,
+export const Sistine = {
+    'Core': Core,
+    'Views': Views,
+    'Utils': Utils,
     'Registry': Registry,
 }
 
-// export default UserList class
-// I used `defaultExport` to state that variable name doesn't matter
-export default Sistine;

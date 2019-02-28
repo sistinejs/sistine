@@ -1,5 +1,5 @@
 
-var DefaultBundle = Sistine.registry.DefaultBundle;
+var DefaultBundle = Sistine.Registry.DefaultBundle;
 iconStages = { };
 shapeDefaults = {
     'strokeStyle': "black",
@@ -10,12 +10,12 @@ theStage = null;
 zoomHandler = null;
 
 function setupStage() {
-    theScene = new Sistine.core.Scene();
-    theStage = new Sistine.stage.Stage("stage_div", theScene);
+    theScene = new Sistine.Core.Models.Scene();
+    theStage = new Sistine.Views.Stage.Stage("stage_div", theScene);
     theStage.isEditable = true;
     theStage.showBackground = true;
     // Add a zoom handler!!
-    zoomHandler = new Sistine.handlers.StageViewPortHandler(theStage);
+    zoomHandler = new Sistine.Views.Handlers.StageViewPortHandler(theStage);
     addSampleShapes();
 }
 
@@ -31,12 +31,12 @@ function addShape(objid, configs) {
 }
 
 function addSampleShapes() {
-    var grd1 = new Sistine.styles.LinearGradient(0, 0, 170, 0)
+    var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 170, 0)
                           .addStop(0, "black")
                           .addStop(1, "white");
     addShape("Triangle", {"x": 80, "y": 150, "width": 200, "height": 200, "lineWidth": 2, "fillStyle": grd1});
 
-    var grd2 = new Sistine.styles.RadialGradient(50, 50, 20, 50, 50, 50)
+    var grd2 = new Sistine.Core.Styles.RadialGradient(50, 50, 20, 50, 50, 50)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");
     addShape("Circle", { "x": 200, "y": 50, "width": 100, "height": 100, "lineWidth": 2, "fillStyle": grd2});

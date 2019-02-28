@@ -1,6 +1,9 @@
 
 import * as events from "./events";
 import * as geom from "./geom";
+import * as geomutils from "../Utils/geom";
+import * as styles from "./styles";
+import * as controller from "./controller";
 
 export const DEFAULT_CONTROL_SIZE = 5;
 
@@ -22,13 +25,14 @@ export class Shape {
         this._children = [];
         this._globalTransform = new geom.Transform();
         this._lastTransformed = Date.now();
+        this.controlSize = DEFAULT_CONTROL_SIZE;
 
         this._bounds = new geom.Bounds(configs)
         // The reference width and height denote the "original" width and height
         // for this shape and is used as a way to know what the current "scale" is.
         this._refWidth = this._bounds.width;
         this._refHeight = this._bounds.height;
-        this._controller = new ShapeController(this);
+        this._controller = new controller.ShapeController(this);
 
         // Observable properties
         this.name = configs.name || "";
@@ -224,7 +228,7 @@ export class Shape {
         var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
         if (this.shouldTrigger(event) == false)
             return null;
-        var C2 = DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE;
+        var C2 = this.controlSize + this.controlSize;
         if (w <= C2 || h <= C2)
             return null;
         return event;
@@ -452,15 +456,15 @@ export class Shape {
         for (var i = sizePoints.length - 1;i >= 0;i--) {
             var px = sizePoints[i][0];
             var py = sizePoints[i][1];
-            ctx.strokeRect(px - DEFAULT_CONTROL_SIZE, py - DEFAULT_CONTROL_SIZE,
-                           DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE,
-                           DEFAULT_CONTROL_SIZE + DEFAULT_CONTROL_SIZE);
+            ctx.strokeRect(px - this.controlSize, py - this.controlSize,
+                           this.controlSize + this.controlSize,
+                           this.controlSize + this.controlSize);
         }
         // Draw the "rotation" control
         ctx.beginPath();
-        geom.pathEllipse(ctx, this.bounds.right + 50 - DEFAULT_CONTROL_SIZE, 
-                         this.bounds.centerY - DEFAULT_CONTROL_SIZE, 
-                         DEFAULT_CONTROL_SIZE * 2, DEFAULT_CONTROL_SIZE * 2);
+        geomutils.pathEllipse(ctx, this.bounds.right + 50 - this.controlSize, 
+                         this.bounds.centerY - this.controlSize, 
+                         this.controlSize * 2, this.controlSize * 2);
         ctx.fillStyle = 'green';
         ctx.fill();
         ctx.moveTo(this.bounds.right, this.bounds.centerY);
@@ -554,3 +558,128 @@ export class Group extends Shape {
         }
     }
 }
+
+export class Layer extends Shape { }
+
+/**
+ * The Scene is the raw model where all layers and shapes are 
+ * managed.  As far as possible this does not perform any view 
+ * related operations as that is decoupled into the view entity.
+ */
+export class Scene extends events.EventDispatcher {
+    constructor(configs) {
+        super();
+        configs = configs || {};
+        this._bounds = configs.bounds || new geom.Bounds();
+        this._layers = []
+        this.addLayer();
+        this._selectedLayer = 0;
+    }
+
+    get bounds() { return this._bounds; }
+
+    layerAtIndex(index) {
+        return this._layers[index];
+    }
+
+    get layers() {
+        return this._layers;
+    }
+
+    get layerCount() {
+        return this._layers.length;
+    }
+
+    get selectedLayer() {
+        return this._selectedLayer;
+    }
+
+    set selectedLayer(index) {
+        if (index != this._selectedLayer) {
+            if (index >= 0 && index < this.layerCount) {
+                this._selectedLayer = index;
+            }
+        }
+    }
+
+    add(shape) {
+        return this._layers[this.selectedLayer].add(shape);
+    }
+
+    addLayer() {
+        return this.insertLayer(-1);
+    }
+
+    removeLayer(index) {
+        var layer = this._layers[index];
+        layer.scene = null;
+        this._layers.splice(index, 1);
+        return layer;
+    }
+
+    insertLayer(index) {
+        var layer = new Layer();
+        layer.scene = this;
+        if (index < 0) {
+            this._layers.push(layer);
+        } else {
+            this._layers.splice(index, 0, layer);
+        }
+        return layer;
+    }
+}
+
+/**
+ * A wrapper over a path.
+ */
+export class Path extends Shape {
+    constructor(configs) {
+        super(configs);
+        this._commands = [];
+    }
+
+    _cmdMoveTo(ctx, args) { ctx.moveTo.apply(args); }
+    _cmdLineTo(ctx, args) { ctx.lineTo.apply(args); }
+    _cmdClosePath(ctx, args) { ctx.closePath(); }
+    _cmdArc(ctx, args) { ctx.arc.apply(args); }
+    _cmdArcTo(ctx, args) { ctx.arcTo.apply(args); }
+    _cmdQuadraticCurveTo(ctx, args) { ctx.quadraticCurveTo.apply(args); }
+    _cmdBezierCurveTo(ctx, args) { ctx.bezierCurveTo.apply(args); }
+    _addCommand(cmd, args) {
+        this._commands.push([cmd, args]);
+    }
+
+    moveTo(x, y) { this._addCommand(this._cmdMoveTo, [x, y]); }
+    lineTo(x, y) { this._addCommand(this._cmdLineTo, [x, y]); }
+    arc(x, y, radius, startAngle, endAngle, anticlockwise) {
+        this._addCommand(this._cmdArc, [x, y, radius, startAngle, endAngle, anticlockwise]);
+    }
+    arcTo(x1, y1, x2, y2, radius) {
+        this._addCommand(this._cmdArcTo, [x1, y1, x2, y2, radius]);
+    }
+    quadraticCurveTo(cp1x, cp1y, x, y) {
+        this._addCommand(this._cmdQuadraticCurveTo, [cp1x, cp1y, x, y]);
+    }
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
+        this._addCommand(this._cmdQuadraticCurveTo, [cp1x, cp1y, cp2x, cp2y, x, y]);
+    }
+    closePath() {
+        this._addCommand(this._cmdClosePath);
+    }
+
+    draw(ctx) {
+        ctx.beginPath();
+        this._commands.forEach(function(cmd) {
+            var func = cmd[0];
+            var args = cmd[1];
+            func(ctx, args);
+        });
+        if (this.fillStyle) {
+            ctx.fill();
+        }
+        if (this.lineWidth > 0) {
+            ctx.stroke();
+        }
+    }
+}
+

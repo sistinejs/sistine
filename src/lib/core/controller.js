@@ -59,6 +59,7 @@ export class ShapeController extends events.EventHandler {
         var x = newp.x;
         var y = newp.y;
         var bounds = this.shape.bounds;
+        var controlSize = this.shape.controlSize;
         var l = bounds.left;
         var r = bounds.right;
         var t = bounds.top;
@@ -79,16 +80,16 @@ export class ShapeController extends events.EventHandler {
             var px = hti[0][0];
             var py = hti[0][1];
             var cursor = hti[1];
-            if (x >= px - DEFAULT_CONTROL_SIZE && x <= px + DEFAULT_CONTROL_SIZE &&
-                y >= py - DEFAULT_CONTROL_SIZE && y <= py + DEFAULT_CONTROL_SIZE) {
+            if (x >= px - controlSize && x <= px + controlSize &&
+                y >= py - controlSize && y <= py + controlSize) {
                 return new HitInfo(this.shape, HitType.SIZE, i, cursor);
             }
         }
 
         var rotX = bounds.right + 50;
         var rotY = bounds.centerY;
-        if (x >= rotX - DEFAULT_CONTROL_SIZE && x <= rotX + DEFAULT_CONTROL_SIZE &&
-            y >= rotY - DEFAULT_CONTROL_SIZE && y <= rotY + DEFAULT_CONTROL_SIZE) {
+        if (x >= rotX - controlSize && x <= rotX + controlSize &&
+            y >= rotY - controlSize && y <= rotY + controlSize) {
             return new HitInfo(this.shape, HitType.ROTATE, 0, "grab");
         }
         if (bounds.containsPoint(x, y)) {

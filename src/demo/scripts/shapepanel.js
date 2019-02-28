@@ -12,7 +12,7 @@ function loadShapes() {
         $icondiv.empty()
 
         var shapeId = icondiv.id.replace(/holder_/, "");
-        var iconStage = iconStages[shapeId] = new Sistine.stage.Stage(icondiv.id);
+        var iconStage = iconStages[shapeId] = new Sistine.Views.Stage.Stage(icondiv.id);
         var topPane = iconStage.getPane("main");
         var $child = topPane.element;
 
@@ -22,12 +22,12 @@ function loadShapes() {
             x: margin,
             y: margin,
             width: $child.width() - (
-                Sistine.utils.dom.getcssint($child, "margin-left") +
-                Sistine.utils.dom.getcssint($child, "margin-right")
+                Sistine.Utils.DOM.getcssint($child, "margin-left") +
+                Sistine.Utils.DOM.getcssint($child, "margin-right")
             ) - (margin * 2),
             height: $child.height() - (
-                Sistine.utils.dom.getcssint($child, "margin-top") +
-                Sistine.utils.dom.getcssint($child, "margin-bottom")
+                Sistine.Utils.DOM.getcssint($child, "margin-top") +
+                Sistine.Utils.DOM.getcssint($child, "margin-bottom")
             ) - (margin * 2)
         });
         iconStage.scene.add(toolbarShape);

@@ -1,5 +1,4 @@
 
-import * as core from "../core"
 import * as leftArrows from "./LeftArrow"
 
 export function newShape(configs) {

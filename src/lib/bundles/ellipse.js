@@ -1,6 +1,6 @@
 
 
-import * as shapes from "../Core/shapes"
+import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 import * as geom from "../Utils/geom"
 
@@ -16,7 +16,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class EllipseShape extends shapes.Shape {
+export class EllipseShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._controller = new EllipseController(this);

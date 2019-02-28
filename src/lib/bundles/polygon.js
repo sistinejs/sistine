@@ -1,5 +1,5 @@
 
-import * as shapes from "../Core/shapes"
+import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 import * as geom from "../Utils/geom"
 
@@ -12,7 +12,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class PolygonShape extends shapes.Shape {
+export class PolygonShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._numSides = Math.max(3, configs.numSides || 5);

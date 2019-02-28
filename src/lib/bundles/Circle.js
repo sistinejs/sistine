@@ -1,5 +1,6 @@
 
-import * as core from "../core"
+import * as models from "../Core/models"
+import * as controller from "../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -10,7 +11,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class CircleShape extends core.Shape {
+export class CircleShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._controller = new CircleController(this);
@@ -45,7 +46,7 @@ export class CircleShape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class CircleController extends core.ShapeController {
+export class CircleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

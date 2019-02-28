@@ -1,5 +1,5 @@
 
-import * as shapes from "../Core/shapes"
+import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 import * as geom from "../Utils/geom"
 
@@ -12,7 +12,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class CylinderShape extends shapes.Shape {
+export class CylinderShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._ellipseHeight = 0.4;

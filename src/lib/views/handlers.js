@@ -1,5 +1,5 @@
 
-import * as core from "../core/geom";
+import * as geom from "../core/geom";
 import * as panes from "./panes";
 import { getcssint } from "../utils/dom"
 

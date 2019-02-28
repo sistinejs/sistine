@@ -1,6 +1,7 @@
 
-import * as events from "../core/events";
-import * as geom from "../core/geom";
+import * as events from "../Core/events";
+import * as models from "../Core/models";
+import * as geom from "../Core/geom";
 import * as panes from "./panes";
 import * as handlers from "./handlers";
 import * as cursors from "./cursors";
@@ -31,7 +32,7 @@ export class Stage extends events.EventHandler {
 
         this._divId = divId;
         this._parentDiv = $("#" + divId);
-        this._scene = scene || new core.Scene();
+        this._scene = scene || new models.Scene();
         this._shapeIndex = new ShapeIndex(this._scene);
 
         // Track mouse/touch drag events
@@ -609,7 +610,7 @@ export class Selection {
             var currParent = currGroup.parent;
             // Here create a new shape group if we have atleast 2 shapes
             if (currGroup.shapes.length > 1)  {
-                var newParent = new core.Group();
+                var newParent = new models.Group();
                 currParent.add(newParent);
                 newParent.setLocation(currBounds.x, currBounds.y);
                 newParent.setSize(currBounds.width, currBounds.height);

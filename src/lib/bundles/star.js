@@ -1,6 +1,6 @@
 
-
-import * as core from "../core"
+import * as models from "../Core/models"
+import * as controller from "../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -11,7 +11,7 @@ export function newShapeForToolbar(configs) {
     return new StarShape(configs);
 }
 
-export class StarShape extends core.Shape {
+export class StarShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._numSides = Math.max(3, configs.numSides || 5);
@@ -72,7 +72,7 @@ export class StarShape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class StarController extends core.ShapeController {
+export class StarController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

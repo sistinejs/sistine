@@ -1,6 +1,6 @@
 
-const TouchModes = Sistine.handlers.TouchModes;
-const TouchMode = Sistine.handlers.TouchMode;
+const TouchModes = Sistine.Views.Handlers.TouchModes;
+const TouchMode = Sistine.Views.Handlers.TouchMode;
 
 function setupMenus() {
     $(".menu li").hover(
@@ -33,7 +33,7 @@ function setupToolbar() {
         $tbbutton.button({
             iconPosition: "top"
         }).append(buttonImage);
-        Sistine.utils.dom.fillChildComponent(buttonImage);
+        Sistine.Utils.DOM.fillChildComponent(buttonImage);
         $tbbutton.click(eval("on" + buttonId));
     });
 }

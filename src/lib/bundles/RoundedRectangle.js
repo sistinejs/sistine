@@ -1,5 +1,6 @@
 
-import * as core from "../core"
+import * as models from "../Core/models"
+import * as controller from "../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -12,7 +13,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class RoundedRectangleShape extends core.Shape {
+export class RoundedRectangleShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._cornerRadius = configs.cornerRadius || 5;
@@ -50,7 +51,7 @@ export class RoundedRectangleShape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class RoundedRectangleController extends core.ShapeController {
+export class RoundedRectangleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

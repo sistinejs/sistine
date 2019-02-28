@@ -1,5 +1,6 @@
 
-import * as core from "../core"
+import * as models from "../Core/models"
+import * as controller from "../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -10,7 +11,7 @@ export function newShapeForToolbar(configs) {
     return newShape(configs);
 }
 
-export class DoubleArrowShape extends core.Shape {
+export class DoubleArrowShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._shaftWidth = configs.shaftWidth || 0.3;
@@ -53,7 +54,7 @@ export class DoubleArrowShape extends core.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class DoubleArrowController extends core.ShapeController {
+export class DoubleArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }
