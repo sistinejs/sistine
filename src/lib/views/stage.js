@@ -12,9 +12,8 @@ import { getcssint } from "../utils/dom"
  * As far as possible this does not perform any view related operations as 
  * that is decoupled into the view entity.
  */
-export class Stage extends events.EventHandler {
+export class Stage {
     constructor(divId, scene, configs) {
-        super();
         configs = configs || {};
         configs.x = configs.x || 0;
         configs.y = configs.y || 0;
@@ -40,7 +39,6 @@ export class Stage extends events.EventHandler {
 
         // Main panel where shapes are drawn at rest
         this._mainPane = this.acquirePane("main");
-        this.scene.addHandler(this);
 
         // Information regarding Selections
         this.selection = new Selection(this);
@@ -50,6 +48,15 @@ export class Stage extends events.EventHandler {
         // The touch mode passes information on what each of the handlers are ok to perform
         this._touchContext = new handlers.TouchContext()
         this._kickOffRepaint();
+
+        var self = this;
+        events.GlobalHub.on(models.EV_SHAPE_ADDED, function(event) {
+            self.paneNeedsRepaint(event.shape.pane);
+        }).on(models.EV_SHAPE_REMOVED, function(event) {
+            self.paneNeedsRepaint(event.shape.pane)
+        }).on(models.EV_PROPERTY_CHANGED, function(event) {
+            self.paneNeedsRepaint(event.source.pane)
+        })
     }
 
     get touchContext() {
@@ -231,16 +238,6 @@ export class Stage extends events.EventHandler {
         }
     }
 
-    eventTriggered(event) {
-        if (event.name == "ShapeAdded") {
-            this.paneNeedsRepaint(event.shape.pane)
-        } else if (event.name == "ShapeRemoved") {
-            this.paneNeedsRepaint(event.shape.pane)
-        } else if (event.name == "PropertyChanged") {
-            this.paneNeedsRepaint(event.source.pane)
-        }
-    }
-
     paneNeedsRepaint(name) {
         name = name || null;
         if (name == null) {
@@ -285,22 +282,18 @@ export class Stage extends events.EventHandler {
  * for faster access and grouping not just by hierarchy but also to cater for various access
  * characteristics. (say by location, by attribute type, by zIndex etc)
  */
-export class ShapeIndex extends events.EventHandler {
+export class ShapeIndex {
     constructor(scene) {
-        super();
         this._shapeIndexes = {};
         this._allShapes = [];
         this.defaultPane = "main";
         this.scene = scene;
-    }
-
-    eventTriggered(event) {
-        if (event.name == "ShapeAdded") {
-            this.add(event.shape);
-        } else if (event.name == "ShapeRemoved") {
-            this.remove(event.shape);
-        } else if (event.name == "PropertyChanged") {
-        }
+        var self = this;
+        events.GlobalHub.on(models.EV_SHAPE_ADDED, function(event) {
+            self.add(event.shape);
+        }).on(models.EV_SHAPE_REMOVED, function(event) {
+            self.remove(event.shape);
+        })
     }
 
     get scene() {
@@ -309,16 +302,10 @@ export class ShapeIndex extends events.EventHandler {
 
     set scene(s) {
         if (s != this._scene) {
-            if (this._scene != null) {
-                this._scene.removeHandler(this);
-            }
             this._scene = s;
             this._shapeIndexes = {};
             this._allShapes = [];
             this.reIndex();     // Build the index for this new scene!
-            if (this._scene != null) {
-                this._scene.addHandler(this);
-            }
         }
     }
 

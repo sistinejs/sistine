@@ -1,85 +1,77 @@
 
-export class EventDispatcher {
+export class EventHub {
     constructor() {
-        this._handlers = [];
+        this._onHandlers = {};
+        this._beforeHandlers = {};
     }
 
-    addHandler(handler) {
-        var i = this._handlers.indexOf(handler);
-        if (i < 0) {
-            this._handlers.push(handler);
+    before(eventType, handler) {
+        return this._addHandler(this._beforeHandlers, eventType, handler);
+    }
+
+    on(eventType, handler) {
+        return this._addHandler(this._onHandlers, eventType, handler);
+    }
+
+    removeBefore(eventType, handler) {
+        return this._removeHandler(this._beforeHandlers, eventType, handler);
+    }
+
+    removeOn(eventType, handler) {
+        return this._removeHandler(this._onHandlers, eventType, handler);
+    }
+
+    _addHandler(handlers, eventType, handler) {
+        if (!(eventType in handlers)) {
+            handlers[eventType] = [];
         }
+        handlers[eventType].push(handler);
+        return this;
     }
 
-    removeHandler(handler) {
-        var i = this._handlers.indexOf(handler);
-        if (i >= 0) {
-            this._handlers.splice(i, 1);
-        }
-    }
-
-    /**
-     * All events are syncronous and follow a "shouldTriggerX" followed by a 
-     * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
-     * of the event there by preventing a certain change that may be going on.
-     */
-    shouldTrigger(event) {
-        for (var i = 0, L = this._handlers.length;i < L;i++) {
-            var handler = this._handlers[i];
-            if (handler.shouldTrigger(event) == false) {
-                return false;
+    _removeHandler(handlers, eventType, handler) {
+        handlers = handlers[eventType] || [];
+        for (var i = 0;i < handlers.length;i++) {
+            if (handlers[i] == handler) {
+                handlers.splice(i, 1);
+                break;
             }
         }
-        return true;
+        return this;
     }
 
     /**
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    eventTriggered(event) {
-        var L = this._handlers.length;
-        for (var i = L - 1;i >= 0;i--) {
-            var handler = this._handlers[i];
-            if (handler.eventTriggered(event) == false) {
+    validateBefore(eventType, event) {
+        return this._trigger(this._beforeHandlers, eventType, event);
+    }
+    triggerOn(eventType, event) {
+        return this._trigger(this._onHandlers, eventType, event);
+    }
+
+    _trigger(handlers, eventType, event) {
+        handlers = handlers[eventType] || [];
+        var L = handlers.length;
+        for (var i = 0;i < L;i++) {
+            var handler = handlers[i];
+            if (handler(event) == false) {
                 return false;
             }
         }
         return true;
     }
-
-    dispatchEvent(event, task) {
-        if (this.shouldTrigger(event) == false)
-            return false;
-        task();
-        return this.triggerEvent(event);
-    }
 }
 
-export class EventHandler {
-    /**
-     * All events are syncronous and follow a "shouldTriggerX" followed by a 
-     * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
-     * of the event there by preventing a certain change that may be going on.
-     */
-    shouldTrigger(event) {
-        return true;
-    }
-
-    /**
-     * This is called after a particular change has been approved to notify that 
-     * a change has indeed gone through.
-     */
-    eventTriggered(event) {
-    }
-}
+export const GlobalHub = new EventHub();
 
 export class Event {
     constructor(source) {
         this.source = source;
     }
 
-    get name() { return "Event"; };
+    get name() { null.a = 3; }
 }
 
 export class PropertyChanged extends Event {
@@ -89,8 +81,6 @@ export class PropertyChanged extends Event {
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
-
-    get name() { return "PropertyChanged"; };
 }
 
 export class ShapeAdded extends Event {
@@ -99,8 +89,6 @@ export class ShapeAdded extends Event {
         this.parent = parent;
         this.shape = shape;
     }
-
-    get name() { return "ShapeAdded"; };
 }
 
 export class ShapeRemoved extends Event {
@@ -109,6 +97,4 @@ export class ShapeRemoved extends Event {
         this.parent = parent;
         this.shape = shape;
     }
-
-    get name() { return "ShapeRemoved"; };
 }
