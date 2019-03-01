@@ -22,7 +22,7 @@ export class Shape {
     constructor(configs) {
         configs = configs || {};
         this.id = ShapeGlobals._shapeCounter++;
-        this._eventHub = new events.EventHub();
+        this._eventHub = null ; // new events.EventHub();
         this.globalHub = events.GlobalHub;
         this._scene = null;
         this._parent = null;
@@ -503,24 +503,30 @@ export class Shape {
     }
 
     on(eventType, handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
         this._eventHub.on(eventType, handler);
         return this;
     }
 
     before(eventType, handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
         this._eventHub.before(eventType, handler);
         return this;
     }
 
     validateBefore(eventType, event) {
         event.source = this;
-        return this._eventHub.validateBefore(eventType, event) != false && 
+        return (this._eventHub == null || this._eventHub.validateBefore(eventType, event) != false) && 
                this.globalHub.validateBefore(eventType, event) != false;
     }
 
     triggerOn(eventType, event) {
         event.source = this;
-        return this._eventHub.triggerOn(eventType, event) != false && 
+        return (this._eventHub == null || this._eventHub.triggerOn(eventType, event) != false) && 
                this.globalHub.triggerOn(eventType, event) != false;
     }
 }
