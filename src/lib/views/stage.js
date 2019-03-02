@@ -50,13 +50,15 @@ export class Stage {
         this._kickOffRepaint();
 
         var self = this;
-        events.GlobalHub.on(models.EV_SHAPE_ADDED, function(event) {
-            self.paneNeedsRepaint(event.shape.pane);
-        }).on(models.EV_SHAPE_REMOVED, function(event) {
-            self.paneNeedsRepaint(event.shape.pane)
-        }).on(models.EV_PROPERTY_CHANGED, function(event) {
-            self.paneNeedsRepaint(event.source.pane)
-        })
+        events.GlobalHub.on(function(event) {
+            if (event.name == "ShapeAdded") {
+                self.paneNeedsRepaint(event.shape.pane);
+            } else if (event.name == "ShapeRemoved") {
+                self.paneNeedsRepaint(event.shape.pane)
+            } else if (event.name == "PropertyChanged") {
+                // self.paneNeedsRepaint(event.source.pane)
+            }
+        });
     }
 
     get touchContext() {
@@ -289,11 +291,13 @@ export class ShapeIndex {
         this.defaultPane = "main";
         this.scene = scene;
         var self = this;
-        events.GlobalHub.on(models.EV_SHAPE_ADDED, function(event) {
-            self.add(event.shape);
-        }).on(models.EV_SHAPE_REMOVED, function(event) {
-            self.remove(event.shape);
-        })
+        events.GlobalHub.on(function(event) {
+            if (event.name == "ShapeAdded") {
+                self.add(event.shape);
+            } else if (event.name == "ShapeRemoved") {
+                self.remove(event.shape);
+            }
+        });
     }
 
     get scene() {

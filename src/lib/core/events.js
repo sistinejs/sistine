@@ -1,36 +1,32 @@
 
 export class EventHub {
     constructor() {
-        this._onHandlers = {};
-        this._beforeHandlers = {};
+        this._onHandlers = [];
+        this._beforeHandlers = [];
     }
 
-    before(eventType, handler) {
-        return this._addHandler(this._beforeHandlers, eventType, handler);
+    before(handler) {
+        return this._addHandler(this._beforeHandlers, handler);
     }
 
-    on(eventType, handler) {
-        return this._addHandler(this._onHandlers, eventType, handler);
+    on(handler) {
+        return this._addHandler(this._onHandlers, handler);
     }
 
-    removeBefore(eventType, handler) {
-        return this._removeHandler(this._beforeHandlers, eventType, handler);
+    removeBefore(handler) {
+        return this._removeHandler(this._beforeHandlers, handler);
     }
 
-    removeOn(eventType, handler) {
-        return this._removeHandler(this._onHandlers, eventType, handler);
+    removeOn(handler) {
+        return this._removeHandler(this._onHandlers, handler);
     }
 
-    _addHandler(handlers, eventType, handler) {
-        if (!(eventType in handlers)) {
-            handlers[eventType] = [];
-        }
-        handlers[eventType].push(handler);
+    _addHandler(handlers, handler) {
+        handlers.push(handler);
         return this;
     }
 
-    _removeHandler(handlers, eventType, handler) {
-        handlers = handlers[eventType] || [];
+    _removeHandler(handlers, handler) {
         for (var i = 0;i < handlers.length;i++) {
             if (handlers[i] == handler) {
                 handlers.splice(i, 1);
@@ -44,15 +40,14 @@ export class EventHub {
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    validateBefore(eventType, event) {
-        return this._trigger(this._beforeHandlers, eventType, event);
+    validateBefore(event) {
+        return this._trigger(this._beforeHandlers, event);
     }
-    triggerOn(eventType, event) {
-        return this._trigger(this._onHandlers, eventType, event);
+    triggerOn(event) {
+        return this._trigger(this._onHandlers, event);
     }
 
-    _trigger(handlers, eventType, event) {
-        handlers = handlers[eventType] || [];
+    _trigger(handlers, event) {
         var L = handlers.length;
         for (var i = 0;i < L;i++) {
             var handler = handlers[i];
