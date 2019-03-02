@@ -56,7 +56,7 @@ export class Stage {
             } else if (event.name == "ShapeRemoved") {
                 self.paneNeedsRepaint(event.shape.pane)
             } else if (event.name == "PropertyChanged") {
-                // self.paneNeedsRepaint(event.source.pane)
+                self.paneNeedsRepaint(event.source.pane)
             }
         });
     }

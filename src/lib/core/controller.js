@@ -64,6 +64,7 @@ export class ShapeController {
             [[l, (t + b) / 2], "w-resize"],
             [[l, t], "nw-resize"],
         ]
+        console.log("gx, gy, x, y: ", gx, gy, x, y, ", Bounds: ", bounds);
         for (var i in sizePoints) {
             var hti = sizePoints[i];
             var px = hti[0][0];
