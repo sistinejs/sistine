@@ -23,10 +23,10 @@ export class EventDispatcher {
      * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
      * of the event there by preventing a certain change that may be going on.
      */
-    shouldTrigger(event) {
+    validateBefore(event) {
         for (var i = 0, L = this._handlers.length;i < L;i++) {
             var handler = this._handlers[i];
-            if (handler.shouldTrigger(event) == false) {
+            if (handler.beforeEvent(event) == false) {
                 return false;
             }
         }
@@ -37,7 +37,7 @@ export class EventDispatcher {
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    eventTriggered(event) {
+    triggerOn(event) {
         var L = this._handlers.length;
         for (var i = L - 1;i >= 0;i--) {
             var handler = this._handlers[i];
@@ -47,13 +47,6 @@ export class EventDispatcher {
         }
         return true;
     }
-
-    dispatchEvent(event, task) {
-        if (this.shouldTrigger(event) == false)
-            return false;
-        task();
-        return this.triggerEvent(event);
-    }
 }
 
 export class EventHandler {
@@ -62,7 +55,7 @@ export class EventHandler {
      * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
      * of the event there by preventing a certain change that may be going on.
      */
-    shouldTrigger(event) {
+    beforeEvent(event) {
         return true;
     }
 
@@ -70,7 +63,7 @@ export class EventHandler {
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    eventTriggered(event) {
+    onEvent(event) {
     }
 }
 

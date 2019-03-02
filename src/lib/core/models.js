@@ -165,7 +165,7 @@ export class Shape {
         if (oldValue == newValue) 
             return null;
         var event = new events.PropertyChanged(property, oldValue, newValue);
-        if (this.shouldTrigger(event) == false)
+        if (this.validateBefore(event) == false)
             return null;
         return event;
     }
@@ -175,7 +175,7 @@ export class Shape {
         if (event == null)
             return false;
         this["_" + property] = newValue;
-        this.eventTriggered(event);
+        this.triggerOn(event);
         return true;
     }
 
@@ -184,7 +184,7 @@ export class Shape {
             return null;
         var oldValue = [ this._bounds._x, this._bounds._y ];
         var event = new events.PropertyChanged("location", oldValue, [ x, y ]);
-        if (this.shouldTrigger(event) == false) 
+        if (this.validateBefore(event) == false) 
             return null;
         return event;
     }
@@ -195,7 +195,7 @@ export class Shape {
         this._bounds._x = x;
         this._bounds._y = y;
         this._lastTransformed = Date.now();
-        this.eventTriggered(event);
+        this.triggerOn(event);
         return true;
     }
 
@@ -204,7 +204,7 @@ export class Shape {
             return null;
         var oldValue = [ this._bounds.midX, this._bounds.midY ];
         var event = new events.PropertyChanged("center", oldValue, [x, y]);
-        if (this.shouldTrigger(event) == false) 
+        if (this.validateBefore(event) == false) 
             return null;
         return event;
     }
@@ -215,7 +215,7 @@ export class Shape {
         this._bounds.centerX = x;
         this._bounds.centerY = y;
         this._lastTransformed = Date.now();
-        this.eventTriggered(event);
+        this.triggerOn(event);
         return true;
     }
 
@@ -226,7 +226,7 @@ export class Shape {
             return null;
         var oldValue = [ oldWidth, oldHeight ];
         var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
-        if (this.shouldTrigger(event) == false)
+        if (this.validateBefore(event) == false)
             return null;
         var C2 = this.controlSize + this.controlSize;
         if (w <= C2 || h <= C2)
@@ -240,7 +240,7 @@ export class Shape {
         this._bounds.width = w;
         this._bounds.height = h;
         this._lastTransformed = Date.now();
-        this.eventTriggered(event);
+        this.triggerOn(event);
         return true;
     }
 
@@ -248,7 +248,7 @@ export class Shape {
         if (theta == this._angle) 
             return null;
         var event = new events.PropertyChanged("angle", this.angle, theta);
-        if (this.shouldTrigger(event) == false)
+        if (this.validateBefore(event) == false)
             return null;
         return event;
     }
@@ -258,7 +258,7 @@ export class Shape {
         if (event == null) return false;
         this._angle = theta;
         this._lastTransformed = Date.now();
-        this.eventTriggered(event);
+        this.triggerOn(event);
         return true;
     }
 
@@ -291,13 +291,13 @@ export class Shape {
         index = index || -1;
         if (shape.parent != this) {
             var event = new events.ShapeAdded(this, shape);
-            if (this.shouldTrigger(event) != false) {
+            if (this.validateBefore(event) != false) {
                 // remove from old parent - Important!
                 if (shape.removeFromParent()) {
                     this._children.push(shape);
                     shape._parent = this;
                     shape.scene = this.scene;
-                    this.eventTriggered(event);
+                    this.triggerOn(event);
                     return true;
                 }
             }
@@ -313,12 +313,12 @@ export class Shape {
     remove(shape) {
         if (shape.parent == this) {
             var event = new events.ShapeRemoved(this, shape);
-            if (this.shouldTrigger(event) != false) {
+            if (this.validateBefore(event) != false) {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == shape) {
                         this._children.splice(i, 1);
                         shape._parent = null;
-                        this.eventTriggered(event);
+                        this.triggerOn(event);
                         return true;
                     }
                 }
@@ -492,11 +492,11 @@ export class Shape {
 
     // Event handling
     /**
-     * All events are syncronous and follow a "shouldTriggerX" followed by a 
+     * All events are syncronous and follow a "validateBeforeX" followed by a 
      * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
      * of the event there by preventing a certain change that may be going on.
      */
-    shouldTrigger(event) {
+    validateBefore(event) {
         // TODO: Currently we are using a Scene as a single "broker" for our 
         // events.  But this could be inefficient based on patterns.  So
         // at some point we may want to have multiple "brokers" we want to use
@@ -508,8 +508,8 @@ export class Shape {
             event.source = this;
             var out = true;
             if (this._controller)
-                out = this._controller.shouldTrigger(event) != false;
-            return out && (this.scene.shouldTrigger(event) != false);
+                out = this._controller.beforeEvent(event) != false;
+            return out && (this.scene.beforeEvent(event) != false);
         }
         return true;
     }
@@ -518,12 +518,12 @@ export class Shape {
      * This is called after a particular change has been approved to 
      * notify that a change has indeed gone through.
      */
-    eventTriggered(event) {
+    triggerOn(event) {
         if (this.scene) {
             event.source = this;
-            var out = this.scene.eventTriggered(event) != false;
+            var out = this.scene.onEvent(event) != false;
             if (this._controller) 
-                out = out && (this._controller.eventTriggered(event) != false);
+                out = out && (this._controller.onEvent(event) != false);
             return out;
         }
     }
@@ -545,17 +545,6 @@ export class Group extends Shape {
             // check if children sizes can be set.
         }
         return event;
-    }
-
-    /**
-     * This is called after a particular change has been approved to 
-     * notify that a change has indeed gone through.
-     */
-    eventTriggered(event) {
-        super.eventTriggered(event);
-        if (event.name == "PropertyChanged" && event.property == "bounds") {
-            // adjust child sizes
-        }
     }
 }
 
@@ -626,6 +615,14 @@ export class Scene extends events.EventDispatcher {
             this._layers.splice(index, 0, layer);
         }
         return layer;
+    }
+
+    beforeEvent(event) {
+        return this.validateBefore(event);
+    }
+
+    onEvent(event) {
+        return this.triggerOn(event);
     }
 }
 
