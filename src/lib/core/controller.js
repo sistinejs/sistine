@@ -32,9 +32,8 @@ export class HitInfo {
  * ShapeControllers provide information needed to facilitate updates to a shape as 
  * well as in accepting events to make updates to shapes.
  */
-export class ShapeController extends events.EventHandler {
+export class ShapeController {
     constructor(shape) {
-        super();
         this._shape = shape;
     }
 

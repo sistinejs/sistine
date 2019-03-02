@@ -12,9 +12,8 @@ import { getcssint } from "../utils/dom"
  * As far as possible this does not perform any view related operations as 
  * that is decoupled into the view entity.
  */
-export class Stage extends events.EventHandler {
+export class Stage {
     constructor(divId, scene, configs) {
-        super();
         configs = configs || {};
         configs.x = configs.x || 0;
         configs.y = configs.y || 0;
@@ -32,7 +31,7 @@ export class Stage extends events.EventHandler {
 
         this._divId = divId;
         this._parentDiv = $("#" + divId);
-        this._scene = scene || new models.Scene();
+        this.scene = scene || new models.Scene();
         this._shapeIndex = new ShapeIndex(this._scene);
 
         // Track mouse/touch drag events
@@ -40,7 +39,6 @@ export class Stage extends events.EventHandler {
 
         // Main panel where shapes are drawn at rest
         this._mainPane = this.acquirePane("main");
-        this.scene.addHandler(this);
 
         // Information regarding Selections
         this.selection = new Selection(this);
@@ -61,6 +59,24 @@ export class Stage extends events.EventHandler {
         this._touchContext.data = data;
         if (this._touchContext.mode == handlers.TouchModes.NONE) {
             this.cursor = "auto";
+        }
+    }
+
+
+    set scene(s) {
+        this._scene = this._scene || null;
+        if (this._scene != s) {
+            this._scene = s
+            var self = this;
+            s.on(function(event) {
+                if (event.name == "ShapeAdded") {
+                    self.paneNeedsRepaint(event.shape.pane);
+                } else if (event.name == "ShapeRemoved") {
+                    self.paneNeedsRepaint(event.shape.pane)
+                } else if (event.name == "PropertyChanged") {
+                    self.paneNeedsRepaint(event.source.pane)
+                }
+            });
         }
     }
 
@@ -231,16 +247,6 @@ export class Stage extends events.EventHandler {
         }
     }
 
-    eventTriggered(event) {
-        if (event.name == "ShapeAdded") {
-            this.paneNeedsRepaint(event.shape.pane)
-        } else if (event.name == "ShapeRemoved") {
-            this.paneNeedsRepaint(event.shape.pane)
-        } else if (event.name == "PropertyChanged") {
-            this.paneNeedsRepaint(event.source.pane)
-        }
-    }
-
     paneNeedsRepaint(name) {
         name = name || null;
         if (name == null) {
@@ -285,22 +291,12 @@ export class Stage extends events.EventHandler {
  * for faster access and grouping not just by hierarchy but also to cater for various access
  * characteristics. (say by location, by attribute type, by zIndex etc)
  */
-export class ShapeIndex extends events.EventHandler {
+export class ShapeIndex {
     constructor(scene) {
-        super();
         this._shapeIndexes = {};
         this._allShapes = [];
         this.defaultPane = "main";
         this.scene = scene;
-    }
-
-    eventTriggered(event) {
-        if (event.name == "ShapeAdded") {
-            this.add(event.shape);
-        } else if (event.name == "ShapeRemoved") {
-            this.remove(event.shape);
-        } else if (event.name == "PropertyChanged") {
-        }
     }
 
     get scene() {
@@ -308,17 +304,20 @@ export class ShapeIndex extends events.EventHandler {
     }
 
     set scene(s) {
-        if (s != this._scene) {
-            if (this._scene != null) {
-                this._scene.removeHandler(this);
-            }
-            this._scene = s;
+        this._scene = this._scene || null;
+        if (this._scene != s) {
+            this._scene = s
             this._shapeIndexes = {};
             this._allShapes = [];
+            var self = this;
+            s.on(function(event) {
+                if (event.name == "ShapeAdded") {
+                    self.add(event.shape);
+                } else if (event.name == "ShapeRemoved") {
+                    self.remove(event.shape);
+                }
+            });
             this.reIndex();     // Build the index for this new scene!
-            if (this._scene != null) {
-                this._scene.addHandler(this);
-            }
         }
     }
 

@@ -7,6 +7,10 @@ import * as controller from "./controller";
 
 export const DEFAULT_CONTROL_SIZE = 5;
 
+export const EV_PROPERTY_CHANGED = 0;
+export const EV_SHAPE_ADDED = 1;
+export const EV_SHAPE_REMOVED = 2;
+
 const ShapeGlobals = {
     _shapeCounter: 1
 }
@@ -18,6 +22,7 @@ export class Shape {
     constructor(configs) {
         configs = configs || {};
         this.id = ShapeGlobals._shapeCounter++;
+        this._eventHub = null ; // new events.EventHub();
         this._scene = null;
         this._parent = null;
         this.isGroup = false;
@@ -32,7 +37,7 @@ export class Shape {
         // for this shape and is used as a way to know what the current "scale" is.
         this._refWidth = this._bounds.width;
         this._refHeight = this._bounds.height;
-        this._controller = new controller.ShapeController(this);
+        this.controller = new controller.ShapeController(this);
 
         // Observable properties
         this.name = configs.name || "";
@@ -139,8 +144,14 @@ export class Shape {
         return result;
     }
 
+    set controller(c) {
+        if (this._controller != c) {
+            this._controller = c;
+        }
+    }
+
     set scene(s) {
-        if (this.scene != s) {
+        if (this._scene != s) {
             this._scene = s;
             for (var i = 0, L = this._children.length;i < L;i++) {
                 this._children[i].scene = s;
@@ -490,42 +501,32 @@ export class Shape {
         return this.bounds.intersects(anotherBounds);
     }
 
-    // Event handling
-    /**
-     * All events are syncronous and follow a "validateBeforeX" followed by a 
-     * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
-     * of the event there by preventing a certain change that may be going on.
-     */
-    validateBefore(event) {
-        // TODO: Currently we are using a Scene as a single "broker" for our 
-        // events.  But this could be inefficient based on patterns.  So
-        // at some point we may want to have multiple "brokers" we want to use
-        // to optimise for different cases, eg:
-        // Many listeners for same kind of event
-        // Many listeners for all events on a single shape only
-        // Many listeners for all events etc.
-        if (this.scene) {
-            event.source = this;
-            var out = true;
-            if (this._controller)
-                out = this._controller.beforeEvent(event) != false;
-            return out && (this.scene.beforeEvent(event) != false);
+    on(handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
         }
-        return true;
+        this._eventHub.on(handler);
+        return this;
     }
 
-    /**
-     * This is called after a particular change has been approved to 
-     * notify that a change has indeed gone through.
-     */
-    triggerOn(event) {
-        if (this.scene) {
-            event.source = this;
-            var out = this.scene.onEvent(event) != false;
-            if (this._controller) 
-                out = out && (this._controller.onEvent(event) != false);
-            return out;
+    before(handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
         }
+        this._eventHub.before(handler);
+        return this;
+    }
+
+    validateBefore(event) {
+        event.source = this;
+        return (this._eventHub == null || this._eventHub.validateBefore(event) != false) && 
+               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.validateBefore(event) != false);
+    }
+
+    triggerOn(event) {
+        event.source = this;
+        return (this._eventHub == null || this._eventHub.triggerOn(event) != false) && 
+               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.triggerOn(event) != false);
     }
 }
 
@@ -555,15 +556,17 @@ export class Layer extends Shape { }
  * managed.  As far as possible this does not perform any view 
  * related operations as that is decoupled into the view entity.
  */
-export class Scene extends events.EventDispatcher {
+export class Scene {
     constructor(configs) {
-        super();
         configs = configs || {};
+        this._eventHub =  new events.EventHub();
         this._bounds = configs.bounds || new geom.Bounds();
         this._layers = []
         this.addLayer();
         this._selectedLayer = 0;
     }
+
+    get eventHub() { return this._eventHub; }
 
     get bounds() { return this._bounds; }
 
@@ -617,12 +620,20 @@ export class Scene extends events.EventDispatcher {
         return layer;
     }
 
-    beforeEvent(event) {
-        return this.validateBefore(event);
+    on(handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
+        this._eventHub.on(handler);
+        return this;
     }
 
-    onEvent(event) {
-        return this.triggerOn(event);
+    before(handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
+        this._eventHub.before(handler);
+        return this;
     }
 }
 

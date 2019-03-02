@@ -1,107 +1,92 @@
 
-export class EventDispatcher {
+export class EventHub {
     constructor() {
-        this._handlers = [];
+        this._onHandlers = [];
+        this._beforeHandlers = [];
     }
 
-    addHandler(handler) {
-        var i = this._handlers.indexOf(handler);
-        if (i < 0) {
-            this._handlers.push(handler);
-        }
+    before(handler) {
+        return this._addHandler(this._beforeHandlers, handler);
     }
 
-    removeHandler(handler) {
-        var i = this._handlers.indexOf(handler);
-        if (i >= 0) {
-            this._handlers.splice(i, 1);
+    on(handler) {
+        return this._addHandler(this._onHandlers, handler);
+    }
+
+    removeBefore(handler) {
+        return this._removeHandler(this._beforeHandlers, handler);
+    }
+
+    removeOn(handler) {
+        return this._removeHandler(this._onHandlers, handler);
+    }
+
+    _addHandler(handlers, handler) {
+        handlers.push(handler);
+        return this;
+    }
+
+    _removeHandler(handlers, handler) {
+        for (var i = 0;i < handlers.length;i++) {
+            if (handlers[i] == handler) {
+                handlers.splice(i, 1);
+                break;
+            }
         }
+        return this;
     }
 
     /**
-     * All events are syncronous and follow a "shouldTriggerX" followed by a 
-     * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
-     * of the event there by preventing a certain change that may be going on.
+     * This is called after a particular change has been approved to notify that 
+     * a change has indeed gone through.
      */
     validateBefore(event) {
-        for (var i = 0, L = this._handlers.length;i < L;i++) {
-            var handler = this._handlers[i];
-            if (handler.beforeEvent(event) == false) {
-                return false;
-            }
-        }
-        return true;
+        return this._trigger(this._beforeHandlers, event);
     }
-
-    /**
-     * This is called after a particular change has been approved to notify that 
-     * a change has indeed gone through.
-     */
     triggerOn(event) {
-        var L = this._handlers.length;
-        for (var i = L - 1;i >= 0;i--) {
-            var handler = this._handlers[i];
-            if (handler.eventTriggered(event) == false) {
+        return this._trigger(this._onHandlers, event);
+    }
+
+    _trigger(handlers, event) {
+        var L = handlers.length;
+        for (var i = 0;i < L;i++) {
+            var handler = handlers[i];
+            if (handler(event) == false) {
                 return false;
             }
         }
         return true;
-    }
-}
-
-export class EventHandler {
-    /**
-     * All events are syncronous and follow a "shouldTriggerX" followed by a 
-     * "triggerX" call.  This is a chance for listeners to "prevent" the sending 
-     * of the event there by preventing a certain change that may be going on.
-     */
-    beforeEvent(event) {
-        return true;
-    }
-
-    /**
-     * This is called after a particular change has been approved to notify that 
-     * a change has indeed gone through.
-     */
-    onEvent(event) {
     }
 }
 
 export class Event {
-    constructor(source) {
+    constructor(name, source) {
+        this.name = name;
         this.source = source;
     }
-
-    get name() { return "Event"; };
 }
 
 export class PropertyChanged extends Event {
     constructor(property, oldValue, newValue) {
-        super(null)
+        super("PropertyChanged", null)
         this.property = property;
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
-
-    get name() { return "PropertyChanged"; };
 }
 
 export class ShapeAdded extends Event {
     constructor(parent, shape) {
-        super(null)
+        super("ShapeAdded", null)
         this.parent = parent;
         this.shape = shape;
     }
-
-    get name() { return "ShapeAdded"; };
 }
 
 export class ShapeRemoved extends Event {
     constructor(parent, shape) {
-        super(null)
+        super("ShapeRemoved", null)
         this.parent = parent;
         this.shape = shape;
     }
-
-    get name() { return "ShapeRemoved"; };
 }
