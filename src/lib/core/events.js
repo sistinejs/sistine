@@ -67,16 +67,15 @@ export class EventHub {
 export const GlobalHub = new EventHub();
 
 export class Event {
-    constructor(source) {
+    constructor(name, source) {
+        this.name = name;
         this.source = source;
     }
-
-    get name() { null.a = 3; }
 }
 
 export class PropertyChanged extends Event {
     constructor(property, oldValue, newValue) {
-        super(null)
+        super("PropertyChanged", null)
         this.property = property;
         this.oldValue = oldValue;
         this.newValue = newValue;
@@ -85,7 +84,7 @@ export class PropertyChanged extends Event {
 
 export class ShapeAdded extends Event {
     constructor(parent, shape) {
-        super(null)
+        super("ShapeAdded", null)
         this.parent = parent;
         this.shape = shape;
     }
@@ -93,7 +92,7 @@ export class ShapeAdded extends Event {
 
 export class ShapeRemoved extends Event {
     constructor(parent, shape) {
-        super(null)
+        super("ShapeRemoved", null)
         this.parent = parent;
         this.shape = shape;
     }
