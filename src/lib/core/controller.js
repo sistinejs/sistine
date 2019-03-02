@@ -43,15 +43,6 @@ export class ShapeController extends events.EventHandler {
     }
 
     /**
-     * This is called after a particular change has been approved to notify that a change has
-     * indeed gone through.
-     */
-    eventTriggered(event) {
-        if (this.shape == event.source) {
-        }
-    }
-
-    /**
      * Returns the "topmost" shape that can be hit at a given coordinate.
      */
     getHitInfo(gx, gy) {
