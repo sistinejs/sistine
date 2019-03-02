@@ -23,7 +23,6 @@ export class Shape {
         configs = configs || {};
         this.id = ShapeGlobals._shapeCounter++;
         this._eventHub = null ; // new events.EventHub();
-        this.globalHub = events.GlobalHub;
         this._scene = null;
         this._parent = null;
         this.isGroup = false;
@@ -521,13 +520,13 @@ export class Shape {
     validateBefore(event) {
         event.source = this;
         return (this._eventHub == null || this._eventHub.validateBefore(event) != false) && 
-               this.globalHub.validateBefore(event) != false;
+               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.validateBefore(event) != false);
     }
 
     triggerOn(event) {
         event.source = this;
         return (this._eventHub == null || this._eventHub.triggerOn(event) != false) && 
-               this.globalHub.triggerOn(event) != false;
+               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.triggerOn(event) != false);
     }
 }
 
@@ -566,6 +565,8 @@ export class Scene {
         this.addLayer();
         this._selectedLayer = 0;
     }
+
+    get eventHub() { return this._eventHub; }
 
     get bounds() { return this._bounds; }
 
@@ -617,6 +618,22 @@ export class Scene {
             this._layers.splice(index, 0, layer);
         }
         return layer;
+    }
+
+    on(handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
+        this._eventHub.on(handler);
+        return this;
+    }
+
+    before(handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
+        this._eventHub.before(handler);
+        return this;
     }
 }
 

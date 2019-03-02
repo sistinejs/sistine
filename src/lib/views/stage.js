@@ -31,7 +31,7 @@ export class Stage {
 
         this._divId = divId;
         this._parentDiv = $("#" + divId);
-        this._scene = scene || new models.Scene();
+        this.scene = scene || new models.Scene();
         this._shapeIndex = new ShapeIndex(this._scene);
 
         // Track mouse/touch drag events
@@ -48,17 +48,6 @@ export class Stage {
         // The touch mode passes information on what each of the handlers are ok to perform
         this._touchContext = new handlers.TouchContext()
         this._kickOffRepaint();
-
-        var self = this;
-        events.GlobalHub.on(function(event) {
-            if (event.name == "ShapeAdded") {
-                self.paneNeedsRepaint(event.shape.pane);
-            } else if (event.name == "ShapeRemoved") {
-                self.paneNeedsRepaint(event.shape.pane)
-            } else if (event.name == "PropertyChanged") {
-                self.paneNeedsRepaint(event.source.pane)
-            }
-        });
     }
 
     get touchContext() {
@@ -70,6 +59,24 @@ export class Stage {
         this._touchContext.data = data;
         if (this._touchContext.mode == handlers.TouchModes.NONE) {
             this.cursor = "auto";
+        }
+    }
+
+
+    set scene(s) {
+        this._scene = this._scene || null;
+        if (this._scene != s) {
+            this._scene = s
+            var self = this;
+            s.on(function(event) {
+                if (event.name == "ShapeAdded") {
+                    self.paneNeedsRepaint(event.shape.pane);
+                } else if (event.name == "ShapeRemoved") {
+                    self.paneNeedsRepaint(event.shape.pane)
+                } else if (event.name == "PropertyChanged") {
+                    self.paneNeedsRepaint(event.source.pane)
+                }
+            });
         }
     }
 
@@ -290,14 +297,6 @@ export class ShapeIndex {
         this._allShapes = [];
         this.defaultPane = "main";
         this.scene = scene;
-        var self = this;
-        events.GlobalHub.on(function(event) {
-            if (event.name == "ShapeAdded") {
-                self.add(event.shape);
-            } else if (event.name == "ShapeRemoved") {
-                self.remove(event.shape);
-            }
-        });
     }
 
     get scene() {
@@ -305,10 +304,19 @@ export class ShapeIndex {
     }
 
     set scene(s) {
-        if (s != this._scene) {
-            this._scene = s;
+        this._scene = this._scene || null;
+        if (this._scene != s) {
+            this._scene = s
             this._shapeIndexes = {};
             this._allShapes = [];
+            var self = this;
+            s.on(function(event) {
+                if (event.name == "ShapeAdded") {
+                    self.add(event.shape);
+                } else if (event.name == "ShapeRemoved") {
+                    self.remove(event.shape);
+                }
+            });
             this.reIndex();     // Build the index for this new scene!
         }
     }

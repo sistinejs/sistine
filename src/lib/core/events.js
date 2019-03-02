@@ -59,8 +59,6 @@ export class EventHub {
     }
 }
 
-export const GlobalHub = new EventHub();
-
 export class Event {
     constructor(name, source) {
         this.name = name;
