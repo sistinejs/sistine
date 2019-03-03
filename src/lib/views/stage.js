@@ -62,7 +62,6 @@ export class Stage {
         }
     }
 
-
     set scene(s) {
         this._scene = this._scene || null;
         if (this._scene != s) {
@@ -444,8 +443,9 @@ export class ShapeIndex {
     }
 }
 
-export class Selection {
+export class Selection extends events.EventSource {
     constructor(stage) {
+        super();
         this.stage = stage;
         this.shapes = {};
         this.downHitInfo = null;
@@ -482,21 +482,28 @@ export class Selection {
     }
     
     add(shape) {
-        if ( ! (shape.id in this.shapes)) {
-            this._count ++;
-        }
-        this.shapes[shape.id] = shape;
-        this.savedInfos[shape.id] = shape.controller.snapshotFor();
-        this.stage.setShapePane(shape, "edit");
+        // var event = new SelectionEvent("Selected", shape);
+        // if (this.validateBefore("ShapeSelected", event) != false) {
+            if ( ! (shape.id in this.shapes)) {
+                this._count ++;
+            }
+            this.shapes[shape.id] = shape;
+            this.savedInfos[shape.id] = shape.controller.snapshotFor();
+            this.stage.setShapePane(shape, "edit");
+            this.triggerOn("ShapeSelected", event);
+        // }
     }
 
     remove(shape) {
-        if ( shape.id in this.shapes ) {
-            this._count --;
-        }
-        this.stage.setShapePane(shape, "main");
-        delete this.shapes[shape.id];
-        delete this.savedInfos[shape.id];
+        // var event = new SelectionEvent("Unselected", shape);
+        // if (this.validateBefore("ShapeUnselected", event) != false) {
+            if ( shape.id in this.shapes ) {
+                this._count --;
+            }
+            this.stage.setShapePane(shape, "main");
+            delete this.shapes[shape.id];
+            delete this.savedInfos[shape.id];
+        // }
     }
 
     checkpointShapes(hitInfo) {

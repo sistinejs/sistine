@@ -1,8 +1,41 @@
 
-export class EventHub {
+export class EventSource {
     constructor() {
+        this._eventHub = new EventHub();
+    }
+
+    on(eventTypes, handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new EventHub();
+        }
+        this._eventHub.on(eventTypes, handler);
+        return this;
+    }
+
+    before(eventTypes, handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new EventHub();
+        }
+        this._eventHub.before(eventTypes, handler);
+        return this;
+    }
+
+    validateBefore(eventTypes, event) {
+        event.source = this;
+        return this._eventHub.validateBefore(eventTypes, event) != false;
+    }
+
+    triggerOn(eventTypes, event) {
+        event.source = this;
+        return this._eventHub.triggerOn(eventTypes, event) != false;
+    }
+}
+
+export class EventHub {
+    constructor(next) {
         this._onHandlers = {};
         this._beforeHandlers = {};
+        this.next = next;
     }
 
     before(eventTypes, handler) {
@@ -51,10 +84,22 @@ export class EventHub {
      * a change has indeed gone through.
      */
     validateBefore(eventType, event) {
-        return this._trigger(eventType, this._beforeHandlers, event);
+        if (this._trigger(eventType, this._beforeHandlers, event) == false) {
+            return false;
+        }
+        if (this.next != null) {
+            return this.next.validateBefore(eventType, event) != false;
+        }
+        return true;
     }
     triggerOn(eventType, event) {
-        return this._trigger(eventType, this._onHandlers, event);
+        if (this._trigger(eventType, this._onHandlers, event) == false) {
+            return false;
+        }
+        if (this.next != null) {
+            return this.next.triggerOn(eventType, event) != false;
+        }
+        return true;
     }
 
     _trigger(eventType, handlers, event) {
@@ -78,8 +123,8 @@ export class Event {
 }
 
 export class PropertyChanged extends Event {
-    constructor(property, oldValue, newValue) {
-        super("PropertyChanged", null)
+    constructor(shape, property, oldValue, newValue) {
+        super("PropertyChanged", shape)
         this.property = property;
         this.oldValue = oldValue;
         this.newValue = newValue;
@@ -88,7 +133,7 @@ export class PropertyChanged extends Event {
 
 export class ShapeAdded extends Event {
     constructor(parent, shape) {
-        super("ShapeAdded", null)
+        super("ShapeAdded", null);
         this.parent = parent;
         this.shape = shape;
     }
@@ -96,8 +141,17 @@ export class ShapeAdded extends Event {
 
 export class ShapeRemoved extends Event {
     constructor(parent, shape) {
-        super("ShapeRemoved", null)
+        super("ShapeRemoved", null);
         this.parent = parent;
         this.shape = shape;
     }
 }
+
+export class ShapeIndexChanged extends Event {
+    constructor(shape, oldIndex, newIndex) {
+        super("ShapeIndexChanged", shape)
+        this.oldIndex = oldIndex;
+        this.newIndex = newIndex;
+    }
+}
+

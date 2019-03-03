@@ -18,11 +18,11 @@ const ShapeGlobals = {
 /**
  * Holds information about the instance of a shape.
  */
-export class Shape {
+export class Shape extends events.EventSource {
     constructor(configs) {
+        super();
         configs = configs || {};
         this.id = ShapeGlobals._shapeCounter++;
-        this._eventHub = null ; // new events.EventHub();
         this._scene = null;
         this._parent = null;
         this.isGroup = false;
@@ -153,6 +153,7 @@ export class Shape {
     set scene(s) {
         if (this._scene != s) {
             this._scene = s;
+            this._eventHub.next = (s == null ? null : s.eventHub);
             for (var i = 0, L = this._children.length;i < L;i++) {
                 this._children[i].scene = s;
             }
@@ -175,7 +176,7 @@ export class Shape {
         var oldValue = this["_" + property];
         if (oldValue == newValue) 
             return null;
-        var event = new events.PropertyChanged(property, oldValue, newValue);
+        var event = new events.PropertyChanged(this, property, oldValue, newValue);
         if (this.validateBefore("PropertyChanged:" + property, event) == false)
             return null;
         return event;
@@ -194,7 +195,7 @@ export class Shape {
         if (x == this._bounds._x && y == this._bounds._y)
             return null;
         var oldValue = [ this._bounds._x, this._bounds._y ];
-        var event = new events.PropertyChanged("location", oldValue, [ x, y ]);
+        var event = new events.PropertyChanged(this, "location", oldValue, [ x, y ]);
         if (this.validateBefore("PropertyChanged:location", event) == false) 
             return null;
         return event;
@@ -214,7 +215,7 @@ export class Shape {
         if (x == this._bounds.centerX && y == this._bounds.centerY)
             return null;
         var oldValue = [ this._bounds.midX, this._bounds.midY ];
-        var event = new events.PropertyChanged("center", oldValue, [x, y]);
+        var event = new events.PropertyChanged(this, "center", oldValue, [x, y]);
         if (this.validateBefore("PropertyChanged:center", event) == false) 
             return null;
         return event;
@@ -236,7 +237,7 @@ export class Shape {
         if (w == oldWidth && h == oldHeight)
             return null;
         var oldValue = [ oldWidth, oldHeight ];
-        var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
+        var event = new events.PropertyChanged(this, "bounds", oldValue, [ w, h ]);
         if (this.validateBefore("PropertyChanged:size", event) == false)
             return null;
         var C2 = this.controlSize + this.controlSize;
@@ -258,7 +259,7 @@ export class Shape {
     canSetAngle(theta) {
         if (theta == this._angle) 
             return null;
-        var event = new events.PropertyChanged("angle", this.angle, theta);
+        var event = new events.PropertyChanged(this, "angle", this.angle, theta);
         if (this.validateBefore("PropertyChanged:angle", event) == false)
             return null;
         return event;
@@ -346,13 +347,43 @@ export class Shape {
         }
         return false;
     }
+    
+    /**
+     * Changes the index of a given shape within the parent.  The indexOrDelta 
+     * parameter denotes whether a shape is to be moved to an absolute index or 
+     * relative to its current position depending on the 'relative' parameter.
+     */
+    changeShapeIndex(shape, indexOrDelta, relative) {
+        if (shape.parent != this) return ;
+
+        var newIndex = indexOrDelta;
+        if (relative || false) {
+            newIndex = index + indexOrDelta;
+        }
+
+        if (newIndex < 0)
+            newIndex = 0;
+        if (newIndex >= this._children.length)
+            newIndex = this._children.length - 1;
+
+        var index = this._children.indexOf(shape);
+        if (newIndex == index) {
+            return ;
+        }
+        var event = new events.ShapeIndexChanged(shape, index, newIndex);
+        if (this.validateBefore("ShapeIndexChanged", event) != false) {
+            this._children.splice(index, 1);
+            this._children.splice(newIndex, 0, shape);
+            this.triggerOn("ShapeIndexChanged", event);
+        }
+    }
 
     /**
      * Brings a child shape forward by one level.
      */
     bringForward(shape) {
-        if (shape.parent != this) return ;
-        var index = this._children.indexOf(shape);
+        return this.changeShapeIndex(shape, 1, true);
+
         if (index >= 0 && index < this._children.length - 1) {
             var temp = this._children[index];
             this._children[index] = this._children[index + 1];
@@ -364,8 +395,8 @@ export class Shape {
      * Sends a child shape backward by one index.
      */
     sendBackward(shape) {
-        if (shape.parent != this) return ;
-        var index = this._children.indexOf(shape);
+        return this.changeShapeIndex(shape, -1, true);
+
         if (index > 0) {
             var temp = this._children[index];
             this._children[index] = this._children[index - 1];
@@ -377,6 +408,8 @@ export class Shape {
      * Brings a child shape to the front of the child stack.
      */
     bringToFront(shape) {
+        return this.changeShapeIndex(shape, this._children.length, false);
+
         if (shape.parent != this) return ;
         var index = this._children.indexOf(shape);
         if (index >= 0 && index < this._children.length - 1) {
@@ -389,8 +422,8 @@ export class Shape {
      * Sends a child shape to the back of the child stack.
      */
     sendToBack(shape) {
-        if (shape.parent != this) return ;
-        var index = this._children.indexOf(shape);
+        return this.changeShapeIndex(shape, 0, false);
+
         if (index > 0) {
             this._children.splice(index, 1);
             this._children.splice(0, 0, shape);
@@ -499,34 +532,6 @@ export class Shape {
      */
     intersects(anotherBounds) {
         return this.bounds.intersects(anotherBounds);
-    }
-
-    on(eventTypes, handler) {
-        if (this._eventHub == null) {
-            this._eventHub = new events.EventHub();
-        }
-        this._eventHub.on(eventTypes, handler);
-        return this;
-    }
-
-    before(eventTypes, handler) {
-        if (this._eventHub == null) {
-            this._eventHub = new events.EventHub();
-        }
-        this._eventHub.before(eventTypes, handler);
-        return this;
-    }
-
-    validateBefore(eventTypes, event) {
-        event.source = this;
-        return (this._eventHub == null || this._eventHub.validateBefore(eventTypes, event) != false) && 
-               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.validateBefore(eventTypes, event) != false);
-    }
-
-    triggerOn(eventTypes, event) {
-        event.source = this;
-        return (this._eventHub == null || this._eventHub.triggerOn(eventTypes, event) != false) && 
-               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.triggerOn(eventTypes, event) != false);
     }
 }
 
