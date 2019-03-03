@@ -68,14 +68,10 @@ export class Stage {
         if (this._scene != s) {
             this._scene = s
             var self = this;
-            s.on(function(event) {
-                if (event.name == "ShapeAdded") {
-                    self.paneNeedsRepaint(event.shape.pane);
-                } else if (event.name == "ShapeRemoved") {
-                    self.paneNeedsRepaint(event.shape.pane)
-                } else if (event.name == "PropertyChanged") {
-                    self.paneNeedsRepaint(event.source.pane)
-                }
+            s.on("ShapeAdded, ShapeRemoved", function(event, eventType) {
+                self.paneNeedsRepaint(event.shape.pane);
+            }).on("PropertyChanged", function(event, eventType) {
+                self.paneNeedsRepaint(event.source.pane)
             });
         }
     }
@@ -310,12 +306,10 @@ export class ShapeIndex {
             this._shapeIndexes = {};
             this._allShapes = [];
             var self = this;
-            s.on(function(event) {
-                if (event.name == "ShapeAdded") {
-                    self.add(event.shape);
-                } else if (event.name == "ShapeRemoved") {
-                    self.remove(event.shape);
-                }
+            s.on("ShapeAdded", function(event, eventType) {
+                self.add(event.shape);
+            }).on("ShapeRemoved", function(event, eventType) {
+                self.remove(event.shape);
             });
             this.reIndex();     // Build the index for this new scene!
         }

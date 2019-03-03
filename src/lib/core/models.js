@@ -176,7 +176,7 @@ export class Shape {
         if (oldValue == newValue) 
             return null;
         var event = new events.PropertyChanged(property, oldValue, newValue);
-        if (this.validateBefore(event) == false)
+        if (this.validateBefore("PropertyChanged:" + property, event) == false)
             return null;
         return event;
     }
@@ -186,7 +186,7 @@ export class Shape {
         if (event == null)
             return false;
         this["_" + property] = newValue;
-        this.triggerOn(event);
+        this.triggerOn("PropertyChanged:" + property, event);
         return true;
     }
 
@@ -195,7 +195,7 @@ export class Shape {
             return null;
         var oldValue = [ this._bounds._x, this._bounds._y ];
         var event = new events.PropertyChanged("location", oldValue, [ x, y ]);
-        if (this.validateBefore(event) == false) 
+        if (this.validateBefore("PropertyChanged:location", event) == false) 
             return null;
         return event;
     }
@@ -206,7 +206,7 @@ export class Shape {
         this._bounds._x = x;
         this._bounds._y = y;
         this._lastTransformed = Date.now();
-        this.triggerOn(event);
+        this.triggerOn("PropertyChanged:location", event);
         return true;
     }
 
@@ -215,7 +215,7 @@ export class Shape {
             return null;
         var oldValue = [ this._bounds.midX, this._bounds.midY ];
         var event = new events.PropertyChanged("center", oldValue, [x, y]);
-        if (this.validateBefore(event) == false) 
+        if (this.validateBefore("PropertyChanged:center", event) == false) 
             return null;
         return event;
     }
@@ -226,7 +226,7 @@ export class Shape {
         this._bounds.centerX = x;
         this._bounds.centerY = y;
         this._lastTransformed = Date.now();
-        this.triggerOn(event);
+        this.triggerOn("PropertyChanged:center", event);
         return true;
     }
 
@@ -237,7 +237,7 @@ export class Shape {
             return null;
         var oldValue = [ oldWidth, oldHeight ];
         var event = new events.PropertyChanged("bounds", oldValue, [ w, h ]);
-        if (this.validateBefore(event) == false)
+        if (this.validateBefore("PropertyChanged:size", event) == false)
             return null;
         var C2 = this.controlSize + this.controlSize;
         if (w <= C2 || h <= C2)
@@ -251,7 +251,7 @@ export class Shape {
         this._bounds.width = w;
         this._bounds.height = h;
         this._lastTransformed = Date.now();
-        this.triggerOn(event);
+        this.triggerOn("PropertyChanged:size", event);
         return true;
     }
 
@@ -259,7 +259,7 @@ export class Shape {
         if (theta == this._angle) 
             return null;
         var event = new events.PropertyChanged("angle", this.angle, theta);
-        if (this.validateBefore(event) == false)
+        if (this.validateBefore("PropertyChanged:angle", event) == false)
             return null;
         return event;
     }
@@ -269,7 +269,7 @@ export class Shape {
         if (event == null) return false;
         this._angle = theta;
         this._lastTransformed = Date.now();
-        this.triggerOn(event);
+        this.triggerOn("PropertyChanged:angle", event);
         return true;
     }
 
@@ -302,13 +302,13 @@ export class Shape {
         index = index || -1;
         if (shape.parent != this) {
             var event = new events.ShapeAdded(this, shape);
-            if (this.validateBefore(event) != false) {
+            if (this.validateBefore("ShapeAdded", event) != false) {
                 // remove from old parent - Important!
                 if (shape.removeFromParent()) {
                     this._children.push(shape);
                     shape._parent = this;
                     shape.scene = this.scene;
-                    this.triggerOn(event);
+                    this.triggerOn("ShapeAdded", event);
                     return true;
                 }
             }
@@ -324,12 +324,12 @@ export class Shape {
     remove(shape) {
         if (shape.parent == this) {
             var event = new events.ShapeRemoved(this, shape);
-            if (this.validateBefore(event) != false) {
+            if (this.validateBefore("ShapeRemoved", event) != false) {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == shape) {
                         this._children.splice(i, 1);
                         shape._parent = null;
-                        this.triggerOn(event);
+                        this.triggerOn("ShapeRemoved", event);
                         return true;
                     }
                 }
@@ -501,32 +501,32 @@ export class Shape {
         return this.bounds.intersects(anotherBounds);
     }
 
-    on(handler) {
+    on(eventTypes, handler) {
         if (this._eventHub == null) {
             this._eventHub = new events.EventHub();
         }
-        this._eventHub.on(handler);
+        this._eventHub.on(eventTypes, handler);
         return this;
     }
 
-    before(handler) {
+    before(eventTypes, handler) {
         if (this._eventHub == null) {
             this._eventHub = new events.EventHub();
         }
-        this._eventHub.before(handler);
+        this._eventHub.before(eventTypes, handler);
         return this;
     }
 
-    validateBefore(event) {
+    validateBefore(eventTypes, event) {
         event.source = this;
-        return (this._eventHub == null || this._eventHub.validateBefore(event) != false) && 
-               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.validateBefore(event) != false);
+        return (this._eventHub == null || this._eventHub.validateBefore(eventTypes, event) != false) && 
+               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.validateBefore(eventTypes, event) != false);
     }
 
-    triggerOn(event) {
+    triggerOn(eventTypes, event) {
         event.source = this;
-        return (this._eventHub == null || this._eventHub.triggerOn(event) != false) && 
-               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.triggerOn(event) != false);
+        return (this._eventHub == null || this._eventHub.triggerOn(eventTypes, event) != false) && 
+               (this._scene == null || this._scene.eventHub == null || this._scene.eventHub.triggerOn(eventTypes, event) != false);
     }
 }
 
@@ -620,19 +620,19 @@ export class Scene {
         return layer;
     }
 
-    on(handler) {
+    on(eventTypes, handler) {
         if (this._eventHub == null) {
             this._eventHub = new events.EventHub();
         }
-        this._eventHub.on(handler);
+        this._eventHub.on(eventTypes, handler);
         return this;
     }
 
-    before(handler) {
+    before(eventTypes, handler) {
         if (this._eventHub == null) {
             this._eventHub = new events.EventHub();
         }
-        this._eventHub.before(handler);
+        this._eventHub.before(eventTypes, handler);
         return this;
     }
 }

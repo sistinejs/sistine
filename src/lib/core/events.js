@@ -1,38 +1,48 @@
 
 export class EventHub {
     constructor() {
-        this._onHandlers = [];
-        this._beforeHandlers = [];
+        this._onHandlers = {};
+        this._beforeHandlers = {};
     }
 
-    before(handler) {
-        return this._addHandler(this._beforeHandlers, handler);
+    before(eventTypes, handler) {
+        return this._addHandler(eventTypes, this._beforeHandlers, handler);
     }
 
-    on(handler) {
-        return this._addHandler(this._onHandlers, handler);
+    on(eventTypes, handler) {
+        return this._addHandler(eventTypes, this._onHandlers, handler);
     }
 
-    removeBefore(handler) {
-        return this._removeHandler(this._beforeHandlers, handler);
+    removeBefore(eventTypes, handler) {
+        return this._removeHandler(eventTypes, this._beforeHandlers, handler);
     }
 
-    removeOn(handler) {
-        return this._removeHandler(this._onHandlers, handler);
+    removeOn(eventTypes, handler) {
+        return this._removeHandler(eventTypes, this._onHandlers, handler);
     }
 
-    _addHandler(handlers, handler) {
-        handlers.push(handler);
+    _addHandler(eventTypes, handlers, handler) {
+        eventTypes = eventTypes.split(",");
+        eventTypes.forEach(function(eventType) {
+            eventType = eventType.trim();
+            handlers[eventType] = handlers[eventType] || [];
+            handlers[eventType].push(handler);
+        });
         return this;
     }
 
     _removeHandler(handlers, handler) {
-        for (var i = 0;i < handlers.length;i++) {
-            if (handlers[i] == handler) {
-                handlers.splice(i, 1);
-                break;
+        eventTypes = eventTypes.split(",");
+        eventTypes.forEach(function(eventType) {
+            eventType = eventType.trim();
+            var evHandlers = handlers[eventType] || [];
+            for (var i = 0;i < evHandlers.length;i++) {
+                if (evHandlers[i] == handler) {
+                    evHandlers.splice(i, 1);
+                    break;
+                }
             }
-        }
+        });
         return this;
     }
 
@@ -40,18 +50,19 @@ export class EventHub {
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    validateBefore(event) {
-        return this._trigger(this._beforeHandlers, event);
+    validateBefore(eventType, event) {
+        return this._trigger(eventType, this._beforeHandlers, event);
     }
-    triggerOn(event) {
-        return this._trigger(this._onHandlers, event);
+    triggerOn(eventType, event) {
+        return this._trigger(eventType, this._onHandlers, event);
     }
 
-    _trigger(handlers, event) {
+    _trigger(eventType, handlers, event) {
+        handlers = handlers[eventType] || [];
         var L = handlers.length;
         for (var i = 0;i < L;i++) {
             var handler = handlers[i];
-            if (handler(event) == false) {
+            if (handler(event, eventType) == false) {
                 return false;
             }
         }
