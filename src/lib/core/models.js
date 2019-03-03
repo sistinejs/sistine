@@ -733,26 +733,27 @@ export class Selection extends events.EventSource {
     }
     
     add(shape) {
-        // var event = new SelectionEvent("Selected", shape);
-        // if (this.validateBefore("ShapeSelected", event) != false) {
+        var event = new events.ShapesSelected(this, [shape]);
+        if (this.validateBefore("ShapesSelected", event) != false) {
             if ( ! (shape.id in this.shapes)) {
                 this._count ++;
             }
             this.shapes[shape.id] = shape;
             this.savedInfos[shape.id] = shape.controller.snapshotFor();
             this.triggerOn("ShapesSelected", event);
-        // }
+        }
     }
 
     remove(shape) {
-        // var event = new SelectionEvent("Unselected", shape);
-        // if (this.validateBefore("ShapeUnselected", event) != false) {
+        var event = new events.ShapesUnselected(this, [shape]);
+        if (this.validateBefore("ShapesUnselected", event) != false) {
             if ( shape.id in this.shapes ) {
                 this._count --;
             }
             delete this.shapes[shape.id];
             delete this.savedInfos[shape.id];
-        // }
+            this.triggerOn("ShapesUnselected", event);
+        }
     }
 
     checkpointShapes(hitInfo) {
@@ -778,10 +779,8 @@ export class Selection extends events.EventSource {
     }
 
     clear() {
-        this.triggerOn("ShapesUnselected", null);
-        this.forEach(function(shape, self) {
-            self.stage.setShapePane(shape, "main");
-        }, this);
+        var event = new events.ShapesUnselected(this, this.allShapes);
+        this.triggerOn("ShapesUnselected", event);
         this.savedInfos = {};
         this.shapes = {};
         this._count = 0;

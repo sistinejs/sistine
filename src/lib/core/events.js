@@ -155,3 +155,16 @@ export class ShapeIndexChanged extends Event {
     }
 }
 
+export class ShapesSelected extends Event {
+    constructor(selection, shapes) {
+        super("ShapesSelected", selection)
+        this.shapes = shapes;
+    }
+}
+
+export class ShapesUnselected extends Event {
+    constructor(selection, shapes) {
+        super("ShapesUnselected", selection)
+        this.shapes = shapes;
+    }
+}
