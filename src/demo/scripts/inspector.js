@@ -10,7 +10,7 @@ class Inspector {
     set shape(s) {
         this._shape = s;
         this._reloadData();
-        this._dialog.dialog({"title": s.name + " - " s.id});
+        this._dialog.dialog({"title": s.name + " - " + s.id});
     }
 
     _reloadData() {
