@@ -20,6 +20,8 @@ export class RectangleShape extends models.Shape {
         this._controller = new RectangleController(this);
     }
 
+    get className() { return "Rectangle"; }
+
     draw(ctx) {
         if (this.fillStyle) {
             ctx.fillRect(this.bounds.left, this.bounds.top, this.bounds.width, this.bounds.height);

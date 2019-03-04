@@ -1,5 +1,6 @@
 
-import * as events from "../Core/events";
+import * as coreevents from "../Core/events";
+import * as events from "./events";
 import * as models from "../Core/models";
 import * as geom from "../Core/geom";
 import * as panes from "./panes";
@@ -12,8 +13,9 @@ import { getcssint } from "../utils/dom"
  * As far as possible this does not perform any view related operations as 
  * that is decoupled into the view entity.
  */
-export class Stage {
+export class Stage extends coreevents.EventSource {
     constructor(divId, scene, configs) {
+        super();
         configs = configs || {};
         configs.x = configs.x || 0;
         configs.y = configs.y || 0;
@@ -100,20 +102,28 @@ export class Stage {
         if (z < 0) z = 1;
         if (z > 10) z = 10;
         if (this._zoom != z) {
-            this._zoom = z;
-            this._panes.forEach(function(pane, index) {
-                pane.setZoom(z);
-            });
+            var event = new events.ZoomChanged(this._zoom, z);
+            if (this.stage.validateBefore("ZoomChanged", event) != false) {
+                this._zoom = z;
+                this._panes.forEach(function(pane, index) {
+                    pane.setZoom(z);
+                });
+                this.stage.triggerOn("ZoomChanged", event);
+            }
         }
     }
 
     get offset() { return this._offset; }
     setOffset(x, y) {
         if (this._offset.x != x || this._offset.y != y) {
-            this._offset = new geom.Point(x, y);
-            this._panes.forEach(function(pane, index) {
-                pane.setOffset(x, y);
-            });
+            var event = new events.ViewPortChanged(this._offset.x, this._offset.y, x, y);
+            if (this.stage.validateBefore("ViewPortChanged", event) != false) {
+                this._offset = new geom.Point(x, y);
+                this._panes.forEach(function(pane, index) {
+                    pane.setOffset(x, y);
+                });
+                this.stage.triggerOn("ViewPortChanged", event);
+            }
         }
     }
 

@@ -7,6 +7,7 @@ shapeDefaults = {
 };
 theScene = null;
 theStage = null;
+theInspector = null;
 zoomHandler = null;
 
 function setupStage() {

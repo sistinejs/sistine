@@ -40,7 +40,7 @@ export class Shape extends events.EventSource {
         this.controller = new controller.ShapeController(this);
 
         // Observable properties
-        this.name = configs.name || "";
+        this.name = configs.name || this.className;
         this.angle = configs.angle || 0;
         this.scale = configs.scale || new geom.Point(1, 1);
         this.zIndex = configs.zIndex || 0;
@@ -850,7 +850,6 @@ export class Selection extends events.EventSource {
             groups[parId].shapes.push(shape);
             groups[parId].bounds.union(shape.bounds);
         });
-        console.log("Found Groups: ", groups);
 
         this.clear();
         for (var parentId in groups) {

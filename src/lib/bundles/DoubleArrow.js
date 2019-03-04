@@ -20,6 +20,8 @@ export class DoubleArrowShape extends models.Shape {
         this._controller = new DoubleArrowController(this);
     }
 
+    get className() { return "DoubleArrow"; };
+
     draw(ctx) {
         var lw = this.lineWidth + 1;
         var x = this.bounds.x + lw;

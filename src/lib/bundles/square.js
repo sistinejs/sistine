@@ -19,6 +19,8 @@ export class SquareShape extends models.Shape {
         this._controller = new SquareController(this);
     }
 
+    get className() { return "Square"; }
+
     setSize(w, h, force) {
         w = h = Math.min(w, h);
         return super.setSize(w, h, force);

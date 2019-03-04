@@ -114,3 +114,10 @@ function onLineColor() {
 function onFillColor() {
 }
 
+function onInspector() {
+    if (theInspector.isShowing) {
+        theInspector.hide();
+    } else {
+        theInspector.show();
+    }
+}

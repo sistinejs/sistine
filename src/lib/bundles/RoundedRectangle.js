@@ -20,6 +20,8 @@ export class RoundedRectangleShape extends models.Shape {
         this._controller = new RoundedRectangleController(this);
     }
 
+    get className() { return "RoundedRectangle"; }
+
     draw(ctx) {
         var x = this.bounds.x;
         var y = this.bounds.y;

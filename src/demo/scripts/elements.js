@@ -5,6 +5,7 @@ function setupElements() {
     setupAccordian();
     layoutElements();
     $( window ).resize(function() { layoutElements(); });
+    theInspector = new Inspector("inspector_dialog");
 }
 
 function setupSplitBar() {

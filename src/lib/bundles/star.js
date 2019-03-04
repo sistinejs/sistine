@@ -19,6 +19,8 @@ export class StarShape extends models.Shape {
         this._controller = new StarController(this);
     }
 
+    get className() { return "Star"; }
+
     setSize(w, h, force) {
         w = h = Math.min(w, h);
         return super.setSize(w, h, force);

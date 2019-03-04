@@ -19,6 +19,8 @@ export class PlusShape extends models.Shape {
         this._controller = new PlusController(this);
     }
 
+    get className() { return "Plus"; }
+
     get innerWidth() { return this._innerWidth; }
     get innerHeight() { return this._innerHeight; }
 

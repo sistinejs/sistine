@@ -21,6 +21,8 @@ export class LeftArrowShape extends models.Shape {
         this._controller = new LeftArrowController(this);
     }
 
+    get className() { return "LeftArrow"; };
+
     draw(ctx) {
         var lw = this.lineWidth + 1;
         var x = this.bounds.x + lw;

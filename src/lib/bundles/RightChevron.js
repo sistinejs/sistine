@@ -6,6 +6,7 @@ export function newShape(configs) {
     configs.backDepth = 0.2;
     configs.tipLength = 0.2;
     configs.shaftWidth = 1.0;
+    configs._name = configs._name || "RightChevron";
     return new rightArrows.RightArrowShape(configs);
 }
 

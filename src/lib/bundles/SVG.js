@@ -17,6 +17,8 @@ export class TriangleShape extends models.Shape {
         this._controller = new TriangleController(this);
     }
 
+    get className() { return "SVG"; }
+
     draw(ctx) {
         var p0x = this.bounds.left;
         var p0y = this.bounds.bottom;

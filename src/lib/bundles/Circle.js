@@ -17,6 +17,8 @@ export class CircleShape extends models.Shape {
         this._controller = new CircleController(this);
     }
 
+    get className() { return "Circle"; };
+
     get radius() { return this.bounds.innerRadius; }
 
     setSize(w, h, force) {

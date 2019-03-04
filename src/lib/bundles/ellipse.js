@@ -22,6 +22,8 @@ export class EllipseShape extends models.Shape {
         this._controller = new EllipseController(this);
     }
 
+    get className() { return "Ellipse"; };
+
     get radius() { return Math.min(this.bounds.width, this.bounds.height) / 2.0; }
 
     draw(ctx) {

@@ -20,6 +20,8 @@ export class PolygonShape extends models.Shape {
         this._controller = new PolygonController(this);
     }
 
+    get className() { return "Polygon"; }
+
     setSize(w, h, force) {
         w = h = Math.min(w, h);
         return super.setSize(w, h, force);
