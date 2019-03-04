@@ -18,6 +18,12 @@ function setupStage() {
     // Add a zoom handler!!
     zoomHandler = new Sistine.Views.Handlers.StageViewPortHandler(theStage);
     addSampleShapes();
+
+    theStage.selection.on("ShapesSelected", function(event, eventType) {
+        theInspector.shape = event.shapes[0];
+    }).on("ShapesUnselected", function(event, eventType) {
+        theInspector.shape = null;
+    });
 }
 
 function addShape(objid, configs) {
