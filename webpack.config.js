@@ -20,6 +20,7 @@ module.exports = (env, options) => {
                 "./src/demo/scripts/elements.js",
                 "./src/demo/scripts/inspector.js",
                 "./src/demo/scripts/toolbars.js",
+                "./src/demo/scripts/sidebars.js",
                 "./src/demo/scripts/shapepanel.js"
             ],
             append: true

@@ -48,18 +48,19 @@
             <div class = "toolbar_button_group">
                 <button class = "toolbar_button" id = "TB_Pointer">Pointer</button>
                 <button class = "toolbar_button" id = "TB_HandTool">Hand Tool</button>
-                <button class = "toolbar_button" id = "TB_LineTool">Line Tool</button>
-                <button class = "toolbar_button" id = "TB_LineWidth">Line Width</button>
             </div>
             <div class = "toolbar_button_group">
-                <button class = "toolbar_button" id = "TB_Share">Share</button>
+                <button class = "toolbar_button" id = "TB_LineTool">Line Tool</button>
+                <button class = "toolbar_button" id = "TB_LineColor">Line Color</button>
+                <button class = "toolbar_button" id = "TB_LineWidth">Line Width</button>
+                <button class = "toolbar_button" id = "TB_LineStyle">Line Style</button>
             </div>
             <div class = "toolbar_button_group">
                 <button class = "toolbar_button" id = "TB_TextColor">Text Color</button>
-                <button class = "toolbar_button" id = "TB_LineColor">Line Color</button>
                 <button class = "toolbar_button" id = "TB_FillColor">Fill Color</button>
             </div>
             <div class = "toolbar_button_group">
+                <button class = "toolbar_button" id = "TB_Share">Share</button>
                 <button class = "toolbar_button" id = "TB_Inspector">Inspector</button>
             </div>
         </div>
@@ -149,17 +150,20 @@
         </div>
         <div id="splitbar" class = "draggable ui-widget-content"></div>
         <div id = "stage_div"></div>
+        <div id = "inspector_panel_div">
+            <button title = "Layout Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LayoutProperties"></button>
+            <button title = "Fill Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_FillProperties"></button>
+            <button title = "Line Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LineProperties"></button>
+        </div>
     </div>
     <div id="footer_div"></div>
-
-    <div id = "inspector_dialog">
-    </div>
 </body>
 <script>
     $(document).ready(function() {
         setupElements();
         loadShapes();
         setupToolbar();
+        setupSidebar();
         setupMenus();
         setupStage();
     });

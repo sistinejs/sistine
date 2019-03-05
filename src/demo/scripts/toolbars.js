@@ -99,6 +99,9 @@ function onHandTool() {
 function onLineTool() {
 }
 
+function onLineStyle() {
+}
+
 function onLineWidth() {
 }
 

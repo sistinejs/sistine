@@ -15,13 +15,18 @@ class Inspector {
     _reloadData() {
         var s = this._shape;
         this._dialog.dialog({"title": ""});
+        // First fill dimension and transformation data
+
+        // Fill and Stroke style data.
         if (s != null) {
             this._dialog.dialog({"title": s.name + " - " + s.id});
+        } else {
+            this.hide();
         }
     }
 
     show() { this._dialog.dialog("open"); }
     hide() { this._dialog.dialog("close"); }
-    get isShowing() { this._dialog.dialog("isOpen"); }
+    get isShowing() { return this._dialog.dialog("isOpen"); }
 }
 
