@@ -238,6 +238,7 @@ export class Stage extends coreevents.EventSource {
 
     get bounds() { return this._bounds; }
     get divId() { return this._divId; }
+    get parentDiv() { return this._parentDiv; }
     get viewBounds() { return this._viewBounds; }
 
     layout() {

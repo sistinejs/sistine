@@ -1,7 +1,9 @@
 
-class Sidebar {
+class Sidebar extends Sistine.Core.Events.EventSource {
     constructor(divId) {
+        super();
         this._divId = divId;
+        this._panelWidth = 200;
         this._parentDiv = $("#" + divId);
         this._sidebarButtons = [];
         this._sidebarPanels = [];
@@ -57,19 +59,23 @@ class Sidebar {
             // hide current one
             var $panel = $("#SBPanel_" + this._currPanelId);
             $panel.hide();
+            this.triggerOn("PanelHidden", {panel: this._currPanelId});
             this._currPanelId = null;
         }
         var $panel = $("#SBPanel_" + panelId);
+        $panel.width(this._panelWidth);
         $panel.height(parentHeight);
         if ($panel.is(":visible")) {
             $panel.offset(offset);
             $panel.hide();
+            this.triggerOn("PanelHidden", {panel: panelId});
         } else {
             this._currPanelId = panelId;
             // $panel.offset(offset);
             offset.left -= $panel.width();
             $panel.show(false);
             $panel.offset(offset);
+            this.triggerOn("PanelShown", {panel: panelId});
         }
     }
 }
