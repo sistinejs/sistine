@@ -158,6 +158,14 @@
     padding: 0px;
 }
 
+.sidebar_content_panel {
+    z-index: 10000;
+    position: absolute;
+    border: solix 1px red;
+    background: #ccc;
+    width: 200px;
+}
+
 .sidebutton_image {
     width: var(--inspector-panel-width);
     height: var(--inspector-panel-width);

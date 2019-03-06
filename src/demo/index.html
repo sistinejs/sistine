@@ -151,9 +151,28 @@
         <div id="splitbar" class = "draggable ui-widget-content"></div>
         <div id = "stage_div"></div>
         <div id = "inspector_panel_div">
-            <button title = "Layout Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LayoutProperties"></button>
-            <button title = "Fill Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_FillProperties"></button>
-            <button title = "Line Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LineProperties"></button>
+            <button title = "Layout Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LayoutProperties">
+                <div class = "sidebar_content_panel" id="SBPanel_LayoutProperties">
+                    X: 
+                    Y: 
+                    Width: 
+                    Height:
+                </div>
+            </button>
+            <button title = "Fill Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_FillProperties">
+                <div class = "sidebar_content_panel" id="SBPanel_FillProperties">
+                    FillColor: 
+                    Opacity:
+                    Linear Gradient: 
+                    Radial Gradient: 
+                    Texture
+                    Pattern
+                </div>
+            </button>
+            <button title = "Line Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LineProperties">
+                <div class = "sidebar_content_panel" id="SBPanel_LineProperties">
+                </div>
+            </button>
         </div>
     </div>
     <div id="footer_div"></div>
