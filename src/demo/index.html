@@ -160,18 +160,19 @@
                 </div>
             </button>
             <button title = "Fill Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_FillProperties">
-                <div class = "sidebar_content_panel" id="SBPanel_FillProperties">
-                    FillColor: 
-                    Opacity:
-                    Linear Gradient: 
-                    Radial Gradient: 
-                    Texture
-                    Pattern
+              <div class = "sidebar_content_panel" id="SBPanel_FillProperties">
+                <div>
+                    <div id = "fill_type_panel" />
                 </div>
+                <div id = "opacity_div">
+                    <hr/>
+                    Opacity: <span id = "opacity_value"></span>
+                    <div id = "opacity_slider"></div>
+                </div>
+              </div>
             </button>
             <button title = "Line Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LineProperties">
-                <div class = "sidebar_content_panel" id="SBPanel_LineProperties">
-                </div>
+                <div class = "sidebar_content_panel" id="SBPanel_LineProperties"/>
             </button>
         </div>
     </div>
@@ -181,9 +182,6 @@
     $(document).ready(function() {
         setupElements();
         loadShapes();
-        setupToolbar();
-        setupSidebar();
-        setupMenus();
         setupStage();
     });
 </script>

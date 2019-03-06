@@ -1,17 +1,13 @@
 
-class Sidebar extends Sistine.Core.Events.EventSource {
-    constructor(divId) {
-        super();
-        this._divId = divId;
-        this._panelWidth = 200;
-        this._parentDiv = $("#" + divId);
+class Sidebar extends Panel {
+    initialize(configs) {
+        this._panelWidth = 300;
         this._sidebarButtons = [];
         this._sidebarPanels = [];
         this._currPanelId = null;
-        this.layout();
     }
 
-    layout() {
+    setupElements() {
         var sidebar_buttons = $("#" + this._divId + " > .sidebar_button");
         var self = this;
         sidebar_buttons.each(function(index, sbbutton) {
@@ -39,6 +35,23 @@ class Sidebar extends Sistine.Core.Events.EventSource {
         });
     }
 
+    layout() {
+        var self = this;
+        var offset = this._parentDiv.offset();
+        offset = {'left': offset.left, 'top': offset.top};
+        var parentHeight = this._parentDiv.height();
+        this._sidebarPanels.forEach(function($panel) {
+            if ($panel.is(":visible")) {
+                offset.left -= $panel.width();
+                $panel.show(false);
+                $panel.offset(offset);
+            } else {
+                $panel.offset(offset);
+                $panel.hide();
+            }
+        });
+    }
+
     onLayoutProperties() {
         this.toggle("LayoutProperties");
     }
@@ -62,6 +75,13 @@ class Sidebar extends Sistine.Core.Events.EventSource {
             this.triggerOn("PanelHidden", {panel: this._currPanelId});
             this._currPanelId = null;
         }
+        this._togglePanel(panelId);
+    }
+
+    _togglePanel(panelId) {
+        var offset = this._parentDiv.offset();
+        offset = {'left': offset.left, 'top': offset.top};
+        var parentHeight = this._parentDiv.height();
         var $panel = $("#SBPanel_" + panelId);
         $panel.width(this._panelWidth);
         $panel.height(parentHeight);
@@ -82,4 +102,5 @@ class Sidebar extends Sistine.Core.Events.EventSource {
 
 function setupSidebar() {
     theSidebar = new Sidebar("inspector_panel_div");
+    theSidebar.fillStylePanel = new FillStylePanel("SBPanel_FillProperties");
 }

@@ -1,4 +1,6 @@
 
+.ui-tabs .ui-tabs-nav li a {font-size:10pt !important;}
+
 :root {
     --header-height: 70px;
     --toolbar-button-height: 30px;
@@ -160,10 +162,16 @@
 
 .sidebar_content_panel {
     z-index: 10000;
+    overflow: scroll;
     position: absolute;
     border: solix 1px red;
     background: #ccc;
     width: 200px;
+}
+
+.sidebar_content_element {
+    overflow: scroll;
+    position: absolute;
 }
 
 .sidebutton_image {

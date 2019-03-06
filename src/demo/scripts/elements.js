@@ -4,8 +4,10 @@ function setupElements() {
     setupSplitBar();
     setupAccordian();
     layoutElements();
+    setupSidebar();
+    setupToolbar();
+    setupMenus();
     $( window ).resize(function() { layoutElements(); });
-    theInspector = new Inspector("inspector_dialog");
 }
 
 function setupSplitBar() {
@@ -60,4 +62,5 @@ function layoutElements(e, ui) {
     // setup stage_div width
     stage_div.css("left", splitbar.position().left + splitbar.width());
     if (theStage) { theStage.layout(); }
+    if (theSidebar) { theSidebar.layout(); }
 }

@@ -7,7 +7,7 @@ shapeDefaults = {
 };
 theScene = null;
 theStage = null;
-theInspector = null;
+theSidebar = null;
 zoomHandler = null;
 
 function setupStage() {
@@ -20,9 +20,9 @@ function setupStage() {
     addSampleShapes();
 
     theStage.selection.on("ShapesSelected", function(event, eventType) {
-        theInspector.shape = event.shapes[0];
+        // theInspector.shape = event.shapes[0];
     }).on("ShapesUnselected", function(event, eventType) {
-        theInspector.shape = null;
+        // theInspector.shape = null;
     });
 }
 
