@@ -17,6 +17,9 @@ module.exports = (env, options) => {
             assets: [
                 "./src/ext/spectrum/spectrum.css",
                 "./src/demo/css/demo.css",
+                "./src/demo/css/sidebars.css",
+                "./src/demo/css/menubar.css",
+                "./src/demo/css/toolbars.css",
                 "./src/demo/css/panels.css",
                 "./src/ext/slider/jquery.limitslider.js",
                 "./src/ext/spectrum/spectrum.js",

@@ -1,0 +1,40 @@
+/********       Menu and Menubar styles         ********/
+.ui-menu, .ui-menu-item {
+    z-index: 10000;
+    width: 250px;
+}
+
+.ui-menu-item-wrapper {
+    z-index: 10000;
+}
+
+ul.menu {
+    text-align: left;
+    display: inline;
+    margin: 0;
+    padding: 15px 4px 17px 0;
+    list-style: none;
+}
+
+ul.menu li {
+    float: left;
+    margin: 0px 10px 0px 10px;
+}
+ul.menu li.ui-state-hover {
+    margin: -1px 9px -1px 9px;
+}
+.menu li a {
+    display: block;
+}
+.menu li ul {
+    display: none;
+    position: absolute;
+}
+.menu li ul li {
+    display: block;
+    float:none;
+}
+li.ui-menu-item.ui-state-hover {
+    margin: 0px;
+}
+

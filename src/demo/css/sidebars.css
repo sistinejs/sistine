@@ -1,0 +1,34 @@
+
+#sidebar_panel_div {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: var(--sidebar-panel-width);
+}
+
+.sidebar_button  {
+    width: var(--sidebar-panel-width);
+    height: var(--sidebar-panel-width);
+    padding: 0px;
+}
+
+.sidebar_content_panel {
+    z-index: 10000;
+    overflow: scroll;
+    position: absolute;
+    border: solix 1px red;
+    background: #ccc;
+    width: 200px;
+}
+
+.sidebar_content_element {
+    overflow: scroll;
+    position: absolute;
+}
+
+.sidebutton_image {
+    width: var(--sidebar-panel-width);
+    height: var(--sidebar-panel-width);
+    padding: 0px;
+}

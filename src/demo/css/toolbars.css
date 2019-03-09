@@ -1,0 +1,12 @@
+
+.toolbar_section_div {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.toolbar_button_highlighted {
+    border: solid 2px gray;
+}
+

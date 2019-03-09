@@ -4,7 +4,7 @@
 :root {
     --header-height: 70px;
     --toolbar-button-height: 30px;
-    --inspector-panel-width: 50px;
+    --sidebar-panel-width: 50px;
     --toolpanel-width: 320px;
     --footer-height: 0px;
     --split-bar-width: 10px;
@@ -107,17 +107,9 @@
 #stage_div {
     position: absolute;
     border: solid 1px black;
-    right: var(--inspector-panel-width);
+    right: var(--sidebar-panel-width);
     top: 0;
     bottom: 0;
-}
-
-#inspector_panel_div {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: var(--inspector-panel-width);
 }
 
 .shape_icon {
@@ -136,13 +128,6 @@
     border: solid 0px red;
 }
 
-.toolbar_section_div {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 .ui-accordion .ui-accordion-content {
     padding-left: 5px;
     padding-right: 5px;
@@ -150,72 +135,3 @@
     padding-bottom: 10px;
 }
 
-.toolbar_button_highlighted {
-    border: solid 2px gray;
-}
-
-.sidebar_button  {
-    width: var(--inspector-panel-width);
-    height: var(--inspector-panel-width);
-    padding: 0px;
-}
-
-.sidebar_content_panel {
-    z-index: 10000;
-    overflow: scroll;
-    position: absolute;
-    border: solix 1px red;
-    background: #ccc;
-    width: 200px;
-}
-
-.sidebar_content_element {
-    overflow: scroll;
-    position: absolute;
-}
-
-.sidebutton_image {
-    width: var(--inspector-panel-width);
-    height: var(--inspector-panel-width);
-    padding: 0px;
-}
-
-/********       Menu and Menubar styles         ********/
-.ui-menu, .ui-menu-item {
-    z-index: 10000;
-    width: 250px;
-}
-
-.ui-menu-item-wrapper {
-    z-index: 10000;
-}
-
-ul.menu {
-    text-align: left;
-    display: inline;
-    margin: 0;
-    padding: 15px 4px 17px 0;
-    list-style: none;
-}
-
-ul.menu li {
-    float: left;
-    margin: 0px 10px 0px 10px;
-}
-ul.menu li.ui-state-hover {
-    margin: -1px 9px -1px 9px;
-}
-.menu li a {
-    display: block;
-}
-.menu li ul {
-    display: none;
-    position: absolute;
-}
-.menu li ul li {
-    display: block;
-    float:none;
-}
-li.ui-menu-item.ui-state-hover {
-    margin: 0px;
-}
