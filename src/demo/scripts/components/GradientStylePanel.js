@@ -121,7 +121,7 @@ class GradientStylePanel extends Panel {
         this.inputGradientY2 = this.find("#gradientY2");
         this.inputGradientR2 = this.find("#gradientR2");
 
-        this.rootElement.controlgroup();
+        this.find("#gradientStyleDiv").controlgroup();
 
         this.stopColorPicker = this.find("#StopColorPicker");
         this.stopColorPicker.spectrum({

@@ -3,7 +3,7 @@ class FillPropertiesPanel extends Panel {
     setupElements() {
         var self = this;
 
-        this.paintStylePanel = new PaintStylePanel("#paintStylePanelTab");
+        this.paintStylePanel = new PaintStylePanel(this.subselector("#paintStylePanelTab"));
 
         this.opacitySlider = this.rootElement.find("#opacity_slider");
         var handle = this.find("#custom-handle");
@@ -11,7 +11,7 @@ class FillPropertiesPanel extends Panel {
             min: 0,
             max: 100,
             value: 50,
-            create: function() {
+            create: function(event) {
                 handle.text( $( this ).slider( "value" ) );
             },
             slide: function( event, ui ) {

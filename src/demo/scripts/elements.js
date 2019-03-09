@@ -23,8 +23,8 @@ function setupAccordian() {
 
 function setupSidebar() {
     theSidebar = new Sidebar("#sidebar_panel_div");
-    theSidebar.fillPropertiesPanel = new FillPropertiesPanel("#SBPanel_FillProperties");
     theSidebar.strokePropertiesPanel = new StrokePropertiesPanel("#SBPanel_StrokeProperties");
+    theSidebar.fillPropertiesPanel = new FillPropertiesPanel("#SBPanel_FillProperties");
 }
 
 /**
