@@ -30,6 +30,7 @@ module.exports = (env, options) => {
                 "./src/demo/scripts/components/Panel.js",
                 "./src/demo/scripts/components/ShapesPanel.js",
                 "./src/demo/scripts/components/FillPropertiesPanel.js",
+                "./src/demo/scripts/components/TextPropertiesPanel.js",
                 "./src/demo/scripts/components/LayoutPropertiesPanel.js",
                 "./src/demo/scripts/components/StrokePropertiesPanel.js",
                 "./src/demo/scripts/components/PaintStylePanel.js",

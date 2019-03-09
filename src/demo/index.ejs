@@ -20,17 +20,7 @@
         <% include ./templates/shapespanel.hbs %>
         <div id="splitbar" class = "draggable ui-widget-content"></div>
         <div id = "stage_div"></div>
-        <div id = "sidebar_panel_div">
-            <button title = "Layout Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LayoutProperties">
-                <% include ./templates/layoutproperties.hbs %>
-            </button>
-            <button title = "Fill Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_FillProperties">
-                <% include ./templates/fillproperties.hbs %>
-            </button>
-            <button title = "Stroke Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_StrokeProperties">
-                <% include ./templates/strokeproperties.hbs %>
-            </button>
-        </div>
+        <% include ./templates/sidebarpanel.hbs %>
     </div>
     <div id="footer_div"></div>
 </body>

@@ -26,6 +26,7 @@ function setupSidebar() {
     theSidebar.layoutPropertiesPanel = new LayoutPropertiesPanel("#SBPanel_LayoutProperties");
     theSidebar.strokePropertiesPanel = new StrokePropertiesPanel("#SBPanel_StrokeProperties");
     theSidebar.fillPropertiesPanel = new FillPropertiesPanel("#SBPanel_FillProperties");
+    theSidebar.textPropertiesPanel = new TextPropertiesPanel("#SBPanel_TextProperties");
 }
 
 /**

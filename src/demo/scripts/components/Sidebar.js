@@ -64,6 +64,10 @@ class Sidebar extends Panel {
         this.toggle("StrokeProperties");
     }
 
+    onTextProperties() {
+        this.toggle("TextProperties");
+    }
+
     toggle(panelId) {
         var offset = this._rootElement.offset();
         offset = {'left': offset.left, 'top': offset.top};
