@@ -23,6 +23,7 @@ function setupAccordian() {
 
 function setupSidebar() {
     theSidebar = new Sidebar("#sidebar_panel_div");
+    theSidebar.layoutPropertiesPanel = new LayoutPropertiesPanel("#SBPanel_LayoutProperties");
     theSidebar.strokePropertiesPanel = new StrokePropertiesPanel("#SBPanel_StrokeProperties");
     theSidebar.fillPropertiesPanel = new FillPropertiesPanel("#SBPanel_FillProperties");
 }
