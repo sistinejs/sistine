@@ -1,7 +1,7 @@
-<div class = "sidebar_content_panel" id="SBPanel_StrokeProperties">
-    <h2><center>Stroke Properties</center></h2>
+<div class = "sidebar_content_panel" id="SBPanel_FillProperties">
+    <h2><center>Fill Properties</center></h2>
     <div>
-        <%= require('html-loader!./templates/paintstyle.html') %>
+        <% include ./paintstyle.hbs %>
     </div>
     <div id = "opacity_div" style="margin-left: 10px; margin-right: 50px">
         <h3>Opacity:</h3>
