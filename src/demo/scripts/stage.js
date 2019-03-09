@@ -20,8 +20,12 @@ function setupStage() {
     addSampleShapes();
 
     theStage.selection.on("ShapesSelected", function(event, eventType) {
-        // theInspector.shape = event.shapes[0];
+        console.log("Shapes Selected: ", event.shapes);
+        var selection = theStage.selection;
+        if (selection.count == 1) {
+        }
     }).on("ShapesUnselected", function(event, eventType) {
+        console.log("Shapes Unselected: ", event.shapes);
         // theInspector.shape = null;
     });
 }

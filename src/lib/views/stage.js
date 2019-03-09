@@ -103,12 +103,12 @@ export class Stage extends coreevents.EventSource {
         if (z > 10) z = 10;
         if (this._zoom != z) {
             var event = new events.ZoomChanged(this._zoom, z);
-            if (this.stage.validateBefore("ZoomChanged", event) != false) {
+            if (this.validateBefore("ZoomChanged", event) != false) {
                 this._zoom = z;
                 this._panes.forEach(function(pane, index) {
                     pane.setZoom(z);
                 });
-                this.stage.triggerOn("ZoomChanged", event);
+                this.triggerOn("ZoomChanged", event);
             }
         }
     }
@@ -117,12 +117,12 @@ export class Stage extends coreevents.EventSource {
     setOffset(x, y) {
         if (this._offset.x != x || this._offset.y != y) {
             var event = new events.ViewPortChanged(this._offset.x, this._offset.y, x, y);
-            if (this.stage.validateBefore("ViewPortChanged", event) != false) {
+            if (this.validateBefore("ViewPortChanged", event) != false) {
                 this._offset = new geom.Point(x, y);
                 this._panes.forEach(function(pane, index) {
                     pane.setOffset(x, y);
                 });
-                this.stage.triggerOn("ViewPortChanged", event);
+                this.triggerOn("ViewPortChanged", event);
             }
         }
     }

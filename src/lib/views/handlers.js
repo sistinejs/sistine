@@ -125,7 +125,6 @@ export class BaseTouchHandler {
             this.currPoint = this.toWorld(event.offsetX, event.offsetY, this.currPoint);
             this.downPoint = this.toWorld(event.offsetX, event.offsetY, this.downPoint);
             this.downTime = event.timeStamp;
-            console.log("CP, DP: ", this.currPoint, this.downPoint);
         }
     }
 
@@ -136,7 +135,6 @@ export class BaseTouchHandler {
         this.isClick = this.timeDelta <= this.clickThresholdTime;
         this.downTime = null;
         this.downPoint = null;
-        console.log("Up, over, enter: ", this.mouseOver, this.mouseEntered);
 
         if (this.isClick) {
             this._onMouseClick(event);
@@ -272,7 +270,6 @@ export class StageTouchHandler extends BaseTouchHandler {
     }
 
     _selectingMultipleShapes(event) {
-        console.log("MetaKey, Button, Buttons: ", event.metaKey, event.button, event.buttons);
         return event.button == 0 && event.metaKey;
     }
 
@@ -316,7 +313,6 @@ export class StageTouchHandler extends BaseTouchHandler {
         }
         else if (this.stage.touchContext.mode == TouchModes.CREATE) {
             var shapeForCreation = this.stage.touchContext.data;
-            console.log("Creating: ", shapeForCreation);
             selection.clear();
             shapeForCreation.setLocation(this.downPoint.x, this.downPoint.y);
             this.stage.shapeIndex.setPane(shapeForCreation, "edit");
@@ -356,7 +352,6 @@ export class StageTouchHandler extends BaseTouchHandler {
                     var y = Math.min(this.downPoint.y, this.currPoint.y);
                     var w = Math.abs(this.downPoint.x - this.currPoint.x);
                     var h = Math.abs(this.downPoint.y - this.currPoint.y);
-                    console.log("DP, CP: ", this.downPoint, this.currPoint);
                     this._editPane.context.lineWidth = 1;
                     this._editPane.context.strokeRect(x, y, w, h);
                 }
@@ -396,7 +391,6 @@ export class StageTouchHandler extends BaseTouchHandler {
                     }
                 }
             } else {
-                console.log("Mouse Over, Button: ", event.button);
             }
         } else if (this.stage.touchContext.mode == TouchModes.ZOOM_IN) {
             var newZoom = this.stage.zoom * 1.1;
