@@ -99,19 +99,19 @@ function onHandTool() {
 function onLineTool() {
 }
 
-function onLineStyle() {
+function onStrokeStyle() {
 }
 
-function onLineWidth() {
+function onStrokeWidth() {
+}
+
+function onStrokeColor() {
 }
 
 function onShare() {
 }
 
 function onTextColor() {
-}
-
-function onLineColor() {
 }
 
 function onFillColor() {

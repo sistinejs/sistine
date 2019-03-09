@@ -1,55 +1,7 @@
 <div class = "sidebar_content_panel" id="SBPanel_FillProperties">
     <h2><center>Fill Type</center></h2>
     <div>
-        <div id = "fillTypeTabDiv">
-            <ul>
-                <li><a href="#tab_FillStylePlain">Plain</a></li>
-                <li><a href="#tab_FillStyleGradient">Gradient</a></li>
-                <li><a href="#tab_FillStylePattern">Pattern</a></li>
-            </ul>
-            <div id='tab_FillStylePlain' class = "fill_style_content">
-                <center> <input id = "FillColorPicker" /> </center>
-            </div>
-            <div id='tab_FillStyleGradient' class = "fill_style_content">
-                <div id = "gradientStyleDiv">
-                    <center>
-                        <label for="linearGradientType">Linear</label>
-                        <input type="radio" name="gradientType" id="linearGradientType" checked="true"/>
-                        <label for="RadialGradientType">Radial</label>
-                        <input type="radio" name="gradientType" id="RadialGradientType" />
-                    </center>
-                    <hr/>
-                    <strong>Bounds:</strong>
-                    <div>
-                        <table>
-                            <tr>
-                                <td>X1</td><td><input id = "gradientX1" class = "gradient_input" value = "0" /> </td>
-                                <td>X2</td><td><input id = "gradientX2" class = "gradient_input" value = "1" /> </td>
-                            </tr>
-                            <tr>
-                                <td>Y1</td><td><input id = "gradientY1" class = "gradient_input" value = "0" /> </td>
-                                <td>Y2</td><td><input id = "gradientY2" class = "gradient_input" value = "1" /> </td>
-                            </tr>
-                            <tr id = "gradientRadiusRow">
-                                <td>R1</td><td><input id = "gradientR1" class = "gradient_input" value = "0.5" /> </td>
-                                <td>R2</td><td><input id = "gradientR2" class = "gradient_input" value = "1" /> </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <strong>Stops:</strong>
-                    <div> <center>
-                        <input id = "StopColorPicker" value = "#000000" ></input> 
-                        <input type = button class="ui-button ui-widget ui-corner-all ui-icon-plus" id = "addStopButton" value = "+"/>
-                        <input type = button class="ui-button ui-widget ui-corner-all ui-icon-minus" id = "removeStopButton" value = "-"/>
-                    </center> </div>
-                    <div style="solid 1px red; padding-top: 30px">
-                        <div id = "stopsSlider"> </div>
-                    </div>
-                </div>
-            </div>
-            <div id='tab_FillStylePattern' class = "fill_style_content">
-            </div>
-        </div>
+        <%= require('html-loader!./templates/paintstyle.html') %>
     </div>
     <div id = "opacity_div" style="margin-left: 10px; margin-right: 50px">
         <h3>Opacity:</h3>

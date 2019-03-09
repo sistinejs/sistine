@@ -19,8 +19,12 @@ class Panel extends Sistine.Core.Events.EventSource {
     setupElements() {
     }
 
+    subselector(selector) {
+        return this.elemSelector + " " + selector;
+    }
+
     find(selector) {
-        return $(this.elemSelector + " " + selector);
+        return $(this.subselector(selector));
     }
 
     layout() {

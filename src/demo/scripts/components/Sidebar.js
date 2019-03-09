@@ -60,8 +60,8 @@ class Sidebar extends Panel {
         this.toggle("FillProperties");
     }
 
-    onLineProperties() {
-        this.toggle("LineProperties");
+    onStrokeProperties() {
+        this.toggle("StrokeProperties");
     }
 
     toggle(panelId) {

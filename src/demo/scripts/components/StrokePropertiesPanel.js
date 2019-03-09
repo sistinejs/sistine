@@ -1,5 +1,5 @@
 
-class FillPropertiesPanel extends Panel {
+class StrokePropertiesPanel extends Panel {
     setupElements() {
         var self = this;
 

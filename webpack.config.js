@@ -29,6 +29,8 @@ module.exports = (env, options) => {
                 "./src/demo/scripts/components/Panel.js",
                 "./src/demo/scripts/components/ShapesPanel.js",
                 "./src/demo/scripts/components/FillPropertiesPanel.js",
+                "./src/demo/scripts/components/StrokePropertiesPanel.js",
+                "./src/demo/scripts/components/PaintStylePanel.js",
                 "./src/demo/scripts/components/GradientStylePanel.js",
                 "./src/demo/scripts/components/Sidebar.js",
                 "./src/demo/scripts/events.js"
