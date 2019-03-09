@@ -13,22 +13,22 @@
 </head>
 <body>
     <div id="header_div">
-        <%= require('html-loader!./toolbar.html') %>
-        <%= require('html-loader!./menubar.html') %>
+        <%= require('html-loader!./templates/toolbar.html') %>
+        <%= require('html-loader!./templates/menubar.html') %>
     </div>
     <div id="center_div">
-        <%= require('html-loader!./shapespanel.html') %>
+        <%= require('html-loader!./templates/shapespanel.html') %>
         <div id="splitbar" class = "draggable ui-widget-content"></div>
         <div id = "stage_div"></div>
         <div id = "sidebar_panel_div">
             <button title = "Layout Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LayoutProperties">
-                <%= require('html-loader!./layoutproperties.html') %>
+                <%= require('html-loader!./templates/layoutproperties.html') %>
             </button>
             <button title = "Fill Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_FillProperties">
-                <%= require('html-loader!./fillproperties.html') %>
+                <%= require('html-loader!./templates/fillproperties.html') %>
             </button>
             <button title = "Line Properties" class="sidebar_button ui-button ui-widget ui-corner-all" id = "SB_LineProperties">
-                <%= require('html-loader!./lineproperties.html') %>
+                <%= require('html-loader!./templates/lineproperties.html') %>
             </button>
         </div>
     </div>
