@@ -8,7 +8,7 @@ class Sidebar extends Panel {
     }
 
     setupElements() {
-        var sidebar_buttons = $("#" + this._divId + " > .sidebar_button");
+        var sidebar_buttons = $(this._elemSelector + " > .sidebar_button");
         var self = this;
         sidebar_buttons.each(function(index, sbbutton) {
             var $sbbutton = $(sbbutton);
@@ -37,9 +37,9 @@ class Sidebar extends Panel {
 
     layout() {
         var self = this;
-        var offset = this._parentDiv.offset();
+        var offset = this._rootElement.offset();
         offset = {'left': offset.left, 'top': offset.top};
-        var parentHeight = this._parentDiv.height();
+        var parentHeight = this._rootElement.height();
         this._sidebarPanels.forEach(function($panel) {
             if ($panel.is(":visible")) {
                 offset.left -= $panel.width();
@@ -65,9 +65,9 @@ class Sidebar extends Panel {
     }
 
     toggle(panelId) {
-        var offset = this._parentDiv.offset();
+        var offset = this._rootElement.offset();
         offset = {'left': offset.left, 'top': offset.top};
-        var parentHeight = this._parentDiv.height();
+        var parentHeight = this._rootElement.height();
         if (this._currPanelId != null && this._currPanelId != panelId) {
             // hide current one
             var $panel = $("#SBPanel_" + this._currPanelId);
@@ -79,9 +79,9 @@ class Sidebar extends Panel {
     }
 
     _togglePanel(panelId) {
-        var offset = this._parentDiv.offset();
+        var offset = this._rootElement.offset();
         offset = {'left': offset.left, 'top': offset.top};
-        var parentHeight = this._parentDiv.height();
+        var parentHeight = this._rootElement.height();
         var $panel = $("#SBPanel_" + panelId);
         $panel.width(this._panelWidth);
         $panel.height(parentHeight);
@@ -100,7 +100,3 @@ class Sidebar extends Panel {
     }
 }
 
-function setupSidebar() {
-    theSidebar = new Sidebar("sidebar_panel_div");
-    theSidebar.fillPropertiesPanel = new FillPropertiesPanel("SBPanel_FillProperties");
-}

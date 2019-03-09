@@ -25,10 +25,13 @@ module.exports = (env, options) => {
                 "./src/ext/spectrum/spectrum.js",
                 "./src/demo/scripts/stage.js",
                 "./src/demo/scripts/elements.js",
-                "./src/demo/scripts/Panels.js",
                 "./src/demo/scripts/toolbars.js",
-                "./src/demo/scripts/sidebars.js",
-                "./src/demo/scripts/shapepanel.js"
+                "./src/demo/scripts/components/Panel.js",
+                "./src/demo/scripts/components/ShapesPanel.js",
+                "./src/demo/scripts/components/FillPropertiesPanel.js",
+                "./src/demo/scripts/components/GradientStylePanel.js",
+                "./src/demo/scripts/components/Sidebar.js",
+                "./src/demo/scripts/events.js"
             ],
             append: true
         }),
