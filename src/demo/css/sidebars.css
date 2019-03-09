@@ -1,4 +1,6 @@
 
+.ui-tabs .ui-tabs-nav li a {font-size:10pt !important;}
+
 #sidebar_panel_div {
     position: absolute;
     top: 0;
@@ -18,7 +20,7 @@
     overflow: scroll;
     position: absolute;
     border: solix 1px red;
-    background: #ccc;
+    background: #f0f0f0;
     width: 200px;
 }
 
