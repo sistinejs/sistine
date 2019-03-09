@@ -1,6 +1,7 @@
 
 .gradient_input {
     width: 80px;
+    text-align: center;
 }
 
 #stopsSlider .ui-slider-handle {

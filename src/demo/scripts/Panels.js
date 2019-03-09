@@ -190,7 +190,7 @@ class GradientStylePanel extends Panel {
     }
 
     get currentColor() {
-        return this.stopColorPicker.spectrum().val();
+        return this.stopColorPicker.spectrum("get");
     }
 
     set currentColor(color) {
