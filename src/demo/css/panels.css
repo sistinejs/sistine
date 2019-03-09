@@ -1,0 +1,14 @@
+
+.gradient_input {
+    width: 80px;
+}
+
+#stopsSlider .ui-slider-handle {
+    font-size:                  1em;
+    top:                        -.4em;
+}
+
+#stopsSlider .range-glow {
+    background:                 #9f0;
+    box-shadow:                 0 0 2em #9f0;
+}

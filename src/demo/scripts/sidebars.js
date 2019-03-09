@@ -102,5 +102,5 @@ class Sidebar extends Panel {
 
 function setupSidebar() {
     theSidebar = new Sidebar("inspector_panel_div");
-    theSidebar.fillStylePanel = new FillStylePanel("SBPanel_FillProperties");
+    theSidebar.fillPropertiesPanel = new FillPropertiesPanel("SBPanel_FillProperties");
 }

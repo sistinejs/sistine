@@ -15,7 +15,11 @@ module.exports = (env, options) => {
         }),
         new HtmlWebpackIncludeAssetsPlugin({
             assets: [
+                "./src/ext/spectrum/spectrum.css",
                 "./src/demo/css/demo.css",
+                "./src/demo/css/panels.css",
+                "./src/ext/slider/jquery.limitslider.js",
+                "./src/ext/spectrum/spectrum.js",
                 "./src/demo/scripts/stage.js",
                 "./src/demo/scripts/elements.js",
                 "./src/demo/scripts/Panels.js",
