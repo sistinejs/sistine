@@ -24,8 +24,6 @@ module.exports = (env, options) => {
                 "./src/demo/css/panels.css",
                 "./src/ext/slider/jquery.limitslider.js",
                 "./src/ext/spectrum/spectrum.js",
-                "./src/demo/scripts/stage.js",
-                "./src/demo/scripts/toolbars.js",
                 "./src/demo/scripts/App.js",
                 "./src/demo/scripts/components/Panel.js",
                 "./src/demo/scripts/components/ShapesPanel.js",
@@ -36,7 +34,9 @@ module.exports = (env, options) => {
                 "./src/demo/scripts/components/PaintStylePanel.js",
                 "./src/demo/scripts/components/GradientStylePanel.js",
                 "./src/demo/scripts/components/Sidebar.js",
-                "./src/demo/scripts/events.js"
+                "./src/demo/scripts/events.js",
+                "./src/demo/scripts/actions.js",
+                "./src/demo/scripts/stage.js",
             ],
             append: true
         }),
