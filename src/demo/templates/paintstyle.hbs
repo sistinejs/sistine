@@ -11,10 +11,10 @@
         <div id = "gradientStyleDiv">
             <center>
             <form>
-                <label for="linearGradientType">Linear</label>
-                <input type="radio" name="gradientType" id="linearGradientType" checked="true"/>
-                <label for="RadialGradientType">Radial</label>
-                <input type="radio" name="gradientType" id="RadialGradientType" />
+                <label for="linearGradientType">Linear
+                <input value = "linear" type="radio" name="gradientType" id="linearGradientType" checked  /></label>
+                <label for="radialGradientType">Radial
+                <input value = "radial" type="radio" name="gradientType" id="radialGradientType" /></label>
             </form>
             </center>
             <hr/>
@@ -30,8 +30,8 @@
                         <td>Y2</td><td><input type = number id = "gradientY2" class = "gradient_input" value = "1" /> </td>
                     </tr>
                     <tr id = "gradientRadiusRow">
-                        <td>R1</td><td><input type = number id = "gradientR1" class = "gradient_input" value = "0.5" /> </td>
-                        <td>R2</td><td><input type = number id = "gradientR2" class = "gradient_input" value = "1" /> </td>
+                        <td>R1</td><td><input type = number id = "gradientR1" class = "gradient_input" value = "0.5" disabled /> </td>
+                        <td>R2</td><td><input type = number id = "gradientR2" class = "gradient_input" value = "1" disabled /> </td>
                     </tr>
                 </table>
             </div>

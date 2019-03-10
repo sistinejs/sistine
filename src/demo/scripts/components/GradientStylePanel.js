@@ -73,9 +73,11 @@ class GradientStylePanel extends Panel {
             if (this._selectedStopIndex >= this._stops.length) {
                 this._selectedStopIndex --;
             }
+            this.markModified();
             this.reloadData();
+            return true;
         }
-        return this;
+        return false;
     }
 
     addStop(offset, color, index) {
@@ -95,6 +97,7 @@ class GradientStylePanel extends Panel {
             this._stops.splice(index, 0, entry);
             this._selectedStopIndex = index;
         }
+        this.markModified();
         this.reloadData();
     }
 
@@ -121,7 +124,32 @@ class GradientStylePanel extends Panel {
         this.inputGradientY2 = this.find("#gradientY2");
         this.inputGradientR2 = this.find("#gradientR2");
 
-        this.find("#gradientStyleDiv").controlgroup();
+        function gradientChanged(fieldName, event) {
+            self.triggerOn("styleChanged", {
+                field: fieldName,
+                value: event.currentTarget.value
+            });
+        }
+        this.inputGradientX1.change(function(event) {
+            gradientChanged("gradientX1", event);
+        });
+        this.inputGradientX2.change(function(event) {
+            gradientChanged("gradientX2", event);
+        });
+        this.inputGradientY1.change(function(event) {
+            gradientChanged("gradientY1", event);
+        });
+        this.inputGradientY2.change(function(event) {
+            gradientChanged("gradientY2", event);
+        });
+        this.inputGradientR1.change(function(event) {
+            gradientChanged("gradientR1", event);
+        });
+        this.inputGradientR2.change(function(event) {
+            gradientChanged("gradientR2", event);
+        });
+
+        this._setupGradientTypeControls();
 
         this.stopColorPicker = this.find("#StopColorPicker");
         this.stopColorPicker.spectrum({
@@ -132,6 +160,11 @@ class GradientStylePanel extends Panel {
             preferredFormat: "rgb",
             move: function(color) {
                 self.currentColor = color.toRgbString();
+                self.markModified();
+                self.triggerOn("styleChanged", {
+                    "color": self.currentColor,
+                    "stop": self._selectedStopIndex,
+                });
             }
         });
 
@@ -141,13 +174,20 @@ class GradientStylePanel extends Panel {
         });
         this.addStopButton.click(function(event) {
             self.addStop(null, null, -1);
+            self.triggerOn("styleChanged", {
+                "stop": self._selectedStopIndex,
+            });
         });
         this.removeStopButton = this.find("#removeStopButton");
         this.removeStopButton.button({
             showLabel: false
         });
         this.removeStopButton.click(function(event) {
-            self.removeStopAt(self._selectedStopIndex);
+            if (self.removeStopAt(self._selectedStopIndex)) {
+                self.triggerOn("styleChanged", {
+                    "stop": self._selectedStopIndex,
+                });
+            }
         });
 
         this._setupStopsSlider()
@@ -163,6 +203,36 @@ class GradientStylePanel extends Panel {
         var theStop = this._stops[index];
         this._selectedStopIndex = index;
         this.stopColorPicker.spectrum("set", theStop.color);
+    }
+
+    _setupGradientTypeControls() {
+        var self = this;
+        this.find("label[for=linearGradientType]")
+            .attr("for", "linearGradientType" + this.uniqueid);
+        this.find("label[for=radialGradientType]")
+            .attr("for", "radialGradientType" + this.uniqueid);
+        this.find("#linearGradientType")
+            .attr("id", "linearGradientType" + this.uniqueid);
+        this.find("#radialGradientType")
+            .attr("id", "radialGradientType" + this.uniqueid);
+        this.find("input[name='gradientType']").checkboxradio();
+        this.find("#linearGradientType" + this.uniqueid).click(
+            function(event) {
+                self.triggerOn("styleChanged", {
+                    type: "linear"
+                });
+            });
+        this.find("#radialGradientType" + this.uniqueid).click(
+            function(event) {
+                self.triggerOn("styleChanged", {
+                    type: "radial"
+                });
+            });
+        this.find("input[name=gradientType]").change(function() {
+            var isLinear = this.value === "linear";
+            self.inputGradientR1.prop("disabled", isLinear);
+            self.inputGradientR2.prop("disabled", isLinear);
+        });
     }
 
     _setupStopsSlider() {
@@ -182,12 +252,18 @@ class GradientStylePanel extends Panel {
                 var nextStop = self._stops[handleIndex];
                 nextStop.offset = ui.value;
                 self.selectedStopIndex = handleIndex;
+                self.triggerOn("styleChanged", {
+                    "stop": self._selectedStopIndex,
+                });
             },
             start:      function(event, ui) {
                 var handleIndex = ui.handleIndex;
                 var nextStop = self._stops[handleIndex];
                 console.log("OnStart CurrSelIndex, ui.index: ", self._selectedStopIndex, handleIndex, nextStop);
                 self.selectedStopIndex = handleIndex;
+                self.triggerOn("styleChanged", {
+                    "stop": self._selectedStopIndex,
+                });
             },
             showRanges: true,
             ranges:     this._ranges
@@ -195,5 +271,13 @@ class GradientStylePanel extends Panel {
         this._stops.forEach(function(stop, index) {
             self.stopsSlider.find(".ui-slider-handle").eq(index).css("background", stop.color);
         });
+    }
+
+    get currentStyle() {
+        if (this._currentStyle == null || this.isModified) {
+            this.markCreated();
+            // recreate it
+            this._currentStyle = this.gradientStylePanel.currentStyle;
+        }
     }
 }

@@ -4,6 +4,7 @@
  */
 function connectEventHandlers() {
     // 1. When selection changes, we want different panels/toolbuttons to react to this.
+    var theStage = theApp.stage;
     var selection = theStage.selection;
     theStage.selection.on("ShapesSelected", function(event, eventType) {
         console.log("Shapes Selected: ", event.shapes);
@@ -21,6 +22,12 @@ function connectEventHandlers() {
     // 2. When properties in sidebar changes, we want shapes to reflect those
     // theSidebar.fillProperties
     theApp.fillPropertiesPanel.on("opacityChanged", function(event) {
+        console.log("Opacity: ", event);
+        selection.forEach(function(shape) {
+            shape.opacity = event.opacity;
+        });
+    }).on("styleChanged", function(event, eventType) {
+        console.log(eventType, event);
         selection.forEach(function(shape) {
             shape.opacity = event.opacity;
         });

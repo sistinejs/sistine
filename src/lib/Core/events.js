@@ -4,6 +4,10 @@ export class EventSource {
         this._eventHub = new EventHub();
     }
 
+    get eventHub() {
+        return this._eventHub;
+    }
+
     on(eventTypes, handler) {
         if (this._eventHub == null) {
             this._eventHub = new EventHub();
