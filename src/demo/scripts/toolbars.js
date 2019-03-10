@@ -2,42 +2,6 @@
 const TouchModes = Sistine.Views.Handlers.TouchModes;
 const TouchMode = Sistine.Views.Handlers.TouchMode;
 
-function setupMenus() {
-    $(".menu li").hover(
-        function () {
-            $(this).addClass("ui-state-hover");
-            $("ul", $(this)).show();
-        },
-
-        function () {
-            $(this).removeClass("ui-state-hover");
-            $("ul", $(this)).hide();
-        });
-    $(".menu li ul").each(function () {
-        $(this).menu();
-    });
-}
-
-function setupToolbar() {
-    $("#zoom_option").selectmenu({ width : 100 });
-    var toolbar_buttons = $(".toolbar_button");
-    toolbar_buttons.each(function(index, tbbutton) {
-        var $tbbutton = $(tbbutton);
-        var label = $tbbutton.text();
-        $tbbutton.empty()
-        $tbbutton.attr("title", label);
-
-        var buttonId = tbbutton.id.replace(/TB_/, "");
-        var iconId = "tb_icon_" + buttonId;
-        var buttonImage = $("<img src = '" + "./src/demo/icons/" + buttonId + ".png' />");
-        $tbbutton.button({
-            iconPosition: "top"
-        }).append(buttonImage);
-        Sistine.Utils.DOM.fillChildComponent(buttonImage);
-        $tbbutton.click(eval("on" + buttonId));
-    });
-}
-
 function onGroupShapes() {
     theStage.selection.group();
 }

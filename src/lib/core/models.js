@@ -699,13 +699,13 @@ export class Path extends Shape {
 export class Selection extends events.EventSource {
     constructor() {
         super();
-        this.shapes = {};
+        this._shapes = [];
+        this._shapesById = {};
         this.savedInfos = {};
-        this._count = 0;
     }
 
     get count() {
-        return this._count;
+        return this._shapes.length;
     }
 
     get allShapes() {
@@ -717,28 +717,32 @@ export class Selection extends events.EventSource {
     }
 
     forEach(handler, self, mutable) {
-        var shapes = this.shapes;
+        var shapesById = this._shapesById;
         if (mutable == true) {
-            shapes = Object.assign({}, shapes);
+            shapesById = Object.assign({}, shapesById);
         }
-        for (var shapeId in shapes) {
-            var shape = shapes[shapeId];
+        for (var shapeId in shapesById) {
+            var shape = shapesById[shapeId];
             if (handler(shape, self) == false)
                 break;
         }
     }
 
     contains(shape) {
-        return shape.id in this.shapes;
+        return shape.id in this._shapesById;
     }
     
+    get(index) {
+        return this._shapes[index];
+    }
+
     add(shape) {
         var event = new events.ShapesSelected(this, [shape]);
         if (this.validateBefore("ShapesSelected", event) != false) {
-            if ( ! (shape.id in this.shapes)) {
-                this._count ++;
+            if ( ! (shape.id in this._shapesById)) {
+                this._shapes.push(shape);
             }
-            this.shapes[shape.id] = shape;
+            this._shapesById[shape.id] = shape;
             this.savedInfos[shape.id] = shape.controller.snapshotFor();
             this.triggerOn("ShapesSelected", event);
         }
@@ -747,10 +751,15 @@ export class Selection extends events.EventSource {
     remove(shape) {
         var event = new events.ShapesUnselected(this, [shape]);
         if (this.validateBefore("ShapesUnselected", event) != false) {
-            if ( shape.id in this.shapes ) {
-                this._count --;
+            if ( shape.id in this._shapesById ) {
+                for (var i = 0;i < this._shapes.length;i++) {
+                    if (this._shapes[i].id == shape.id) {
+                        this._shapes.splice(i, 1);
+                        break ;
+                    }
+                }
             }
-            delete this.shapes[shape.id];
+            delete this._shapesById[shape.id];
             delete this.savedInfos[shape.id];
             this.triggerOn("ShapesUnselected", event);
         }
@@ -782,7 +791,8 @@ export class Selection extends events.EventSource {
         var event = new events.ShapesUnselected(this, this.allShapes);
         this.triggerOn("ShapesUnselected", event);
         this.savedInfos = {};
-        this.shapes = {};
+        this._shapes = [];
+        this._shapesById = {};
         this._count = 0;
     }
 

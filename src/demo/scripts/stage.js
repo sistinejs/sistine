@@ -1,24 +1,9 @@
 
 var DefaultBundle = Sistine.Registry.DefaultBundle;
-iconStages = { };
 shapeDefaults = {
     'strokeStyle': "black",
     'lineWidth': 2,
 };
-theScene = null;
-theStage = null;
-theSidebar = null;
-zoomHandler = null;
-
-function setupStage() {
-    theScene = new Sistine.Core.Models.Scene();
-    theStage = new Sistine.Views.Stage.Stage("stage_div", theScene);
-    theStage.isEditable = true;
-    theStage.showBackground = true;
-    // Add a zoom handler!!
-    zoomHandler = new Sistine.Views.Handlers.StageViewPortHandler(theStage);
-    addSampleShapes();
-}
 
 function addSampleShapes() {
     var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 170, 0)
@@ -41,7 +26,7 @@ function addShape(objid, configs) {
         ...configs
     }
     var newShape = DefaultBundle[objid].newShape(finalConfigs);
-    theScene.add(newShape);
+    theApp.scene.add(newShape);
     return newShape;
 }
 
@@ -70,8 +55,8 @@ function drawSample(x, y, w, h, angle, clear) { if (clear)
 }
 
 function test() {
-    ctx = theStage.getPane("main").context;
-    x = theScene._layers[0]._children[0];
+    ctx = theApp.stage.getPane("main").context;
+    x = theApp.scene._layers[0]._children[0];
     x.rotate(30);
     // scaling when drawing is using the "wrong" offset.  For some reason x and y are fine but still looks "jilted"
 

@@ -44,7 +44,8 @@ class ShapesPanel extends Panel {
             $icondiv.empty()
 
             var shapeId = icondiv.id.replace(/holder_/, "");
-            var iconStage = iconStages[shapeId] = new Sistine.Views.Stage.Stage(icondiv.id);
+            var iconStage = new Sistine.Views.Stage.Stage(icondiv.id);
+            // iconStages[shapeId] = iconStage;
             var topPane = iconStage.getPane("main");
             var $child = topPane.element;
 
