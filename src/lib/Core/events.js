@@ -29,13 +29,38 @@ export class EventSource {
         event.source = this;
         return this._eventHub.triggerOn(eventTypes, event) != false;
     }
+
+    validateAndTrigger(eventTypes, event, action) {
+        event.source = this;
+        return this._eventHub.validateAndTrigger(eventTypes, event, action);
+    }
 }
 
 export class EventHub {
     constructor(next) {
         this._onHandlers = {};
         this._beforeHandlers = {};
-        this.next = next;
+        this._next = [];
+        if (next != null) {
+            this._next.push(next);
+        }
+    }
+
+    chain(another) {
+        if (another != null) {
+            if (this._next.findIndex(function(value) { return value == another; }) < 0) {
+                this._next.push(another);
+            }
+        }
+    }
+
+    unchain(another) {
+        if (another != null) {
+            var index = this._next.findIndex(function(value) { return value == another; });
+            if (index >= 0) {
+                this._next.splice(index, 1);
+            }
+        }
     }
 
     before(eventTypes, handler) {
@@ -87,8 +112,10 @@ export class EventHub {
         if (this._trigger(eventType, this._beforeHandlers, event) == false) {
             return false;
         }
-        if (this.next != null) {
-            return this.next.validateBefore(eventType, event) != false;
+        for (var i = this._next.length - 1;i >= 0;i --) {
+            if (this._next[i].validateBefore(eventType, event) == false) {
+                return false;
+            }
         }
         return true;
     }
@@ -96,8 +123,10 @@ export class EventHub {
         if (this._trigger(eventType, this._onHandlers, event) == false) {
             return false;
         }
-        if (this.next != null) {
-            return this.next.triggerOn(eventType, event) != false;
+        for (var i = this._next.length - 1;i >= 0;i --) {
+            if (this._next[i].triggerOn(eventType, event) == false) {
+                return false;
+            }
         }
         return true;
     }
@@ -112,6 +141,13 @@ export class EventHub {
             }
         }
         return true;
+    }
+
+    validateAndTrigger(eventType, event, action) {
+        if (this.validateBefore(eventType, event) == false) 
+            return false;
+        action();
+        return this.triggerOn(eventType, event) != false;
     }
 }
 

@@ -152,8 +152,14 @@ export class Shape extends events.EventSource {
 
     set scene(s) {
         if (this._scene != s) {
+            // unchain previous scene
+            if (this._scene) {
+                this._eventHub.unchain(this._scene.eventHub);
+            }
             this._scene = s;
-            this._eventHub.next = (s == null ? null : s.eventHub);
+            if (this._scene) {
+                this._eventHub.chain(this._scene.eventHub);
+            }
             for (var i = 0, L = this._children.length;i < L;i++) {
                 this._children[i].scene = s;
             }
