@@ -20,11 +20,12 @@ function connectEventHandlers() {
 
     // 2. When properties in sidebar changes, we want shapes to reflect those
     // theSidebar.fillProperties
-    theSidebar.fillPropertiesPanel
+    theApp.fillPropertiesPanel.on("opacityChanged", function(event) {
+        selection.forEach(function(shape) {
+            shape.opacity = event.opacity;
+        });
+    });
 }
 
 function setFillPropertiesFromShape(shape) {
-}
-
-function applyFillPropertiesToSelection(selection) {
 }
