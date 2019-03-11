@@ -34,3 +34,19 @@
     height: var(--sidebar-panel-width);
     padding: 0px;
 }
+
+.sidebar_content_panel h2 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.sidebar_content_section {
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 50px
+}
+
+.sidebar_content_section h3, h4 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
