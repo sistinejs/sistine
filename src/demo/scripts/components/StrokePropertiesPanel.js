@@ -26,9 +26,6 @@ class StrokePropertiesPanel extends Panel {
         this._setupLineJoinTypeControls();
     }
 
-    layout() {
-    }
-
     _setupLineJoinTypeControls() {
         var self = this;
         this.find("label[for=lineJoinBevel]")
@@ -47,11 +44,11 @@ class StrokePropertiesPanel extends Panel {
 
         this.find("input[name='lineJoinType']").checkboxradio();
         this.lineJoinBevel = this.find("#lineJoinBevel" + this.uniqueid)
-        this.lineJoinBevel.click( function(event) { self.triggerOn("lineJoinChanged", {}); });
+        this.lineJoinBevel.click( function(event) { self._triggerOn("lineJoinChanged", {}); });
         this.lineJoinMiter = this.find("#lineJoinMiter" + this.uniqueid)
-        this.lineJoinMiter.click( function(event) { self.triggerOn("lineJoinChanged", {}); });
+        this.lineJoinMiter.click( function(event) { self._triggerOn("lineJoinChanged", {}); });
         this.lineJoinRound = this.find("#lineJoinRound" + this.uniqueid)
-        this.lineJoinRound.click( function(event) { self.triggerOn("lineJoinChanged", {}); });
+        this.lineJoinRound.click( function(event) { self._triggerOn("lineJoinChanged", {}); });
 
         this.find("input[name=lineJoinType]").change(function() {
             var isMiter = this.value === "miter";
@@ -77,11 +74,43 @@ class StrokePropertiesPanel extends Panel {
 
         this.find("input[name='lineCapType']").checkboxradio();
         this.lineCapButt = this.find("#lineCapButt" + this.uniqueid)
-        this.lineCapButt.click( function(event) { self.triggerOn("lineCapChanged", {}); });
+        this.lineCapButt.click( function(event) { self._triggerOn("lineCapChanged", {}); });
         this.lineCapSquare = this.find("#lineCapSquare" + this.uniqueid)
-        this.lineCapSquare.click( function(event) { self.triggerOn("lineCapChanged", {}); });
+        this.lineCapSquare.click( function(event) { self._triggerOn("lineCapChanged", {}); });
         this.lineCapRound = this.find("#lineCapRound" + this.uniqueid)
-        this.lineCapRound.click( function(event) { self.triggerOn("lineCapChanged", {}); });
+        this.lineCapRound.click( function(event) { self._triggerOn("lineCapChanged", {}); });
+    }
+
+    _triggerOn(eventType, event) {
+        this.markModified();
+        this.triggerOn(eventType, event);
+    }
+
+    get lineJoin() {
+        return this.find("input[name=lineJoinType]").val();
+    }
+
+    get lineCap() {
+        return this.find("input[name=lineCapType]").val();
+    }
+
+    get lineWidth() {
+        return this.find("input[name=lineCapType]").val();
+    }
+
+    get dashOffset() {
+        return this.dashOffsetSlider.value;
+    }
+
+    get strokeWidth() {
+        return this.strokeWidthSlider.value;
+    }
+
+    get miterLimit() {
+        return this.miterLimitSlider.value;
+    }
+
+    get lineDash() {
     }
 }
 
