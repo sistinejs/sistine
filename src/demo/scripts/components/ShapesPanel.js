@@ -76,7 +76,7 @@ class ShapesPanel extends Panel {
                 // Add the shape on the canvas at the center
                 var id = event.currentTarget.id.replace(/mainpane_holder_/, "");
                 var configs = Object.assign({}, shapeDefaults);
-                theStage.setTouchContext(TouchModes.CREATE, DefaultBundle[id].newShape(configs));
+                theApp.stage.setTouchContext(TouchModes.CREATE, DefaultBundle[id].newShape(configs));
             });
         });
     }

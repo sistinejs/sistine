@@ -3,35 +3,35 @@ const TouchModes = Sistine.Views.Handlers.TouchModes;
 const TouchMode = Sistine.Views.Handlers.TouchMode;
 
 function onGroupShapes() {
-    theStage.selection.group();
+    theApp.stage.selection.group();
 }
 
 function onUngroupShapes() {
-    theStage.selection.ungroup();
+    theApp.stage.selection.ungroup();
 }
 
 function onBringToFront() {
-    theStage.selection.bringToFront();
+    theApp.stage.selection.bringToFront();
 }
 
 function onSendToBack() {
-    theStage.selection.sendToBack();
+    theApp.stage.selection.sendToBack();
 }
 
 function onBringForward() {
-    theStage.selection.bringForward();
+    theApp.stage.selection.bringForward();
 }
 
 function onSendBackward() {
-    theStage.selection.sendBackward();
+    theApp.stage.selection.sendBackward();
 }
 
 function onZoomIn() {
-    theStage.setTouchContext(TouchModes.ZOOM_IN);
+    theApp.stage.setTouchContext(TouchModes.ZOOM_IN);
 }
 
 function onZoomOut() {
-    theStage.setTouchContext(TouchModes.ZOOM_OUT);
+    theApp.stage.setTouchContext(TouchModes.ZOOM_OUT);
 }
 
 function onUndo() {
@@ -41,23 +41,23 @@ function onRedo() {
 }
 
 function onCut() {
-    theStage.selection.copyToClipboard(true);
+    theApp.stage.selection.copyToClipboard(true);
 }
 
 function onCopy() {
-    theStage.selection.copyToClipboard();
+    theApp.stage.selection.copyToClipboard();
 }
 
 function onPaste() {
-    theStage.selection.pasteFromClipboard();
+    theApp.stage.selection.pasteFromClipboard();
 }
 
 function onPointer() {
-    theStage.setTouchContext();
+    theApp.stage.setTouchContext();
 }
 
 function onHandTool() {
-    theStage.setTouchContext(TouchModes.HAND_TOOL);
+    theApp.stage.setTouchContext(TouchModes.HAND_TOOL);
 }
 
 function onLineTool() {
