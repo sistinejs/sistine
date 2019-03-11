@@ -21,12 +21,7 @@ function connectEventHandlers() {
 
     // 2. When properties in sidebar changes, we want shapes to reflect those
     // theSidebar.fillProperties
-    theApp.fillPropertiesPanel.on("opacityChanged", function(event) {
-        console.log("Opacity: ", event);
-        selection.forEach(function(shape) {
-            shape.opacity = event.opacity;
-        });
-    }).on("styleChanged", function(event, eventType) {
+    theApp.fillPropertiesPanel.on("styleChanged", function(event, eventType) {
         var currentStyle = theApp.fillPropertiesPanel.paintStylePanel.currentStyle;
         console.log(eventType, event, "Style: ", currentStyle);
         selection.forEach(function(shape) {
@@ -34,6 +29,20 @@ function connectEventHandlers() {
                 currentStyle = currentStyle.copy();
             }
             shape.fillStyle = currentStyle;
+            theStage.paneNeedsRepaint(shape.pane);
+        });
+    });
+
+    // 2. When properties in sidebar changes, we want shapes to reflect those
+    // theSidebar.fillProperties
+    theApp.strokePropertiesPanel.on("styleChanged", function(event, eventType) {
+        var currentStyle = theApp.strokePropertiesPanel.paintStylePanel.currentStyle;
+        console.log(eventType, event, "Style: ", currentStyle);
+        selection.forEach(function(shape) {
+            if (currentStyle.copy) {
+                currentStyle = currentStyle.copy();
+            }
+            shape.strokeStyle = currentStyle;
             theStage.paneNeedsRepaint(shape.pane);
         });
     });

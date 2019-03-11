@@ -6,6 +6,7 @@ class FillPropertiesPanel extends Panel {
         this.paintStylePanel = new PaintStylePanel(this.subselector("#paintStylePanelTab"));
         this.paintStylePanel.eventHub.chain(this.eventHub);
 
+        /*
         this.opacitySlider = this.rootElement.find("#opacity_slider");
         var handle = this.find("#custom-handle");
         this.opacitySlider.slider({
@@ -21,6 +22,7 @@ class FillPropertiesPanel extends Panel {
                 self.triggerOn("opacityChanged", {opacity: ui.value});
             }
         });
+        */
     }
 
     set opacity(value) {
