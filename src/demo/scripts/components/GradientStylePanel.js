@@ -17,6 +17,13 @@ class GradientStylePanel extends Panel {
         });
     }
 
+    get x1() { return parseFloat(this.inputGradientX1.val()); } 
+    get y1() { return parseFloat(this.inputGradientY1.val()); } 
+    get r1() { return parseFloat(this.inputGradientR1.val()); }
+    get x2() { return parseFloat(this.inputGradientX2.val()); } 
+    get y2() { return parseFloat(this.inputGradientY2.val()); } 
+    get r2() { return parseFloat(this.inputGradientR2.val()); }
+
     get numStops() {
         return this._stops.length;
     }
@@ -125,7 +132,7 @@ class GradientStylePanel extends Panel {
         this.inputGradientR2 = this.find("#gradientR2");
 
         function gradientChanged(fieldName, event) {
-            self.triggerOn("styleChanged", {
+            self._triggerStyleChanged({
                 field: fieldName,
                 value: event.currentTarget.value
             });
@@ -160,8 +167,7 @@ class GradientStylePanel extends Panel {
             preferredFormat: "rgb",
             move: function(color) {
                 self.currentColor = color.toRgbString();
-                self.markModified();
-                self.triggerOn("styleChanged", {
+                self._triggerStyleChanged({
                     "color": self.currentColor,
                     "stop": self._selectedStopIndex,
                 });
@@ -174,7 +180,7 @@ class GradientStylePanel extends Panel {
         });
         this.addStopButton.click(function(event) {
             self.addStop(null, null, -1);
-            self.triggerOn("styleChanged", {
+            self._triggerStyleChanged({
                 "stop": self._selectedStopIndex,
             });
         });
@@ -184,7 +190,7 @@ class GradientStylePanel extends Panel {
         });
         this.removeStopButton.click(function(event) {
             if (self.removeStopAt(self._selectedStopIndex)) {
-                self.triggerOn("styleChanged", {
+                self._triggerStyleChanged({
                     "stop": self._selectedStopIndex,
                 });
             }
@@ -216,15 +222,17 @@ class GradientStylePanel extends Panel {
         this.find("#radialGradientType")
             .attr("id", "radialGradientType" + this.uniqueid);
         this.find("input[name='gradientType']").checkboxradio();
-        this.find("#linearGradientType" + this.uniqueid).click(
+        this.linearGradientType = this.find("#linearGradientType" + this.uniqueid)
+        this.linearGradientType.click(
             function(event) {
-                self.triggerOn("styleChanged", {
+                self._triggerStyleChanged({
                     type: "linear"
                 });
             });
-        this.find("#radialGradientType" + this.uniqueid).click(
+        this.radialGradientType = this.find("#radialGradientType" + this.uniqueid)
+        this.radialGradientType.click(
             function(event) {
-                self.triggerOn("styleChanged", {
+                self._triggerStyleChanged({
                     type: "radial"
                 });
             });
@@ -252,8 +260,9 @@ class GradientStylePanel extends Panel {
                 var nextStop = self._stops[handleIndex];
                 nextStop.offset = ui.value;
                 self.selectedStopIndex = handleIndex;
-                self.triggerOn("styleChanged", {
+                self._triggerStyleChanged({
                     "stop": self._selectedStopIndex,
+                    "offset": ui.value
                 });
             },
             start:      function(event, ui) {
@@ -261,8 +270,9 @@ class GradientStylePanel extends Panel {
                 var nextStop = self._stops[handleIndex];
                 console.log("OnStart CurrSelIndex, ui.index: ", self._selectedStopIndex, handleIndex, nextStop);
                 self.selectedStopIndex = handleIndex;
-                self.triggerOn("styleChanged", {
+                self._triggerStyleChanged({
                     "stop": self._selectedStopIndex,
+                    "offset": ui.value
                 });
             },
             showRanges: true,
@@ -277,7 +287,30 @@ class GradientStylePanel extends Panel {
         if (this._currentStyle == null || this.isModified) {
             this.markCreated();
             // recreate it
-            this._currentStyle = this.gradientStylePanel.currentStyle;
+            this._currentStyle = this._createStyle();
         }
+        return this._currentStyle;
+    }
+
+    _createStyle() {
+        var style = null;
+        if (this.linearGradientType.is(":checked")) {
+            style = new Sistine.Core.Styles.LinearGradient(
+                this.x1, this.y1, this.x2, this.y2);
+        } else {
+            style = new Sistine.Core.Styles.RadialGradient(
+                this.x1, this.y1, this.r1,
+                this.x2, this.y2, this.r2);
+        }
+        for (var i = 0;i < this._stops.length;i++) {
+            var stop = this._stops[i];
+            style.addStop(stop.offset / 1000.0, stop.color);
+        }
+        return style;
+    }
+
+    _triggerStyleChanged(data) {
+        this.markModified();
+        this.triggerOn("styleChanged", data);
     }
 }

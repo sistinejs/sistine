@@ -3,14 +3,18 @@ export class Style {
     constructor() {
         this._realValue = null;
         this._context = null;
-        this._x = null;
-        this._y = null;
+        this._shapeX = null;
+        this._shapeY = null;
+        this._shapeW = null;
+        this._shapeH = null;
     }
 
     forContext(shape, ctx) {
         if (this._hasChanged(shape, ctx)) {
-            this._x = shape.bounds.x;
-            this._y = shape.bounds.y;
+            this._shapeX = shape.bounds.x;
+            this._shapeY = shape.bounds.y;
+            this._shapeW = shape.bounds.width;
+            this._shapeH = shape.bounds.height;
             this._context = ctx;
             this._realValue = this._createStyle(shape, ctx);
         }
@@ -23,7 +27,10 @@ export class Style {
 
     _hasChanged(shape, ctx) {
         return this._realValue == null || this._context != ctx ||
-                shape.bounds.x != this._x || shape.bounds.y != this._y;
+                shape.bounds.x != this._shapeX ||
+                shape.bounds.y != this._shapeY ||
+                shape.bounds.width != this._shapeW ||
+                shape.bounds.height != this._shapeH;
     }
 }
 
@@ -35,6 +42,10 @@ export class Literal extends Style {
 
     _createStyle(shape, ctx) {
         return this._value;
+    }
+
+    copy() {
+        return Literal(this._value);
     }
 }
 
@@ -65,11 +76,20 @@ export class LinearGradient extends Gradient {
     }
 
     _createStyle(shape, ctx) {
-        var out = ctx.createLinearGradient(this.x0 + this._x, this.y0 + this._y,
-                                           this.x1 + this._x, this.y1 + this._y);
+        var x0 = this._shapeX + (this.x0 * this._shapeW);
+        var y0 = this._shapeY + (this.y0 * this._shapeH);
+        var x1 = this._shapeX + (this.x1 * this._shapeW);
+        var y1 = this._shapeY + (this.y1 * this._shapeH);
+        var out = ctx.createLinearGradient(x0, y0, x1, y1);
         this._stops.forEach(function(value) {
             out.addColorStop(value[0], value[1]);
         });
+        return out;
+    }
+
+    copy() {
+        var out = new LinearGradient(this.x0, this.y0, this.x1, this.y1);
+        out._stops = this._stops.slice(0, this._stops.length);
         return out;
     }
 }
@@ -86,11 +106,23 @@ export class RadialGradient extends Gradient {
     }
 
     _createStyle(shape, ctx) {
-        var out = ctx.createRadialGradient(this.x0 + this._x, this.y0 + this._y, this.r0,
-                                           this.x1 + this._x, this.y1 + this._y, this.r1);
+        var out = ctx.createRadialGradient(
+                    this._shapeX + (this.x0 * this._shapeW),
+                    this._shapeY + (this.y0 * this._shapeH),
+                    (this.r0 * this._shapeW),
+                    this._shapeX + (this.x1 * this._shapeW),
+                    this._shapeY + (this.y1 * this._shapeH),
+                    (this.r1 * this._shapeH));
         this._stops.forEach(function(value) {
             out.addColorStop(value[0], value[1]);
         });
+        return out;
+    }
+
+    copy() {
+        var out = new RadialGradient(this.x0, this.y0, this.r0,
+                                     this.x1, this.y1, this.r1);
+        out._stops = this._stops.slice(0, this._stops.length);
         return out;
     }
 }

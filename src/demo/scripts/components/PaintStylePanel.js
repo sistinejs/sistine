@@ -30,18 +30,26 @@ class PaintStylePanel extends Panel {
         this.gradientStylePanel.eventHub.chain(this.eventHub);
     }
 
+    get isPlainStyle() {
+        return this.rootElement.tabs("option", "active") == 0;
+    }
+
+    get isGradientStyle() {
+        return this.rootElement.tabs("option", "active") == 1;
+    }
+
+    get isPatternStyle() {
+        return this.rootElement.tabs("option", "active") == 2;
+    }
+
     get currentStyle() {
-        if (this._currentStyle == null || this.isModified) {
-            this.markCreated();
-            // recreate it
-            if (this.isPlainStyle) {
-                this._currentStyle = this.currentColor;
-            } else if (this.isGradientStyle) {
-                this._currentStyle = this.gradientStylePanel.currentStyle;
-            } else {
-                // Pattern style
-            }
+        if (this.isGradientStyle) {
+            return this.gradientStylePanel.currentStyle;
+        } else if (this.isPatternStyle) {
+            // Pattern style
+            // TODO: enable gradients
         }
+        return this.currentColor;
     }
 }
 

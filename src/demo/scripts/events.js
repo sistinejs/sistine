@@ -27,9 +27,14 @@ function connectEventHandlers() {
             shape.opacity = event.opacity;
         });
     }).on("styleChanged", function(event, eventType) {
-        console.log(eventType, event);
+        var currentStyle = theApp.fillPropertiesPanel.paintStylePanel.currentStyle;
+        console.log(eventType, event, "Style: ", currentStyle);
         selection.forEach(function(shape) {
-            shape.opacity = event.opacity;
+            if (currentStyle.copy) {
+                currentStyle = currentStyle.copy();
+            }
+            shape.fillStyle = currentStyle;
+            theStage.paneNeedsRepaint(shape.pane);
         });
     });
 }
