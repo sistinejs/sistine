@@ -64,5 +64,10 @@ class NumericSlider extends Panel {
         this.inputElement.css("height", "25px");
         this.inputElement.css("flow", "right");
     }
+
+    enable(enable) {
+        this.inputElement.prop("disabled", !enable);
+        this.sliderElement.slider(enable ? "enable" : "disable");
+    }
 }
 
