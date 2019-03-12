@@ -17,6 +17,13 @@ function addSampleShapes() {
     addShape("Circle", { "x": 200, "y": 50, "width": 100, "height": 100, "lineWidth": 2, "fillStyle": grd2});
     addShape("Square", { "x": 350, "y": 50, "width": 200, "height": 100, "fillStyle": 'red' });
     addShape("Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
+
+    var path = new Sistine.Core.Models.Path();
+    path.moveTo(100, 100);
+    path.lineTo(100, 200);
+    path.lineTo(300, 300);
+    path.lineWidth = 10;
+    theApp.scene.add(path);
 }
 
 function addShape(objid, configs) {

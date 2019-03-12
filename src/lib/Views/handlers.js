@@ -9,6 +9,7 @@ export const TouchModes = {
     ZOOM_IN: 2,
     ZOOM_OUT: 3,
     HAND_TOOL: 4,
+    LINE_TOOL: 5,
 }
 
 export class TouchContext {

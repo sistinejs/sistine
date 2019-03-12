@@ -450,15 +450,21 @@ export class Shape extends events.EventSource {
     applyStyles(ctx, options) {
         if (this.fillStyle) {
             this.fillStyle.apply(this, "fillStyle", ctx);
+        } else {
+            ctx.fillStyle = null;
         }
-        if (this.strokeStyle) {
-            this.strokeStyle.apply(this, "strokeStyle", ctx);
+        if (this.lineWidth > 0) {
+            if (this.strokeStyle) {
+                this.strokeStyle.apply(this, "strokeStyle", ctx);
+            } else {
+                ctx.strokeStyle = null;
+            }
+            ctx.lineJoin = this.lineJoin;
+            ctx.lineCap = this.lineCap;
+            ctx.setLineDash(this.lineDash || []);
+            ctx.lineWidth = this.lineWidth;
+            ctx.lineDashOffset = this.lineDashOffset;
         }
-        ctx.lineJoin = this.lineJoin;
-        ctx.lineCap = this.lineCap;
-        ctx.setLineDash(this.lineDash || []);
-        ctx.lineWidth = this.lineWidth;
-        ctx.lineDashOffset = this.lineDashOffset;
     }
 
     applyTransforms(ctx) {
@@ -650,33 +656,63 @@ export class Scene {
 export class Path extends Shape {
     constructor(configs) {
         super(configs);
-        this._commands = [];
+        this._bytecode = [];
+        this._commandOffsets = [];
     }
 
-    _cmdMoveTo(ctx, args) { ctx.moveTo.apply(args); }
-    _cmdLineTo(ctx, args) { ctx.lineTo.apply(args); }
-    _cmdClosePath(ctx, args) { ctx.closePath(); }
-    _cmdArc(ctx, args) { ctx.arc.apply(args); }
-    _cmdArcTo(ctx, args) { ctx.arcTo.apply(args); }
-    _cmdQuadraticCurveTo(ctx, args) { ctx.quadraticCurveTo.apply(args); }
-    _cmdBezierCurveTo(ctx, args) { ctx.bezierCurveTo.apply(args); }
-    _addCommand(cmd, args) {
-        this._commands.push([cmd, args]);
+    _cmdMoveTo(ctx, bc, offset) {
+        ctx.moveTo(bc[offset + 0], bc[offset + 1]);
+    };
+    _cmdLineTo(ctx, bc, offset) {
+        ctx.lineTo(bc[offset + 0], bc[offset + 1]);
+    };
+    _cmdClosePath(ctx, bc, offset) {
+        ctx.closePath();
+    }
+    _cmdArc(ctx, bc, offset) {
+        ctx.arc(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3], bc[offset + 4], bc[offset + 5]);
+    }
+    _cmdArcTo(ctx, bc, offset) {
+        ctx.arcTo(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3], bc[offset + 4]);
+    }
+    _cmdQuadraticCurveTo(ctx, bc, offset) {
+        ctx.quadraticCurveTo(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3]);
+    }
+    _cmdBezierCurveTo(ctx, bc, offset) {
+        ctx.bezierCurveTo(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3], bc[offset + 4], bc[offset + 5]);
+    }
+    _addCommand() {
+        var args = arguments;
+        this._commandOffsets.push(this._bytecode.length);
+        this._bytecode.push(args.length);
+        for (var i = 0;i < args.length;i++) this._bytecode.push(args[i]);
     }
 
-    moveTo(x, y) { this._addCommand(this._cmdMoveTo, [x, y]); }
-    lineTo(x, y) { this._addCommand(this._cmdLineTo, [x, y]); }
+    get commandCount() {
+        return this._commandOffsets.length;
+    }
+
+    commandAt(index) {
+        var offset = this._commandOffsets[index];
+        var nargs = this._byteCode[offset ++];
+        return this._bytecode.slice(offset, offset + nargs);
+    }
+
+    moveTo(x, y) { this._addCommand(this._cmdMoveTo, x, y); }
+    lineTo(x, y) { 
+        this._addCommand(this._cmdLineTo, x, y); 
+    }
     arc(x, y, radius, startAngle, endAngle, anticlockwise) {
-        this._addCommand(this._cmdArc, [x, y, radius, startAngle, endAngle, anticlockwise]);
+        this._addCommand(this._cmdArc, x, y, radius, startAngle, endAngle, anticlockwise);
     }
     arcTo(x1, y1, x2, y2, radius) {
-        this._addCommand(this._cmdArcTo, [x1, y1, x2, y2, radius]);
+        this._addCommand(this._cmdArcTo, x1, y1, x2, y2, radius);
     }
     quadraticCurveTo(cp1x, cp1y, x, y) {
-        this._addCommand(this._cmdQuadraticCurveTo, [cp1x, cp1y, x, y]);
+        this._addCommand(this._cmdQuadraticCurveTo, cp1x, cp1y, x, y);
     }
     bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
-        this._addCommand(this._cmdQuadraticCurveTo, [cp1x, cp1y, cp2x, cp2y, x, y]);
+        this._addCommand(this._cmdQuadraticCurveTo, cp1x, cp1y, cp2x, cp2y, x, y);
     }
     closePath() {
         this._addCommand(this._cmdClosePath);
@@ -684,11 +720,14 @@ export class Path extends Shape {
 
     draw(ctx) {
         ctx.beginPath();
-        this._commands.forEach(function(cmd) {
-            var func = cmd[0];
-            var args = cmd[1];
-            func(ctx, args);
-        });
+        var bc = this._bytecode;
+        var i = 0, L = bc.length, n = 0;
+        while (i < L) {
+            var nargs = bc[i++];
+            var cmd = bc[i];
+            cmd(ctx, bc, i + 1);
+            i += nargs;
+        }
         if (this.fillStyle) {
             ctx.fill();
         }
