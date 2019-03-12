@@ -41,7 +41,18 @@ class NumericSlider extends Panel {
             value: this.value,
             slide: function( event, ui ) {
                 self.value = ui.value;
+                self.inputElement.val(ui.value);
             }
+        });
+        this.inputElement.change(function(event) {
+            var value = parseFloat(self.inputElement.val());
+            if (value < self.min) {
+                value = self.min;
+            } else if (value > self.max) {
+                value = self.max;
+            }
+            self.inputElement.val(value);
+            self.sliderElement.slider("value", value);
         });
     }
 
