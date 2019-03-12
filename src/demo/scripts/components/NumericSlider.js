@@ -27,7 +27,7 @@ class NumericSlider extends Panel {
         this.inputElement.attr("value", this.value);
 
         this.sliderElement = this.rootElement.find("#slider");
-        if (this.inputElement.length == 0) {
+        if (this.sliderElement.length == 0) {
             // then add one
             this.sliderParent.append($("<div id = 'slider' />"));
             this.sliderElement = this.rootElement.find("#slider");
@@ -42,6 +42,7 @@ class NumericSlider extends Panel {
             slide: function( event, ui ) {
                 self.value = ui.value;
                 self.inputElement.val(ui.value);
+                self.triggerOn("valueChanged", {'value': ui.value});
             }
         });
         this.inputElement.change(function(event) {
@@ -53,6 +54,7 @@ class NumericSlider extends Panel {
             }
             self.inputElement.val(value);
             self.sliderElement.slider("value", value);
+            self.triggerOn("valueChanged", {'value': value});
         });
     }
 

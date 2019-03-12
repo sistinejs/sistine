@@ -46,6 +46,48 @@ function connectEventHandlers() {
             theStage.paneNeedsRepaint(shape.pane);
         });
     });
+
+    theApp.strokePropertiesPanel.on("dashOffsetChanged", function(event, eventType) {
+        selection.forEach(function(shape) {
+            shape.lineDashOffset = theApp.strokePropertiesPanel.dashOffset;
+            theStage.paneNeedsRepaint(shape.pane);
+        });
+    });
+
+    theApp.strokePropertiesPanel.on("miterLimitChanged", function(event, eventType) {
+        selection.forEach(function(shape) {
+            shape.miterLimit = theApp.strokePropertiesPanel.miterLimit;
+            theStage.paneNeedsRepaint(shape.pane);
+        });
+    });
+
+    theApp.strokePropertiesPanel.on("lineWidthChanged", function(event, eventType) {
+        selection.forEach(function(shape) {
+            shape.lineWidth = theApp.strokePropertiesPanel.lineWidth;
+            theStage.paneNeedsRepaint(shape.pane);
+        });
+    });
+
+    theApp.strokePropertiesPanel.on("lineCapChanged", function(event, eventType) {
+        selection.forEach(function(shape) {
+            shape.lineCap = theApp.strokePropertiesPanel.lineCap;
+            theStage.paneNeedsRepaint(shape.pane);
+        });
+    });
+
+    theApp.strokePropertiesPanel.on("lineJoinChanged", function(event, eventType) {
+        selection.forEach(function(shape) {
+            shape.lineJoin = theApp.strokePropertiesPanel.lineJoin;
+            theStage.paneNeedsRepaint(shape.pane);
+        });
+    });
+
+    theApp.strokePropertiesPanel.on("lineDashChanged", function(event, eventType) {
+        selection.forEach(function(shape) {
+            shape.lineDash = theApp.strokePropertiesPanel.lineDash;
+            theStage.paneNeedsRepaint(shape.pane);
+        });
+    });
 }
 
 function setFillPropertiesFromShape(shape) {

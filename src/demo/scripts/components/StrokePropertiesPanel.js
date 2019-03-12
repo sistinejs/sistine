@@ -11,7 +11,7 @@ class StrokePropertiesPanel extends Panel {
             max: 50,
             value: 1
         });
-        this.strokeWidthSlider = new NumericSlider("#strokeWidthSlider", {
+        this.lineWidthSlider = new NumericSlider("#lineWidthSlider", {
             min: 0,
             max: 50,
             value: 1
@@ -20,6 +20,15 @@ class StrokePropertiesPanel extends Panel {
             min: 0,
             max: 50,
             value: 1
+        });
+        this.dashOffsetSlider.on("valueChanged", function(event) {
+            self.triggerOn("dashOffsetChanged", event);
+        });
+        this.lineWidthSlider.on("valueChanged", function(event) {
+            self.triggerOn("lineWidthChanged", event);
+        });
+        this.miterLimitSlider.on("valueChanged", function(event) {
+            self.triggerOn("miterLimitChanged", event);
         });
 
         this._setupLineCapTypeControls();
@@ -44,14 +53,12 @@ class StrokePropertiesPanel extends Panel {
 
         this.find("input[name='lineJoinType']").checkboxradio();
         this.lineJoinBevel = this.find("#lineJoinBevel" + this.uniqueid)
-        this.lineJoinBevel.click( function(event) { self._triggerOn("lineJoinChanged", {}); });
         this.lineJoinMiter = this.find("#lineJoinMiter" + this.uniqueid)
-        this.lineJoinMiter.click( function(event) { self._triggerOn("lineJoinChanged", {}); });
         this.lineJoinRound = this.find("#lineJoinRound" + this.uniqueid)
-        this.lineJoinRound.click( function(event) { self._triggerOn("lineJoinChanged", {}); });
 
         this.find("input[name=lineJoinType]").change(function() {
             var isMiter = this.value === "miter";
+            self._triggerOn("lineJoinChanged", {});
             self.miterLimitSlider.enable(isMiter);
         });
     }
@@ -74,11 +81,12 @@ class StrokePropertiesPanel extends Panel {
 
         this.find("input[name='lineCapType']").checkboxradio();
         this.lineCapButt = this.find("#lineCapButt" + this.uniqueid)
-        this.lineCapButt.click( function(event) { self._triggerOn("lineCapChanged", {}); });
         this.lineCapSquare = this.find("#lineCapSquare" + this.uniqueid)
-        this.lineCapSquare.click( function(event) { self._triggerOn("lineCapChanged", {}); });
         this.lineCapRound = this.find("#lineCapRound" + this.uniqueid)
-        this.lineCapRound.click( function(event) { self._triggerOn("lineCapChanged", {}); });
+
+        this.find("input[name=lineCapType]").change(function() {
+            self._triggerOn("lineCapChanged", {});
+        });
     }
 
     _triggerOn(eventType, event) {
@@ -87,23 +95,19 @@ class StrokePropertiesPanel extends Panel {
     }
 
     get lineJoin() {
-        return this.find("input[name=lineJoinType]").val();
+        return this.find("input[name=lineJoinType]:checked").val();
     }
 
     get lineCap() {
-        return this.find("input[name=lineCapType]").val();
-    }
-
-    get lineWidth() {
-        return this.find("input[name=lineCapType]").val();
+        return this.find("input[name=lineCapType]:checked").val();
     }
 
     get dashOffset() {
         return this.dashOffsetSlider.value;
     }
 
-    get strokeWidth() {
-        return this.strokeWidthSlider.value;
+    get lineWidth() {
+        return this.lineWidthSlider.value;
     }
 
     get miterLimit() {

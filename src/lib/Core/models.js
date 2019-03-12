@@ -454,15 +454,9 @@ export class Shape extends events.EventSource {
         if (this.strokeStyle) {
             this.strokeStyle.apply(this, "strokeStyle", ctx);
         }
-        if (this.lineJoin) {
-            ctx.lineJoin = this.lineJoin;
-        }
-        if (this.lineCap) {
-            ctx.lineCap = this.lineCap;
-        }
-        if (this.lineWidth) {
-            ctx.lineWidth = this.lineWidth;
-        }
+        ctx.lineJoin = this.lineJoin;
+        ctx.lineCap = this.lineCap;
+        ctx.lineWidth = this.lineWidth;
     }
 
     applyTransforms(ctx) {
