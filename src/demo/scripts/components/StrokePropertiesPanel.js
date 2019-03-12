@@ -30,6 +30,10 @@ class StrokePropertiesPanel extends Panel {
         this.miterLimitSlider.on("valueChanged", function(event) {
             self.triggerOn("miterLimitChanged", event);
         });
+        this.customDashPattern = this.find("#customDashPattern");
+        this.customDashPattern.change(function() {
+            self._triggerOn("lineDashChanged", {});
+        });
 
         this._setupLineCapTypeControls();
         this._setupLineJoinTypeControls();
@@ -115,6 +119,13 @@ class StrokePropertiesPanel extends Panel {
     }
 
     get lineDash() {
+        if (this.customDashPattern.val().trim().length != 0) {
+            var out = this.customDashPattern.val().trim().split(" ");
+            return out.filter(function(val) { return val.trim().length > 0; })
+                      .map(function(val) { return parseFloat(val); });
+        }
+
+        // use custom
     }
 }
 

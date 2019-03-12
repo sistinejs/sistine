@@ -456,7 +456,9 @@ export class Shape extends events.EventSource {
         }
         ctx.lineJoin = this.lineJoin;
         ctx.lineCap = this.lineCap;
+        ctx.setLineDash(this.lineDash || []);
         ctx.lineWidth = this.lineWidth;
+        ctx.lineDashOffset = this.lineDashOffset;
     }
 
     applyTransforms(ctx) {
