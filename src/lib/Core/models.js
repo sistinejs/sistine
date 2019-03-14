@@ -670,8 +670,15 @@ export class PathCommand {
         this.next = null;
         this.prev = null;
         this._controlPoints = [];
+        this._bounds = null;
     }
 
+    get bounds() {
+        if (this._bounds == null) {
+            this._bounds = this._evalBounds();
+        }
+        return this._bounds;
+    }
     get controlPoints() { return this._controlPoints; } 
     get numControlPoints() { return 0; } 
     get endX() { return this._endX; }
@@ -686,6 +693,27 @@ export class LineToCommand extends PathCommand {
         this._endX = x;
         this._endY = y;
         this._controlPoints = [new geom.Point(x, y)];
+        this._bounds = null;
+    }
+
+    _evalBounds() {
+        var minx = this._controlPoints[0].x;
+        var miny = this._controlPoints[0].y;
+        var maxx = minx;
+        var maxy = miny;
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endX);
+            miny = Math.min(miny, this.prev.endY);
+            maxx = Math.max(maxx, this.prev.endX);
+            maxy = Math.max(maxy, this.prev.endY);
+        }
+        var out = new geom.Bounds({
+            x: minx,
+            y: miny,
+            width: maxx - minx,
+            height: maxy - miny,
+        });
+        return out;
     }
 
     draw(ctx) {
@@ -712,6 +740,26 @@ export class ArcCommand extends PathCommand {
         this._controlPoints = [new geom.Point(this._endX, this.endY)];
     }
 
+    _evalBounds() {
+        var minx = this._controlPoints[0].x;
+        var miny = this._controlPoints[0].y;
+        var maxx = minx;
+        var maxy = miny;
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endX);
+            miny = Math.min(miny, this.prev.endY);
+            maxx = Math.max(maxx, this.prev.endX);
+            maxy = Math.max(maxy, this.prev.endY);
+        }
+        var out = new geom.Bounds({
+            x: minx,
+            y: miny,
+            width: maxx - minx,
+            height: maxy - miny,
+        });
+        return out;
+    }
+
     get numControlPoints() {
         return 1;
     }
@@ -727,6 +775,26 @@ export class ArcToCommand extends PathCommand {
         this._endX = x2;
         this._endY = y2;
         this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2)];
+    }
+
+    _evalBounds() {
+        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x);
+        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y);
+        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x);
+        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y);
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endX);
+            miny = Math.min(miny, this.prev.endY);
+            maxx = Math.max(maxx, this.prev.endX);
+            maxy = Math.max(maxy, this.prev.endY);
+        }
+        var out = new geom.Bounds({
+            x: minx,
+            y: miny,
+            width: maxx - minx,
+            height: maxy - miny,
+        });
+        return out;
     }
 
     draw(ctx) {
@@ -748,6 +816,46 @@ export class QuadraticToCommand extends PathCommand {
         this._endX = x2;
         this._endY = y2;
         this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2)];
+    }
+
+    _evalBounds() {
+        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x);
+        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y);
+        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x);
+        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y);
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endX);
+            miny = Math.min(miny, this.prev.endY);
+            maxx = Math.max(maxx, this.prev.endX);
+            maxy = Math.max(maxy, this.prev.endY);
+        }
+        var out = new geom.Bounds({
+            x: minx,
+            y: miny,
+            width: maxx - minx,
+            height: maxy - miny,
+        });
+        return out;
+    }
+
+    _evalBounds() {
+        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
+        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
+        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
+        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endX);
+            miny = Math.min(miny, this.prev.endY);
+            maxx = Math.max(maxx, this.prev.endX);
+            maxy = Math.max(maxy, this.prev.endY);
+        }
+        var out = new geom.Bounds({
+            x: minx,
+            y: miny,
+            width: maxx - minx,
+            height: maxy - miny,
+        });
+        return out;
     }
 
     draw(ctx) {
@@ -806,6 +914,7 @@ export class Path extends Shape {
         this._moveTo = configs.moveTo || null;
         this._commandList = new dlist.DList();
         this._controlPoints = [];
+        this._bounds = new geom.Bounds();
     }
 
     /**
@@ -814,6 +923,7 @@ export class Path extends Shape {
     addCommand(command) {
         this.markUpdated();
         this._commandList.add(command);
+        this._bounds.union(command.bounds);
     }
 
     get commandCount() {
@@ -867,6 +977,7 @@ export class Path extends Shape {
     }
 
     drawControls(ctx, options) {
+        super.drawControls(ctx, options);
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
