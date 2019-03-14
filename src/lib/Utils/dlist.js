@@ -1,14 +1,25 @@
 
-class ListNode {
-    constructor(value) {
-        this.value = value || null;
-        this.next = this.prev = null;
-    }
-}
-
-class DList {
+export class DList {
     constructor() {
-        this.head = this.tail = null;
+        this._head = this._tail = null;
+        this._count = 0;
+    }
+
+    get head() { return this._head; } 
+    get tail() { return this._tail; } 
+    get count() { return this._count; }
+
+    add(node) {
+        node.next = node.prev = null;
+        if (this._head == null) {
+            this._head = this._tail = node;
+        } else {
+            this._tail.next = node;
+            node.prev = this._tail;
+            this._tail = node;
+        }
+        this._count ++;
+        return this;
     }
 
     remove(node) {

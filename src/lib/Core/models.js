@@ -2,6 +2,7 @@
 import * as events from "./events";
 import * as geom from "./geom";
 import * as geomutils from "../Utils/geom";
+import * as dlist from "../Utils/dlist";
 import * as styles from "./styles";
 import * as controller from "./controller";
 
@@ -29,7 +30,7 @@ export class Shape extends events.EventSource {
         this.isVisible = true;
         this._children = [];
         this._globalTransform = new geom.Transform();
-        this._lastTransformed = Date.now();
+        this.markUpdated();
         this.controlSize = DEFAULT_CONTROL_SIZE;
 
         this._bounds = new geom.Bounds(configs)
@@ -50,6 +51,10 @@ export class Shape extends events.EventSource {
         this.miterLimit = configs.miterLimit || null;
         this.fillStyle = configs.fillStyle || null;
         this.strokeStyle = configs.strokeStyle || null;
+    }
+
+    markUpdated() {
+        this._lastUpdated = Date.now();
     }
 
     childAtIndex(i) { return this._children[i]; } 
@@ -121,11 +126,11 @@ export class Shape extends events.EventSource {
         if (this._parent != null) {
             var pt = this._parent.globalTransform;
             if (pt.timeStamp > gt.timeStamp ||
-                this._lastTransformed > gt.timeStamp) {
+                this._lastUpdated > gt.timeStamp) {
                 // updated ourselves
                 this._globalTransform = this._updateTransform(pt.copy());
             }
-        } else if (this._lastTransformed > gt.timeStamp) {
+        } else if (this._lastUpdated > gt.timeStamp) {
             this._globalTransform = this._updateTransform();
         }
         return this._globalTransform;
@@ -153,6 +158,7 @@ export class Shape extends events.EventSource {
     set scene(s) {
         if (this._scene != s) {
             // unchain previous scene
+            this.markUpdated();
             if (this._scene) {
                 this._eventHub.unchain(this._scene.eventHub);
             }
@@ -193,6 +199,7 @@ export class Shape extends events.EventSource {
         if (event == null)
             return false;
         this["_" + property] = newValue;
+        this.markUpdated();
         this.triggerOn("PropertyChanged:" + property, event);
         return true;
     }
@@ -212,7 +219,7 @@ export class Shape extends events.EventSource {
         if (event == null) return false;
         this._bounds._x = x;
         this._bounds._y = y;
-        this._lastTransformed = Date.now();
+        this.markUpdated();
         this.triggerOn("PropertyChanged:location", event);
         return true;
     }
@@ -232,7 +239,7 @@ export class Shape extends events.EventSource {
         if (event == null) return false;
         this._bounds.centerX = x;
         this._bounds.centerY = y;
-        this._lastTransformed = Date.now();
+        this.markUpdated();
         this.triggerOn("PropertyChanged:center", event);
         return true;
     }
@@ -257,7 +264,7 @@ export class Shape extends events.EventSource {
         if (event == null) return false;
         this._bounds.width = w;
         this._bounds.height = h;
-        this._lastTransformed = Date.now();
+        this.markUpdated();
         this.triggerOn("PropertyChanged:size", event);
         return true;
     }
@@ -275,7 +282,7 @@ export class Shape extends events.EventSource {
         var event = this.canSetAngle(theta);
         if (event == null) return false;
         this._angle = theta;
-        this._lastTransformed = Date.now();
+        this.markUpdated();
         this.triggerOn("PropertyChanged:angle", event);
         return true;
     }
@@ -284,7 +291,7 @@ export class Shape extends events.EventSource {
         if (sx == 0 || sy == 0) return false;
         this.configs._scaleX = sx;
         this.configs._scaleY = sy;
-        this._lastTransformed = Date.now();
+        this.markUpdated();
         return true;
     }
 
@@ -487,9 +494,10 @@ export class Shape extends events.EventSource {
     }
 
     drawControls(ctx, options) {
-        ctx.strokeStyle = 'blue';
-        ctx.lineWidth = 0.5;
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 0.5
         ctx.strokeRect(this.bounds.left, this.bounds.top, this.bounds.width, this.bounds.height);
+        ctx.fillStyle = "yellow";
 
         var l = this.bounds.left;
         var r = this.bounds.right;
@@ -508,6 +516,9 @@ export class Shape extends events.EventSource {
         for (var i = sizePoints.length - 1;i >= 0;i--) {
             var px = sizePoints[i][0];
             var py = sizePoints[i][1];
+            ctx.fillRect(px - this.controlSize, py - this.controlSize,
+                           this.controlSize + this.controlSize,
+                           this.controlSize + this.controlSize);
             ctx.strokeRect(px - this.controlSize, py - this.controlSize,
                            this.controlSize + this.controlSize,
                            this.controlSize + this.controlSize);
@@ -651,88 +662,232 @@ export class Scene {
 }
 
 /**
+ * A path is composed of several path components and form different kinds of units in a path
+ * like lines, arcs, quadratic beziers etc.
+ */
+export class PathCommand {
+    constructor() {
+        this.next = null;
+        this.prev = null;
+        this._controlPoints = [];
+    }
+
+    get controlPoints() { return this._controlPoints; } 
+    get numControlPoints() { return 0; } 
+    get endX() { return this._endX; }
+    get endY() { return this._endY; }
+}
+
+export class LineToCommand extends PathCommand {
+    constructor(x, y) {
+        super();
+        this.x = x;
+        this.y = y;
+        this._endX = x;
+        this._endY = y;
+        this._controlPoints = [new geom.Point(x, y)];
+    }
+
+    draw(ctx) {
+        ctx.lineTo(this.x, this.y);
+    }
+
+    get numControlPoints() {
+        return 1;
+    }
+}
+
+export class ArcCommand extends PathCommand {
+    constructor(x, y, radius, startAngle, endAngle, anticlockwise) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.startAngle = startAngle;
+        this.endAngle = endAngle;
+        this.anticlockwise = anticlockwise;
+        var out = geom.pointOnCircle(radius, endAngle, out)
+        this.endX = x + out[0];
+        this.endY = y + out[1];
+        this._controlPoints = [new geom.Point(this._endX, this.endY)];
+    }
+
+    get numControlPoints() {
+        return 1;
+    }
+}
+
+export class ArcToCommand extends PathCommand {
+    constructor(x1, y1, x2, y2, radius) {
+        super();
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this._endX = x2;
+        this._endY = y2;
+        this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2)];
+    }
+
+    draw(ctx) {
+        ctx.arcTo(this.x1, this.y1, this.x2, this.y2, this.radius);
+    }
+
+    get numControlPoints() {
+        return 2;
+    }
+}
+
+export class QuadraticToCommand extends PathCommand {
+    constructor(x1, y1, x2, y2) {
+        super();
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this._endX = x2;
+        this._endY = y2;
+        this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2)];
+    }
+
+    draw(ctx) {
+        ctx.quadraticCurveTo(this.x1, this.y1, this.x2, this.y2);
+    }
+
+    get numControlPoints() {
+        return 2;
+    }
+}
+
+export class BezierToCommand extends PathCommand {
+    constructor(x1, y1, x2, y2, x3, y3) {
+        super();
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.x3 = x3;
+        this.y3 = y3;
+        this._endX = x3;
+        this._endY = y3;
+        this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2), new geom.Point(x3,y3)];
+    }
+
+    draw(ctx) {
+        ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+    }
+
+    get numControlPoints() {
+        return 3;
+    }
+}
+
+/**
  * A wrapper over a path.
  */
 export class Path extends Shape {
+    /**
+     * How are control points and commands interleaved?
+     *
+     * Path component has couple of things:
+     *   * A function/command which - <func> arg1 arg2 arg3 ... N
+     *   * Control points - pt1 pt2 pt3 ...
+     *
+     * Depending on what we want to do, these things control the shape at the end but have different representations
+     * For rendering we want function/commands to be easily represented.
+     * For easier transformation and control we want control points to be represented easily.  But really each path component should be the source of truth and the bytecode and control points should just be derived data for different purposes.
+     *
+     * control-points <---> command info
+     */
     constructor(configs) {
         super(configs);
-        this._bytecode = [];
-        this._commandOffsets = [];
+        configs = configs || {};
+        this._closed = configs.closed || false;
+        this._moveTo = configs.moveTo || null;
+        this._commandList = new dlist.DList();
+        this._controlPoints = [];
     }
 
-    _cmdMoveTo(ctx, bc, offset) {
-        ctx.moveTo(bc[offset + 0], bc[offset + 1]);
-    };
-    _cmdLineTo(ctx, bc, offset) {
-        ctx.lineTo(bc[offset + 0], bc[offset + 1]);
-    };
-    _cmdClosePath(ctx, bc, offset) {
-        ctx.closePath();
-    }
-    _cmdArc(ctx, bc, offset) {
-        ctx.arc(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3], bc[offset + 4], bc[offset + 5]);
-    }
-    _cmdArcTo(ctx, bc, offset) {
-        ctx.arcTo(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3], bc[offset + 4]);
-    }
-    _cmdQuadraticCurveTo(ctx, bc, offset) {
-        ctx.quadraticCurveTo(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3]);
-    }
-    _cmdBezierCurveTo(ctx, bc, offset) {
-        ctx.bezierCurveTo(bc[offset + 0], bc[offset + 1], bc[offset + 2], bc[offset + 3], bc[offset + 4], bc[offset + 5]);
-    }
-    _addCommand() {
-        var args = arguments;
-        this._commandOffsets.push(this._bytecode.length);
-        this._bytecode.push(args.length);
-        for (var i = 0;i < args.length;i++) this._bytecode.push(args[i]);
+    /**
+     * Add a new path component at the end of the path.
+     */
+    addCommand(command) {
+        this.markUpdated();
+        this._commandList.add(command);
     }
 
     get commandCount() {
-        return this._commandOffsets.length;
+        return this._commandList.count;
     }
 
-    commandAt(index) {
-        var offset = this._commandOffsets[index];
-        var nargs = this._byteCode[offset ++];
-        return this._bytecode.slice(offset, offset + nargs);
+    moveTo(x, y) {
+        this.markUpdated();
+        this._moveTo = new geom.Point(x, y);
     }
 
-    moveTo(x, y) { this._addCommand(this._cmdMoveTo, x, y); }
+    close(yesorno) {
+        this.markUpdated();
+        this._closed = yesorno;
+    }
+
     lineTo(x, y) { 
-        this._addCommand(this._cmdLineTo, x, y); 
+        this.addCommand(new LineToCommand(x, y));
     }
     arc(x, y, radius, startAngle, endAngle, anticlockwise) {
-        this._addCommand(this._cmdArc, x, y, radius, startAngle, endAngle, anticlockwise);
+        this.addCommand(new ArcCommand(x, y, radius, startAngle, endAngle, anticlockwise));
     }
     arcTo(x1, y1, x2, y2, radius) {
-        this._addCommand(this._cmdArcTo, x1, y1, x2, y2, radius);
+        this.addCommand(new ArcToCommand(this._cmdArcTo, x1, y1, x2, y2, radius));
     }
     quadraticCurveTo(cp1x, cp1y, x, y) {
-        this._addCommand(this._cmdQuadraticCurveTo, cp1x, cp1y, x, y);
+        this.addCommand(new QuadraticCurveToCommand(cp1x, cp1y, x, y));
     }
     bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
-        this._addCommand(this._cmdQuadraticCurveTo, cp1x, cp1y, cp2x, cp2y, x, y);
-    }
-    closePath() {
-        this._addCommand(this._cmdClosePath);
+        this.addCommand(this.BezierCurveToCommand, cp1x, cp1y, cp2x, cp2y, x, y);
     }
 
     draw(ctx) {
         ctx.beginPath();
-        var bc = this._bytecode;
-        var i = 0, L = bc.length, n = 0;
-        while (i < L) {
-            var nargs = bc[i++];
-            var cmd = bc[i];
-            cmd(ctx, bc, i + 1);
-            i += nargs;
+        var currCmd = this._commandList.head;
+        if (this._moveTo != null)
+            ctx.moveTo(this._moveTo.x, this._moveTo.y);
+        while (currCmd != null) {
+            currCmd.draw(ctx);
+            currCmd = currCmd.next;
         }
+        if (this._closed) ctx.closePath();
         if (this.fillStyle) {
             ctx.fill();
         }
         if (this.lineWidth > 0) {
             ctx.stroke();
+        }
+        // Draw fornow till we figure out hit tests and bounding boxes
+        this.drawControls(ctx);
+    }
+
+    drawControls(ctx, options) {
+        ctx.fillStyle = "yellow";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        if (this._moveTo != null) {
+            ctx.beginPath();
+            ctx.arc(this._moveTo.x, this._moveTo.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+        var currCmd = this._commandList.head;
+        while (currCmd != null) {
+            currCmd.draw(ctx);
+            for (var i = currCmd.numControlPoints - 1;i >= 0;i--) {
+                var cpt = currCmd.controlPoints[i];
+                console.log("i, CPT: ", i, cpt);
+                ctx.beginPath();
+                ctx.arc(cpt.x, cpt.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+            currCmd = currCmd.next;
         }
     }
 }
