@@ -36,16 +36,21 @@ export function pathEllipse(ctx, x, y, w, h) {
 }
 
 export function pointOnCircle(R, theta, out) {
+    out = out || [];
     out[0] = R * cos(theta);
     out[1] = R * sin(theta);
+    return out;
 }
 
 export function pointOnRect(W, H, theta, out) {
+    out = out || [];
     out[0] = R * cos(theta);
     out[1] = R * sin(theta);
+    return out;
 }
 
 export function pointOnEllipse(A, B, theta, out) {
+    out = out || [];
     while (theta > 2 * PI) theta -= (2 * PI);
     var epsilon = 0.0001;
     if (abs(theta) < epsilon) {
@@ -76,6 +81,7 @@ export function pointOnEllipse(A, B, theta, out) {
             out[1] = -ab * tantheta / den;
         }
     }
+    return out;
 }
 
 // SOURCE: https://stackoverflow.com/questions/2587751/an-algorithm-to-find-bounding-box-of-closed-bezier-curves
