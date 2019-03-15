@@ -99,6 +99,13 @@ export class Transform {
     }
 }
 
+export class Size {
+    constructor(w, h) {
+        this.width = w || 0;
+        this.height = h || 0;
+    }
+}
+
 export class Point {
     constructor(x, y) {
         this.x = x || 0;

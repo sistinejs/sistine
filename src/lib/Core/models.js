@@ -217,30 +217,13 @@ export class Shape extends events.EventSource {
     setLocation(x, y) {
         var event = this.canSetLocation(x, y);
         if (event == null) return false;
+        var oldX = this._bounds.x;
+        var oldY = this._bounds.y;
         this._bounds._x = x;
         this._bounds._y = y;
         this.markUpdated();
+        this._locationChanged(oldX, oldY);
         this.triggerOn("PropertyChanged:location", event);
-        return true;
-    }
-
-    canSetCenter(x, y) {
-        if (x == this._bounds.centerX && y == this._bounds.centerY)
-            return null;
-        var oldValue = [ this._bounds.midX, this._bounds.midY ];
-        var event = new events.PropertyChanged(this, "center", oldValue, [x, y]);
-        if (this.validateBefore("PropertyChanged:center", event) == false) 
-            return null;
-        return event;
-    }
-
-    setCenter(x, y) {
-        event = this.canSetCenter(x, y);
-        if (event == null) return false;
-        this._bounds.centerX = x;
-        this._bounds.centerY = y;
-        this.markUpdated();
-        this.triggerOn("PropertyChanged:center", event);
         return true;
     }
 
@@ -262,9 +245,12 @@ export class Shape extends events.EventSource {
     setSize(w, h) {
         var event = this.canSetSize(w, h);
         if (event == null) return false;
+        var oldW = this._bounds.width;
+        var oldH = this._bounds.height;
         this._bounds.width = w;
         this._bounds.height = h;
         this.markUpdated();
+        this._sizeChanged(oldW, oldH);
         this.triggerOn("PropertyChanged:size", event);
         return true;
     }
@@ -281,17 +267,11 @@ export class Shape extends events.EventSource {
     setAngle(theta) {
         var event = this.canSetAngle(theta);
         if (event == null) return false;
+        var oldAngle = this._oldAngle;
         this._angle = theta;
         this.markUpdated();
+        this._angleChanged(oldAngle);
         this.triggerOn("PropertyChanged:angle", event);
-        return true;
-    }
-
-    setScale(sx, sy) {
-        if (sx == 0 || sy == 0) return false;
-        this.configs._scaleX = sx;
-        this.configs._scaleY = sy;
-        this.markUpdated();
         return true;
     }
 
@@ -552,6 +532,10 @@ export class Shape extends events.EventSource {
     intersects(anotherBounds) {
         return this.bounds.intersects(anotherBounds);
     }
+
+    _locationChanged(oldX, oldY) { }
+    _sizeChanged(oldW, oldH) { }
+    _angleChanged(oldAngle) { }
 }
 
 /**

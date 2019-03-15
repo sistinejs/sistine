@@ -158,3 +158,7 @@ export class ShapeController {
         }
     }
 }
+
+class PathController extends ShapeController {
+}
+
