@@ -1,4 +1,5 @@
 
+import * as counters from "./counters";
 import * as events from "./events";
 import * as geom from "./geom";
 import * as geomutils from "../Utils/geom";
@@ -12,9 +13,7 @@ export const EV_PROPERTY_CHANGED = 0;
 export const EV_SHAPE_ADDED = 1;
 export const EV_SHAPE_REMOVED = 2;
 
-const ShapeGlobals = {
-    _shapeCounter: 1
-}
+const ShapeCounter = new counters.Counter("ShapeIDs");
 
 /**
  * Holds information about the instance of a shape.
@@ -23,7 +22,7 @@ export class Shape extends events.EventSource {
     constructor(configs) {
         super();
         configs = configs || {};
-        this.id = ShapeGlobals._shapeCounter++;
+        this.id = ShapeCounter.next();
         this._scene = null;
         this._parent = null;
         this.isGroup = false;

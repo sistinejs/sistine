@@ -8,6 +8,52 @@ import * as handlers from "./handlers";
 import * as cursors from "./cursors";
 import { getcssint } from "../utils/dom"
 
+class TouchState {
+    constructor(maxPoints) {
+        maxPoints = maxPoints || 10;
+        this.maxPoints = maxPoints;
+        this._active = [];
+        this.downTimes = [];
+        this.downPoints = [];
+        this.currTimes = [];
+        this.currPoints = [];
+        this.timeDeltas = [];
+        this.isClick = [];
+        for (var i = 0;i < maxPoints;i++) {
+            this._active.push(false);
+            this.downTimes.push(0);
+            this.downPoints.push(null);
+            this.currTimes.push(0);
+            this.currPoints.push(new geom.Point());
+            this.isClick.push(false);
+            this.timeDeltas.push(0);
+        }
+
+        // Max time before a down goes from a "click" to a "hold"
+        this.clickThresholdTime = 500;
+    }
+
+    touchDown(index, x, y, timeStamp) {
+        this.downPoints[index] = new geom.Point(x, y);
+        this.currPoints[index].x = x;
+        this.currPoints[index].y = y;
+        this.currTimes[index] = timeStamp;
+        this.downTimes[index] = timeStamp;
+        this._active[index] = true;
+    }
+
+    touchUp(index, x, y, timeStamp) {
+        this._active[index] = false;
+        this.currPoints[index].x = x;
+        this.currPoints[index].y = y;
+        this.currTimes[index] = timeStamp;
+        this.timeDeltas[index] = this.currTimes[index] - this.downTimes[index];
+        this.isClick[index] = this.timeDeltas[index] <= this.clickThresholdTime;
+        this.downTimes[index] = null;
+        this.downPoints[index] = null;
+    }
+}
+
 /**
  * The stage model if where all layers and shapes are managed. 
  * As far as possible this does not perform any view related operations as 
@@ -45,11 +91,11 @@ export class Stage extends coreevents.EventSource {
         // Information regarding Selections
         this.selection = new models.Selection();
         var self = this;
-        this.selection.on("ShapesSelected", function(event) {
+        this.selection.on("ShapesSelected", function(eventType, source, event) {
             event.shapes.forEach(function(shape) {
                 self.setShapePane(shape, "edit");
             });
-        }).on("ShapesUnselected", function(event) {
+        }).on("ShapesUnselected", function(eventType, source, event) {
             event.shapes.forEach(function(shape) {
                 self.setShapePane(shape, "main");
             });
@@ -57,21 +103,12 @@ export class Stage extends coreevents.EventSource {
 
         this.cursorMap = Object.assign({}, cursors.DefaultCursorMap);
 
-        // The touch mode passes information on what each of the handlers are ok to perform
-        this._touchContext = new handlers.TouchContext()
+        // Setup event state machines for push based event handling
+        this.touchState = new TouchState();
+        this._setupEventMachine();
+
+        // Kick off the repaint loop
         this._kickOffRepaint();
-    }
-
-    get touchContext() {
-        return this._touchContext;
-    }
-
-    setTouchContext(mode, data) {
-        this._touchContext.mode = mode || handlers.TouchModes.NONE;
-        this._touchContext.data = data;
-        if (this._touchContext.mode == handlers.TouchModes.NONE) {
-            this.cursor = "auto";
-        }
     }
 
     set scene(s) {
@@ -79,9 +116,9 @@ export class Stage extends coreevents.EventSource {
         if (this._scene != s) {
             this._scene = s
             var self = this;
-            s.on("ShapeAdded, ShapeRemoved", function(event, eventType) {
+            s.on("ShapeAdded, ShapeRemoved", function(eventType, source, event) {
                 self.paneNeedsRepaint(event.shape.pane);
-            }).on("PropertyChanged", function(event, eventType) {
+            }).on("PropertyChanged", function(eventType, source, event) {
                 self.paneNeedsRepaint(event.source.pane)
             });
         }
@@ -139,10 +176,9 @@ export class Stage extends coreevents.EventSource {
         if (this._showBackground != show) {
             this._showBackground = show;
             if (show) {
-                this.bgHandler = new handlers.StageBGHandler(this);
+                this.acquirePane("bg", panes.BGPane);
             } else {
-                this.bgHandler.detach();
-                this.bgHandler.null;
+                this.releasePane("bg");
             }
         }
     }
@@ -154,15 +190,6 @@ export class Stage extends coreevents.EventSource {
     set isEditable(editable) {
         if (this._editable != editable) {
             this._editable = editable;
-            if (editable) {
-                this.touchHandler = new handlers.StageTouchHandler(this);
-                this.keyHandler = new handlers.StageKeyHandler(this);
-            } else {
-                this.keyHandler.detach();
-                this.keyHandler.null;
-                this.touchHandler.detach();
-                this.touchHandler.null;
-            }
         }
     }
 
@@ -277,15 +304,46 @@ export class Stage extends coreevents.EventSource {
         }
     }
 
-    _setupHandler(element, method, handler) {
-        var source = this;
-        element[method](function(event) {
-            event.theSource = source;
-            handler(event);
+    _setupEventMachine() {
+        var self = this;
+        var machine = new coreevents.StateMachine();
+        self.eventMachine = machine;
+        self.element.on("keydown", function(event) {
+            machine.handle("keydown", self, event);
         });
-        return this;
+        self.element.on("keyup", function(event) {
+            machine.handle("keyup", self, event);
+        });
+        self.element.on("keypress", function(event) {
+            machine.handle("keypress", self, event);
+        });
+        self.element.on("mouseenter", function(event) {
+            machine.handle("mouseentered", self, event);
+        });
+        self.element.on("mouseleave", function(event) {
+            machine.handle("mouseleave", self, event);
+        });
+        self.element.on("mouseover", function(event) {
+            machine.handle("mouseover", self, event);
+        });
+        self.element.on("mouseout", function(event) {
+            machine.handle("mouseout", self, event);
+        });
+        self.element.on("mousedown", function(event) {
+            self.touchState.touchDown(event.button, event.offsetX, event.offsetY, event.timeStamp);
+            machine.handle("mousedown", self, event);
+        });
+        self.element.on("mouseup", function(event) {
+            self.touchState.touchUp(event.button, event.offsetX, event.offsetY, event.timeStamp);
+            machine.handle("mouseup", self, event);
+        });
+        self.element.on("mousemove", function(event) {
+            machine.handle("mousemove", self, event);
+        });
     }
 
+    // Subscribtion based event handling for more custom handling 
+    // if needed.
     keypress(handler) { return this._setupHandler(this.element, "keypress", handler); }
     keyup(handler) { return this._setupHandler(this.element, "keyup", handler); }
     keydown(handler) { return this._setupHandler(this.element, "keydown", handler); }
@@ -300,6 +358,15 @@ export class Stage extends coreevents.EventSource {
     mousemove(handler) { return this._setupHandler(this.element, "mousemove", handler); }
     contextmenu(handler) { return this._setupHandler(this.element, "contextmenu", handler); }
     scroll(handler) { return this._setupHandler(this.element, "scroll", handler); }
+
+    _setupHandler(element, method, handler) {
+        var source = this;
+        element[method](function(event) {
+            event.theSource = source;
+            handler(event);
+        });
+        return this;
+    }
 }
 
 /**
@@ -326,9 +393,9 @@ export class ShapeIndex {
             this._shapeIndexes = {};
             this._allShapes = [];
             var self = this;
-            s.on("ShapeAdded", function(event, eventType) {
+            s.on("ShapeAdded", function(eventType, source, event) {
                 self.add(event.shape);
-            }).on("ShapeRemoved", function(event, eventType) {
+            }).on("ShapeRemoved", function(eventType, source, event) {
                 self.remove(event.shape);
             });
             this.reIndex();     // Build the index for this new scene!

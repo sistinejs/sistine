@@ -18,8 +18,21 @@ class App {
         this.stage = new Sistine.Views.Stage.Stage("stage_div", this.scene);
         this.stage.isEditable = true;
         this.stage.showBackground = true;
+
         // Add a zoom handler!!
-        this.zoomHandler = new Sistine.Views.Handlers.StageViewPortHandler(this.stage);
+        // this.zoomHandler = new Sistine.Views.Handlers.StageViewPortHandler(this.stage);
+        var States = Sistine.Views.States;
+        var plainState = new States.PlainState(this.stage);
+        var vpPanningState = new States.ViewPortPanningState(this.stage);
+        var vpZoomingState = new States.ViewPortZoomingState(this.stage);
+        var creatingShapeState = new States.CreatingShapeState(this.stage);
+        var machine = this.stage.eventMachine;
+        this.eventMachine = machine;
+        machine.registerState("plain", plainState);
+        machine.registerState("panningVP", vpPanningState);
+        machine.registerState("zoomingVP", vpZoomingState);
+        machine.registerState("creatingShape", creatingShapeState);
+        machine.rootState = "plain";
         return this.stage;
     }
 

@@ -1,9 +1,9 @@
 
-import * as coreevents from "../Core/events";
+import * as events from "../Core/events";
 
-export class ViewPortChanged extends coreevents.Event {
+export class ViewPortChanged extends events.Event {
     constructor(oldOffsetX, oldOffsetY, newOffsetX, newOffsetY) {
-        super("ViewPortChanged", null)
+        super();
         this.oldOffsetX = oldOffsetX;
         this.oldOffsetY = oldOffsetY;
         this.newOffsetX = newOffsetX;
@@ -11,9 +11,9 @@ export class ViewPortChanged extends coreevents.Event {
     }
 }
 
-export class ZoomChanged extends coreevents.Event {
+export class ZoomChanged extends events.Event {
     constructor(oldZoom, newZoom) {
-        super("ZoomChanged", null)
+        super();
         this.oldZoom = oldZoom;
         this.newZoom = newZoom;
     }

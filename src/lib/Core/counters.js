@@ -1,5 +1,5 @@
 
-class Counter {
+export class Counter {
     constructor(name) {
         this._name = name;
         this._value = 0;
@@ -14,7 +14,7 @@ class Counter {
     }
 }
 
-class NameIdMap {
+export class NameIdMap {
     constructor(name) {
         this._idCounter = new Counter(name);
         this._idMap = {};

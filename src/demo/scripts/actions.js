@@ -1,7 +1,4 @@
 
-const TouchModes = Sistine.Views.Handlers.TouchModes;
-const TouchMode = Sistine.Views.Handlers.TouchMode;
-
 function onGroupShapes() {
     theApp.stage.selection.group();
 }
@@ -27,11 +24,15 @@ function onSendBackward() {
 }
 
 function onZoomIn() {
-    theApp.stage.setTouchContext(TouchModes.ZOOM_IN);
+    theApp.eventMachine.enter("zoomingVP", "zoomin");
 }
 
 function onZoomOut() {
-    theApp.stage.setTouchContext(TouchModes.ZOOM_OUT);
+    theApp.eventMachine.enter("zoomingVP", "zoomout");
+}
+
+function onHandTool() {
+    theApp.eventMachine.enter("panningVP", "");
 }
 
 function onUndo() {
@@ -53,11 +54,7 @@ function onPaste() {
 }
 
 function onPointer() {
-    theApp.stage.setTouchContext();
-}
-
-function onHandTool() {
-    theApp.stage.setTouchContext(TouchModes.HAND_TOOL);
+    theApp.eventMachine.enter("");
 }
 
 function onLineTool() {
