@@ -150,7 +150,7 @@ export class ViewPortZoomingState extends StageState {
     }
 }
 
-export class PlainState extends StageState {
+export class DefaultState extends StageState {
     constructor(stage) {
         super(stage);
         this._editPane = this.stage.acquirePane("edit");

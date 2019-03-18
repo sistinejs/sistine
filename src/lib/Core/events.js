@@ -234,8 +234,11 @@ export class StateMachine {
     /**
      * Register a new state in the state machine.
      */
-    registerState(name, state) {
+    registerState(name, state, isRoot) {
         this._states[name] = state;
+        if (isRoot || false) {
+            this.rootState = name;
+        }
     }
 
     handle(eventType, source, eventData) {

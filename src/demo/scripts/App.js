@@ -22,17 +22,16 @@ class App {
         // Add a zoom handler!!
         // this.zoomHandler = new Sistine.Views.Handlers.StageViewPortHandler(this.stage);
         var States = Sistine.Views.States;
-        var plainState = new States.PlainState(this.stage);
+        var defaultState = new States.DefaultState(this.stage);
         var vpPanningState = new States.ViewPortPanningState(this.stage);
         var vpZoomingState = new States.ViewPortZoomingState(this.stage);
         var creatingShapeState = new States.CreatingShapeState(this.stage);
         var machine = this.stage.eventMachine;
         this.eventMachine = machine;
-        machine.registerState("plain", plainState);
+        machine.registerState("default", defaultState, true);
         machine.registerState("panningVP", vpPanningState);
         machine.registerState("zoomingVP", vpZoomingState);
         machine.registerState("creatingShape", creatingShapeState);
-        machine.rootState = "plain";
         return this.stage;
     }
 

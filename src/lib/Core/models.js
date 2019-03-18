@@ -821,26 +821,6 @@ export class QuadraticToCommand extends PathCommand {
         return out;
     }
 
-    _evalBounds() {
-        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
-        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
-        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
-        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
-        if (this.prev) {
-            minx = Math.min(minx, this.prev.endX);
-            miny = Math.min(miny, this.prev.endY);
-            maxx = Math.max(maxx, this.prev.endX);
-            maxy = Math.max(maxy, this.prev.endY);
-        }
-        var out = new geom.Bounds({
-            x: minx,
-            y: miny,
-            width: maxx - minx,
-            height: maxy - miny,
-        });
-        return out;
-    }
-
     draw(ctx) {
         ctx.quadraticCurveTo(this.x1, this.y1, this.x2, this.y2);
     }
@@ -870,6 +850,26 @@ export class BezierToCommand extends PathCommand {
 
     get numControlPoints() {
         return 3;
+    }
+
+    _evalBounds() {
+        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
+        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
+        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
+        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endX);
+            miny = Math.min(miny, this.prev.endY);
+            maxx = Math.max(maxx, this.prev.endX);
+            maxy = Math.max(maxy, this.prev.endY);
+        }
+        var out = new geom.Bounds({
+            x: minx,
+            y: miny,
+            width: maxx - minx,
+            height: maxy - miny,
+        });
+        return out;
     }
 }
 
@@ -956,7 +956,7 @@ export class Path extends Shape {
             ctx.stroke();
         }
         // Draw fornow till we figure out hit tests and bounding boxes
-        this.drawControls(ctx);
+        // this.drawControls(ctx);
     }
 
     drawControls(ctx, options) {
