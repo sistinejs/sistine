@@ -1,4 +1,5 @@
 
+import * as geom from "../Core/geom"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
@@ -7,16 +8,23 @@ export function newShape(configs) {
     return new SquareShape(configs);
 }
 
-export function newShapeForToolbar(configs) {
+export function newShapeForToolbar(x, y, width, height, configs) {
+    configs = configs || {};
+    configs.p0 = new geom.Point(x, y);
+    configs.size = Math.min(width, height);
     return newShape(configs);
 }
 
 export class SquareShape extends models.Shape {
     constructor(configs) {
         super(configs);
-        var size = Math.min(this.bounds.width, this.bounds.height);
-        this.bounds._width = this.bounds._height = size;
+        this._p0 = configs.p0 || new geom.Point(0, 0);
+        this._size = configs.size || 10;
         this._controller = new SquareController(this);
+    }
+
+    _evalBounds() {
+        return new geom.Bounds(this._p0.x, this._p0.y, this._size, this._size);
     }
 
     get className() { return "Square"; }

@@ -1,4 +1,5 @@
 
+import * as geom from "../Core/geom"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
@@ -7,35 +8,40 @@ export function newShape(configs) {
     return new CircleShape(configs);
 }
 
-export function newShapeForToolbar(configs) {
+export function newShapeForToolbar(x, y, width, height, configs) {
+    configs = configs || {};
+    configs.center = new geom.Point(x + width / 2, y + height / 2);
+    configs.radius = Math.min(width, height) / 2;
     return newShape(configs);
 }
 
 export class CircleShape extends models.Shape {
     constructor(configs) {
         super(configs);
+        this._center = configs.center || new geom.Point(0, 0);
+        this._radius = configs.radius || 10;
         this._controller = new CircleController(this);
     }
 
-    get className() { return "Circle"; };
+    _evalBounds() {
+        return new geom.Bounds(this._center.x - this._radius,
+                               this._center.y - this._radius,
+                               this._center.x + this._radius,
+                               this._center.y + this._radius);
+    }
 
-    get radius() { return this.bounds.innerRadius; }
+    get className() { return "Circle"; }
+
+    get radius() { return this._radius; }
 
     setSize(w, h, force) {
-        w = h = Math.min(w, h);
-        return super.setSize(w, h, force);
+        this._radius = Math.min(w, h);
+        return super.setSize(this._radius, this._radius, force);
     }
 
     draw(ctx) {
-        var lw = this.lineWidth + 1;
-        var x = this.bounds.x + lw;
-        var y = this.bounds.y + lw;
-        var width = this.bounds.width - (2 * lw);
-        var height = this.bounds.height - (2 * lw);
-        var R = Math.max(0, this.radius);
-
         ctx.beginPath();
-        ctx.arc(this.bounds.centerX, this.bounds.centerY, R, 0, 2 * Math.PI);
+        ctx.arc(this._center.x, this._center.y, this._radius, 0, 2 * Math.PI);
         if (this.fillStyle) {
             ctx.fill();
         }

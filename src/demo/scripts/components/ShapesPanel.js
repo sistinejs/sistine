@@ -50,19 +50,19 @@ class ShapesPanel extends Panel {
             var $child = topPane.element;
 
             var margin = 3;
-            var toolbarShape = DefaultBundle[shapeId].newShapeForToolbar({
-                lineWidth: 2,
-                x: margin,
-                y: margin,
-                width: $child.width() - (
+            var toolbarShape = DefaultBundle[shapeId].newShapeForToolbar(
+                margin,
+                margin,
+                $child.width() - (
                     Sistine.Utils.DOM.getcssint($child, "margin-left") +
                     Sistine.Utils.DOM.getcssint($child, "margin-right")
                 ) - (margin * 2),
-                height: $child.height() - (
+                $child.height() - (
                     Sistine.Utils.DOM.getcssint($child, "margin-top") +
                     Sistine.Utils.DOM.getcssint($child, "margin-bottom")
-                ) - (margin * 2)
-            });
+                ) - (margin * 2),
+                { lineWidth: 2, }
+            );
             iconStage.scene.add(toolbarShape);
             iconStage.layout();
             // topPane.element.tooltip();

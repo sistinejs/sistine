@@ -32,11 +32,10 @@ export class Shape extends events.EventSource {
         this.markUpdated();
         this.controlSize = DEFAULT_CONTROL_SIZE;
 
-        this._bounds = new geom.Bounds(configs)
+        this._bounds = null;
+
         // The reference width and height denote the "original" width and height
         // for this shape and is used as a way to know what the current "scale" is.
-        this._refWidth = this._bounds.width;
-        this._refHeight = this._bounds.height;
         this.controller = new controller.ShapeController(this);
 
         // Observable properties
@@ -52,6 +51,13 @@ export class Shape extends events.EventSource {
         this.strokeStyle = configs.strokeStyle || null;
     }
 
+    get bounds() {
+        if (this._bounds == null) {
+            this._bounds = this._evalBounds();
+        }
+        return this._bounds;
+    }
+
     markUpdated() {
         this._lastUpdated = Date.now();
     }
@@ -60,7 +66,6 @@ export class Shape extends events.EventSource {
     get hasChildren() { return this._children.length > 0; } 
     get childCount() { return this._children.length; } 
     get parent() { return this._parent; } 
-    get bounds() { return this._bounds; }
     get scene() { return this._scene; } 
     get controller() { return this._controller; }
 
@@ -102,24 +107,6 @@ export class Shape extends events.EventSource {
         return this.set("fillStyle", value); 
     }
 
-    /**
-    * There are two ways to handle coordinates.  Globally or Locally
-    * In Global method, a global coordinate (say on the screen) remains as is
-    * and each element on the screen can tell you if a given global point 
-    * lies within itself.   This is great when we are doing things like
-    * handling mouse/touch hits to see where a global point falls within 
-    * a shape.
-    *
-    * In the local method, the global coordinates are converted into a 
-    * local system each time it is needed.  This way the shape does not need to know about screen coordinates and transformations etc.
-    *
-    * The second method is easier from the Shape's perspective but the global 
-    * point has to be transformed through each parent in the hierarchy while doing a hit test.
-    *
-    * With the first method, a global transform change on a parent will modify the global transform parameter for all its children.   So if we expect transformations to be small enough making this parameter change in all children is not bad.
-    *
-    * But a transform could happen either via animation or via ui controls, so if a high refresh rate is required a tree walk to update this parameter could be expensive.  Instead updating on read could be a better option by seeing if a parent's transform has changed and only updating if the timestamp is newer.
-    */
     get globalTransform() {
         var gt = this._globalTransform;
         if (this._parent != null) {
@@ -556,7 +543,11 @@ export class Group extends Shape {
     }
 }
 
-export class Layer extends Shape { }
+export class Layer extends Shape { 
+    _evalBounds() {
+        return new geom.Bounds(0, 0, 0, 0);
+    }
+}
 
 /**
  * The Scene is the raw model where all layers and shapes are 
@@ -877,19 +868,6 @@ export class BezierToCommand extends PathCommand {
  * A wrapper over a path.
  */
 export class Path extends Shape {
-    /**
-     * How are control points and commands interleaved?
-     *
-     * Path component has couple of things:
-     *   * A function/command which - <func> arg1 arg2 arg3 ... N
-     *   * Control points - pt1 pt2 pt3 ...
-     *
-     * Depending on what we want to do, these things control the shape at the end but have different representations
-     * For rendering we want function/commands to be easily represented.
-     * For easier transformation and control we want control points to be represented easily.  But really each path component should be the source of truth and the bytecode and control points should just be derived data for different purposes.
-     *
-     * control-points <---> command info
-     */
     constructor(configs) {
         super(configs);
         configs = configs || {};
@@ -975,7 +953,6 @@ export class Path extends Shape {
             currCmd.draw(ctx);
             for (var i = currCmd.numControlPoints - 1;i >= 0;i--) {
                 var cpt = currCmd.controlPoints[i];
-                console.log("i, CPT: ", i, cpt);
                 ctx.beginPath();
                 ctx.arc(cpt.x, cpt.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
                 ctx.fill();

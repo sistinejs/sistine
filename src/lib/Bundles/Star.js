@@ -1,4 +1,5 @@
 
+import * as geom from "../Core/geom"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
@@ -7,16 +8,29 @@ export function newShape(configs) {
     return new StarShape(configs);
 }
 
-export function newShapeForToolbar(configs) {
+export function newShapeForToolbar(x, y, width, height, configs) {
+    configs = configs || {};
+    configs.p1 = new geom.Point(x, y);
+    configs.p2 = new geom.Point(x + width, y + height);
     return new StarShape(configs);
 }
 
 export class StarShape extends models.Shape {
     constructor(configs) {
         super(configs);
+        this._p1 = configs.p1 || new geom.Point(0, 0);
+        this._p2 = configs.p2 || new geom.Point(100, 100);
         this._numSides = Math.max(3, configs.numSides || 5);
         this._innerRadius = configs.innerRadius || null;
         this._controller = new StarController(this);
+    }
+
+    _evalBounds() {
+        var left = Math.min(this._p1.x, this._p2.x);
+        var top = Math.min(this._p1.y, this._p2.y);
+        var right = Math.max(this._p1.x, this._p2.x);
+        var bottom = Math.max(this._p1.y, this._p2.y);
+        return new geom.Bounds(left, top, right - left, bottom - top);
     }
 
     get className() { return "Star"; }

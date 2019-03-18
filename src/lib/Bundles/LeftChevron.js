@@ -1,4 +1,5 @@
 
+import * as geom from "../Core/geom"
 import * as leftArrows from "./LeftArrow"
 
 export function newShape(configs) {
@@ -10,11 +11,14 @@ export function newShape(configs) {
     return new leftArrows.LeftArrowShape(configs);
 }
 
-export function newShapeForToolbar(configs) {
-    configs.y = configs.height / 4;
+export function newShapeForToolbar(x, y, width, height, configs) {
+    configs = configs || {};
+    y += height / 4;
+    height *= 0.6;
     configs.backDepth = 0.2;
     configs.tipLength = 0.2;
-    configs.height *= 0.6;
+    configs.p1 = new geom.Point(x, y);
+    configs.p2 = new geom.Point(x + width, y + height);
     return newShape(configs);
 }
 
