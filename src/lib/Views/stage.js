@@ -1,8 +1,8 @@
 
+import * as geom from "../Utils/geom";
 import * as coreevents from "../Core/events";
 import * as events from "./events";
 import * as models from "../Core/models";
-import * as geom from "../Core/geom";
 import * as panes from "./panes";
 import * as handlers from "./handlers";
 import * as cursors from "./cursors";

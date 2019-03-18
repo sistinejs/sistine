@@ -1,5 +1,5 @@
 
-import * as geom from "../Core/geom"
+import * as geom from "../Utils/geom"
 import * as rightArrows from "./RightArrow"
 
 export function newShape(configs) {

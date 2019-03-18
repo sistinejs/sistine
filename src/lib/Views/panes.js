@@ -1,6 +1,6 @@
 
-import * as geom from "../core/geom";
-import { getcssint } from "../utils/dom"
+import * as geom from "../Utils/geom";
+import { getcssint } from "../Utils/dom"
 
 /**
  * A Pane is a wrapper over our drawing element/context.   Shapes can be drawn at 

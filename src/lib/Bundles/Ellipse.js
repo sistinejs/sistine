@@ -1,9 +1,8 @@
 
 
-import * as geom from "../Core/geom"
+import * as geom from "../Utils/geom"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
-import * as geomutils from "../Utils/geom"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -47,7 +46,7 @@ export class EllipseShape extends models.Shape {
         var h = this.bounds.height - (2 * lw);
 
         ctx.beginPath();
-        geomutils.pathEllipse(ctx, x, y, w, h);
+        geom.pathEllipse(ctx, x, y, w, h);
         ctx.stroke();
         if (this.fillStyle) {
             ctx.fill();

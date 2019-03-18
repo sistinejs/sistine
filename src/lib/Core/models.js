@@ -1,8 +1,7 @@
 
 import * as counters from "./counters";
 import * as events from "./events";
-import * as geom from "./geom";
-import * as geomutils from "../Utils/geom";
+import * as geom from "../Utils/geom"
 import * as dlist from "../Utils/dlist";
 import * as styles from "./styles";
 import * as controller from "./controller";
@@ -491,7 +490,7 @@ export class Shape extends events.EventSource {
         }
         // Draw the "rotation" control
         ctx.beginPath();
-        geomutils.pathEllipse(ctx, this.bounds.right + 50 - this.controlSize, 
+        geom.pathEllipse(ctx, this.bounds.right + 50 - this.controlSize, 
                          this.bounds.centerY - this.controlSize, 
                          this.controlSize * 2, this.controlSize * 2);
         ctx.fillStyle = 'green';

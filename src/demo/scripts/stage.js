@@ -5,17 +5,33 @@ shapeDefaults = {
     'lineWidth': 2,
 };
 
+var Point = Sistine.Utils.Geom.Point;
+
 function addSampleShapes() {
     var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 170, 0)
                           .addStop(0, "black")
                           .addStop(1, "white");
-    addShape("Triangle", {"x": 80, "y": 150, "width": 200, "height": 200, "lineWidth": 2, "fillStyle": grd1});
+    addShape("Triangle", {
+        p0: new Point(140, 150),
+        p1: new Point(80, 280),
+        p2: new Point(280, 280),
+        "lineWidth": 2,
+        "fillStyle": grd1
+    });
 
     var grd2 = new Sistine.Core.Styles.RadialGradient(50, 50, 20, 50, 50, 50)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");
-    addShape("Circle", { "x": 200, "y": 50, "width": 100, "height": 100, "lineWidth": 2, "fillStyle": grd2});
-    addShape("Square", { "x": 350, "y": 50, "width": 200, "height": 100, "fillStyle": 'red' });
+    addShape("Circle", {
+        center: new Point(200, 200),
+        radius: 100,
+        "lineWidth": 2, "fillStyle": grd2
+    });
+    addShape("Square", {
+        p0: new Point(350, 50),
+        size: 200,
+        fillStyle: 'red'
+    });
     addShape("Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
 
     var path = new Sistine.Core.Models.Path();

@@ -1,8 +1,7 @@
 
-import * as geom from "../Core/geom"
+import * as geom from "../Utils/geom"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
-import * as geomutils from "../Utils/geom"
 
 export function newShape(configs) {
     configs = configs || {};
