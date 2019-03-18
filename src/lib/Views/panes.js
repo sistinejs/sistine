@@ -218,7 +218,6 @@ export class ShapesPane extends Pane {
     draw(ctx) {
         var pane = this;
         var stage = this._stage;
-        var touchHandler = stage.touchHandler;
         var byWalking = true;
         if (byWalking) {
             var scene = stage.scene;
@@ -234,7 +233,7 @@ export class ShapesPane extends Pane {
                 shape.applyTransforms(ctx);
                 shape.applyStyles(ctx);
                 shape.draw(ctx);
-                if (touchHandler != null && stage.selection.contains(shape)) {
+                if (stage.selection.contains(shape)) {
                     shape.drawControls(ctx);
                 }
                 shape.revertTransforms(ctx);
@@ -246,7 +245,6 @@ export class ShapesPane extends Pane {
     drawShape(ctx, shape, stage, clipBounds) {
         // TODO: Update clip bounds as necessary
         if (!shape.isVisible) return;
-        var touchHandler = stage.touchHandler;
         var belongsToPane = shape.pane == this.name;
         shape.applyTransforms(ctx);
         shape.applyStyles(ctx);
@@ -269,7 +267,7 @@ export class ShapesPane extends Pane {
             // ctx.restore();
         }
         if (belongsToPane) {
-            if (touchHandler != null && stage.selection.contains(shape)) {
+            if (stage.selection.contains(shape)) {
                 shape.drawControls(ctx);
             }
         }

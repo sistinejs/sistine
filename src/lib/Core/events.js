@@ -253,10 +253,10 @@ export class StateMachine {
 }
 
 export class PropertyChanged extends Event {
-    constructor(source, propname, oldValue, newValue) {
+    constructor(source, property, oldValue, newValue) {
         super();
         this.source = source;
-        this.propname = propname;
+        this.property = property;
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
