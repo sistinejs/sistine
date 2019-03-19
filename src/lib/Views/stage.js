@@ -5,7 +5,7 @@ import * as models from "../Core/models";
 import * as panes from "./panes";
 import * as handlers from "./handlers";
 import * as cursors from "./cursors";
-import { getcssint } from "../utils/dom"
+import { getcssint } from "../Utils/dom"
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
