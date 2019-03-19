@@ -1,7 +1,8 @@
 
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
-import * as geom from "../Utils/geom"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 
 export function newShape(configs) {
     configs = configs || {};
@@ -54,12 +55,12 @@ export class PolygonShape extends models.Shape {
 
         var p0 = [0,0];
         var pi = [0,0];
-        geom.pointOnEllipse(A, B, Math.PI / 2.0, p0);
+        geomutils.pointOnEllipse(A, B, Math.PI / 2.0, p0);
         ctx.beginPath();
         ctx.moveTo(cx + p0[0], cy + p0[1]);
         for (var i = 1;i < n;i++) {
             var currangle = (Math.PI / 2.0) + (i * theta);
-            geom.pointOnEllipse(A, B, currangle, pi);
+            geomutils.pointOnEllipse(A, B, currangle, pi);
             ctx.lineTo(cx + pi[0], cy + pi[1]);
         }
         ctx.lineTo(cx + p0[0], cy + p0[1]);

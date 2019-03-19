@@ -1,5 +1,4 @@
 
-import * as geom from "../Utils/geom";
 import * as coreevents from "../Core/events";
 import * as events from "./events";
 import * as models from "../Core/models";
@@ -7,6 +6,8 @@ import * as panes from "./panes";
 import * as handlers from "./handlers";
 import * as cursors from "./cursors";
 import { getcssint } from "../utils/dom"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 
 class TouchState {
     constructor(maxPoints) {
@@ -123,8 +124,6 @@ export class Stage extends coreevents.EventSource {
             });
         }
     }
-
-    get bounds() { return this._bounds; }
 
     set cursor(c) {
         c = c || "auto";

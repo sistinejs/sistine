@@ -1,10 +1,11 @@
 
 import * as counters from "./counters";
 import * as events from "./events";
-import * as geom from "../Utils/geom"
 import * as dlist from "../Utils/dlist";
 import * as styles from "./styles";
 import * as controller from "./controller";
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 
 export const DEFAULT_CONTROL_SIZE = 5;
 
@@ -13,6 +14,89 @@ export const EV_SHAPE_ADDED = 1;
 export const EV_SHAPE_REMOVED = 2;
 
 const ShapeCounter = new counters.Counter("ShapeIDs");
+
+/**
+ * The Scene is the raw model where all layers and shapes are 
+ * managed.  As far as possible this does not perform any view 
+ * related operations as that is decoupled into the view entity.
+ */
+export class Scene {
+    constructor(configs) {
+        configs = configs || {};
+        this._eventHub =  new events.EventHub();
+        this._layers = []
+        this.addLayer();
+        this._selectedLayer = 0;
+    }
+
+    get eventHub() { return this._eventHub; }
+
+    layerAtIndex(index) {
+        return this._layers[index];
+    }
+
+    get layers() {
+        return this._layers;
+    }
+
+    get layerCount() {
+        return this._layers.length;
+    }
+
+    get selectedLayer() {
+        return this._selectedLayer;
+    }
+
+    set selectedLayer(index) {
+        if (index != this._selectedLayer) {
+            if (index >= 0 && index < this.layerCount) {
+                this._selectedLayer = index;
+            }
+        }
+    }
+
+    add(shape) {
+        return this._layers[this.selectedLayer].add(shape);
+    }
+
+    addLayer() {
+        return this.insertLayer(-1);
+    }
+
+    removeLayer(index) {
+        var layer = this._layers[index];
+        layer.setScene(null);
+        this._layers.splice(index, 1);
+        return layer;
+    }
+
+    insertLayer(index) {
+        var layer = new Layer();
+        layer.setScene(this);
+        if (index < 0) {
+            this._layers.push(layer);
+        } else {
+            this._layers.splice(index, 0, layer);
+        }
+        return layer;
+    }
+
+    on(eventTypes, handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
+        this._eventHub.on(eventTypes, handler);
+        return this;
+    }
+
+    before(eventTypes, handler) {
+        if (this._eventHub == null) {
+            this._eventHub = new events.EventHub();
+        }
+        this._eventHub.before(eventTypes, handler);
+        return this;
+    }
+}
 
 /**
  * Holds information about the instance of a shape.
@@ -24,14 +108,18 @@ export class Shape extends events.EventSource {
         this.id = ShapeCounter.next();
         this._scene = null;
         this._parent = null;
-        this.isGroup = false;
         this.isVisible = true;
-        this._children = [];
         this._globalTransform = new geom.Transform();
         this.markUpdated();
         this.controlSize = DEFAULT_CONTROL_SIZE;
 
-        this._bounds = null;
+        this._logicalBounds = null;
+
+        // Transform properties
+        this._rotation = 0;
+        this._translation = new geom.Point(0, 0);
+        this._scaleFactor = new geom.Point(1, 1);
+        this._shearFactor = new geom.Point(1, 1);
 
         // The reference width and height denote the "original" width and height
         // for this shape and is used as a way to know what the current "scale" is.
@@ -39,7 +127,6 @@ export class Shape extends events.EventSource {
 
         // Observable properties
         this.name = configs.name || this.className;
-        this.angle = configs.angle || 0;
         this.scale = configs.scale || new geom.Point(1, 1);
         this.zIndex = configs.zIndex || 0;
         this.lineWidth = configs.lineWidth || 2;
@@ -50,20 +137,19 @@ export class Shape extends events.EventSource {
         this.strokeStyle = configs.strokeStyle || null;
     }
 
-    get bounds() {
-        if (this._bounds == null) {
-            this._bounds = this._evalBounds();
+    get hasChildren() { return false; }
+
+    get logicalBounds() {
+        if (this._logicalBounds == null) {
+            this._logicalBounds = this._evalBounds();
         }
-        return this._bounds;
+        return this._logicalBounds;
     }
 
     markUpdated() {
         this._lastUpdated = Date.now();
     }
 
-    childAtIndex(i) { return this._children[i]; } 
-    get hasChildren() { return this._children.length > 0; } 
-    get childCount() { return this._children.length; } 
     get parent() { return this._parent; } 
     get scene() { return this._scene; } 
     get controller() { return this._controller; }
@@ -122,8 +208,8 @@ export class Shape extends events.EventSource {
     }
     _updateTransform(result) {
         result = result || new geom.Transform();
-        var cx = this._bounds.centerX;
-        var cy = this._bounds.centerY;
+        var cx = this.logicalBounds.centerX;
+        var cy = this.logicalBound.centerY;
         // Notice we are doing "invserse transforms here"
         // since we need to map a point "back" to global form
         result.translate(cx, cy)
@@ -141,6 +227,10 @@ export class Shape extends events.EventSource {
     }
 
     set scene(s) {
+        null.a = 3;
+    }
+
+    setScene(s) {
         if (this._scene != s) {
             // unchain previous scene
             this.markUpdated();
@@ -151,10 +241,9 @@ export class Shape extends events.EventSource {
             if (this._scene) {
                 this._eventHub.chain(this._scene.eventHub);
             }
-            for (var i = 0, L = this._children.length;i < L;i++) {
-                this._children[i].scene = s;
-            }
+            return true;
         }
+        return false;
     }
 
     forEachChild(handler, self, mutable) {
@@ -189,87 +278,57 @@ export class Shape extends events.EventSource {
         return true;
     }
 
-    canSetLocation(x, y) {
-        if (x == this._bounds._x && y == this._bounds._y)
-            return null;
-        var oldValue = [ this._bounds._x, this._bounds._y ];
-        var event = new events.PropertyChanged(this, "location", oldValue, [ x, y ]);
-        if (this.validateBefore("PropertyChanged:location", event) == false) 
-            return null;
-        return event;
-    }
+    move(dx, dy) { return this.moveTo(this._translation.x + dx, this._translation.y + dy); } 
+    moveTo(x, y) {
+        var oldX = this.translation.x;
+        var oldY = this.translation.y;
+        if (x == oldX && y == oldY) return false;
 
-    setLocation(x, y) {
-        var event = this.canSetLocation(x, y);
-        if (event == null) return false;
-        var oldX = this._bounds.x;
-        var oldY = this._bounds.y;
-        this._bounds._x = x;
-        this._bounds._y = y;
+        var event = new events.PropertyChanged(this, "location", [ oldX, oldY ], [ x, y ]);
+
+        if (this.validateBefore(event.name, event) == false) return false;
+
+        this.translation.x = x;
+        this.translation.y = y;
         this.markUpdated();
         this._locationChanged(oldX, oldY);
-        this.triggerOn("PropertyChanged:location", event);
+        this.triggerOn(event.name, event);
         return true;
     }
 
-    canSetSize(w, h) {
-        var oldWidth = this._bounds._width;
-        var oldHeight = this._bounds._height;
-        if (w == oldWidth && h == oldHeight)
-            return null;
-        var oldValue = [ oldWidth, oldHeight ];
-        var event = new events.PropertyChanged(this, "bounds", oldValue, [ w, h ]);
-        if (this.validateBefore("PropertyChanged:size", event) == false)
-            return null;
+    scale(sx, sy) { return this.scaleTo(this._scaleFactor.x * sx, this._scaleFactor.y * sy); } 
+    scaleTo(w, h) {
+        var oldScaleX = this.scaleFactor.x;
+        var oldScaleY = this.scaleFactor.y;
+        if (w == oldScaleX && h == oldScaleY) return false;
+
+        // Check minimum sizes
         var C2 = this.controlSize + this.controlSize;
-        if (w <= C2 || h <= C2)
-            return null;
-        return event;
-    }
+        if (w * this.logicalBounds.width <= C2 || h * this.logicalBounds.height <= C2) return false;
 
-    setSize(w, h) {
-        var event = this.canSetSize(w, h);
-        if (event == null) return false;
-        var oldW = this._bounds.width;
-        var oldH = this._bounds.height;
-        this._bounds.width = w;
-        this._bounds.height = h;
+        var event = new events.PropertyChanged(this, "scale", [ oldScaleX, oldScaleY ], [ w, h ]);
+        if (this.validateBefore(event.name, event) == false) return false;
+
+        this._scaleFactor.set(w, h);
         this.markUpdated();
-        this._sizeChanged(oldW, oldH);
-        this.triggerOn("PropertyChanged:size", event);
+        this._scaleChanged(oldScaleX, oldScaleY);
+        this.triggerOn(event.name, event);
         return true;
     }
 
-    canSetAngle(theta) {
-        if (theta == this._angle) 
-            return null;
-        var event = new events.PropertyChanged(this, "angle", this.angle, theta);
-        if (this.validateBefore("PropertyChanged:angle", event) == false)
-            return null;
-        return event;
-    }
+    rotate(theta) { return this.rotateTo(this._rotation + theta); }
+    rotateTo(theta) {
+        if (theta == this._rotation) return false;
 
-    setAngle(theta) {
-        var event = this.canSetAngle(theta);
-        if (event == null) return false;
-        var oldAngle = this._oldAngle;
-        this._angle = theta;
+        var event = new events.PropertyChanged(this, "angle", this._rotation, theta);
+        if (this.validateBefore(event.name, event) == false) return false;
+
+        var oldAngle = this._rotation;
+        this._rotation = theta;
         this.markUpdated();
         this._angleChanged(oldAngle);
-        this.triggerOn("PropertyChanged:angle", event);
+        this.triggerOn(event.name, event);
         return true;
-    }
-
-    move(dx, dy) {
-        return this.setLocation(this.bounds.x + dx, this.bounds.y + dy);
-    }
-
-    scale(dx, dy) {
-        return this.setSize(this.bounds.width * dx, this.bounds.height * dy);
-    }
-
-    rotate(dtheta, dy) {
-        return this.setAngle(this.angle + dtheta);
     }
 
     /**
@@ -286,7 +345,7 @@ export class Shape extends events.EventSource {
                 if (shape.removeFromParent()) {
                     this._children.push(shape);
                     shape._parent = this;
-                    shape.scene = this.scene;
+                    shape.setScene(this.scene);
                     this.triggerOn("ShapeAdded", event);
                     return true;
                 }
@@ -412,7 +471,8 @@ export class Shape extends events.EventSource {
         if (this._children.length > 0) {
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 0.5;
-            ctx.strokeRect(this.bounds.left, this.bounds.top, this.bounds.width, this.bounds.height);
+            var lBounds = this.logicalBounds;
+            ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
         }
     }
 
@@ -440,11 +500,12 @@ export class Shape extends events.EventSource {
     }
 
     applyTransforms(ctx) {
-        var angle = this.angle;
+        var angle = this._rotation;
         if (angle) {
             ctx.save(); 
-            var cx = this.bounds.centerX;
-            var cy = this.bounds.centerY;
+            var lBounds = this.logicalBounds;
+            var cx = lBounds.centerX;
+            var cy = lBounds.centerY;
             ctx.translate(cx, cy);
             ctx.rotate(angle);
             ctx.translate(-cx, -cy);
@@ -461,13 +522,14 @@ export class Shape extends events.EventSource {
     drawControls(ctx, options) {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 0.5
-        ctx.strokeRect(this.bounds.left, this.bounds.top, this.bounds.width, this.bounds.height);
+        var lBounds = this.logicalBounds;
+        var l = lBounds.left;
+        var r = lBounds.right;
+        var t = lBounds.top;
+        var b = lBounds.bottom;
+        ctx.strokeRect(l, t, lBounds.width, lBounds.height);
         ctx.fillStyle = "yellow";
 
-        var l = this.bounds.left;
-        var r = this.bounds.right;
-        var t = this.bounds.top;
-        var b = this.bounds.bottom;
         var sizePoints = [
             [l, t],
             [(l + r) / 2, t],
@@ -490,13 +552,13 @@ export class Shape extends events.EventSource {
         }
         // Draw the "rotation" control
         ctx.beginPath();
-        geom.pathEllipse(ctx, this.bounds.right + 50 - this.controlSize, 
-                         this.bounds.centerY - this.controlSize, 
+        geom.pathEllipse(ctx, lBounds.right + 50 - this.controlSize, 
+                         lBounds.centerY - this.controlSize, 
                          this.controlSize * 2, this.controlSize * 2);
         ctx.fillStyle = 'green';
         ctx.fill();
-        ctx.moveTo(this.bounds.right, this.bounds.centerY);
-        ctx.lineTo(this.bounds.right + 50, this.bounds.centerY);
+        ctx.moveTo(lBounds.right, lBounds.centerY);
+        ctx.lineTo(lBounds.right + 50, lBounds.centerY);
         ctx.strokeStyle = 'blue';
         ctx.stroke();
     }
@@ -507,7 +569,7 @@ export class Shape extends events.EventSource {
      */
     containsPoint(x, y) {
         var newp = this.globalTransform.apply(x, y, {});
-        return this.bounds.containsPoint(newp.x, newp.y);
+        return this.logicalBounds.containsPoint(newp.x, newp.y);
     }
 
     /**
@@ -515,7 +577,7 @@ export class Shape extends events.EventSource {
      * false otherwise.
      */
     intersects(anotherBounds) {
-        return this.bounds.intersects(anotherBounds);
+        return this.logicalBounds.intersects(anotherBounds);
     }
 
     _locationChanged(oldX, oldY) { }
@@ -530,107 +592,137 @@ export class Shape extends events.EventSource {
 export class Group extends Shape {
     constructor(configs) {
         super(configs);
-        this.isGroup = true;
+        this._children = [];
     }
 
-    canSetSize(w, h) {
-        var event = super.canSetSize(w, h);
-        if (event != null) {
-            // check if children sizes can be set.
+    setScene(s) {
+        if (!super.setScene(s)) return false;
+        for (var i = 0, L = this._children.length;i < L;i++) {
+            this._children[i].setScene(s);
         }
-        return event;
+        return true;
     }
+
+    childAtIndex(i) { return this._children[i]; } 
+    get hasChildren() { return this._children.length > 0; } 
+    get childCount() { return this._children.length; } 
 }
 
-export class Layer extends Shape { 
+export class Layer extends Group { 
     _evalBounds() {
         return new geom.Bounds(0, 0, 0, 0);
     }
 }
 
 /**
- * The Scene is the raw model where all layers and shapes are 
- * managed.  As far as possible this does not perform any view 
- * related operations as that is decoupled into the view entity.
+ * A wrapper over a path.
  */
-export class Scene {
+export class Path extends Shape {
     constructor(configs) {
+        super(configs);
         configs = configs || {};
-        this._eventHub =  new events.EventHub();
-        this._bounds = configs.bounds || new geom.Bounds();
-        this._layers = []
-        this.addLayer();
-        this._selectedLayer = 0;
+        this._closed = configs.closed || false;
+        this._moveTo = configs.moveTo || null;
+        this._componentList = new dlist.DList();
+        this._controlPoints = [];
     }
 
-    get eventHub() { return this._eventHub; }
-
-    get bounds() { return this._bounds; }
-
-    layerAtIndex(index) {
-        return this._layers[index];
+    _evalBounds() {
+        var out = new geom.Bounds();
+        if (this._moveTo) {
+            out.x = this._moveTo.x;
+            out.y = this._moveTo.y;
+        }
+        var currComp = this._componentList.head;
+        while (currComp != null) {
+            out.union(currComp.logicalBounds);
+            currComp = currComp.next;
+        }
+        return out;
     }
 
-    get layers() {
-        return this._layers;
+    /**
+     * Add a new path component at the end of the path.
+     */
+    addComponent(component) {
+        this.markUpdated();
+        this._componentList.add(component);
+        this._logicalBounds.union(component.logicalBounds);
     }
 
-    get layerCount() {
-        return this._layers.length;
+    get componentCount() {
+        return this._componentList.count;
     }
 
-    get selectedLayer() {
-        return this._selectedLayer;
+    moveTo(x, y) {
+        this.markUpdated();
+        this._moveTo = new geom.Point(x, y);
     }
 
-    set selectedLayer(index) {
-        if (index != this._selectedLayer) {
-            if (index >= 0 && index < this.layerCount) {
-                this._selectedLayer = index;
+    close(yesorno) {
+        this.markUpdated();
+        this._closed = yesorno;
+    }
+
+    lineTo(x, y) { 
+        this.addComponent(new LineToComponent(x, y));
+    }
+    arc(x, y, radius, startAngle, endAngle, anticlockwise) {
+        this.addComponent(new ArcComponent(x, y, radius, startAngle, endAngle, anticlockwise));
+    }
+    arcTo(x1, y1, x2, y2, radius) {
+        this.addComponent(new ArcToComponent(this._cmdArcTo, x1, y1, x2, y2, radius));
+    }
+    quadraticCurveTo(cp1x, cp1y, x, y) {
+        this.addComponent(new QuadraticCurveToComponent(cp1x, cp1y, x, y));
+    }
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
+        this.addComponent(this.BezierCurveToComponent, cp1x, cp1y, cp2x, cp2y, x, y);
+    }
+
+    draw(ctx) {
+        ctx.beginPath();
+        if (this._moveTo != null)
+            ctx.moveTo(this._moveTo.x, this._moveTo.y);
+        var currComp = this._componentList.head;
+        while (currComp != null) {
+            currComp.draw(ctx);
+            currComp = currComp.next;
+        }
+        if (this._closed) ctx.closePath();
+        if (this.fillStyle) {
+            ctx.fill();
+        }
+        if (this.lineWidth > 0) {
+            ctx.stroke();
+        }
+        // Draw fornow till we figure out hit tests and bounding boxes
+        // this.drawControls(ctx);
+    }
+
+    drawControls(ctx, options) {
+        super.drawControls(ctx, options);
+        ctx.fillStyle = "yellow";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        if (this._moveTo != null) {
+            ctx.beginPath();
+            ctx.arc(this._moveTo.x, this._moveTo.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+        var currComp = this._componentList.head;
+        while (currComp != null) {
+            currComp.draw(ctx);
+            for (var i = currComp.numControlPoints - 1;i >= 0;i--) {
+                var cpt = currComp.controlPoints[i];
+                ctx.beginPath();
+                ctx.arc(cpt.x, cpt.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
             }
+            currComp = currComp.next;
         }
-    }
-
-    add(shape) {
-        return this._layers[this.selectedLayer].add(shape);
-    }
-
-    addLayer() {
-        return this.insertLayer(-1);
-    }
-
-    removeLayer(index) {
-        var layer = this._layers[index];
-        layer.scene = null;
-        this._layers.splice(index, 1);
-        return layer;
-    }
-
-    insertLayer(index) {
-        var layer = new Layer();
-        layer.scene = this;
-        if (index < 0) {
-            this._layers.push(layer);
-        } else {
-            this._layers.splice(index, 0, layer);
-        }
-        return layer;
-    }
-
-    on(eventTypes, handler) {
-        if (this._eventHub == null) {
-            this._eventHub = new events.EventHub();
-        }
-        this._eventHub.on(eventTypes, handler);
-        return this;
-    }
-
-    before(eventTypes, handler) {
-        if (this._eventHub == null) {
-            this._eventHub = new events.EventHub();
-        }
-        this._eventHub.before(eventTypes, handler);
-        return this;
     }
 }
 
@@ -638,27 +730,28 @@ export class Scene {
  * A path is composed of several path components and form different kinds of units in a path
  * like lines, arcs, quadratic beziers etc.
  */
-export class PathCommand {
+export class PathComponent {
     constructor() {
         this.next = null;
         this.prev = null;
         this._controlPoints = [];
-        this._bounds = null;
+        this._logicalBounds = null;
     }
 
-    get bounds() {
-        if (this._bounds == null) {
-            this._bounds = this._evalBounds();
+    get logicalBounds() {
+        if (this._logicalBounds == null) {
+            this._logicalBounds = this._evalBounds();
         }
-        return this._bounds;
+        return this._logicalBounds;
     }
+
     get controlPoints() { return this._controlPoints; } 
     get numControlPoints() { return 0; } 
     get endX() { return this._endX; }
     get endY() { return this._endY; }
 }
 
-export class LineToCommand extends PathCommand {
+export class LineToComponent extends PathComponent {
     constructor(x, y) {
         super();
         this.x = x;
@@ -666,7 +759,6 @@ export class LineToCommand extends PathCommand {
         this._endX = x;
         this._endY = y;
         this._controlPoints = [new geom.Point(x, y)];
-        this._bounds = null;
     }
 
     _evalBounds() {
@@ -680,13 +772,7 @@ export class LineToCommand extends PathCommand {
             maxx = Math.max(maxx, this.prev.endX);
             maxy = Math.max(maxy, this.prev.endY);
         }
-        var out = new geom.Bounds({
-            x: minx,
-            y: miny,
-            width: maxx - minx,
-            height: maxy - miny,
-        });
-        return out;
+        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     draw(ctx) {
@@ -698,7 +784,7 @@ export class LineToCommand extends PathCommand {
     }
 }
 
-export class ArcCommand extends PathCommand {
+export class ArcComponent extends PathComponent {
     constructor(x, y, radius, startAngle, endAngle, anticlockwise) {
         super();
         this.x = x;
@@ -707,7 +793,7 @@ export class ArcCommand extends PathCommand {
         this.startAngle = startAngle;
         this.endAngle = endAngle;
         this.anticlockwise = anticlockwise;
-        var out = geom.pointOnCircle(radius, endAngle, out)
+        var out = geomutils.pointOnCircle(radius, endAngle, out)
         this.endX = x + out[0];
         this.endY = y + out[1];
         this._controlPoints = [new geom.Point(this._endX, this.endY)];
@@ -738,7 +824,7 @@ export class ArcCommand extends PathCommand {
     }
 }
 
-export class ArcToCommand extends PathCommand {
+export class ArcToComponent extends PathComponent {
     constructor(x1, y1, x2, y2, radius) {
         super();
         this.x1 = x1;
@@ -779,7 +865,7 @@ export class ArcToCommand extends PathCommand {
     }
 }
 
-export class QuadraticToCommand extends PathCommand {
+export class QuadraticToComponent extends PathComponent {
     constructor(x1, y1, x2, y2) {
         super();
         this.x1 = x1;
@@ -820,7 +906,7 @@ export class QuadraticToCommand extends PathCommand {
     }
 }
 
-export class BezierToCommand extends PathCommand {
+export class BezierToComponent extends PathComponent {
     constructor(x1, y1, x2, y2, x3, y3) {
         super();
         this.x1 = x1;
@@ -853,112 +939,8 @@ export class BezierToCommand extends PathCommand {
             maxx = Math.max(maxx, this.prev.endX);
             maxy = Math.max(maxy, this.prev.endY);
         }
-        var out = new geom.Bounds({
-            x: minx,
-            y: miny,
-            width: maxx - minx,
-            height: maxy - miny,
-        });
+        var out = new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
         return out;
-    }
-}
-
-/**
- * A wrapper over a path.
- */
-export class Path extends Shape {
-    constructor(configs) {
-        super(configs);
-        configs = configs || {};
-        this._closed = configs.closed || false;
-        this._moveTo = configs.moveTo || null;
-        this._commandList = new dlist.DList();
-        this._controlPoints = [];
-        this._bounds = new geom.Bounds();
-    }
-
-    /**
-     * Add a new path component at the end of the path.
-     */
-    addCommand(command) {
-        this.markUpdated();
-        this._commandList.add(command);
-        this._bounds.union(command.bounds);
-    }
-
-    get commandCount() {
-        return this._commandList.count;
-    }
-
-    moveTo(x, y) {
-        this.markUpdated();
-        this._moveTo = new geom.Point(x, y);
-    }
-
-    close(yesorno) {
-        this.markUpdated();
-        this._closed = yesorno;
-    }
-
-    lineTo(x, y) { 
-        this.addCommand(new LineToCommand(x, y));
-    }
-    arc(x, y, radius, startAngle, endAngle, anticlockwise) {
-        this.addCommand(new ArcCommand(x, y, radius, startAngle, endAngle, anticlockwise));
-    }
-    arcTo(x1, y1, x2, y2, radius) {
-        this.addCommand(new ArcToCommand(this._cmdArcTo, x1, y1, x2, y2, radius));
-    }
-    quadraticCurveTo(cp1x, cp1y, x, y) {
-        this.addCommand(new QuadraticCurveToCommand(cp1x, cp1y, x, y));
-    }
-    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
-        this.addCommand(this.BezierCurveToCommand, cp1x, cp1y, cp2x, cp2y, x, y);
-    }
-
-    draw(ctx) {
-        ctx.beginPath();
-        var currCmd = this._commandList.head;
-        if (this._moveTo != null)
-            ctx.moveTo(this._moveTo.x, this._moveTo.y);
-        while (currCmd != null) {
-            currCmd.draw(ctx);
-            currCmd = currCmd.next;
-        }
-        if (this._closed) ctx.closePath();
-        if (this.fillStyle) {
-            ctx.fill();
-        }
-        if (this.lineWidth > 0) {
-            ctx.stroke();
-        }
-        // Draw fornow till we figure out hit tests and bounding boxes
-        // this.drawControls(ctx);
-    }
-
-    drawControls(ctx, options) {
-        super.drawControls(ctx, options);
-        ctx.fillStyle = "yellow";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 2;
-        if (this._moveTo != null) {
-            ctx.beginPath();
-            ctx.arc(this._moveTo.x, this._moveTo.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-        }
-        var currCmd = this._commandList.head;
-        while (currCmd != null) {
-            currCmd.draw(ctx);
-            for (var i = currCmd.numControlPoints - 1;i >= 0;i--) {
-                var cpt = currCmd.controlPoints[i];
-                ctx.beginPath();
-                ctx.arc(cpt.x, cpt.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.stroke();
-            }
-            currCmd = currCmd.next;
-        }
     }
 }
 
@@ -1119,18 +1101,18 @@ export class Selection extends events.EventSource {
             if (! (parId in groups)) {
                 groups[parId] = {
                     parent: shape.parent,
-                    bounds: shape.bounds.copy(),
+                    logicalBounds: shape.logicalBounds.copy(),
                     shapes: []
                 };
             }
             groups[parId].shapes.push(shape);
-            groups[parId].bounds.union(shape.bounds);
+            groups[parId].logicalBounds.union(shape.logicalBounds);
         });
 
         this.clear();
         for (var parentId in groups) {
             var currGroup = groups[parentId];
-            var currBounds = currGroup.bounds;
+            var currBounds = currGroup.logicalBounds;
             var currParent = currGroup.parent;
             // Here create a new shape group if we have atleast 2 shapes
             if (currGroup.shapes.length > 1)  {
@@ -1140,7 +1122,7 @@ export class Selection extends events.EventSource {
                 newParent.setSize(currBounds.width, currBounds.height);
                 currGroup.shapes.forEach(function(child, index) {
                     newParent.add(child);
-                    child.setLocation(child.bounds.x - currBounds.x, child.bounds.y - currBounds.y);
+                    child.setLocation(child.logicalBounds.x - currBounds.x, child.logicalBounds.y - currBounds.y);
                 });
                 this.add(newParent);
             }
@@ -1157,11 +1139,11 @@ export class Selection extends events.EventSource {
             if (shape.isGroup) {
                 selection.remove(shape);
                 var newParent = shape.parent;
-                var bounds = shape.bounds;
+                var lBounds = shape.logicalBounds;
                 shape.forEachChild(function(child, index, self) {
                     newParent.add(child);
-                    child.setLocation(bounds.x + child.bounds.x,
-                                      bounds.y + child.bounds.y);
+                    child.setLocation(lBounds.x + child.logicalBounds.x,
+                                      lBounds.y + child.logicalBounds.y);
                     selection.add(child);
                 }, this, true);
                 newParent.remove(shape);

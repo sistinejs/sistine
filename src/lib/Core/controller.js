@@ -48,12 +48,12 @@ export class ShapeController {
         var newp = this.shape.globalTransform.apply(gx, gy, {});
         var x = newp.x;
         var y = newp.y;
-        var bounds = this.shape.bounds;
+        var logicalBounds = this.shape.logicalBounds;
         var controlSize = this.shape.controlSize;
-        var l = bounds.left;
-        var r = bounds.right;
-        var t = bounds.top;
-        var b = bounds.bottom;
+        var l = logicalBounds.left;
+        var r = logicalBounds.right;
+        var t = logicalBounds.top;
+        var b = logicalBounds.bottom;
         var sizePoints = [
             [[(l + r) / 2, t], "n-resize"],
             [[r, t], "ne-resize"],
@@ -75,20 +75,20 @@ export class ShapeController {
             }
         }
 
-        var rotX = bounds.right + 50;
-        var rotY = bounds.centerY;
+        var rotX = logicalBounds.right + 50;
+        var rotY = logicalBounds.centerY;
         if (x >= rotX - controlSize && x <= rotX + controlSize &&
             y >= rotY - controlSize && y <= rotY + controlSize) {
             return new HitInfo(this.shape, HitType.ROTATE, 0, "grab");
         }
-        if (bounds.containsPoint(x, y)) {
+        if (logicalBounds.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
 
     snapshotFor(hitInfo) {
-        return {'bounds': this.shape.bounds.copy(), angle: this.shape.angle};
+        return {'logicalBounds': this.shape.logicalBounds.copy(), angle: this.shape.angle};
     }
 
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
@@ -97,13 +97,13 @@ export class ShapeController {
         var shape = this.shape;
         console.log("Delta: ", deltaX, deltaY, shape.isGroup);
         if (hitInfo.hitType == HitType.MOVE) {
-            shape.setLocation(savedInfo.bounds.left + deltaX,
-                              savedInfo.bounds.top + deltaY);
+            shape.setLocation(savedInfo.logicalBounds.left + deltaX,
+                              savedInfo.logicalBounds.top + deltaY);
         } else if (hitInfo.hitType == HitType.SIZE) {
-            var newTop = savedInfo.bounds.top;
-            var newLeft = savedInfo.bounds.left;
-            var newHeight = savedInfo.bounds.height;
-            var newWidth = savedInfo.bounds.width;
+            var newTop = savedInfo.logicalBounds.top;
+            var newLeft = savedInfo.logicalBounds.left;
+            var newHeight = savedInfo.logicalBounds.height;
+            var newWidth = savedInfo.logicalBounds.width;
             if (hitInfo.hitIndex == HitType.SIZE_N) {
                 newHeight -= deltaY;
                 newTop += deltaY;
@@ -134,8 +134,8 @@ export class ShapeController {
             shape.setLocation(newLeft, newTop);
             shape.setSize(newWidth, newHeight);
         } else if (hitInfo.hitType == HitType.ROTATE) {
-            var centerX = hitInfo.hitShape.bounds.centerX;
-            var centerY = hitInfo.hitShape.bounds.centerY;
+            var centerX = hitInfo.hitShape.logicalBounds.centerX;
+            var centerY = hitInfo.hitShape.logicalBounds.centerY;
             var deltaX = currX - centerX;
             var deltaY = currY - centerY;
             var newAngle = 0;

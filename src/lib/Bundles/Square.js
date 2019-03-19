@@ -1,5 +1,6 @@
 
-import * as geom from "../Utils/geom"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
@@ -35,9 +36,9 @@ export class SquareShape extends models.Shape {
     }
 
     draw(ctx) {
-        var size = Math.min(this.bounds.width, this.bounds.height);
-        var left = (this.bounds.left + this.bounds.right - size) / 2;
-        var top = (this.bounds.top + this.bounds.bottom - size) / 2;
+        var size = this._size;
+        var left = this._p0.x;
+        var top = this._p0.y;
         if (this.fillStyle) {
             ctx.fillRect(left, top, size, size);
         }

@@ -263,6 +263,8 @@ export class PropertyChanged extends Event {
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
+
+    get name() { return "PropertyChanged"; }
 }
 
 export class ShapeAdded extends Event {
@@ -271,6 +273,8 @@ export class ShapeAdded extends Event {
         this.parent = parent;
         this.shape = shape;
     }
+
+    get name() { return "ShapeAdded"; }
 }
 
 export class ShapeRemoved extends Event {
@@ -279,6 +283,8 @@ export class ShapeRemoved extends Event {
         this.parent = parent;
         this.shape = shape;
     }
+
+    get name() { return "ShapeRemoved"; }
 }
 
 export class ShapeIndexChanged extends Event {
@@ -288,6 +294,8 @@ export class ShapeIndexChanged extends Event {
         this.oldIndex = oldIndex;
         this.newIndex = newIndex;
     }
+
+    get name() { return "ShapeIndexChanged"; }
 }
 
 export class ShapesSelected extends Event {
@@ -296,6 +304,8 @@ export class ShapesSelected extends Event {
         this.selection = selection;
         this.shapes = shapes;
     }
+
+    get name() { return "ShapesSelected"; }
 }
 
 export class ShapesUnselected extends Event {
@@ -304,4 +314,6 @@ export class ShapesUnselected extends Event {
         this.selection = selection;
         this.shapes = shapes;
     }
+
+    get name() { return "ShapesUnselected"; }
 }

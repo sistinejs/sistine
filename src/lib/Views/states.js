@@ -1,7 +1,8 @@
 
 import * as panes from "./panes";
-import * as geom from "../Utils/geom";
 import * as events from "../Core/events";
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 
 export class StageState extends events.State {
     constructor(stage) {

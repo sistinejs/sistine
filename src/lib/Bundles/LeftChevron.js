@@ -1,5 +1,6 @@
 
-import * as geom from "../Utils/geom"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 import * as leftArrows from "./LeftArrow"
 
 export function newShape(configs) {

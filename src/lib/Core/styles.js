@@ -11,10 +11,10 @@ export class Style {
 
     forContext(shape, ctx) {
         if (this._hasChanged(shape, ctx)) {
-            this._shapeX = shape.bounds.x;
-            this._shapeY = shape.bounds.y;
-            this._shapeW = shape.bounds.width;
-            this._shapeH = shape.bounds.height;
+            this._shapeX = shape.logicalBounds.x;
+            this._shapeY = shape.logicalBounds.y;
+            this._shapeW = shape.logicalBounds.width;
+            this._shapeH = shape.logicalBounds.height;
             this._context = ctx;
             this._realValue = this._createStyle(shape, ctx);
         }
@@ -27,10 +27,10 @@ export class Style {
 
     _hasChanged(shape, ctx) {
         return this._realValue == null || this._context != ctx ||
-                shape.bounds.x != this._shapeX ||
-                shape.bounds.y != this._shapeY ||
-                shape.bounds.width != this._shapeW ||
-                shape.bounds.height != this._shapeH;
+                shape.logicalBounds.x != this._shapeX ||
+                shape.logicalBounds.y != this._shapeY ||
+                shape.logicalBounds.width != this._shapeW ||
+                shape.logicalBounds.height != this._shapeH;
     }
 }
 

@@ -1,5 +1,6 @@
 
-import * as geom from "../Utils/geom"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
@@ -45,15 +46,15 @@ export class StarShape extends models.Shape {
     }
 
     get innerRadius() {
-        return this._innerRadius || (this.bounds.innerRadius / 3.0);
+        return this._innerRadius || (this.logicalBounds.innerRadius / 3.0);
     }
 
     draw(ctx) {
         var n = 2 * this._numSides;
         var theta = (Math.PI * 2.0) / n;
-        var cx = this.bounds.centerX;
-        var cy = this.bounds.centerY;
-        var R = Math.min(this.bounds.width, this.bounds.height) / 2.0;
+        var cx = this.logicalBounds.centerX;
+        var cy = this.logicalBounds.centerY;
+        var R = Math.min(this.logicalBounds.width, this.logicalBounds.height) / 2.0;
         var innerR = this.innerRadius;
 
         var fx = cx;

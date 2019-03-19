@@ -1,5 +1,6 @@
 
-import * as geom from "../Utils/geom"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
@@ -26,8 +27,8 @@ export class CircleShape extends models.Shape {
     _evalBounds() {
         return new geom.Bounds(this._center.x - this._radius,
                                this._center.y - this._radius,
-                               this._center.x + this._radius,
-                               this._center.y + this._radius);
+                               this._radius * 2,
+                               this._radius * 2);
     }
 
     get className() { return "Circle"; }
