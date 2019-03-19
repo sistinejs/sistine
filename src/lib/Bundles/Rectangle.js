@@ -37,11 +37,12 @@ export class RectangleShape extends models.Shape {
     get className() { return "Rectangle"; }
 
     draw(ctx) {
+        var lBounds = this.logicalBounds;
         if (this.fillStyle) {
-            ctx.fillRect(this.bounds.left, this.bounds.top, this.bounds.width, this.bounds.height);
+            ctx.fillRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
         }
         if (this.lineWidth > 0) {
-            ctx.strokeRect(this.bounds.left, this.bounds.top, this.bounds.width, this.bounds.height);
+            ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
         }
     }
 }

@@ -48,10 +48,10 @@ export class PolygonShape extends models.Shape {
     draw(ctx) {
         var n = this._numSides;
         var theta = (Math.PI * 2.0) / n;
-        var cx = this.bounds.centerX;
-        var cy = this.bounds.centerY;
-        var A = this.bounds.width / 2.0;
-        var B = this.bounds.height / 2.0;
+        var cx = this.logicalBounds.centerX;
+        var cy = this.logicalBounds.centerY;
+        var A = this.logicalBounds.width / 2.0;
+        var B = this.logicalBounds.height / 2.0;
 
         var p0 = [0,0];
         var pi = [0,0];

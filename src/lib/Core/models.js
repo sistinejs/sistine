@@ -209,7 +209,7 @@ export class Shape extends events.EventSource {
     _updateTransform(result) {
         result = result || new geom.Transform();
         var cx = this.logicalBounds.centerX;
-        var cy = this.logicalBound.centerY;
+        var cy = this.logicalBounds.centerY;
         // Notice we are doing "invserse transforms here"
         // since we need to map a point "back" to global form
         result.translate(cx, cy)

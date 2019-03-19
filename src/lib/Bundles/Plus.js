@@ -40,11 +40,12 @@ export class PlusShape extends models.Shape {
     get innerHeight() { return this._innerHeight; }
 
     draw(ctx) {
+        var lBounds = this.logicalBounds;
         var lw = this.lineWidth + 2;
-        var x = this.bounds.x + lw;
-        var y = this.bounds.y + lw;
-        var width = this.bounds.width - (2 * lw);
-        var height = this.bounds.height - (2 * lw);
+        var x = lBounds.x + lw;
+        var y = lBounds.y + lw;
+        var width = lBounds.width - (2 * lw);
+        var height = lBounds.height - (2 * lw);
         var iw = this.innerWidth * width;
         var ih = this.innerHeight * height;
 

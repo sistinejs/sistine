@@ -38,10 +38,11 @@ export class RoundedRectangleShape extends models.Shape {
     get className() { return "RoundedRectangle"; }
 
     draw(ctx) {
-        var x = this.bounds.x;
-        var y = this.bounds.y;
-        var width = this.bounds.width;
-        var height = this.bounds.height;
+        var lBounds = this.logicalBounds;
+        var x = lBounds.x;
+        var y = lBounds.y;
+        var width = lBounds.width;
+        var height = lBounds.height;
         var radius = this._cornerRadius;
 
         ctx.beginPath();
