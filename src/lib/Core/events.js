@@ -188,6 +188,8 @@ export class State {
         this._id = StateIdCounter.next();
     }
 
+    get name() { return this.constructor.name; }
+
     get id() { return this._id; }
 
     enter(data) { this.stateData = data; }
@@ -226,7 +228,7 @@ export class StateMachine {
      */
     getState(name) {
         if (!(name in this._states)) {
-            throw Error("State '" + name + "' not yet registered");
+            throw Error("State '" + name + "' not yet registered.");
         }
         return this._states[name];
     }
@@ -234,10 +236,14 @@ export class StateMachine {
     /**
      * Register a new state in the state machine.
      */
-    registerState(name, state, isRoot) {
+    registerState(state, isRoot) {
+        var name = state.name;
+        if (name in this._states) {
+            throw Error("State '" + name + "' already registered.");
+        }
         this._states[name] = state;
         if (isRoot || false) {
-            this.rootState = name;
+            this.rootState = state.name;
         }
     }
 
@@ -247,7 +253,7 @@ export class StateMachine {
         var nextState = this._currentState.handle(eventType, source, eventData);
         if (nextState != null) {
             if (nextState == "") {
-                this.enter(this._rootState);
+                this.enter(this._rootState.name);
             } else {
                 this.enter(this.getState(nextState));
             }

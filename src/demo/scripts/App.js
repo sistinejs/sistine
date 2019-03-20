@@ -14,6 +14,10 @@ class App {
         $( window ).resize(function() { self._layoutElements(); });
     }
 
+    get eventMachine() {
+        return this.stage.eventMachine;
+    }
+
     _setupStage() {
         this.stage = new Sistine.Views.Stage.Stage("stage_div", this.scene);
         this.stage.isEditable = true;
@@ -21,17 +25,7 @@ class App {
 
         // Add a zoom handler!!
         // this.zoomHandler = new Sistine.Views.Handlers.StageViewPortHandler(this.stage);
-        var States = Sistine.Views.States;
-        var defaultState = new States.DefaultState(this.stage);
-        var vpPanningState = new States.ViewPortPanningState(this.stage);
-        var vpZoomingState = new States.ViewPortZoomingState(this.stage);
-        var creatingShapeState = new States.CreatingShapeState(this.stage);
-        var machine = this.stage.eventMachine;
-        this.eventMachine = machine;
-        machine.registerState("default", defaultState, true);
-        machine.registerState("panningVP", vpPanningState);
-        machine.registerState("zoomingVP", vpZoomingState);
-        machine.registerState("creatingShape", creatingShapeState);
+        this.eventMachine.registerState(new RootUIState(this), true);
         return this.stage;
     }
 
@@ -86,6 +80,7 @@ class App {
     }
 
     _setupToolbar() {
+        var self = this;
         $("#zoom_option").selectmenu({ width : 100 });
         var toolbar_buttons = $(".toolbar_button");
         toolbar_buttons.each(function(index, tbbutton) {
@@ -101,7 +96,9 @@ class App {
                 iconPosition: "top"
             }).append(buttonImage);
             Sistine.Utils.DOM.fillChildComponent(buttonImage);
-            $tbbutton.click(eval("on" + buttonId));
+
+            var eventId = "on" + buttonId
+            self.eventMachine.handle(eventId, self, null);
         });
     }
 }

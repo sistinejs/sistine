@@ -347,7 +347,9 @@ export class Shape extends events.EventSource {
         }
     } 
     canSetBounds(newBounds) { return true; }
-    _setBounds(newBounds) { throw Error("Not Implemented."); }
+    _setBounds(newBounds) {
+        throw Error("Not Implemented for: ", this);
+    }
 
     /**
      * Adds a new shape to this group.

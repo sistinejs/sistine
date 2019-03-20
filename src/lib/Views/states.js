@@ -10,11 +10,14 @@ export class StageState extends events.State {
         this.stage = stage;
         this.downPoints = [];
         this.currPoints = [];
+        this._mainPane = this.stage.acquirePane("main");
         for (var i = 0;i < stage.touchState.maxPoints;i++) {
             this.downPoints.push(null);
             this.currPoints.push(new geom.Point());
         }
     }
+
+    detach() { this.stage.releasePane("main"); }
 
     handle(eventType, source, event) {
         if (eventType == "mousedown") {
@@ -37,6 +40,8 @@ export class StageState extends events.State {
             this.stage.cursor = "auto";
         }
     }
+
+    toWorld(x, y, result) { return this._mainPane.toWorld(x, y, result); } 
 
     _onKeyDown(eventType, source, event) { console.log("KeyDown: ", event); }
     _onKeyPress(eventType, source, event) { console.log("KeyPress: ", event); }
@@ -313,7 +318,7 @@ export class CreatingShapeState extends StageState {
         var shapeForCreation = this.stateData;
         var downPoint = this.downPoints[0];
         this.stage.selection.clear();
-        shapeForCreation.setLocation(downPoint.x, downPoint.y);
+        shapeForCreation.setBounds(new geom.Bounds(downPoint.x, downPoint.y, 1, 1));
         this.stage.shapeIndex.setPane(shapeForCreation, "edit");
         this.stage.scene.add(shapeForCreation);
     }
@@ -330,9 +335,9 @@ export class CreatingShapeState extends StageState {
         if (downPoint != null) {
             var minX = Math.min(downPoint.x, currPoint.x);
             var minY = Math.min(downPoint.y, currPoint.y);
-            shapeForCreation.setLocation(minX, minY);
-            shapeForCreation.setSize(Math.abs(currPoint.x - downPoint.x),
-                                     Math.abs(currPoint.y - downPoint.y));
+            var maxX = Math.max(downPoint.x, currPoint.x);
+            var maxY = Math.max(downPoint.y, currPoint.y);
+            shapeForCreation.setBounds(new geom.Bounds(minX, minY, maxX - minX, maxY - minY));
         }
     }
 

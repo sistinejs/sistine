@@ -108,6 +108,10 @@ export class Size {
 
 export class Point {
     constructor(x, y) {
+        this.set(x, y);
+    }
+
+    set(x, y) {
         this.x = x || 0;
         this.y = y || 0;
     }
