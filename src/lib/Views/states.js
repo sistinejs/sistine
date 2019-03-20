@@ -338,6 +338,8 @@ export class CreatingShapeState extends StageState {
             var maxX = Math.max(downPoint.x, currPoint.x);
             var maxY = Math.max(downPoint.y, currPoint.y);
             shapeForCreation.setBounds(new geom.Bounds(minX, minY, maxX - minX, maxY - minY));
+            console.log("Here: ", shapeForCreation.logicalBounds);
+            stage.paneNeedsRepaint("edit");
         }
     }
 
@@ -351,6 +353,7 @@ export class CreatingShapeState extends StageState {
         var shapeForCreation = this.stateData;
         this.stage.shapeIndex.setPane(shapeForCreation, "main");
         this.stateData = null;
+        this.stage.paneNeedsRepaint("main");
         return "";  // kick off a transition to root
     }
 }
