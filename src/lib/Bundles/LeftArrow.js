@@ -35,6 +35,10 @@ export class LeftArrowShape extends models.Shape {
         var bottom = Math.max(this._p1.y, this._p2.y);
         return new geom.Bounds(left, top, right - left, bottom - top);
     }
+    _setBounds(newBounds) {
+        this._p1.set(newBounds.left, newBounds.top);
+        this._p2.set(newBounds.right, newBounds.bottom);
+    }
 
     get className() { return "LeftArrow"; };
 

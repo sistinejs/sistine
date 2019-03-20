@@ -76,7 +76,7 @@ class ShapesPanel extends Panel {
                 // Add the shape on the canvas at the center
                 var id = event.currentTarget.id.replace(/mainpane_holder_/, "");
                 var configs = Object.assign({}, shapeDefaults);
-                theApp.eventMachine.enter("creatingShapes", DefaultBundle[id].newShape(configs));
+                theApp.eventMachine.enter("creatingShape", DefaultBundle[id].newShape(configs));
             });
         });
     }

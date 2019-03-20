@@ -26,6 +26,11 @@ export class PolygonShape extends models.Shape {
         this._controller = new PolygonController(this);
     }
 
+    _setBounds(newBounds) {
+        this._p1.set(newBounds.left, newBounds.top);
+        this._p2.set(newBounds.right, newBounds.bottom);
+    }
+
     _evalBounds() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);

@@ -36,6 +36,11 @@ export class CylinderShape extends models.Shape {
         return new geom.Bounds(left, top - (eh / 2), right - left, eh + bottom - top);
     }
 
+    _setBounds(newBounds) {
+        this._p1.set(newBounds.left, newBounds.top);
+        this._p2.set(newBounds.right, newBounds.bottom);
+    }
+
     draw(ctx) {
         var lw = this.lineWidth + 1;
         var lBounds = this.logicalBounds;

@@ -284,7 +284,7 @@ export class Shape extends events.EventSource {
         var oldY = this.translation.y;
         if (x == oldX && y == oldY) return false;
 
-        var event = new events.PropertyChanged(this, "location", [ oldX, oldY ], [ x, y ]);
+        var event = new events.GeometryChanged(this, "location", [ oldX, oldY ], [ x, y ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
 
@@ -295,7 +295,6 @@ export class Shape extends events.EventSource {
         this.triggerOn(event.name, event);
         return true;
     }
-
     scale(sx, sy) { return this.scaleTo(this._scaleFactor.x * sx, this._scaleFactor.y * sy); } 
     scaleTo(w, h) {
         var oldScaleX = this.scaleFactor.x;
@@ -306,7 +305,7 @@ export class Shape extends events.EventSource {
         var C2 = this.controlSize + this.controlSize;
         if (w * this.logicalBounds.width <= C2 || h * this.logicalBounds.height <= C2) return false;
 
-        var event = new events.PropertyChanged(this, "scale", [ oldScaleX, oldScaleY ], [ w, h ]);
+        var event = new events.GeometryChanged(this, "scale", [ oldScaleX, oldScaleY ], [ w, h ]);
         if (this.validateBefore(event.name, event) == false) return false;
 
         this._scaleFactor.set(w, h);
@@ -315,12 +314,11 @@ export class Shape extends events.EventSource {
         this.triggerOn(event.name, event);
         return true;
     }
-
     rotate(theta) { return this.rotateTo(this._rotation + theta); }
     rotateTo(theta) {
         if (theta == this._rotation) return false;
 
-        var event = new events.PropertyChanged(this, "angle", this._rotation, theta);
+        var event = new events.GeometryChanged(this, "angle", this._rotation, theta);
         if (this.validateBefore(event.name, event) == false) return false;
 
         var oldAngle = this._rotation;
@@ -330,6 +328,26 @@ export class Shape extends events.EventSource {
         this.triggerOn(event.name, event);
         return true;
     }
+
+    /**
+     * A easy wrapper to control shape dimensions by just setting its bounds.
+     * This will also reset the scaleFactor to 1.
+     */
+    setBounds(newBounds) {
+        if (this.canSetBounds(newBounds)) {
+            var oldBounds = this.logicalBounds.copy();
+            var event = new events.GeometryChanged(this, "bounds", oldBounds, newBounds);
+            if (this.validateBefore(event.name, event) == false) return false;
+            this._scaleFactor.x = this._scaleFactor.y = 1.0;
+            this._setBounds(newBounds);
+            this._logicalBounds = null;
+            this.markUpdated();
+            this.triggerOn(event.name, event);
+            return true;
+        }
+    } 
+    canSetBounds(newBounds) { return true; }
+    _setBounds(newBounds) { throw Error("Not Implemented."); }
 
     /**
      * Adds a new shape to this group.

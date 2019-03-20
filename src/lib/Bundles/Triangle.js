@@ -26,6 +26,15 @@ export class TriangleShape extends models.Shape {
         this._controller = new TriangleController(this);
     }
 
+    _setBounds(bounds) {
+        this._p0.x = bounds.centerX;
+        this._p0.y = bounds.y;
+        this._p1.x = bounds.x;
+        this._p1.y = bounds.bottom;
+        this._p2.x = bounds.right;
+        this._p2.y = bounds.bottom;
+    }
+
     _evalBounds() {
         var left = Math.min(this._p0.x, this._p1.x, this._p2.x);
         var top = Math.min(this._p0.y, this._p1.y, this._p2.y);

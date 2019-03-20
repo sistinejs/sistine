@@ -255,6 +255,18 @@ export class StateMachine {
     }
 }
 
+export class GeometryChanged extends Event {
+    constructor(source, property, oldValue, newValue) {
+        super();
+        this.source = source;
+        this.property = property;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
+    get name() { return "GeometryChanged"; }
+}
+
 export class PropertyChanged extends Event {
     constructor(source, property, oldValue, newValue) {
         super();

@@ -24,6 +24,15 @@ export class SquareShape extends models.Shape {
         this._controller = new SquareController(this);
     }
 
+    canSetSize(newBounds) {
+        newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);
+        return true;
+    }
+    _setBounds(newBounds) {
+        this._p0.set(newBounds.left, newBounds.top);
+        this._size = newBounds.width;
+    }
+
     _evalBounds() {
         return new geom.Bounds(this._p0.x, this._p0.y, this._size, this._size);
     }

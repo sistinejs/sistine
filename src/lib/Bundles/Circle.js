@@ -30,6 +30,15 @@ export class CircleShape extends models.Shape {
                                this._radius * 2,
                                this._radius * 2);
     }
+    _setBounds(newBounds) {
+        this._center.x = newBounds.centerX;
+        this._center.y = newBounds.centerY;
+        this._radius = newBounds.innerRadius;
+    }
+    canSetBounds(newBounds) {
+        newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);
+        return true;
+    }
 
     get className() { return "Circle"; }
 
