@@ -267,6 +267,12 @@ export class Stage extends coreevents.EventSource {
     get parentDiv() { return this._parentDiv; }
     get viewBounds() { return this._viewBounds; }
 
+    set tabIndex(value) {
+        this.element.attr("tabindex", 1);
+    }
+    focus() { this.element.focus(); }
+    blur() { this.element.blur(); }
+
     layout() {
         for (var i = this._panes.length - 1; i >= 0;i--)
             this._panes[i].layout();

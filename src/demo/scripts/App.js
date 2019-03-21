@@ -98,7 +98,9 @@ class App {
             Sistine.Utils.DOM.fillChildComponent(buttonImage);
 
             var eventId = "on" + buttonId
-            self.eventMachine.handle(eventId, self, null);
+            $tbbutton.click(function(event) {
+                self.eventMachine.handle(eventId, self, event);
+            });
         });
     }
 }

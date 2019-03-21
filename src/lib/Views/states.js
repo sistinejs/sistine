@@ -33,11 +33,16 @@ export class StageState extends events.State {
         } else if (eventType == "keypress") {
             return this._onKeyPress(eventType, source, event);
         } else if (eventType == "mouseover") {
+            this.stage.focus();
             return this._onMouseOver(eventType, source, event);
         } else if (eventType == "mouseentered") {
+            this.stage.focus();
             return this._onMouseEntered(eventType, source, event);
-        } else if (eventType == "mouseleave" || eventType == "mouseout") {
-            this.stage.cursor = "auto";
+        } else if (eventType == "mouseleave") {
+            this.stage.blur();
+            return this._onMouseLeave(eventType, source, event);
+        } else if (eventType == "mouseout") {
+            return this._onMouseOut(eventType, source, event);
         }
     }
 
@@ -58,6 +63,14 @@ export class StageState extends events.State {
     }
 
     _onMouseOver(eventType, source, event) {
+        this.stage.cursor = "auto";
+    }
+
+    _onMouseLeave(eventType, source, event) {
+        this.stage.cursor = "auto";
+    }
+
+    _onMouseOut(eventType, source, event) {
         this.stage.cursor = "auto";
     }
 
@@ -123,13 +136,8 @@ export class ViewPortPanningState extends StageState {
         }
     }
 
-    _onMouseEntered(eventType, source, event) {
-        return this._onMouseOver(eventType, source, event);
-    }
-
-    _onMouseOver(eventType, source, event) {
-        this.stage.cursor = "grab";
-    }
+    _onMouseOver(eventType, source, event) { this.stage.cursor = "grab"; }
+    _onMouseEntered(eventType, source, event) { return this._onMouseOver(eventType, source, event); }
 }
 
 export class ViewPortZoomingState extends StageState {
@@ -160,7 +168,7 @@ export class DefaultState extends StageState {
     constructor(stage) {
         super(stage);
         this._editPane = this.stage.acquirePane("edit");
-        this._editPane.element.attr("tabindex", 1);
+        this.stage.tabIndex = 1;
         this.stage.movePane(this._editPane, -1);
         this.selectingMultiple = false;
     }
@@ -343,8 +351,8 @@ export class CreatingShapeState extends StageState {
         }
     }
 
-    _onMouseEntered(eventType, source, event) { this.stage.cursor = "crosshair"; }
     _onMouseOver(eventType, source, event) { this.stage.cursor = "crosshair"; }
+    _onMouseEntered(eventType, source, event) { return this._onMouseOver(eventType, source, event); }
 
     _onMouseUp(eventType, source, event) {
         super._onMouseUp(eventType, source, event);
