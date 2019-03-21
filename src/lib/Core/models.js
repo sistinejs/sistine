@@ -110,10 +110,10 @@ export class Shape extends events.EventSource {
         this._parent = null;
         this.isVisible = true;
         this._globalTransform = new geom.Transform();
-        this.markUpdated();
-        this.controlSize = DEFAULT_CONTROL_SIZE;
-
         this._logicalBounds = null;
+        this.markUpdated();
+        this.markTransformed();
+        this.controlSize = DEFAULT_CONTROL_SIZE;
 
         // Transform properties
         this._rotation = 0;
@@ -127,7 +127,6 @@ export class Shape extends events.EventSource {
 
         // Observable properties
         this.name = configs.name || this.className;
-        this.scale = configs.scale || new geom.Point(1, 1);
         this.zIndex = configs.zIndex || 0;
         this.lineWidth = configs.lineWidth || 2;
         this.lineJoin = configs.lineJoin || null;
@@ -146,8 +145,9 @@ export class Shape extends events.EventSource {
         return this._logicalBounds;
     }
 
-    markUpdated() {
-        this._lastUpdated = Date.now();
+    markUpdated() { this._lastUpdated = Date.now(); }
+    markTransformed() { 
+        this._lastTransformed = Date.now(); 
     }
 
     get parent() { return this._parent; } 
@@ -208,13 +208,13 @@ export class Shape extends events.EventSource {
     }
     _updateTransform(result) {
         result = result || new geom.Transform();
-        var cx = this.logicalBounds.centerX;
-        var cy = this.logicalBounds.centerY;
+        var cx = this._translation.x;
+        var cy = this._translation.y;
         // Notice we are doing "invserse transforms here"
         // since we need to map a point "back" to global form
         result.translate(cx, cy)
               .rotate(- this._rotation)
-              .scale(1.0 / this.scale.x, 1.0 / this.scale.y)
+              .scale(1.0 / this._scaleFactor.x, 1.0 / this._scaleFactor.y)
               .translate(-cx, -cy);
         console.log("updated transform: ", this, result);
         return result;
@@ -280,36 +280,38 @@ export class Shape extends events.EventSource {
 
     move(dx, dy) { return this.moveTo(this._translation.x + dx, this._translation.y + dy); } 
     moveTo(x, y) {
-        var oldX = this.translation.x;
-        var oldY = this.translation.y;
+        var oldX = this._translation.x;
+        var oldY = this._translation.y;
         if (x == oldX && y == oldY) return false;
 
         var event = new events.GeometryChanged(this, "location", [ oldX, oldY ], [ x, y ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
 
-        this.translation.x = x;
-        this.translation.y = y;
+        this._translation.x = x;
+        this._translation.y = y;
         this.markUpdated();
+        this.markTransformed();
         this._locationChanged(oldX, oldY);
         this.triggerOn(event.name, event);
         return true;
     }
     scale(sx, sy) { return this.scaleTo(this._scaleFactor.x * sx, this._scaleFactor.y * sy); } 
-    scaleTo(w, h) {
-        var oldScaleX = this.scaleFactor.x;
-        var oldScaleY = this.scaleFactor.y;
-        if (w == oldScaleX && h == oldScaleY) return false;
+    scaleTo(x, y) {
+        var oldScaleX = this._scaleFactor.x;
+        var oldScaleY = this._scaleFactor.y;
+        if (x == oldScaleX && y == oldScaleY) return false;
 
         // Check minimum sizes
         var C2 = this.controlSize + this.controlSize;
-        if (w * this.logicalBounds.width <= C2 || h * this.logicalBounds.height <= C2) return false;
+        if (x * this.logicalBounds.width <= C2 || y * this.logicalBounds.height <= C2) return false;
 
-        var event = new events.GeometryChanged(this, "scale", [ oldScaleX, oldScaleY ], [ w, h ]);
+        var event = new events.GeometryChanged(this, "scale", [ oldScaleX, oldScaleY ], [ x, y ]);
         if (this.validateBefore(event.name, event) == false) return false;
 
-        this._scaleFactor.set(w, h);
+        this._scaleFactor.set(x, y);
         this.markUpdated();
+        this.markTransformed();
         this._scaleChanged(oldScaleX, oldScaleY);
         this.triggerOn(event.name, event);
         return true;
@@ -324,7 +326,8 @@ export class Shape extends events.EventSource {
         var oldAngle = this._rotation;
         this._rotation = theta;
         this.markUpdated();
-        this._angleChanged(oldAngle);
+        this.markTransformed();
+        this._rotationChanged(oldAngle);
         this.triggerOn(event.name, event);
         return true;
     }
@@ -342,6 +345,7 @@ export class Shape extends events.EventSource {
             this._setBounds(newBounds);
             this._logicalBounds = null;
             this.markUpdated();
+            this.markTransformed();
             this.triggerOn(event.name, event);
             return true;
         }
@@ -521,11 +525,10 @@ export class Shape extends events.EventSource {
 
     applyTransforms(ctx) {
         var angle = this._rotation;
-        if (angle) {
+        if (angle || this._scaleFactor.x || this._scaleFactor.y || this._translation.x || this._translation.y) {
             ctx.save(); 
-            var lBounds = this.logicalBounds;
-            var cx = lBounds.centerX;
-            var cy = lBounds.centerY;
+            var cx = this._translation.x;
+            var cy = this._translation.y;
             ctx.translate(cx, cy);
             ctx.rotate(angle);
             ctx.translate(-cx, -cy);
@@ -601,8 +604,8 @@ export class Shape extends events.EventSource {
     }
 
     _locationChanged(oldX, oldY) { }
-    _sizeChanged(oldW, oldH) { }
-    _angleChanged(oldAngle) { }
+    _scaleChanged(oldW, oldH) { }
+    _rotationChanged(oldAngle) { }
 }
 
 /**
@@ -666,6 +669,7 @@ export class Path extends Shape {
      */
     addComponent(component) {
         this.markUpdated();
+        this.markTransformed();
         this._componentList.add(component);
         this._logicalBounds.union(component.logicalBounds);
     }
@@ -676,11 +680,13 @@ export class Path extends Shape {
 
     moveTo(x, y) {
         this.markUpdated();
+        this.markTransformed();
         this._moveTo = new geom.Point(x, y);
     }
 
     close(yesorno) {
         this.markUpdated();
+        this.markTransformed();
         this._closed = yesorno;
     }
 
