@@ -8,7 +8,6 @@ shapeDefaults = {
 var Point = Sistine.Geom.Models.Point;
 
 function addSampleShapes() {
-    return ;
     var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 170, 0)
                           .addStop(0, "black")
                           .addStop(1, "white");

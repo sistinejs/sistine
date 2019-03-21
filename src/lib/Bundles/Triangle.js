@@ -26,13 +26,16 @@ export class TriangleShape extends models.Shape {
         this._controller = new TriangleController(this);
     }
 
-    _setBounds(bounds) {
-        this._p0.x = bounds.centerX;
-        this._p0.y = bounds.y;
-        this._p1.x = bounds.x;
-        this._p1.y = bounds.bottom;
-        this._p2.x = bounds.right;
-        this._p2.y = bounds.bottom;
+    _setBounds(newBounds) {
+        var oldBounds = this.logicalBounds;
+        var sx = newBounds.width / oldBounds.width;
+        var sy = newBounds.height / oldBounds.height;
+        this._p0.x = newBounds.x + ((this._p0.x - oldBounds.x) * sx)
+        this._p0.y = newBounds.y + ((this._p0.y - oldBounds.y) * sy)
+        this._p1.x = newBounds.x + ((this._p1.x - oldBounds.x) * sx)
+        this._p1.y = newBounds.y + ((this._p1.y - oldBounds.y) * sy)
+        this._p2.x = newBounds.x + ((this._p2.x - oldBounds.x) * sx)
+        this._p2.y = newBounds.y + ((this._p2.y - oldBounds.y) * sy)
     }
 
     _evalBounds() {
