@@ -201,6 +201,10 @@ export class Bounds {
         return result;
     }
 
+    move(deltaX, deltaY) {
+        return new Bounds(this.left + deltaX, this.top + deltaY, this.width, this.height);
+    }
+
     copy() {
         return new Bounds(this.left, this.top, this.width, this.height);
     }

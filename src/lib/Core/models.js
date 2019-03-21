@@ -525,13 +525,16 @@ export class Shape extends events.EventSource {
 
     applyTransforms(ctx) {
         var angle = this._rotation;
-        if (angle || this._scaleFactor.x || this._scaleFactor.y || this._translation.x || this._translation.y) {
+        if (angle || this._scaleFactor.x != 1 || this._scaleFactor.y != 1 ||
+            this._translation.x || this._translation.y) {
             ctx.save(); 
-            var cx = this._translation.x;
-            var cy = this._translation.y;
+            var lBounds = this.logicalBounds;
+            var cx = this.logicalBounds.centerX;
+            var cy = this.logicalBounds.centerY;
             ctx.translate(cx, cy);
             ctx.rotate(angle);
-            ctx.translate(-cx, -cy);
+            ctx.scale(this._scaleFactor.x, this._scaleFactor.y);
+            ctx.translate(-cx + this._translation.x, -cy + this._translation.y);
         }
     }
 

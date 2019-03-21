@@ -1,5 +1,6 @@
 
 import * as events from "./events";
+import * as geom from "../Geom/models";
 
 /////////////// Controllers 
 
@@ -97,10 +98,7 @@ export class ShapeController {
         var shape = this.shape;
         console.log("Delta: ", deltaX, deltaY, shape.isGroup);
         if (hitInfo.hitType == HitType.MOVE) {
-            shape.setBounds(savedInfo.logicalBounds.left + deltaX,
-                            savedInfo.logicalBounds.top + deltaY,
-                            savedInfo.logicalBounds.width,
-                            savedInfo.logicalBounds.height);
+            shape.setBounds(savedInfo.logicalBounds.move(deltaX, deltaY));
         } else if (hitInfo.hitType == HitType.SIZE) {
             var newTop = savedInfo.logicalBounds.top;
             var newLeft = savedInfo.logicalBounds.left;
@@ -133,7 +131,7 @@ export class ShapeController {
                 newLeft += deltaX;
                 newWidth -= deltaX;
             }
-            shape.setBounds(newLeft, newTop, newWidth, newHeight);
+            shape.setBounds(new geom.Bounds(newLeft, newTop, newWidth, newHeight));
         } else if (hitInfo.hitType == HitType.ROTATE) {
             var centerX = hitInfo.hitShape.logicalBounds.centerX;
             var centerY = hitInfo.hitShape.logicalBounds.centerY;
