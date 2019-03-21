@@ -158,8 +158,8 @@ export class Shape extends events.EventSource {
     get name() { return this._name; }
     set name(value) { return this.set("name", value); }
 
-    get angle() { return this._angle; }
-    set angle(value) { return this.set("angle", value); }
+    get rotation() { return this._rotation; }
+    set rotation(value) { return this.set("rotation", value); }
 
     get zIndex() { return this._zIndex; }
     set zIndex(value) { return this.set("zIndex", value); }
@@ -213,7 +213,7 @@ export class Shape extends events.EventSource {
         // Notice we are doing "invserse transforms here"
         // since we need to map a point "back" to global form
         result.translate(cx, cy)
-              .rotate(- this.angle)
+              .rotate(- this._rotation)
               .scale(1.0 / this.scale.x, 1.0 / this.scale.y)
               .translate(-cx, -cy);
         console.log("updated transform: ", this, result);
@@ -533,7 +533,7 @@ export class Shape extends events.EventSource {
     }
 
     revertTransforms(ctx) {
-        var angle = this.angle;
+        var angle = this._rotation;
         if (angle) {
             ctx.restore(); 
         }
@@ -572,7 +572,7 @@ export class Shape extends events.EventSource {
         }
         // Draw the "rotation" control
         ctx.beginPath();
-        geom.pathEllipse(ctx, lBounds.right + 50 - this.controlSize, 
+        geomutils.pathEllipse(ctx, lBounds.right + 50 - this.controlSize, 
                          lBounds.centerY - this.controlSize, 
                          this.controlSize * 2, this.controlSize * 2);
         ctx.fillStyle = 'green';

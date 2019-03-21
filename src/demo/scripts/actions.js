@@ -17,6 +17,11 @@ class RootUIState extends Sistine.Core.Events.State {
     }
 
     handle(eventType, source, event) {
+        if (source == this.stage) {
+            this.app.eventMachine.enter("DefaultState");
+            return this.app.eventMachine.handle(eventType, source, event);
+        }
+
         if (eventType == "onZoomIn") {
             this.app.eventMachine.enter("ViewPortZoomingState", "zoomin");
         }

@@ -88,7 +88,7 @@ export class ShapeController {
     }
 
     snapshotFor(hitInfo) {
-        return {'logicalBounds': this.shape.logicalBounds.copy(), angle: this.shape.angle};
+        return {'logicalBounds': this.shape.logicalBounds.copy(), rotation: this.shape.rotation};
     }
 
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
@@ -97,8 +97,10 @@ export class ShapeController {
         var shape = this.shape;
         console.log("Delta: ", deltaX, deltaY, shape.isGroup);
         if (hitInfo.hitType == HitType.MOVE) {
-            shape.setLocation(savedInfo.logicalBounds.left + deltaX,
-                              savedInfo.logicalBounds.top + deltaY);
+            shape.setBounds(savedInfo.logicalBounds.left + deltaX,
+                            savedInfo.logicalBounds.top + deltaY,
+                            savedInfo.logicalBounds.width,
+                            savedInfo.logicalBounds.height);
         } else if (hitInfo.hitType == HitType.SIZE) {
             var newTop = savedInfo.logicalBounds.top;
             var newLeft = savedInfo.logicalBounds.left;
@@ -131,8 +133,7 @@ export class ShapeController {
                 newLeft += deltaX;
                 newWidth -= deltaX;
             }
-            shape.setLocation(newLeft, newTop);
-            shape.setSize(newWidth, newHeight);
+            shape.setBounds(newLeft, newTop, newWidth, newHeight);
         } else if (hitInfo.hitType == HitType.ROTATE) {
             var centerX = hitInfo.hitShape.logicalBounds.centerX;
             var centerY = hitInfo.hitShape.logicalBounds.centerY;
@@ -153,7 +154,7 @@ export class ShapeController {
             }
             console.log("Rotating: ", deltaX, deltaY,
                         (deltaX == 0 ? "Inf" : deltaY / deltaX), newAngle);
-            shape.setAngle(newAngle);
+            shape.rotateTo(newAngle);
         } else if (hitInfo.hitType == HitType.CONTROL) {
         }
     }
