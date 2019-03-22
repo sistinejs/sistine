@@ -20,12 +20,23 @@ export const HitType = {
     SIZE_NW: 7,
 }
 
+class ControlPoint extends geom.Point {
+    constructor(x, y, pointType, pointIndex, cursor) {
+        super(x, y);
+        this.pointType = pointType || 0;
+        this.pointIndex = pointIndex || 0;
+        this.cursor = cursor || "auto";
+    }
+}
+
 export class HitInfo {
-    constructor(shape, hitType, hitIndex, cursor) {
+    constructor(shape, hitType, hitIndex, cursor, controlPoint) {
         this.hitShape = shape;
+        this.controlPoint = controlPoint;
         this.hitType = hitType || 0;
         this.hitIndex = hitIndex || 0;
-        this.cursor = cursor || "auto";
+        this.cursor = cursor;
+        this.controlPoint = controlPoint || null;
     }
 }
 
@@ -36,10 +47,41 @@ export class HitInfo {
 export class ShapeController {
     constructor(shape) {
         this._shape = shape;
+        this._controlPoints = null;
     }
 
     get shape() {
         return this._shape;
+    }
+
+    get controlPoints() {
+        if (this._controlPoints == null) {
+            this._controlPoints = this._evalControlPoints();
+        }
+        return this._controlPoints;
+    }
+
+    _evalControlPoints() {
+        var lBounds = this.shape.logicalBounds;
+        var controlSize = this.shape.controlSize;
+        var l = lBounds.left;
+        var r = lBounds.right;
+        var t = lBounds.top;
+        var b = lBounds.bottom;
+        var out = [];
+        out.push(new ControlPoint((l + r) / 2, t, HitType.SIZE, 0, "n-resize"));
+        out.push(new ControlPoint(r, t, HitType.SIZE, 1, "ne-resize"));
+        out.push(new ControlPoint(r, (t + b) / 2, HitType.SIZE, 2, "e-resize"));
+        out.push(new ControlPoint(r, b, HitType.SIZE, 3, "se-resize"));
+        out.push(new ControlPoint((l + r) / 2, b, HitType.SIZE, 4, "s-resize"));
+        out.push(new ControlPoint(l, b, HitType.SIZE, 5, "sw-resize"));
+        out.push(new ControlPoint(l, (t + b) / 2, HitType.SIZE, 6, "w-resize"));
+        out.push(new ControlPoint(l, t, HitType.SIZE, 7, "nw-resize"));
+
+        var rotX = lBounds.right + 50;
+        var rotY = lBounds.centerY;
+        out.push(new ControlPoint(rotX, rotY, HitType.ROTATE, 0, "grab"));
+        return out;
     }
 
     /**
@@ -51,37 +93,17 @@ export class ShapeController {
         var y = newp.y;
         var logicalBounds = this.shape.logicalBounds;
         var controlSize = this.shape.controlSize;
-        var l = logicalBounds.left;
-        var r = logicalBounds.right;
-        var t = logicalBounds.top;
-        var b = logicalBounds.bottom;
-        var sizePoints = [
-            [[(l + r) / 2, t], "n-resize"],
-            [[r, t], "ne-resize"],
-            [[r, (t + b) / 2], "e-resize"],
-            [[r, b], "se-resize"],
-            [[(l + r) / 2, b], "s-resize"],
-            [[l, b], "sw-resize"],
-            [[l, (t + b) / 2], "w-resize"],
-            [[l, t], "nw-resize"],
-        ]
-        for (var i in sizePoints) {
-            var hti = sizePoints[i];
-            var px = hti[0][0];
-            var py = hti[0][1];
-            var cursor = hti[1];
+        var controlPoints = this.controlPoints;
+        for (var i = controlPoints.length - 1;i >= 0;i--) {
+            var cp = controlPoints[i];
+            var px = cp.x;
+            var py = cp.y;
             if (x >= px - controlSize && x <= px + controlSize &&
                 y >= py - controlSize && y <= py + controlSize) {
-                return new HitInfo(this.shape, HitType.SIZE, i, cursor);
+                return new HitInfo(this.shape, cp.pointType, cp.pointIndex, cp.cursor);
             }
         }
 
-        var rotX = logicalBounds.right + 50;
-        var rotY = logicalBounds.centerY;
-        if (x >= rotX - controlSize && x <= rotX + controlSize &&
-            y >= rotY - controlSize && y <= rotY + controlSize) {
-            return new HitInfo(this.shape, HitType.ROTATE, 0, "grab");
-        }
         if (logicalBounds.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
