@@ -8,7 +8,7 @@ shapeDefaults = {
 var Point = Sistine.Geom.Models.Point;
 
 function addSampleShapes() {
-    var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 170, 0)
+    var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1)
                           .addStop(0, "black")
                           .addStop(1, "white");
     addShape("Triangle", {
@@ -19,7 +19,7 @@ function addSampleShapes() {
         "fillStyle": grd1
     });
 
-    var grd2 = new Sistine.Core.Styles.RadialGradient(50, 50, 20, 50, 50, 50)
+    var grd2 = new Sistine.Core.Styles.RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");
     addShape("Circle", {

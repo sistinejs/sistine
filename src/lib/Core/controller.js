@@ -47,6 +47,7 @@ export class HitInfo {
 export class ShapeController {
     constructor(shape) {
         this._shape = shape;
+        this._controlPointTS = 0;
         this._controlPoints = null;
     }
 
@@ -55,13 +56,14 @@ export class ShapeController {
     }
 
     get controlPoints() {
-        if (this._controlPoints == null) {
+        if (this._controlPoints == null || this.shape._lastTransformed > this._controlPointTS) {
             this._controlPoints = this._evalControlPoints();
         }
         return this._controlPoints;
     }
 
     _evalControlPoints() {
+        this._controlPointTS = Date.now();
         var lBounds = this.shape.logicalBounds;
         var controlSize = this.shape.controlSize;
         var l = lBounds.left;
