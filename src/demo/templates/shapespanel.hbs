@@ -2,48 +2,56 @@
     <div id = "toolbar_accordian">
         <h3>Basic Shapes</h3>
         <div class = "toolbar_section_div">
-            <div class = "shape_icon" id = "holder_Triangle" title = "Triangle">Triangle</div>
-            <div class = "shape_icon" id = "holder_Rectangle" title = "Rect">Rect</div>
-            <div class = "shape_icon" id = "holder_Square" title = "Square">Square</div>
-            <div class = "shape_icon" id = "holder_Polygon" title = "Polygon">Polygon</div>
-            <div class = "shape_icon" id = "holder_Star" title = "Star">Star</div>
-            <div class = "shape_icon" id = "holder_Cog" title = "Cog">Cog</div>
-            <div class = "shape_icon" id = "holder_RoundedRectangle" title = "Rounded Rectangle">Rounded Rectangle</div>
-            <div class = "shape_icon" id = "holder_Plus" title = "Plus">Plus</div>
-            <div class = "shape_icon" id = "holder_Circle" title = "Circle">Circle</div>
-            <div class = "shape_icon" id = "holder_Ellipse" title = "Ellipse">Ellipse</div>
+            <button class = "shape_button" id = "SB_Triangle">Triangle</button>
+            <button class = "shape_button" id = "SB_Rectangle">Rect</button>
+            <button class = "shape_button" id = "SB_Square">Square</button>
+            <button class = "shape_button" id = "SB_Polygon">Polygon</button>
+            <button class = "shape_button" id = "SB_Star">Star</button>
+            <button class = "shape_button" id = "SB_Cog">Cog</button>
+            <button class = "shape_button" id = "SB_RoundedRectangle">Rounded Rectangle</button>
+            <button class = "shape_button" id = "SB_Plus">Plus</button>
+            <button class = "shape_button" id = "SB_Circle">Circle</button>
+            <button class = "shape_button" id = "SB_Ellipse">Ellipse</button>
+            <button class = "shape_button" id = "SB_Cylinder">Cylinder</button>
+        </div>
+        <h3>Arrows</h3>
+        <div class = "toolbar_section_div">
+            <button class = "shape_button" id = "SB_LeftArrow">Left Arrow</button>
+            <button class = "shape_button" id = "SB_RightArrow">Right Arrow</button>
+            <button class = "shape_button" id = "SB_DoubleArrow>Double Arrow</button>
 
-            <div class = "shape_icon" id = "holder_LeftArrow" title = "Left Arrow">Left Arrow</div>
-            <div class = "shape_icon" id = "holder_RightArrow" title = "Right Arrow">Right Arrow</div>
-            <div class = "shape_icon" id = "holder_DoubleArrow" title = "Double Arrow">Double Arrow</div>
+            <button class = "shape_button" id = "SB_LeftBlockArrow">Left Block Arrow</button>
+            <button class = "shape_button" id = "SB_RightBlockArrow">Right Block Arrow</button>
 
-            <div class = "shape_icon" id = "holder_Cylinder" title = "Cylinder">Cylinder</div>
-            <div class = "shape_icon" id = "holder_LeftBlockArrow" title = "Left Block Arrow">Left Block Arrow</div>
-            <div class = "shape_icon" id = "holder_RightBlockArrow" title = "Right Block Arrow">Right Block Arrow</div>
-
-            <div class = "shape_icon" id = "holder_LeftChevron" title = "Left Chevron">Left Chevron</div>
-            <div class = "shape_icon" id = "holder_RightChevron" title = "Right Chevron">Right Chevron</div>
+            <button class = "shape_button" id = "SB_LeftChevron">Left Chevron</button>
+            <button class = "shape_button" id = "SB_RightChevron">Right Chevron</button>
+        </div>
+        <h3>Paths</h3>
+        <div class = "toolbar_section_div">
+            <button class = "shape_button" id = "SB_LineComponent">Straight Connector</button>
+            <button class = "shape_button" id = "SB_ElbowConnector">Elbow Connector</button>
+            <button class = "shape_button" id = "SB_CurvedConnector">Curved Connector</button>
         </div>
         <h3>Connectors</h3>
         <div class = "toolbar_section_div">
-            <div class = "shape_icon" id = "holder_StraightConnector" title = "Straight Connector">Straight Connector</div>
-            <div class = "shape_icon" id = "holder_ElbowConnector" title = "Elbow Connector">Elbow Connector</div>
-            <div class = "shape_icon" id = "holder_CurvedConnector" title = "Curved Connector">Curved Connector</div>
+            <button class = "shape_button" id = "SB_StraightConnector">Straight Connector</button>
+            <button class = "shape_button" id = "SB_ElbowConnector">Elbow Connector</button>
+            <button class = "shape_button" id = "SB_CurvedConnector">Curved Connector</button>
         </div>
         <h3>Devices</h3>
         <div class = "toolbar_section_div">
-            <div class = "shape_icon" id = "holder_InMemCache" title = "InMem Cache">InMem Cache</div>
-            <div class = "shape_icon" id = "holder_DistributedCache" title = "Dist Cache">Dist Cache</div>
-            <div class = "shape_icon" id = "holder_LoadBalancer" title = "Load Balancer">Load Balancer</div>
-            <div class = "shape_icon" id = "holder_WebServer" title = "Web Server">Web Server</div>
-            <div class = "shape_icon" id = "holder_Database" title = "Database">Database</div>
-            <div class = "shape_icon" id = "holder_BTreeIndex" title = "BTree Index">BTree Index</div>
-            <div class = "shape_icon" id = "holder_HashIndex" title = "Hash Index">Hash Index</div>
-            <div class = "shape_icon" id = "holder_KafkaQueue" title = "Kafka Queue">Kafka Queue</div>
+            <button class = "shape_button" id = "SB_InMemCache">InMem Cache</button>
+            <button class = "shape_button" id = "SB_DistributedCache">Dist Cache</button>
+            <button class = "shape_button" id = "SB_LoadBalancer">Load Balancer</button>
+            <button class = "shape_button" id = "SB_WebServer">Web Server</button>
+            <button class = "shape_button" id = "SB_Database">Database</button>
+            <button class = "shape_button" id = "SB_BTreeIndex">BTree Index</button>
+            <button class = "shape_button" id = "SB_HashIndex">Hash Index</button>
+            <button class = "shape_button" id = "SB_KafkaQueue">Kafka Queue</button>
         </div>
         <h3>Links</h3>
         <div class = "toolbar_section_div">
-            <div class = "shape_icon" id = "holder_NetworkLink" title = "Network Link">Network Link</div>
+            <button class = "shape_button" id = "SB_NetworkLink">Network Link</button>
         </div>
     </div>
 </div>

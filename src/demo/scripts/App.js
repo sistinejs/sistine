@@ -90,11 +90,8 @@ class App {
             $tbbutton.attr("title", label);
 
             var buttonId = tbbutton.id.replace(/TB_/, "");
-            var iconId = "tb_icon_" + buttonId;
-            var buttonImage = $("<img src = '" + "./src/demo/icons/" + buttonId + ".png' />");
-            $tbbutton.button({
-                iconPosition: "top"
-            }).append(buttonImage);
+            var buttonImage = $("<img src = '" + "./src/demo/icons/toolbar/" + buttonId + ".png' />");
+            $tbbutton.button({ iconPosition: "top" }).append(buttonImage);
             Sistine.Utils.DOM.fillChildComponent(buttonImage);
 
             var eventId = "on" + buttonId

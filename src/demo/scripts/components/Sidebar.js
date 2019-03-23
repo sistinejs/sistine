@@ -21,7 +21,7 @@ class Sidebar extends Panel {
 
             var buttonId = sbbutton.id.replace(/SB_/, "");
             var iconId = "tb_icon_" + buttonId;
-            var buttonImage = $("<img src = '" + "./src/demo/icons/" + buttonId + ".png' />");
+            var buttonImage = $("<img src = '" + "./src/demo/icons/toolbar/" + buttonId + ".png' />");
             $sbbutton.button({
                 iconPosition: "top"
             }).append(buttonImage);

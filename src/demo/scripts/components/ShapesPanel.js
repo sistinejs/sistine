@@ -32,49 +32,26 @@ class ShapesPanel extends Panel {
     }
 
     _loadShapeIcons() {
-        var shape_icons = this.find(".shape_icon");
-        shape_icons.each(function(index, icondiv) {
-            // We have divs where these buttons should go.
-            // What we need is some kind of element in these buttons, that will:
-            // 1. Show the icon corresponding to that button
-            // 2. Add a drag handler that will let us drop that *component* onto the canvas
-            // 3. Associate the button to an actual node component.
-            // 4. This implies the node component corresponding to the ID will be responsible for the above.
-            var $icondiv = $(icondiv)
-            $icondiv.empty()
+        var shape_buttons = this.find(".shape_button");
+        shape_buttons.each(function(index, sbbutton) {
+            var $sbbutton = $(sbbutton)
+            var label = $sbbutton.text();
+            $sbbutton.empty()
+            $sbbutton.attr("title", label);
 
-            var shapeId = icondiv.id.replace(/holder_/, "");
-            var iconStage = new Sistine.Views.Stage.Stage(icondiv.id);
-            // iconStages[shapeId] = iconStage;
-            var topPane = iconStage.getPane("main");
-            var $child = topPane.element;
-
-            var margin = 3;
-            var toolbarShape = DefaultBundle[shapeId].newShapeForToolbar(
-                margin,
-                margin,
-                $child.width() - (
-                    Sistine.Utils.DOM.getcssint($child, "margin-left") +
-                    Sistine.Utils.DOM.getcssint($child, "margin-right")
-                ) - (margin * 2),
-                $child.height() - (
-                    Sistine.Utils.DOM.getcssint($child, "margin-top") +
-                    Sistine.Utils.DOM.getcssint($child, "margin-bottom")
-                ) - (margin * 2),
-                { lineWidth: 2, }
-            );
-            iconStage.scene.add(toolbarShape);
-            iconStage.layout();
-            // topPane.element.tooltip();
+            var shapeId = sbbutton.id.replace(/SB_/, "");
+            var buttonImage = $("<img src = '" + "./src/demo/icons/shapes/" + shapeId + ".png' />");
+            $sbbutton.button({ iconPosition: "top" }).append(buttonImage);
+            Sistine.Utils.DOM.fillChildComponent(buttonImage);
 
             // Setup highlighter!
-            topPane.element.mouseover(function(event) {
+            $sbbutton.on("mouseover", function(event) {
                 $(event.currentTarget).addClass("toolbar_button_highlighted");
-            }).mouseout(function(event) {
+            }).on("mouseout", function(event) {
                 $(event.currentTarget).removeClass("toolbar_button_highlighted");
             }).click(function(event) {
                 // Add the shape on the canvas at the center
-                var id = event.currentTarget.id.replace(/mainpane_holder_/, "");
+                var id = event.currentTarget.id.replace(/SB_/, "");
                 var configs = Object.assign({}, shapeDefaults);
                 theApp.eventMachine.enter("CreatingShapeState", DefaultBundle[id].newShape(configs));
             });

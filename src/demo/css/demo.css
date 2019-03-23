@@ -3,7 +3,7 @@
     --header-height: 70px;
     --toolbar-button-height: 30px;
     --sidebar-panel-width: 50px;
-    --toolpanel-width: 320px;
+    --toolpanel-width: 280px;
     --footer-height: 0px;
     --split-bar-width: 10px;
     --shape-icon-size: 50px;
@@ -37,22 +37,6 @@
     right: 0px;
     left: 0px;
     bottom: 0px;
-}
-
-.toolbar_button_group {
-    float: left;
-    height: 100%;
-    border-right : solid 2px darkGray;
-    padding-left : 10px;
-    padding-right : 10px;
-}
-
-.toolbar_button {
-    float: left;
-    outline-width: 0px !important;
-    padding: 0px;
-    height: var(--toolbar-button-height);
-    width: var(--toolbar-button-height);
 }
 
 #footer_div {
@@ -110,26 +94,26 @@
     bottom: 0;
 }
 
-.shape_icon {
-    float: left;
-    margin: 5px;
-    width: var(--shape-icon-size);
-    height: var(--shape-icon-size);
-    border: solid 0px blue;
-}
-
-.shape_icon_canvas {
-    width: var(--shape-icon-size);
-    height: var(--shape-icon-size);
-    padding: 2px;
-    margin: 2px;
-    border: solid 0px red;
-}
-
 .ui-accordion .ui-accordion-content {
     padding-left: 5px;
     padding-right: 5px;
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+.toolbar_button {
+    float: left;
+    outline-width: 0px !important;
+    padding: 0px;
+    height: var(--toolbar-button-height);
+    width: var(--toolbar-button-height);
+}
+
+.shape_button {
+    float: left;
+    outline-width: 0px !important;
+    padding: 0px;
+    width: var(--shape-icon-size);
+    height: var(--shape-icon-size);
 }
 
