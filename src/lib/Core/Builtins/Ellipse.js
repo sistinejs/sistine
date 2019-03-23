@@ -1,8 +1,11 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import { Geom } from "../../Geom/index"
+import * as models from "../models"
+import * as controller from "../controller"
+
+var ControlPoint = controller.ControlPoint;
+var HitType = controller.HitType;
+var HitInfo = controller.HitInfo;
 
 export function newShape(configs) {
     configs = configs || {};
@@ -13,16 +16,16 @@ export function newShapeForToolbar(x, y, width, height, configs) {
     configs = configs || {};
     y += height / 4;
     height *= 0.7;
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
+    configs.p1 = new Geom.models.Point(x, y);
+    configs.p2 = new Geom.models.Point(x + width, y + height);
     return newShape(configs);
 }
 
 export class EllipseShape extends models.Shape {
     constructor(configs) {
         super(configs);
-        this._p1 = configs.p1 || new geom.Point(0, 0);
-        this._p2 = configs.p2 || new geom.Point(100, 100);
+        this._p1 = configs.p1 || new Geom.models.Point(0, 0);
+        this._p2 = configs.p2 || new Geom.models.Point(100, 100);
         this._controller = new EllipseController(this);
     }
 
@@ -49,7 +52,7 @@ export class EllipseShape extends models.Shape {
         var h = lBounds.height - (2 * lw);
 
         ctx.beginPath();
-        geomutils.pathEllipse(ctx, x, y, w, h);
+        Geom.Utils.pathEllipse(ctx, x, y, w, h);
         ctx.stroke();
         if (this.fillStyle) {
             ctx.fill();

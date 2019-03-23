@@ -1,8 +1,7 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import { Geom } from "../../Geom/index"
+import * as models from "../models"
+import * as controller from "../controller"
 
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
@@ -16,8 +15,8 @@ export function newShape(configs) {
 export class Line extends models.Shape {
     constructor(configs) {
         super(configs);
-        this._p0 = configs.p0 || new geom.Point();
-        this._p1 = configs.p1 || new geom.Point();
+        this._p0 = configs.p0 || new Geom.models.Point();
+        this._p1 = configs.p1 || new Geom.models.Point();
         this._controller = new LineController(this);
     }
 

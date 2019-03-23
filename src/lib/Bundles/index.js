@@ -1,14 +1,11 @@
 
 import * as Triangle from "./Triangle"
-import * as Line from "./Line"
-import * as Rectangle from "./Rectangle"
 import * as Square from "./Square"
 import * as Polygon from "./Polygon"
 import * as Star from "./Star"
 import * as RoundedRectangle from "./RoundedRectangle"
 import * as Plus from "./Plus"
 import * as Circle from "./Circle"
-import * as Ellipse from "./Ellipse"
 import * as LeftArrow from "./LeftArrow"
 import * as RightArrow from "./RightArrow"
 import * as DoubleArrow from "./DoubleArrow"
@@ -20,15 +17,12 @@ import * as RightChevron from "./RightChevron"
 
 export const Bundle = {
     "Triangle": Triangle,
-    "Line": Line,
-    "Rectangle": Rectangle,
     "Square": Square,
     "Polygon": Polygon,
     "Star": Star,
     "RoundedRectangle": RoundedRectangle,
     "Plus": Plus,
     "Circle": Circle,
-    "Ellipse": Ellipse,
     "LeftArrow": LeftArrow,
     "RightArrow": RightArrow,
     "DoubleArrow": DoubleArrow,
