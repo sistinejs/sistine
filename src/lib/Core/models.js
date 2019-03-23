@@ -112,7 +112,7 @@ export class Shape extends events.EventSource {
         this._globalTransform = new geom.Transform();
         this._logicalBounds = null;
         this.markTransformed();
-        this.controlSize = DEFAULT_CONTROL_SIZE;
+        this.controlRadius = DEFAULT_CONTROL_SIZE;
 
         // Transform properties
         this._rotation = 0;
@@ -303,7 +303,7 @@ export class Shape extends events.EventSource {
         if (x == oldScaleX && y == oldScaleY) return false;
 
         // Check minimum sizes
-        var C2 = this.controlSize + this.controlSize;
+        var C2 = this.controlRadius + this.controlRadius;
         if (x * this.logicalBounds.width <= C2 || y * this.logicalBounds.height <= C2) return false;
 
         var event = new events.GeometryChanged(this, "scale", [ oldScaleX, oldScaleY ], [ x, y ]);
@@ -566,18 +566,18 @@ export class Shape extends events.EventSource {
         for (var i = sizePoints.length - 1;i >= 0;i--) {
             var px = sizePoints[i][0];
             var py = sizePoints[i][1];
-            ctx.fillRect(px - this.controlSize, py - this.controlSize,
-                           this.controlSize + this.controlSize,
-                           this.controlSize + this.controlSize);
-            ctx.strokeRect(px - this.controlSize, py - this.controlSize,
-                           this.controlSize + this.controlSize,
-                           this.controlSize + this.controlSize);
+            ctx.fillRect(px - this.controlRadius, py - this.controlRadius,
+                           this.controlRadius + this.controlRadius,
+                           this.controlRadius + this.controlRadius);
+            ctx.strokeRect(px - this.controlRadius, py - this.controlRadius,
+                           this.controlRadius + this.controlRadius,
+                           this.controlRadius + this.controlRadius);
         }
         // Draw the "rotation" control
         ctx.beginPath();
-        geomutils.pathEllipse(ctx, lBounds.right + 50 - this.controlSize, 
-                         lBounds.centerY - this.controlSize, 
-                         this.controlSize * 2, this.controlSize * 2);
+        geomutils.pathEllipse(ctx, lBounds.right + 50 - this.controlRadius, 
+                         lBounds.centerY - this.controlRadius, 
+                         this.controlRadius * 2, this.controlRadius * 2);
         ctx.fillStyle = 'green';
         ctx.fill();
         ctx.moveTo(lBounds.right, lBounds.centerY);

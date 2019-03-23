@@ -20,9 +20,9 @@ export const HitType = {
     SIZE_NW: 7,
 }
 
-class ControlPoint extends geom.Point {
-    constructor(x, y, pointType, pointIndex, cursor, extraData) {
-        super(x, y);
+class ControlPoint {
+    constructor(point, pointType, pointIndex, cursor, extraData) {
+        this.point = point;
         this.pointType = pointType || 0;
         this.pointIndex = pointIndex || 0;
         this.cursor = cursor || "auto";
@@ -66,24 +66,24 @@ export class ShapeController {
     _evalControlPoints() {
         this._controlPointTS = Date.now();
         var lBounds = this.shape.logicalBounds;
-        var controlSize = this.shape.controlSize;
+        var controlRadius = this.shape.controlRadius;
         var l = lBounds.left;
         var r = lBounds.right;
         var t = lBounds.top;
         var b = lBounds.bottom;
         var out = [];
-        out.push(new ControlPoint((l + r) / 2, t, HitType.SIZE, 0, "n-resize"));
-        out.push(new ControlPoint(r, t, HitType.SIZE, 1, "ne-resize"));
-        out.push(new ControlPoint(r, (t + b) / 2, HitType.SIZE, 2, "e-resize"));
-        out.push(new ControlPoint(r, b, HitType.SIZE, 3, "se-resize"));
-        out.push(new ControlPoint((l + r) / 2, b, HitType.SIZE, 4, "s-resize"));
-        out.push(new ControlPoint(l, b, HitType.SIZE, 5, "sw-resize"));
-        out.push(new ControlPoint(l, (t + b) / 2, HitType.SIZE, 6, "w-resize"));
-        out.push(new ControlPoint(l, t, HitType.SIZE, 7, "nw-resize"));
+        out.push(new ControlPoint(new geom.Point((l + r) / 2, t), HitType.SIZE, 0, "n-resize"));
+        out.push(new ControlPoint(new geom.Point(r, t), HitType.SIZE, 1, "ne-resize"));
+        out.push(new ControlPoint(new geom.Point(r, (t + b) / 2), HitType.SIZE, 2, "e-resize"));
+        out.push(new ControlPoint(new geom.Point(r, b), HitType.SIZE, 3, "se-resize"));
+        out.push(new ControlPoint(new geom.Point((l + r) / 2, b), HitType.SIZE, 4, "s-resize"));
+        out.push(new ControlPoint(new geom.Point(l, b), HitType.SIZE, 5, "sw-resize"));
+        out.push(new ControlPoint(new geom.Point(l, (t + b) / 2), HitType.SIZE, 6, "w-resize"));
+        out.push(new ControlPoint(new geom.Point(l, t), HitType.SIZE, 7, "nw-resize"));
 
         var rotX = lBounds.right + 50;
         var rotY = lBounds.centerY;
-        out.push(new ControlPoint(rotX, rotY, HitType.ROTATE, 0, "grab"));
+        out.push(new ControlPoint(new geom.Point(rotX, rotY), HitType.ROTATE, 0, "grab"));
         return out;
     }
 
@@ -95,14 +95,11 @@ export class ShapeController {
         var x = newp.x;
         var y = newp.y;
         var logicalBounds = this.shape.logicalBounds;
-        var controlSize = this.shape.controlSize;
+        var controlRadius = this.shape.controlRadius;
         var controlPoints = this.controlPoints;
         for (var i = controlPoints.length - 1;i >= 0;i--) {
             var cp = controlPoints[i];
-            var px = cp.x;
-            var py = cp.y;
-            if (x >= px - controlSize && x <= px + controlSize &&
-                y >= py - controlSize && y <= py + controlSize) {
+            if (cp.point.isWithin(x, y, controlRadius)) {
                 return new HitInfo(this.shape, cp.pointType, cp.pointIndex, cp.cursor, cp);
             }
         }
@@ -121,7 +118,7 @@ export class ShapeController {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
         var shape = this.shape;
-        console.log("Delta: ", deltaX, deltaY, shape.isGroup);
+        console.log("ShapeController.applyHitInfo: ", deltaX, deltaY, shape.isGroup);
         if (hitInfo.hitType == HitType.MOVE) {
             shape.setBounds(savedInfo.logicalBounds.move(deltaX, deltaY));
         } else if (hitInfo.hitType == HitType.SIZE) {
@@ -178,7 +175,6 @@ export class ShapeController {
             console.log("Rotating: ", deltaX, deltaY,
                         (deltaX == 0 ? "Inf" : deltaY / deltaX), newAngle);
             shape.rotateTo(newAngle);
-        } else if (hitInfo.hitType == HitType.CONTROL) {
         }
     }
 }
@@ -187,22 +183,53 @@ export class PathController extends ShapeController {
     _evalControlPoints() {
         var ours = [];
         var path = this.shape;
-        var j = 0;
         if (path._moveTo) {
-            ours.push(new ControlPoint(path._moveTo.x, path._moveTo.y, HitType.CONTROL, j++, "grab"));
+            ours.push(new ControlPoint(path._moveTo, HitType.CONTROL, 0, "grab", {'component': null, 'index': 0}));
         }
+        var j = 1;
         var currComp = path._componentList.head;
         while (currComp != null) {
             var nCPT = currComp.numControlPoints;
             for (var i = 0;i < nCPT;i++) {
                 var cpt = currComp.getControlPoint(i);
-                var controlPoint = new ControlPoint(cpt.x, cpt.y, HitType.CONTROL, j++, "grab", currComp)
+                var controlPoint = new ControlPoint(cpt, HitType.CONTROL, j++, "grab", {'component': currComp, 'index': i})
                 ours.push(controlPoint);
             }
             currComp = currComp.next;
         }
         var parents = super._evalControlPoints();
         var out = ours.concat(parents);
+        return out;
+    }
+
+    applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
+        if (hitInfo.hitType != HitType.CONTROL) {
+            return super.applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY);
+        }
+
+        var deltaX = currX - downX;
+        var deltaY = currY - downY;
+        var path = this.shape;
+        var downPoint = savedInfo.downPoint;
+        var nx = downPoint.x + deltaX;
+        var ny = downPoint.y + deltaY;
+        if (hitInfo.hitIndex == 0) {
+            // change moveTo
+            path._moveTo.set(nx, ny);
+        } else {
+            var cpComponent = hitInfo.controlPoint.extraData.component;
+            var cpIndex = hitInfo.controlPoint.extraData.index;
+            cpComponent.setControlPoint(cpIndex, nx, ny);
+        }
+        path._logicalBounds = null;
+        path.markTransformed();
+    }
+
+    snapshotFor(hitInfo) {
+        var out = super.snapshotFor(hitInfo);
+        if (hitInfo && hitInfo.hitType == HitType.CONTROL) {
+            out.downPoint = hitInfo.controlPoint.point.copy();
+        }
         return out;
     }
 }

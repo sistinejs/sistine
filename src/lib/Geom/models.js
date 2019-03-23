@@ -111,6 +111,12 @@ export class Point {
         this.set(x, y);
     }
 
+    isWithin(x, y, radius) {
+        var cx = this.x;
+        var cy = this.y;
+        return x >= cx - radius && x <= cx + radius && y >= cy - radius && y <= cy + radius;
+    }
+
     set(x, y) {
         this.x = x || 0;
         this.y = y || 0;

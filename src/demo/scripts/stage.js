@@ -28,13 +28,13 @@ function addSampleShapes() {
         radius: 100,
         "lineWidth": 2, "fillStyle": grd2
     });
-    */
     addShape("Square", {
         p0: new Point(350, 50),
         size: 200,
         fillStyle: 'red'
     });
     addShape("Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
+    */
 
     var path = new Sistine.Core.Models.Path();
     path.moveTo(100, 100);
