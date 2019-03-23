@@ -652,15 +652,12 @@ export class Path extends Shape {
         var oldBounds = this.logicalBounds;
         var sx = newBounds.width / oldBounds.width;
         var sy = newBounds.height / oldBounds.height;
-        this._p0.x = newBounds.x + ((this._p0.x - oldBounds.x) * sx)
-        this._p0.y = newBounds.y + ((this._p0.y - oldBounds.y) * sy)
         if (this._moveTo) {
             this._moveTo.x = newBounds.x + ((this._moveTo.x - oldBounds.x) * sx);
             this._moveTo.y = newBounds.y + ((this._moveTo.y - oldBounds.y) * sy);
         }
         var currComp = this._componentList.head;
         while (currComp != null) {
-            out.union(currComp.logicalBounds);
             var nCPT = currComp.numControlPoints;
             for (var i = nCPT - 1;i >= 0;i--) {
                 var cpt = currComp.getControlPoint(i);
@@ -682,12 +679,6 @@ export class Path extends Shape {
         while (currComp != null) {
             out.union(currComp.logicalBounds);
             currComp = currComp.next;
-        }
-        if (this.lineWidth > 0) {
-            out.x -= this.lineWidth / 2;
-            out.y -= this.lineWidth / 2;
-            out.width += this.lineWidth;
-            out.height += this.lineWidth;
         }
         return out;
     }
@@ -765,7 +756,7 @@ export class Path extends Shape {
         while (currComp != null) {
             currComp.draw(ctx);
             for (var i = currComp.numControlPoints - 1;i >= 0;i--) {
-                var cpt = currComp.getControlPoints(i);
+                var cpt = currComp.getControlPoint(i);
                 ctx.beginPath();
                 ctx.arc(cpt.x, cpt.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
                 ctx.fill();
@@ -832,6 +823,7 @@ export class LineToComponent extends PathComponent {
 
     setControlPoint(index, x, y) {
         this._endPoint.set(x, y);
+        this._logicalBounds = null;
     }
 
     get numControlPoints() {
@@ -862,6 +854,7 @@ export class ArcComponent extends PathComponent {
     }
 
     setControlPoint(index, x, y) {
+        this._logicalBounds = null;
         if (index == 0) {
             null.a = 2;
             return this._endPoint;
