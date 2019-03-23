@@ -122,7 +122,7 @@ export class Shape extends events.EventSource {
 
         // The reference width and height denote the "original" width and height
         // for this shape and is used as a way to know what the current "scale" is.
-        this.controller = new controller.ShapeController(this);
+        this._controller = null; 
 
         // Observable properties
         this.name = configs.name || this.className;
@@ -152,7 +152,12 @@ export class Shape extends events.EventSource {
 
     get parent() { return this._parent; } 
     get scene() { return this._scene; } 
-    get controller() { return this._controller; }
+    get controller() { 
+        if (this._controller == null) {
+            this._controller = new controller.ShapeController(this);
+        }
+        return this._controller; 
+    }
 
     // Observable Properties that will trigger change events
     get name() { return this._name; }
@@ -224,10 +229,6 @@ export class Shape extends events.EventSource {
         if (this._controller != c) {
             this._controller = c;
         }
-    }
-
-    set scene(s) {
-        null.a = 3;
     }
 
     setScene(s) {
@@ -646,6 +647,7 @@ export class Path extends Shape {
         this._closed = configs.closed || false;
         this._moveTo = configs.moveTo || null;
         this._componentList = new dlist.DList();
+        this._controller = new controller.PathController(this);
     }
 
     _setBounds(newBounds) {
@@ -679,6 +681,16 @@ export class Path extends Shape {
         while (currComp != null) {
             out.union(currComp.logicalBounds);
             currComp = currComp.next;
+        }
+        out.x -= 5;
+        out.y -= 5;
+        out.width += 10;
+        out.height += 10;
+        if (this.lineWidth > 0) {
+            out.x -= this.lineWidth / 2;
+            out.y -= this.lineWidth / 2;
+            out.width += this.lineWidth;
+            out.height += this.lineWidth;
         }
         return out;
     }
@@ -790,7 +802,6 @@ export class PathComponent {
     // get controlPoints() { return this._controlPoints; } 
     // setControlPoint(index, x, y) { this._controlPoints[index].set(x, y); this.markTransformed(); }
     get numControlPoints() { return 0; } 
-    get endPoint() { return this._endPoint; }
 }
 
 export class LineToComponent extends PathComponent {
@@ -812,6 +823,8 @@ export class LineToComponent extends PathComponent {
         }
         return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
+
+    get endPoint() { return this._endPoint; }
 
     draw(ctx) {
         ctx.lineTo(this._endPoint.x, this._endPoint.y);
@@ -843,23 +856,12 @@ export class ArcComponent extends PathComponent {
         this._arcCenter = new geom.Point(x, y);
     }
 
+    get endPoint() { return this._endPoint; }
+
     getControlPoint(index) {
         if (index == 0) {
             return this._endPoint;
         } else if (index == 1) {
-            return this._startPoint;
-        } else {
-            return this._arcCenter;
-        }
-    }
-
-    setControlPoint(index, x, y) {
-        this._logicalBounds = null;
-        if (index == 0) {
-            null.a = 2;
-            return this._endPoint;
-        } else if (index == 1) {
-            null.b = 2;
             return this._startPoint;
         } else {
             return this._arcCenter;
@@ -893,8 +895,9 @@ export class ArcToComponent extends PathComponent {
         // TODO
         this._arcCenter = new geom.Point(-1, -1);
         this.radius = radius;
-        this._endPoint = new geom.Point(x2, y2);
     }
+
+    get endPoint() { return this.p2; }
 
     getControlPoint(index) {
         if (index == 0) {
@@ -934,8 +937,6 @@ export class QuadraticToComponent extends PathComponent {
         super();
         this.p1 = new geom.Point(x1, y1);
         this.p2 = new geom.Point(x2, y2);
-        this._endPoint = this.p2;
-        this._endPoint.y = y2;
     }
 
     _evalBounds() {
@@ -956,6 +957,19 @@ export class QuadraticToComponent extends PathComponent {
         ctx.quadraticCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
     }
 
+    get endPoint() {
+        return this.p2;
+    }
+
+    setControlPoint(index, x, y) {
+        if (index == 0) {
+            this.p1.set(x, y);
+        } else {
+            this.p2.set(x, y);
+        }
+        this._logicalBounds = null;
+    }
+
     get numControlPoints() {
         return 2;
     }
@@ -967,11 +981,25 @@ export class BezierToComponent extends PathComponent {
         this.p1 = new geom.Point(x1, y1);
         this.p2 = new geom.Point(x2, y2);
         this.p3 = new geom.Point(x3, y3);
-        this._endPoint = new geom.Point(x3, y3);
     }
 
     draw(ctx) {
         ctx.bezierCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y, this.p3.x, this.p3.y);
+    }
+
+    get endPoint() {
+        return this.p3;
+    }
+
+    setControlPoint(index, x, y) {
+        if (index == 0) {
+            this.p1.set(x, y);
+        } else if (index == 1) {
+            this.p2.set(x, y);
+        } else {
+            this.p3.set(x, y);
+        }
+        this._logicalBounds = null;
     }
 
     getControlPoint(i) {

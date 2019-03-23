@@ -21,11 +21,12 @@ export const HitType = {
 }
 
 class ControlPoint extends geom.Point {
-    constructor(x, y, pointType, pointIndex, cursor) {
+    constructor(x, y, pointType, pointIndex, cursor, extraData) {
         super(x, y);
         this.pointType = pointType || 0;
         this.pointIndex = pointIndex || 0;
         this.cursor = cursor || "auto";
+        this.extraData = extraData || null;
     }
 }
 
@@ -102,7 +103,7 @@ export class ShapeController {
             var py = cp.y;
             if (x >= px - controlSize && x <= px + controlSize &&
                 y >= py - controlSize && y <= py + controlSize) {
-                return new HitInfo(this.shape, cp.pointType, cp.pointIndex, cp.cursor);
+                return new HitInfo(this.shape, cp.pointType, cp.pointIndex, cp.cursor, cp);
             }
         }
 
@@ -182,6 +183,27 @@ export class ShapeController {
     }
 }
 
-class PathController extends ShapeController {
+export class PathController extends ShapeController {
+    _evalControlPoints() {
+        var ours = [];
+        var path = this.shape;
+        var j = 0;
+        if (path._moveTo) {
+            ours.push(new ControlPoint(path._moveTo.x, path._moveTo.y, HitType.CONTROL, j++, "grab"));
+        }
+        var currComp = path._componentList.head;
+        while (currComp != null) {
+            var nCPT = currComp.numControlPoints;
+            for (var i = 0;i < nCPT;i++) {
+                var cpt = currComp.getControlPoint(i);
+                var controlPoint = new ControlPoint(cpt.x, cpt.y, HitType.CONTROL, j++, "grab", currComp)
+                ours.push(controlPoint);
+            }
+            currComp = currComp.next;
+        }
+        var parents = super._evalControlPoints();
+        var out = ours.concat(parents);
+        return out;
+    }
 }
 
