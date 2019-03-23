@@ -346,7 +346,6 @@ export class CreatingShapeState extends StageState {
             var maxX = Math.max(downPoint.x, currPoint.x);
             var maxY = Math.max(downPoint.y, currPoint.y);
             shapeForCreation.setBounds(new geom.Bounds(minX, minY, maxX - minX, maxY - minY));
-            console.log("Here: ", shapeForCreation.logicalBounds);
             stage.paneNeedsRepaint("edit");
         }
     }

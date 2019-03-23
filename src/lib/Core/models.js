@@ -221,7 +221,6 @@ export class Shape extends events.EventSource {
               .rotate(- this._rotation)
               .scale(1.0 / this._scaleFactor.x, 1.0 / this._scaleFactor.y)
               .translate(-cx, -cy);
-        console.log("updated transform: ", this, result);
         return result;
     }
 

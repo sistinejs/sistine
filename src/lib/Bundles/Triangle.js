@@ -9,36 +9,38 @@ export function newShape(configs) {
     return new TriangleShape(configs);
 }
 
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p0 = configs.p0 || new geom.Point(x + width / 2, y);
-    configs.p1 = configs.p1 || new geom.Point(x + width, y + height);
-    configs.p2 = configs.p2 || new geom.Point(x, y + height);
-    return newShape(configs);
-}
-
 export class TriangleShape extends models.Shape {
     constructor(configs) {
         super(configs);
-        this._p0 = configs.p0 || new geom.Point();
-        this._p1 = configs.p1 || new geom.Point();
-        this._p2 = configs.p2 || new geom.Point();
+        this._p0 = configs.p0 || null;
+        this._p1 = configs.p1 || null;
+        this._p2 = configs.p2 || null;
         this._controller = new TriangleController(this);
     }
 
     _setBounds(newBounds) {
-        var oldBounds = this.logicalBounds;
-        var sx = newBounds.width / oldBounds.width;
-        var sy = newBounds.height / oldBounds.height;
-        this._p0.x = newBounds.x + ((this._p0.x - oldBounds.x) * sx)
-        this._p0.y = newBounds.y + ((this._p0.y - oldBounds.y) * sy)
-        this._p1.x = newBounds.x + ((this._p1.x - oldBounds.x) * sx)
-        this._p1.y = newBounds.y + ((this._p1.y - oldBounds.y) * sy)
-        this._p2.x = newBounds.x + ((this._p2.x - oldBounds.x) * sx)
-        this._p2.y = newBounds.y + ((this._p2.y - oldBounds.y) * sy)
+        if (this._po == null) {
+            this._p0 = new geom.Point(newBounds.centerX, newBounds.top);
+            this._p1 = new geom.Point(newBounds.left, newBounds.bottom);
+            this._p2 = new geom.Point(newBounds.right, newBounds.bottom);
+        } else {
+            var oldBounds = this.logicalBounds;
+            var sx = newBounds.width / oldBounds.width;
+            var sy = newBounds.height / oldBounds.height;
+            this._p0.x = newBounds.x + ((this._p0.x - oldBounds.x) * sx)
+            this._p0.y = newBounds.y + ((this._p0.y - oldBounds.y) * sy)
+            this._p1.x = newBounds.x + ((this._p1.x - oldBounds.x) * sx)
+            this._p1.y = newBounds.y + ((this._p1.y - oldBounds.y) * sy)
+            this._p2.x = newBounds.x + ((this._p2.x - oldBounds.x) * sx)
+            this._p2.y = newBounds.y + ((this._p2.y - oldBounds.y) * sy)
+        }
     }
 
     _evalBounds() {
+        if (this._p0 == null) {
+            // shape hasnt been created yet
+            return new geom.Bounds();
+        }
         var left = Math.min(this._p0.x, this._p1.x, this._p2.x);
         var top = Math.min(this._p0.y, this._p1.y, this._p2.y);
         var right = Math.max(this._p0.x, this._p1.x, this._p2.x);
