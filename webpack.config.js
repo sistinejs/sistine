@@ -27,6 +27,7 @@ module.exports = (env, options) => {
                 "./src/demo/scripts/App.js",
                 "./src/demo/scripts/components/Panel.js",
                 "./src/demo/scripts/components/ShapesPanel.js",
+                "./src/demo/scripts/components/Toolbar.js",
                 "./src/demo/scripts/components/NumericSlider.js",
                 "./src/demo/scripts/components/FillPropertiesPanel.js",
                 "./src/demo/scripts/components/TextPropertiesPanel.js",

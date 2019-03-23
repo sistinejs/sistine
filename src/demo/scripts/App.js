@@ -4,10 +4,10 @@ class App {
         this.scene = new Sistine.Core.Models.Scene();
         this.stage = this._setupStage();
         this.sidebar = this._setupSidebar();
-        this.shapesPanel = new ShapesPanel("#toolbar_accordian");
+        this.shapesPanel = new ShapesPanel("#shapespanel_accordian");
+        this.toolbar = new Toolbar("#toolbar_div");
 
         this._setupSplitBar();
-        this._setupToolbar();
         this._setupMenus();
         this._layoutElements();
         var self = this;
@@ -52,10 +52,10 @@ class App {
     _layoutElements(e, ui) {
         var stage_div = $("#stage_div");
         var splitbar = $("#splitbar");
-        var toolpanel_div = $("#toolpanel_div");
+        var shapespanel_div = $("#shapespanel_div");
 
         // setup toolpanel width
-        toolpanel_div.width(splitbar.position().left);
+        shapespanel_div.width(splitbar.position().left);
 
         // setup stage_div width
         stage_div.css("left", splitbar.position().left + splitbar.width());
@@ -76,28 +76,6 @@ class App {
             });
         $(".menu li ul").each(function () {
             $(this).menu();
-        });
-    }
-
-    _setupToolbar() {
-        var self = this;
-        $("#zoom_option").selectmenu({ width : 100 });
-        var toolbar_buttons = $(".toolbar_button");
-        toolbar_buttons.each(function(index, tbbutton) {
-            var $tbbutton = $(tbbutton);
-            var label = $tbbutton.text();
-            $tbbutton.empty()
-            $tbbutton.attr("title", label);
-
-            var buttonId = tbbutton.id.replace(/TB_/, "");
-            var buttonImage = $("<img src = '" + "./src/demo/icons/toolbar/" + buttonId + ".png' />");
-            $tbbutton.button({ iconPosition: "top" }).append(buttonImage);
-            Sistine.Utils.DOM.fillChildComponent(buttonImage);
-
-            var eventId = "on" + buttonId
-            $tbbutton.click(function(event) {
-                self.eventMachine.handle(eventId, self, event);
-            });
         });
     }
 }
