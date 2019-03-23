@@ -147,12 +147,15 @@ export class Point {
 
 export class Bounds {
     constructor(x, y, width, height) {
-        this._x = x;
-        this._y = y;
-        this._width = width;
-        this._height = height;
+        this.set(x, y, width, height);
     }
 
+    set(x, y, width, height) {
+        this._x = x || 0;
+        this._y = y || 0;
+        this._width = width || 0;
+        this._height = height || 0;
+    }
     get innerRadius() { return Math.min(this._width, this._height) / 2.0; }
     get left() { return this._x; }
     get top() { return this._y; }

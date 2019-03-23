@@ -1,4 +1,6 @@
 
+import * as models from "./models"
+
 var pow = Math.pow,
     sqrt = Math.sqrt,
     min = Math.min,
@@ -36,49 +38,49 @@ export function pathEllipse(ctx, x, y, w, h) {
 }
 
 export function pointOnCircle(R, theta, out) {
-    out = out || [];
-    out[0] = R * cos(theta);
-    out[1] = R * sin(theta);
+    out = out || new models.Point();
+    out.x = R * cos(theta);
+    out.y = R * sin(theta);
     return out;
 }
 
 export function pointOnRect(W, H, theta, out) {
-    out = out || [];
-    out[0] = R * cos(theta);
-    out[1] = R * sin(theta);
+    out = out || new models.Point();
+    out.x = R * cos(theta);
+    out.y = R * sin(theta);
     return out;
 }
 
 export function pointOnEllipse(A, B, theta, out) {
-    out = out || [];
+    out = out || new models.Point();
     while (theta > 2 * PI) theta -= (2 * PI);
     var epsilon = 0.0001;
     if (abs(theta) < epsilon) {
         // close to 0
-        out[0] = A;
-        out[1] = 0;
+        out.x = A;
+        out.y = 0;
     } else if (abs(theta - PI) < epsilon) {
         // close to PI
-        out[0] = -A;
-        out[1] = 0;
+        out.x = -A;
+        out.y = 0;
     } else if (abs(theta - PI * 0.5) < epsilon) {
         // close to PI / 2
-        out[0] = 0;
-        out[1] = -B;
+        out.x = 0;
+        out.y = -B;
     } else if (abs(theta - PI * 1.5) < epsilon) {
         // close to 3 * PI / 2
-        out[0] = 0;
-        out[1] = B;
+        out.x = 0;
+        out.y = B;
     } else {
         var ab = A * B;
         var tantheta = tan(theta);
         var den = sqrt((B * B) + (A * A * tantheta * tantheta));
         if (theta > PI * 0.5 && theta < PI * 1.5) {
-            out[0] = ab / den;
-            out[1] = ab * tantheta / den;
+            out.x = ab / den;
+            out.y = ab * tantheta / den;
         } else {
-            out[0] = -ab / den;
-            out[1] = -ab * tantheta / den;
+            out.x = -ab / den;
+            out.y = -ab * tantheta / den;
         }
     }
     return out;

@@ -34,14 +34,12 @@ function addSampleShapes() {
     });
     addShape("Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
 
-    /**
     var path = new Sistine.Core.Models.Path();
     path.moveTo(100, 100);
     path.lineTo(100, 200);
     path.lineTo(300, 300);
     path.lineWidth = 10;
     theApp.scene.add(path);
-    */
 }
 
 function addShape(objid, configs) {

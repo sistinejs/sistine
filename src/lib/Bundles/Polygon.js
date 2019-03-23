@@ -58,17 +58,16 @@ export class PolygonShape extends models.Shape {
         var A = this.logicalBounds.width / 2.0;
         var B = this.logicalBounds.height / 2.0;
 
-        var p0 = [0,0];
-        var pi = [0,0];
-        geomutils.pointOnEllipse(A, B, Math.PI / 2.0, p0);
+        var p0 = geomutils.pointOnEllipse(A, B, Math.PI / 2.0);
+        var pi = new geom.Point();
         ctx.beginPath();
-        ctx.moveTo(cx + p0[0], cy + p0[1]);
+        ctx.moveTo(cx + p0.x, cy + p0.y);
         for (var i = 1;i < n;i++) {
             var currangle = (Math.PI / 2.0) + (i * theta);
             geomutils.pointOnEllipse(A, B, currangle, pi);
-            ctx.lineTo(cx + pi[0], cy + pi[1]);
+            ctx.lineTo(cx + pi.x, cy + pi.y);
         }
-        ctx.lineTo(cx + p0[0], cy + p0[1]);
+        ctx.lineTo(cx + p0.x, cy + p0.y);
         if (this.fillStyle) {
             ctx.fill();
         }

@@ -111,7 +111,6 @@ export class Shape extends events.EventSource {
         this.isVisible = true;
         this._globalTransform = new geom.Transform();
         this._logicalBounds = null;
-        this.markUpdated();
         this.markTransformed();
         this.controlSize = DEFAULT_CONTROL_SIZE;
 
@@ -147,6 +146,7 @@ export class Shape extends events.EventSource {
 
     markUpdated() { this._lastUpdated = Date.now(); }
     markTransformed() { 
+        this.markUpdated();
         this._lastTransformed = Date.now(); 
     }
 
@@ -290,7 +290,6 @@ export class Shape extends events.EventSource {
 
         this._translation.x = x;
         this._translation.y = y;
-        this.markUpdated();
         this.markTransformed();
         this._locationChanged(oldX, oldY);
         this.triggerOn(event.name, event);
@@ -310,7 +309,6 @@ export class Shape extends events.EventSource {
         if (this.validateBefore(event.name, event) == false) return false;
 
         this._scaleFactor.set(x, y);
-        this.markUpdated();
         this.markTransformed();
         this._scaleChanged(oldScaleX, oldScaleY);
         this.triggerOn(event.name, event);
@@ -325,7 +323,6 @@ export class Shape extends events.EventSource {
 
         var oldAngle = this._rotation;
         this._rotation = theta;
-        this.markUpdated();
         this.markTransformed();
         this._rotationChanged(oldAngle);
         this.triggerOn(event.name, event);
@@ -344,7 +341,6 @@ export class Shape extends events.EventSource {
             this._scaleFactor.x = this._scaleFactor.y = 1.0;
             this._setBounds(newBounds);
             this._logicalBounds = null;
-            this.markUpdated();
             this.markTransformed();
             this.triggerOn(event.name, event);
             return true;
@@ -650,7 +646,30 @@ export class Path extends Shape {
         this._closed = configs.closed || false;
         this._moveTo = configs.moveTo || null;
         this._componentList = new dlist.DList();
-        this._controlPoints = [];
+    }
+
+    _setBounds(newBounds) {
+        var oldBounds = this.logicalBounds;
+        var sx = newBounds.width / oldBounds.width;
+        var sy = newBounds.height / oldBounds.height;
+        this._p0.x = newBounds.x + ((this._p0.x - oldBounds.x) * sx)
+        this._p0.y = newBounds.y + ((this._p0.y - oldBounds.y) * sy)
+        if (this._moveTo) {
+            this._moveTo.x = newBounds.x + ((this._moveTo.x - oldBounds.x) * sx);
+            this._moveTo.y = newBounds.y + ((this._moveTo.y - oldBounds.y) * sy);
+        }
+        var currComp = this._componentList.head;
+        while (currComp != null) {
+            out.union(currComp.logicalBounds);
+            var nCPT = currComp.numControlPoints;
+            for (var i = nCPT - 1;i >= 0;i--) {
+                var cpt = currComp.getControlPoint(i);
+                var nx = newBounds.x + ((cpt.x - oldBounds.x) * sx);
+                var ny = newBounds.y + ((cpt.y - oldBounds.y) * sy);
+                currComp.setControlPoint(i, nx, ny);
+            }
+            currComp = currComp.next;
+        }
     }
 
     _evalBounds() {
@@ -664,6 +683,12 @@ export class Path extends Shape {
             out.union(currComp.logicalBounds);
             currComp = currComp.next;
         }
+        if (this.lineWidth > 0) {
+            out.x -= this.lineWidth / 2;
+            out.y -= this.lineWidth / 2;
+            out.width += this.lineWidth;
+            out.height += this.lineWidth;
+        }
         return out;
     }
 
@@ -671,10 +696,8 @@ export class Path extends Shape {
      * Add a new path component at the end of the path.
      */
     addComponent(component) {
-        this.markUpdated();
-        this.markTransformed();
         this._componentList.add(component);
-        this._logicalBounds.union(component.logicalBounds);
+        this.markTransformed();
     }
 
     get componentCount() {
@@ -682,15 +705,13 @@ export class Path extends Shape {
     }
 
     moveTo(x, y) {
-        this.markUpdated();
-        this.markTransformed();
         this._moveTo = new geom.Point(x, y);
+        this.markTransformed();
     }
 
     close(yesorno) {
-        this.markUpdated();
-        this.markTransformed();
         this._closed = yesorno;
+        this.markTransformed();
     }
 
     lineTo(x, y) { 
@@ -744,7 +765,7 @@ export class Path extends Shape {
         while (currComp != null) {
             currComp.draw(ctx);
             for (var i = currComp.numControlPoints - 1;i >= 0;i--) {
-                var cpt = currComp.controlPoints[i];
+                var cpt = currComp.getControlPoints(i);
                 ctx.beginPath();
                 ctx.arc(cpt.x, cpt.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
                 ctx.fill();
@@ -763,7 +784,6 @@ export class PathComponent {
     constructor() {
         this.next = null;
         this.prev = null;
-        this._controlPoints = [];
         this._logicalBounds = null;
     }
 
@@ -774,38 +794,44 @@ export class PathComponent {
         return this._logicalBounds;
     }
 
-    get controlPoints() { return this._controlPoints; } 
+    getControlPoint(i) { throw new Error( "Not implemented"); }
+    setControlPoint(index, x, y) { throw new Error( "Not implemented"); }
+    // get controlPoints() { return this._controlPoints; } 
+    // setControlPoint(index, x, y) { this._controlPoints[index].set(x, y); this.markTransformed(); }
     get numControlPoints() { return 0; } 
-    get endX() { return this._endX; }
-    get endY() { return this._endY; }
+    get endPoint() { return this._endPoint; }
 }
 
 export class LineToComponent extends PathComponent {
     constructor(x, y) {
         super();
-        this.x = x;
-        this.y = y;
-        this._endX = x;
-        this._endY = y;
-        this._controlPoints = [new geom.Point(x, y)];
+        this._endPoint = new geom.Point(x, y);
     }
 
     _evalBounds() {
-        var minx = this._controlPoints[0].x;
-        var miny = this._controlPoints[0].y;
+        var minx = this._endPoint.x;
+        var miny = this._endPoint.y;
         var maxx = minx;
         var maxy = miny;
         if (this.prev) {
-            minx = Math.min(minx, this.prev.endX);
-            miny = Math.min(miny, this.prev.endY);
-            maxx = Math.max(maxx, this.prev.endX);
-            maxy = Math.max(maxy, this.prev.endY);
+            minx = Math.min(minx, this.prev.endPoint.x);
+            miny = Math.min(miny, this.prev.endPoint.y);
+            maxx = Math.max(maxx, this.prev.endPoint.x);
+            maxy = Math.max(maxy, this.prev.endPoint.y);
         }
         return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     draw(ctx) {
-        ctx.lineTo(this.x, this.y);
+        ctx.lineTo(this._endPoint.x, this._endPoint.y);
+    }
+
+    getControlPoint(index) {
+        return this._endPoint;
+    }
+
+    setControlPoint(index, x, y) {
+        this._endPoint.set(x, y);
     }
 
     get numControlPoints() {
@@ -816,16 +842,35 @@ export class LineToComponent extends PathComponent {
 export class ArcComponent extends PathComponent {
     constructor(x, y, radius, startAngle, endAngle, anticlockwise) {
         super();
-        this.x = x;
-        this.y = y;
         this.radius = radius;
         this.startAngle = startAngle;
         this.endAngle = endAngle;
         this.anticlockwise = anticlockwise;
-        var out = geomutils.pointOnCircle(radius, endAngle, out)
-        this.endX = x + out[0];
-        this.endY = y + out[1];
-        this._controlPoints = [new geom.Point(this._endX, this.endY)];
+        this._startPoint = geomutils.pointOnCircle(radius, startAngle);
+        this._endPoint = geomutils.pointOnCircle(radius, endAngle);
+        this._arcCenter = new geom.Point(x, y);
+    }
+
+    getControlPoint(index) {
+        if (index == 0) {
+            return this._endPoint;
+        } else if (index == 1) {
+            return this._startPoint;
+        } else {
+            return this._arcCenter;
+        }
+    }
+
+    setControlPoint(index, x, y) {
+        if (index == 0) {
+            null.a = 2;
+            return this._endPoint;
+        } else if (index == 1) {
+            null.b = 2;
+            return this._startPoint;
+        } else {
+            return this._arcCenter;
+        }
     }
 
     _evalBounds() {
@@ -834,18 +879,12 @@ export class ArcComponent extends PathComponent {
         var maxx = minx;
         var maxy = miny;
         if (this.prev) {
-            minx = Math.min(minx, this.prev.endX);
-            miny = Math.min(miny, this.prev.endY);
-            maxx = Math.max(maxx, this.prev.endX);
-            maxy = Math.max(maxy, this.prev.endY);
+            minx = Math.min(minx, this.prev.endPoint.x);
+            miny = Math.min(miny, this.prev.endPoint.y);
+            maxx = Math.max(maxx, this.prev.endPoint.x);
+            maxy = Math.max(maxy, this.prev.endPoint.y);
         }
-        var out = new geom.Bounds({
-            x: minx,
-            y: miny,
-            width: maxx - minx,
-            height: maxy - miny,
-        });
-        return out;
+        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     get numControlPoints() {
@@ -856,78 +895,72 @@ export class ArcComponent extends PathComponent {
 export class ArcToComponent extends PathComponent {
     constructor(x1, y1, x2, y2, radius) {
         super();
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this._endX = x2;
-        this._endY = y2;
-        this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2)];
+        this.p1 = new geom.Point(x1, y1);
+        this.p2 = new geom.Point(x2, y2);
+        // TODO
+        this._arcCenter = new geom.Point(-1, -1);
+        this.radius = radius;
+        this._endPoint = new geom.Point(x2, y2);
     }
 
-    _evalBounds() {
-        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x);
-        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y);
-        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x);
-        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y);
-        if (this.prev) {
-            minx = Math.min(minx, this.prev.endX);
-            miny = Math.min(miny, this.prev.endY);
-            maxx = Math.max(maxx, this.prev.endX);
-            maxy = Math.max(maxy, this.prev.endY);
+    getControlPoint(index) {
+        if (index == 0) {
+            return this.p1;
+        } else if (index == 1) {
+            return this.p2;
+        } else {
+            return this._arcCenter;
         }
-        var out = new geom.Bounds({
-            x: minx,
-            y: miny,
-            width: maxx - minx,
-            height: maxy - miny,
-        });
-        return out;
-    }
-
-    draw(ctx) {
-        ctx.arcTo(this.x1, this.y1, this.x2, this.y2, this.radius);
     }
 
     get numControlPoints() {
-        return 2;
+        return 3;
+    }
+
+    _evalBounds() {
+        var minx = Math.min(this.p1.x, this.p2.x);
+        var miny = Math.min(this.p1.y, this.p2.y);
+        var maxx = Math.max(this.p1.x, this.p2.x);
+        var maxy = Math.max(this.p1.y, this.p2.y);
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endPoint.x);
+            miny = Math.min(miny, this.prev.endPoint.y);
+            maxx = Math.max(maxx, this.prev.endPoint.x);
+            maxy = Math.max(maxy, this.prev.endPoint.y);
+        }
+        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
+    }
+
+    draw(ctx) {
+        ctx.arcTo(this.p1.x, this.p1.y, this.p2.x, this.p2.x, this.radius);
     }
 }
 
 export class QuadraticToComponent extends PathComponent {
     constructor(x1, y1, x2, y2) {
         super();
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this._endX = x2;
-        this._endY = y2;
-        this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2)];
+        this.p1 = new geom.Point(x1, y1);
+        this.p2 = new geom.Point(x2, y2);
+        this._endPoint = this.p2;
+        this._endPoint.y = y2;
     }
 
     _evalBounds() {
-        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x);
-        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y);
-        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x);
-        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y);
+        var minx = Math.min(this.p1.x, this.p2.x);
+        var miny = Math.min(this.p1.y, this.p2.y);
+        var maxx = Math.max(this.p1.x, this.p2.x);
+        var maxy = Math.max(this.p1.y, this.p2.y);
         if (this.prev) {
-            minx = Math.min(minx, this.prev.endX);
-            miny = Math.min(miny, this.prev.endY);
-            maxx = Math.max(maxx, this.prev.endX);
-            maxy = Math.max(maxy, this.prev.endY);
+            minx = Math.min(minx, this.prev.endPoint.x);
+            miny = Math.min(miny, this.prev.endPoint.y);
+            maxx = Math.max(maxx, this.prev.endPoint.x);
+            maxy = Math.max(maxy, this.prev.endPoint.y);
         }
-        var out = new geom.Bounds({
-            x: minx,
-            y: miny,
-            width: maxx - minx,
-            height: maxy - miny,
-        });
-        return out;
+        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     draw(ctx) {
-        ctx.quadraticCurveTo(this.x1, this.y1, this.x2, this.y2);
+        ctx.quadraticCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
     }
 
     get numControlPoints() {
@@ -938,19 +971,24 @@ export class QuadraticToComponent extends PathComponent {
 export class BezierToComponent extends PathComponent {
     constructor(x1, y1, x2, y2, x3, y3) {
         super();
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.x3 = x3;
-        this.y3 = y3;
-        this._endX = x3;
-        this._endY = y3;
-        this._controlPoints = [new geom.Point(x1, y1), new geom.Point(x2, y2), new geom.Point(x3,y3)];
+        this.p1 = new geom.Point(x1, y1);
+        this.p2 = new geom.Point(x2, y2);
+        this.p3 = new geom.Point(x3, y3);
+        this._endPoint = new geom.Point(x3, y3);
     }
 
     draw(ctx) {
-        ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+        ctx.bezierCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y, this.p3.x, this.p3.y);
+    }
+
+    getControlPoint(i) {
+        if (i == 0) {
+            return this.p1;
+        } else if (i == 1) {
+            return this.p2;
+        } else {
+            return this.p3;
+        }
     }
 
     get numControlPoints() {
@@ -958,15 +996,15 @@ export class BezierToComponent extends PathComponent {
     }
 
     _evalBounds() {
-        var minx = Math.min(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
-        var miny = Math.min(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
-        var maxx = Math.max(this._controlPoints[0].x, this._controlPoints[1].x, this._controlPoints[2].x);
-        var maxy = Math.max(this._controlPoints[0].y, this._controlPoints[1].y, this._controlPoints[2].y);
+        var minx = Math.min(this.p1.x, this.p2.x, this.p3.x);
+        var miny = Math.min(this.p1.y, this.p2.y, this.p3.y);
+        var maxx = Math.max(this.p1.x, this.p2.x, this.p3.x);
+        var maxy = Math.max(this.p1.y, this.p2.y, this.p3.y);
         if (this.prev) {
-            minx = Math.min(minx, this.prev.endX);
-            miny = Math.min(miny, this.prev.endY);
-            maxx = Math.max(maxx, this.prev.endX);
-            maxy = Math.max(maxy, this.prev.endY);
+            minx = Math.min(minx, this.prev.endPoint.x);
+            miny = Math.min(miny, this.prev.endPoint.y);
+            maxx = Math.max(maxx, this.prev.endPoint.x);
+            maxy = Math.max(maxy, this.prev.endPoint.y);
         }
         var out = new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
         return out;
