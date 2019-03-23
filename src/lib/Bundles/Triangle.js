@@ -19,7 +19,7 @@ export class TriangleShape extends models.Shape {
     }
 
     _setBounds(newBounds) {
-        if (this._po == null) {
+        if (this._p0 == null) {
             this._p0 = new geom.Point(newBounds.centerX, newBounds.top);
             this._p1 = new geom.Point(newBounds.left, newBounds.bottom);
             this._p2 = new geom.Point(newBounds.right, newBounds.bottom);

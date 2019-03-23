@@ -20,7 +20,7 @@ export const HitType = {
     SIZE_NW: 7,
 }
 
-class ControlPoint {
+export class ControlPoint {
     constructor(point, pointType, pointIndex, cursor, extraData) {
         this.point = point;
         this.pointType = pointType || 0;
@@ -94,7 +94,6 @@ export class ShapeController {
         var newp = this.shape.globalTransform.apply(gx, gy, {});
         var x = newp.x;
         var y = newp.y;
-        var logicalBounds = this.shape.logicalBounds;
         var controlRadius = this.shape.controlRadius;
         var controlPoints = this.controlPoints;
         for (var i = controlPoints.length - 1;i >= 0;i--) {
@@ -104,6 +103,11 @@ export class ShapeController {
             }
         }
 
+        return this._checkMoveHitInfo(x, y)
+    }
+
+    _checkMoveHitInfo(x, y) {
+        var logicalBounds = this.shape.logicalBounds;
         if (logicalBounds.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }

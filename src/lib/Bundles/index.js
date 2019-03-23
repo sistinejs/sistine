@@ -1,5 +1,6 @@
 
 import * as Triangle from "./Triangle"
+import * as Line from "./Line"
 import * as Rectangle from "./Rectangle"
 import * as Square from "./Square"
 import * as Polygon from "./Polygon"
@@ -19,6 +20,7 @@ import * as RightChevron from "./RightChevron"
 
 export const Bundle = {
     "Triangle": Triangle,
+    "Line": Line,
     "Rectangle": Rectangle,
     "Square": Square,
     "Polygon": Polygon,
@@ -37,35 +39,3 @@ export const Bundle = {
     "RightChevron": RightChevron,
 }
 
-/*
-"Triangle",
-"Rectangle",
-"Square",
-"Polygon",
-"Star",
-"Cog",
-"RoundedRectangle",
-"Plus",
-"Circle",
-"Ellipse",
-"LeftArrow",
-"RightArrow",
-"DoubleArrow",
-"Cylinder",
-"LeftBlockArrow",
-"RightBlockArrow",
-"LeftChevron",
-"RightChevron",
-"StraightConnector",
-"ElbowConnector",
-"CurvedConnector",
-"InMemCache",
-"DistributedCache",
-"LoadBalancer",
-"WebServer",
-"Database",
-"BTreeIndex",
-"HashIndex",
-"KafkaQueue",
-"NetworkLink",
-*/
