@@ -26,7 +26,7 @@ export class Path extends models.Shape {
         var sx = newBounds.width / oldBounds.width;
         var sy = newBounds.height / oldBounds.height;
         if (this._moveTo) {
-            this._moveTo.scale(sx, sy, oldBounds.x, oldBounds.y).translate(newBounds.x, newBoundsy);
+            this._moveTo.scale(sx, sy, oldBounds.x, oldBounds.y).translate(newBounds.x, newBounds.y);
         }
         var currComp = this._componentList.head;
         while (currComp != null) {
@@ -87,10 +87,10 @@ export class Path extends models.Shape {
         this.addComponent(new ArcToComponent(this._cmdArcTo, x1, y1, x2, y2, radius));
     }
     quadraticCurveTo(cp1x, cp1y, x, y) {
-        this.addComponent(new QuadraticCurveToComponent(cp1x, cp1y, x, y));
+        this.addComponent(new QuadraticToComponent(cp1x, cp1y, x, y));
     }
     bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
-        this.addComponent(this.BezierCurveToComponent, cp1x, cp1y, cp2x, cp2y, x, y);
+        this.addComponent(new BezierToComponent(cp1x, cp1y, cp2x, cp2y, x, y));
     }
 
     draw(ctx) {
@@ -326,6 +326,14 @@ export class QuadraticToComponent extends PathComponent {
         return this.p2;
     }
 
+    getControlPoint(index) {
+        if (index == 0) {
+            return this.p1;
+        } else {
+            return this.p2;
+        }
+    }
+
     setControlPoint(index, x, y) {
         if (index == 0) {
             this.p1.set(x, y);
@@ -385,14 +393,14 @@ export class BezierToComponent extends PathComponent {
         var result = null;
         if (this.prev) {
             result = Geom.Utils.boundsOfCubicCurve(this.prev.endPoint.x, this.prev.endPoint.y, 
-                                                  this._p1.x, this._p1.y,
-                                                  this._p2.x, this._p2.y,
-                                                  this._p3.x, this._p3.y);
+                                                  this.p1.x, this.p1.y,
+                                                  this.p2.x, this.p2.y,
+                                                  this.p3.x, this.p3.y);
         } else {
-            result = Geom.Utils.boundsOfCubicCurve(this._p1.x, this._p1.y,
-                                                   this._p1.x, this._p1.y,
-                                                   this._p2.x, this._p2.y,
-                                                   this._p3.x, this._p3.y);
+            result = Geom.Utils.boundsOfCubicCurve(this.p1.x, this.p1.y,
+                                                   this.p1.x, this.p1.y,
+                                                   this.p2.x, this.p2.y,
+                                                   this.p3.x, this.p3.y);
         }
         return new Geom.Models.Bounds(result.left, result.top,
                                       result.right - result.left,

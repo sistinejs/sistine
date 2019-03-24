@@ -36,13 +36,15 @@ function addSampleShapes() {
         fillStyle: 'red'
     });
     addShape(BasicShapes, "Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
+    */
 
     var path = addShape(BuiltinShapes, "Path")
     path.moveTo(100, 100);
     path.lineTo(100, 200);
-    path.lineTo(300, 300);
+    path.quadraticCurveTo(300, 400, 325, 475);
+    path.bezierCurveTo(300, 400, 325, 475, 500, 390);
     path.lineWidth = 10;
-    */
+
     addShape(BuiltinShapes, "QuadCurve", {
         p0: new Sistine.Geom.Models.Point(100, 300),
         p1: new Sistine.Geom.Models.Point(200, 200),
