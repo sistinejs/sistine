@@ -42,10 +42,7 @@ export class QuadCurve extends models.Shape {
             // shape hasnt been created yet
             return new Geom.Models.Bounds();
         }
-        var result = Geom.Utils.boundsOfCurve(this._p0.x, this._p0.y,
-                                              this._p1.x, this._p1.y,
-                                              this._p1.x, this._p1.y,
-                                              this._p2.x, this._p2.y);
+        var result = Geom.Utils.boundsOfQuadCurve(this._p0.x, this._p0.y, this._p1.x, this._p1.y, this._p2.x, this._p2.y);
         return new Geom.Models.Bounds(result.left, result.top,
                                       result.right - result.left,
                                       result.bottom - result.top);
@@ -117,6 +114,7 @@ QuadCurve.Controller = class QuadCurveController extends controller.ShapeControl
     }
 
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
+        console.log("Hit Info: ", hitInfo);
         if (hitInfo.hitType != HitType.CONTROL) {
             return super.applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY);
         }

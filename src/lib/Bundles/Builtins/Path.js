@@ -52,16 +52,6 @@ export class Path extends models.Shape {
             out.union(currComp.logicalBounds);
             currComp = currComp.next;
         }
-        out.x -= 5;
-        out.y -= 5;
-        out.width += 10;
-        out.height += 10;
-        if (this.lineWidth > 0) {
-            out.x -= this.lineWidth / 2;
-            out.y -= this.lineWidth / 2;
-            out.width += this.lineWidth;
-            out.height += this.lineWidth;
-        }
         return out;
     }
 
@@ -310,17 +300,22 @@ export class QuadraticToComponent extends PathComponent {
     }
 
     _evalBounds() {
-        var minx = Math.min(this.p1.x, this.p2.x);
-        var miny = Math.min(this.p1.y, this.p2.y);
-        var maxx = Math.max(this.p1.x, this.p2.x);
-        var maxy = Math.max(this.p1.y, this.p2.y);
+        var result = null;
         if (this.prev) {
-            minx = Math.min(minx, this.prev.endPoint.x);
-            miny = Math.min(miny, this.prev.endPoint.y);
-            maxx = Math.max(maxx, this.prev.endPoint.x);
-            maxy = Math.max(maxy, this.prev.endPoint.y);
+            var p0 = this.prev.endPoint;
+            var p1 = this.p1;
+            var p2 = this.p2;
+            result = Geom.Utils.boundsOfQuadCurve(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+            return new Geom.Models.Bounds(result.left, result.top,
+                                          result.right - result.left,
+                                          result.bottom - result.top);
+        } else {
+            var minx = Math.min(this.p1.x, this.p2.x);
+            var miny = Math.min(this.p1.y, this.p2.y);
+            var maxx = Math.max(this.p1.x, this.p2.x);
+            var maxy = Math.max(this.p1.y, this.p2.y);
+            return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
         }
-        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     draw(ctx) {
@@ -387,18 +382,21 @@ export class BezierToComponent extends PathComponent {
     }
 
     _evalBounds() {
-        var minx = Math.min(this.p1.x, this.p2.x, this.p3.x);
-        var miny = Math.min(this.p1.y, this.p2.y, this.p3.y);
-        var maxx = Math.max(this.p1.x, this.p2.x, this.p3.x);
-        var maxy = Math.max(this.p1.y, this.p2.y, this.p3.y);
+        var result = null;
         if (this.prev) {
-            minx = Math.min(minx, this.prev.endPoint.x);
-            miny = Math.min(miny, this.prev.endPoint.y);
-            maxx = Math.max(maxx, this.prev.endPoint.x);
-            maxy = Math.max(maxy, this.prev.endPoint.y);
+            result = Geom.Utils.boundsOfCubicCurve(this.prev.endPoint.x, this.prev.endPoint.y, 
+                                                  this._p1.x, this._p1.y,
+                                                  this._p2.x, this._p2.y,
+                                                  this._p3.x, this._p3.y);
+        } else {
+            result = Geom.Utils.boundsOfCubicCurve(this._p1.x, this._p1.y,
+                                                   this._p1.x, this._p1.y,
+                                                   this._p2.x, this._p2.y,
+                                                   this._p3.x, this._p3.y);
         }
-        var out = new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
-        return out;
+        return new Geom.Models.Bounds(result.left, result.top,
+                                      result.right - result.left,
+                                      result.bottom - result.top);
     }
 }
 

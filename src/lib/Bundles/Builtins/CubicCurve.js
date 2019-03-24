@@ -43,7 +43,7 @@ export class CubicCurve extends models.Shape {
             // shape hasnt been created yet
             return new Geom.Models.Bounds();
         }
-        var result = Geom.Utils.boundsOfCurve(this._p0.x, this._p0.y,
+        var result = Geom.Utils.boundsOfCubicCurve(this._p0.x, this._p0.y,
                                               this._p1.x, this._p1.y,
                                               this._p2.x, this._p2.y,
                                               this._p3.x, this._p3.y);

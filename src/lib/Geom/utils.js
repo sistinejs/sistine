@@ -86,8 +86,17 @@ export function pointOnEllipse(A, B, theta, out) {
     return out;
 }
 
+export function boundsOfQuadCurve(x0, y0, x1, y1, x2, y2) {
+    return boundsOfCubicCurve(x0, y0,
+                              x0 + (2 * (x1 - x0) / 3.0),
+                              y0 + (2 * (y1 - y0) / 3.0),
+                              x2 + (2 * (x1 - x2) / 3.0),
+                              y2 + (2 * (y1 - y2) / 3.0),
+                              x2, y2);
+}
+
 // SOURCE: https://stackoverflow.com/questions/2587751/an-algorithm-to-find-bounding-box-of-closed-bezier-curves
-export function boundsOfCurve(x0, y0, x1, y1, x2, y2, x3, y3)
+export function boundsOfCubicCurve(x0, y0, x1, y1, x2, y2, x3, y3)
 {
   var tvalues = new Array();
   var bounds = [new Array(), new Array()];

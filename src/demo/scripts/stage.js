@@ -49,10 +49,10 @@ function addSampleShapes() {
         p2: new Sistine.Geom.Models.Point(300, 300)
     })
     addShape(BuiltinShapes, "CubicCurve", {
-        p0: new Sistine.Geom.Models.Point(100, 300),
-        p1: new Sistine.Geom.Models.Point(200, 200),
-        p2: new Sistine.Geom.Models.Point(300, 300),
-        p3: new Sistine.Geom.Models.Point(400, 200)
+        p0: new Sistine.Geom.Models.Point(400, 300),
+        p1: new Sistine.Geom.Models.Point(500, 200),
+        p2: new Sistine.Geom.Models.Point(600, 300),
+        p3: new Sistine.Geom.Models.Point(700, 200)
     })
 }
 
