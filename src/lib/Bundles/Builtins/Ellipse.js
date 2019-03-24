@@ -34,7 +34,7 @@ export class EllipseShape extends models.Shape {
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
         var bottom = Math.max(this._p1.y, this._p2.y);
-        return new geom.Bounds(left, top, right - left, bottom - top);
+        return new Geom.Models.Bounds(left, top, right - left, bottom - top);
     }
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);

@@ -32,7 +32,7 @@ export class Arc extends models.Shape {
         var top = Math.min(this._p0.y, this._p1.y);
         var right = Math.max(this._p0.x, this._p1.x);
         var bottom = Math.max(this._p0.y, this._p1.y);
-        return new geom.Bounds(left, top, right - left, bottom - top);
+        return new Geom.Models.Bounds(left, top, right - left, bottom - top);
     }
 
     get className() { return "Arc"; };
