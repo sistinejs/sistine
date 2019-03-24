@@ -7,17 +7,12 @@ var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new Line(configs);
-}
-
 export class Line extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p0 = configs.p0 || new Geom.Models.Point();
         this._p1 = configs.p1 || new Geom.Models.Point();
-        this._controller = new LineController(this);
+        this._controller = new Line.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -62,7 +57,7 @@ export class Line extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class LineController extends controller.ShapeController {
+Line.Controller = class LineController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

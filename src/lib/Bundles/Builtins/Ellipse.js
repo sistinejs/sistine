@@ -7,26 +7,12 @@ var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new EllipseShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    y += height / 4;
-    height *= 0.7;
-    configs.p1 = new Geom.Models.Point(x, y);
-    configs.p2 = new Geom.Models.Point(x + width, y + height);
-    return newShape(configs);
-}
-
-export class EllipseShape extends models.Shape {
+export class Ellipse extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new Geom.Models.Point(0, 0);
         this._p2 = configs.p2 || new Geom.Models.Point(100, 100);
-        this._controller = new EllipseController(this);
+        this._controller = new Ellipse.Controller(this);
     }
 
     _evalBounds() {
@@ -66,7 +52,7 @@ export class EllipseShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class EllipseController extends controller.ShapeController {
+Ellipse.Controller = class EllipseController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

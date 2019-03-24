@@ -4,18 +4,13 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new TriangleShape(configs);
-}
-
-export class TriangleShape extends models.Shape {
+export class Triangle extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p0 = configs.p0 || null;
         this._p1 = configs.p1 || null;
         this._p2 = configs.p2 || null;
-        this._controller = new TriangleController(this);
+        this._controller = new Triangle.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -68,7 +63,7 @@ export class TriangleShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class TriangleController extends controller.ShapeController {
+Triangle.Controller = class TriangleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

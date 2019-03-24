@@ -4,19 +4,14 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new StarShape(configs);
-}
-
-export class StarShape extends models.Shape {
+export class Star extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._numSides = Math.max(3, configs.numSides || 5);
         this._innerRadius = configs.innerRadius || null;
-        this._controller = new StarController(this);
+        this._controller = new Star.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -87,7 +82,7 @@ export class StarShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class StarController extends controller.ShapeController {
+Star.Controller = class StarController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

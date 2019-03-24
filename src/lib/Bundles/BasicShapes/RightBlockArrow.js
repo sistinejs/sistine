@@ -1,9 +1,15 @@
 
 import * as rightArrows from "./RightArrow"
 
-export function newShape(configs) {
+function sanitizeConfigs(configs) {
     configs = configs || {};
     configs.shaftWidth = 1.0;
-    configs._name = configs._name || "RightBlockArrow";
-    return new rightArrows.RightArrowShape(configs);
+    return configs;
 }
+
+export class RightBlockArrow extends rightArrows.RightArrow {
+    constructor(configs) {
+        super((configs = sanitizeConfigs(configs)));
+    }
+}
+

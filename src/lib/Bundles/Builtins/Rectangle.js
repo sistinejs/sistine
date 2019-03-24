@@ -7,14 +7,9 @@ var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new RectangleShape(configs);
-}
-
-export class RectangleShape extends models.Shape {
+export class Rectangle extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new Geom.Models.Point(0, 0);
         this._p2 = configs.p2 || new Geom.Models.Point(100, 100);
         this._controller = new RectangleController(this);

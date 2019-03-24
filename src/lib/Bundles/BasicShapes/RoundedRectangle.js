@@ -4,18 +4,13 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new RoundedRectangleShape(configs);
-}
-
-export class RoundedRectangleShape extends models.Shape {
+export class RoundedRectangle extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._cornerRadius = configs.cornerRadius || 5;
-        this._controller = new RoundedRectangleController(this);
+        this._controller = new RoundedRectangle.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -65,7 +60,7 @@ export class RoundedRectangleShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class RoundedRectangleController extends controller.ShapeController {
+RoundedRectangle.Controller = class RoundedRectangleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

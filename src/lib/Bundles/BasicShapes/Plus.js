@@ -4,26 +4,14 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new PlusShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
-    return newShape(configs);
-}
-
-export class PlusShape extends models.Shape {
+export class Plus extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._innerWidth = configs.innerWidth || 0.3;
         this._innerHeight = configs.innerHeight || 0.3;
-        this._controller = new PlusController(this);
+        this._controller = new Plus.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -80,7 +68,7 @@ export class PlusShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class PlusController extends controller.ShapeController {
+Plus.Controller = class PlusController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

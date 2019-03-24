@@ -4,27 +4,15 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new DoubleArrowShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
-    return newShape(configs);
-}
-
-export class DoubleArrowShape extends models.Shape {
+export class DoubleArrow extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._shaftWidth = configs.shaftWidth || 0.3;
         this._tipLength = configs.tipLength || 0.3;
         this._tipPullback = configs.tipPullback || 0.1;
-        this._controller = new DoubleArrowController(this);
+        this._controller = new DoubleArrow.Controller(this);
     }
 
     _evalBounds() {
@@ -76,7 +64,7 @@ export class DoubleArrowShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class DoubleArrowController extends controller.ShapeController {
+DoubleArrow.Controller = class DoubleArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

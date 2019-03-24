@@ -4,28 +4,16 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new LeftArrowShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
-    return newShape(configs);
-}
-
-export class LeftArrowShape extends models.Shape {
+export class LeftArrow extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._shaftWidth = configs.shaftWidth || 0.4;
         this._tipLength = configs.tipLength || 0.4;
         this._tipPullback = configs.tipPullback || 0;
         this._backDepth = configs.backDepth || 0;
-        this._controller = new LeftArrowController(this);
+        this._controller = new LeftArrow.Controller(this);
     }
 
     _evalBounds() {
@@ -78,7 +66,7 @@ export class LeftArrowShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class LeftArrowController extends controller.ShapeController {
+LeftArrow.Controller = class LeftArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

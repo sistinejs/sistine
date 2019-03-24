@@ -4,26 +4,14 @@ import * as controller from "../../Core/controller"
 import * as geom from "../../Geom/models"
 import * as geomutils from "../../Geom/utils"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new PolygonShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
-    return newShape(configs);
-}
-
-export class PolygonShape extends models.Shape {
+export class Polygon extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._numSides = Math.max(3, configs.numSides || 5);
         this._edgePoints = [];
-        this._controller = new PolygonController(this);
+        this._controller = new Polygon.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -80,7 +68,7 @@ export class PolygonShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class PolygonController extends controller.ShapeController {
+Polygon.Controller = class PolygonController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

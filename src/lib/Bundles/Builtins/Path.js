@@ -7,17 +7,12 @@ var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new Path(configs);
-}
-
 /**
  * A wrapper over a path.
  */
 export class Path extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         configs = configs || {};
         this._closed = configs.closed || false;
         this._moveTo = configs.moveTo || null;

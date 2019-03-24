@@ -4,21 +4,9 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new CircleShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.center = new geom.Point(x + width / 2, y + height / 2);
-    configs.radius = Math.min(width, height) / 2;
-    return newShape(configs);
-}
-
-export class CircleShape extends models.Shape {
+export class Circle extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._center = configs.center || new geom.Point(0, 0);
         this._radius = configs.radius || 10;
         this._controller = new CircleController(this);

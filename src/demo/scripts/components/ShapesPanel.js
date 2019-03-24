@@ -56,7 +56,8 @@ class ShapesPanel extends Panel {
                 var id = event.currentTarget.id.replace(/SB_/, "");
                 var TheBundle = eval(event.currentTarget.getAttribute("bundle") || "Sistine.Bundles.BasicShapes");
                 var configs = Object.assign({}, shapeDefaults);
-                theApp.eventMachine.enter("CreatingShapeState", TheBundle[id].newShape(configs));
+                var newShape = new TheBundle[id](configs);
+                theApp.eventMachine.enter("CreatingShapeState", newShape);
             });
         });
     }

@@ -4,21 +4,16 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new RightArrowShape(configs);
-}
-
-export class RightArrowShape extends models.Shape {
+export class RightArrow extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._shaftWidth = configs.shaftWidth || 0.4;
         this._tipLength = configs.tipLength || 0.4;
         this._tipPullback = configs.tipPullback || 0;
         this._backDepth = configs.backDepth || 0;
-        this._controller = new RightArrowController(this);
+        this._controller = new RightArrow.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -72,7 +67,7 @@ export class RightArrowShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class RightArrowController extends controller.ShapeController {
+RightArrow.Controller = class RightArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

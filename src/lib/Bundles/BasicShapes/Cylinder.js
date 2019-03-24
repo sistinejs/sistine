@@ -4,23 +4,9 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new CylinderShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    y += height / 5;
-    height *= 0.6;
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
-    return newShape(configs);
-}
-
-export class CylinderShape extends models.Shape {
+export class Cylinder extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._ellipseHeight = configs.ellipseHeight || 0.4;
@@ -82,7 +68,7 @@ export class CylinderShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class CylinderController extends controller.ShapeController {
+Cylinder.Controller = class CylinderController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

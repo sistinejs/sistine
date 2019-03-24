@@ -1,20 +1,15 @@
 
 import { Geom } from "../../Geom/index"
-import * as models from "../../models"
-import * as controller from "../../controller"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new Arc(configs);
-}
-
 export class Arc extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p0 = configs.p0 || new Geom.Models.Point();
         this._p1 = configs.p1 || new Geom.Models.Point();
         this._p2 = configs.p1 || new Geom.Models.Point();

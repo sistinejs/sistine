@@ -4,17 +4,12 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
-export function newShape(configs) {
-    configs = configs || {};
-    return new SquareShape(configs);
-}
-
-export class SquareShape extends models.Shape {
+export class Square extends models.Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
         this._p0 = configs.p0 || new geom.Point(0, 0);
         this._size = configs.size || 10;
-        this._controller = new SquareController(this);
+        this._controller = new Square.Controller(this);
     }
 
     canSetSize(newBounds) {
@@ -53,7 +48,7 @@ export class SquareShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class SquareController extends controller.ShapeController {
+Square.Controller = class SquareController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

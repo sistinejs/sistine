@@ -51,7 +51,7 @@ function addShape(Bundle, objid, configs) {
         ...shapeDefaults,
         ...configs
     }
-    var newShape = Bundle[objid].newShape(finalConfigs);
+    var newShape = new Bundle[objid](finalConfigs);
     theApp.scene.add(newShape);
     return newShape;
 }
