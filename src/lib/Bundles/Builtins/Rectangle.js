@@ -15,8 +15,8 @@ export function newShape(configs) {
 export class RectangleShape extends models.Shape {
     constructor(configs) {
         super(configs);
-        this._p1 = configs.p1 || new Geom.models.Point(0, 0);
-        this._p2 = configs.p2 || new Geom.models.Point(100, 100);
+        this._p1 = configs.p1 || new Geom.Models.Point(0, 0);
+        this._p2 = configs.p2 || new Geom.Models.Point(100, 100);
         this._controller = new RectangleController(this);
     }
 

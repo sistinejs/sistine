@@ -16,16 +16,16 @@ export function newShapeForToolbar(x, y, width, height, configs) {
     configs = configs || {};
     y += height / 4;
     height *= 0.7;
-    configs.p1 = new Geom.models.Point(x, y);
-    configs.p2 = new Geom.models.Point(x + width, y + height);
+    configs.p1 = new Geom.Models.Point(x, y);
+    configs.p2 = new Geom.Models.Point(x + width, y + height);
     return newShape(configs);
 }
 
 export class EllipseShape extends models.Shape {
     constructor(configs) {
         super(configs);
-        this._p1 = configs.p1 || new Geom.models.Point(0, 0);
-        this._p2 = configs.p2 || new Geom.models.Point(100, 100);
+        this._p1 = configs.p1 || new Geom.Models.Point(0, 0);
+        this._p2 = configs.p2 || new Geom.Models.Point(100, 100);
         this._controller = new EllipseController(this);
     }
 

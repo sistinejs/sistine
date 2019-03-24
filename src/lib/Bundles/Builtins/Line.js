@@ -15,8 +15,8 @@ export function newShape(configs) {
 export class Line extends models.Shape {
     constructor(configs) {
         super(configs);
-        this._p0 = configs.p0 || new Geom.models.Point();
-        this._p1 = configs.p1 || new Geom.models.Point();
+        this._p0 = configs.p0 || new Geom.Models.Point();
+        this._p1 = configs.p1 || new Geom.Models.Point();
         this._controller = new LineController(this);
     }
 

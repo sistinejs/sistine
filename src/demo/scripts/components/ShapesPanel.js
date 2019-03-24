@@ -54,8 +54,9 @@ class ShapesPanel extends Panel {
             }).click(function(event) {
                 // Add the shape on the canvas at the center
                 var id = event.currentTarget.id.replace(/SB_/, "");
+                var TheBundle = eval(event.currentTarget.getAttribute("bundle") || "Sistine.Bundles.BasicShapes");
                 var configs = Object.assign({}, shapeDefaults);
-                theApp.eventMachine.enter("CreatingShapeState", DefaultBundle[id].newShape(configs));
+                theApp.eventMachine.enter("CreatingShapeState", TheBundle[id].newShape(configs));
             });
         });
     }
