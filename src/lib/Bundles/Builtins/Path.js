@@ -26,8 +26,7 @@ export class Path extends models.Shape {
         var sx = newBounds.width / oldBounds.width;
         var sy = newBounds.height / oldBounds.height;
         if (this._moveTo) {
-            this._moveTo.x = newBounds.x + ((this._moveTo.x - oldBounds.x) * sx);
-            this._moveTo.y = newBounds.y + ((this._moveTo.y - oldBounds.y) * sy);
+            this._moveTo.scale(sx, sy, oldBounds.x, oldBounds.y).translate(newBounds.x, newBoundsy);
         }
         var currComp = this._componentList.head;
         while (currComp != null) {
@@ -422,8 +421,7 @@ Path.Controller = class PathController extends controller.ShapeController {
             currComp = currComp.next;
         }
         var parents = super._evalControlPoints();
-        var out = ours.concat(parents);
-        return out;
+        return ours.concat(parents);
     }
 
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {

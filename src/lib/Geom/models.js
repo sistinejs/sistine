@@ -126,28 +126,38 @@ export class Point {
         return new Point(this.x, this.y);
     }
 
-    move(tx, ty) {
-        this.x += tx;
-        this.y += ty;
-        return this;
+    scale(sx, sy, cx, cy, result) {
+        result = result || this;
+        result.x = ((this.x - cx) * sx);
+        result.y = ((this.y - cy) * sy);
+        return result;
     }
 
-    rotate(theta) {
+    translate(tx, ty, result) {
+        result = result || this;
+        result.x += tx;
+        result.y += ty;
+        return result;
+    }
+
+    rotate(theta, result) {
+        result = result || this;
         var costheta = Math.cos(theta);
         var sintheta = Math.sin(theta);
         var nx = (this.x * costheta) - (this.y * sintheta);
         var ny = (this.y * costheta) + (this.x * sintheta);
-        this.x = nx;
-        this.y = ny;
-        return this;
+        result.x = nx;
+        result.y = ny;
+        return result;
     }
 
-    transform(a, b, c, d, e, f) {
+    transform(a, b, c, d, e, f, result) {
+        result = result || this;
         var x = this.x;
         var y = this.y;
-        this.x = a * x + b * y + c;
-        this.y = d * x + e * y + f;
-        return this;
+        result.x = a * x + b * y + c;
+        result.y = d * x + e * y + f;
+        return result;
     }
 }
 

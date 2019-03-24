@@ -36,13 +36,24 @@ function addSampleShapes() {
         fillStyle: 'red'
     });
     addShape(BasicShapes, "Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
-    */
 
     var path = addShape(BuiltinShapes, "Path")
     path.moveTo(100, 100);
     path.lineTo(100, 200);
     path.lineTo(300, 300);
     path.lineWidth = 10;
+    */
+    addShape(BuiltinShapes, "QuadCurve", {
+        p0: new Sistine.Geom.Models.Point(100, 300),
+        p1: new Sistine.Geom.Models.Point(200, 200),
+        p2: new Sistine.Geom.Models.Point(300, 300)
+    })
+    addShape(BuiltinShapes, "CubicCurve", {
+        p0: new Sistine.Geom.Models.Point(100, 300),
+        p1: new Sistine.Geom.Models.Point(200, 200),
+        p2: new Sistine.Geom.Models.Point(300, 300),
+        p3: new Sistine.Geom.Models.Point(400, 200)
+    })
 }
 
 function addShape(Bundle, objid, configs) {
