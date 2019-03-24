@@ -132,6 +132,8 @@ export class Shape extends events.EventSource {
         this.miterLimit = configs.miterLimit || null;
         this.fillStyle = configs.fillStyle || null;
         this.strokeStyle = configs.strokeStyle || null;
+        this.shouldFill = true;
+        this.shouldStroke = true;
     }
 
     get hasChildren() { return false; }
@@ -500,22 +502,28 @@ export class Shape extends events.EventSource {
      * Draws this shape on a given context.
      */
     applyStyles(ctx, options) {
-        if (this.fillStyle) {
-            this.fillStyle.apply(this, "fillStyle", ctx);
-        } else {
+        if (this.shouldFill && this.fillStyle) {
             ctx.fillStyle = null;
         }
-        if (this.lineWidth > 0) {
+        if (this.shouldStroke) {
             if (this.strokeStyle) {
                 this.strokeStyle.apply(this, "strokeStyle", ctx);
-            } else {
-                ctx.strokeStyle = null;
             }
-            ctx.lineJoin = this.lineJoin;
-            ctx.lineCap = this.lineCap;
-            ctx.setLineDash(this.lineDash || []);
-            ctx.lineWidth = this.lineWidth;
-            ctx.lineDashOffset = this.lineDashOffset;
+            if (this.lineJoin) {
+                ctx.lineJoin = this.lineJoin;
+            }
+            if (this.lineCap) {
+                ctx.lineCap = this.lineCap;
+            }
+            if (this.lineDash) {
+                ctx.setLineDash(this.lineDash);
+            }
+            if (this.lineWidth > 0) {
+                ctx.lineWidth = this.lineWidth;
+            }
+            if (this.lineDashOffset) {
+                ctx.lineDashOffset = this.lineDashOffset;
+            }
         }
     }
 
