@@ -9,8 +9,9 @@ export class Circle extends models.Shape {
         super((configs = configs || {}));
         this._center = configs.center || new geom.Point(0, 0);
         this._radius = configs.radius || 10;
-        this._controller = new Circle.Controller(this);
     }
+
+    get controllerClass() { return Circle.Controller; }
 
     _evalBounds() {
         return new geom.Bounds(this._center.x - this._radius,

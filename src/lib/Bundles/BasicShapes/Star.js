@@ -11,8 +11,9 @@ export class Star extends models.Shape {
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._numSides = Math.max(3, configs.numSides || 5);
         this._innerRadius = configs.innerRadius || null;
-        this._controller = new Star.Controller(this);
     }
+
+    get controllerClass() { return Star.Controller; }
 
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);

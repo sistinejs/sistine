@@ -10,8 +10,9 @@ export class Cylinder extends models.Shape {
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._ellipseHeight = configs.ellipseHeight || 0.4;
-        this._controller = new Cylinder.Controller(this);
     }
+
+    get controllerClass() { return Cylinder.Controller; }
 
     _evalBounds() {
         var left = Math.min(this._p1.x, this._p2.x);

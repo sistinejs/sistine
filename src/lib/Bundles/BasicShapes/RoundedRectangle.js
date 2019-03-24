@@ -10,8 +10,9 @@ export class RoundedRectangle extends models.Shape {
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._cornerRadius = configs.cornerRadius || 5;
-        this._controller = new RoundedRectangle.Controller(this);
     }
+
+    get controllerClass() { return RoundedRectangle.Controller; }
 
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);

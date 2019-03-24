@@ -12,8 +12,9 @@ export class Rectangle extends models.Shape {
         super((configs = configs || {}));
         this._p1 = configs.p1 || new Geom.Models.Point(0, 0);
         this._p2 = configs.p2 || new Geom.Models.Point(100, 100);
-        this._controller = new Rectangle.Controller(this);
     }
+
+    get controllerClass() { return Rectangle.Controller; }
 
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);

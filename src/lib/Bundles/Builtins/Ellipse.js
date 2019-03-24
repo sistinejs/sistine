@@ -12,8 +12,9 @@ export class Ellipse extends models.Shape {
         super((configs = configs || {}));
         this._p1 = configs.p1 || new Geom.Models.Point(0, 0);
         this._p2 = configs.p2 || new Geom.Models.Point(100, 100);
-        this._controller = new Ellipse.Controller(this);
     }
+
+    get controllerClass() { return Ellipse.Controller; }
 
     _evalBounds() {
         var left = Math.min(this._p1.x, this._p2.x);

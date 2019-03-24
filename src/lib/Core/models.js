@@ -151,9 +151,10 @@ export class Shape extends events.EventSource {
 
     get parent() { return this._parent; } 
     get scene() { return this._scene; } 
+    get controllerClass() { return controller.ShapeController; }
     get controller() { 
         if (this._controller == null) {
-            this._controller = new controller.ShapeController(this);
+            this._controller = new this.controllerClass(this);
         }
         return this._controller; 
     }

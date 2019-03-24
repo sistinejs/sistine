@@ -12,8 +12,9 @@ export class DoubleArrow extends models.Shape {
         this._shaftWidth = configs.shaftWidth || 0.3;
         this._tipLength = configs.tipLength || 0.3;
         this._tipPullback = configs.tipPullback || 0.1;
-        this._controller = new DoubleArrow.Controller(this);
     }
+
+    get controllerClass() { return DoubleArrow.Controller; }
 
     _evalBounds() {
         var left = Math.min(this._p1.x, this._p2.x);

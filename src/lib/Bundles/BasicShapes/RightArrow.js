@@ -13,8 +13,9 @@ export class RightArrow extends models.Shape {
         this._tipLength = configs.tipLength || 0.4;
         this._tipPullback = configs.tipPullback || 0;
         this._backDepth = configs.backDepth || 0;
-        this._controller = new RightArrow.Controller(this);
     }
+
+    get controllerClass() { return RightArrow.Controller; }
 
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);

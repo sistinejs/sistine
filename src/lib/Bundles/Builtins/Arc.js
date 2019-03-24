@@ -13,8 +13,9 @@ export class Arc extends models.Shape {
         this._p0 = configs.p0 || new Geom.Models.Point();
         this._p1 = configs.p1 || new Geom.Models.Point();
         this._p2 = configs.p1 || new Geom.Models.Point();
-        this._controller = new Arc.Controller(this);
     }
+
+    get controllerClass() { return Arc.Controller; }
 
     _setBounds(newBounds) {
         this._p0.set(newBounds.left, newBounds.top);

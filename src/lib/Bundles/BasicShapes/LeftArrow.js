@@ -13,8 +13,9 @@ export class LeftArrow extends models.Shape {
         this._tipLength = configs.tipLength || 0.4;
         this._tipPullback = configs.tipPullback || 0;
         this._backDepth = configs.backDepth || 0;
-        this._controller = new LeftArrow.Controller(this);
     }
+
+    get controllerClass() { return LeftArrow.Controller; }
 
     _evalBounds() {
         var left = Math.min(this._p1.x, this._p2.x);

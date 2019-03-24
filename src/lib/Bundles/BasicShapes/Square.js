@@ -9,8 +9,9 @@ export class Square extends models.Shape {
         super((configs = configs || {}));
         this._p0 = configs.p0 || new geom.Point(0, 0);
         this._size = configs.size || 10;
-        this._controller = new Square.Controller(this);
     }
+
+    get controllerClass() { return Square.Controller; }
 
     canSetSize(newBounds) {
         newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);

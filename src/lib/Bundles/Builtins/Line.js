@@ -12,8 +12,9 @@ export class Line extends models.Shape {
         super((configs = configs || {}));
         this._p0 = configs.p0 || new Geom.Models.Point();
         this._p1 = configs.p1 || new Geom.Models.Point();
-        this._controller = new Line.Controller(this);
     }
+
+    get controllerClass() { return Line.Controller; }
 
     _setBounds(newBounds) {
         this._p0.set(newBounds.left, newBounds.top);

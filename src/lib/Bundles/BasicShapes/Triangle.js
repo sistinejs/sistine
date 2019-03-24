@@ -10,8 +10,9 @@ export class Triangle extends models.Shape {
         this._p0 = configs.p0 || null;
         this._p1 = configs.p1 || null;
         this._p2 = configs.p2 || null;
-        this._controller = new Triangle.Controller(this);
     }
+
+    get controllerClass() { return Triangle.Controller; }
 
     _setBounds(newBounds) {
         if (this._p0 == null) {

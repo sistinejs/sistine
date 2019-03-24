@@ -17,8 +17,9 @@ export class Path extends models.Shape {
         this._closed = configs.closed || false;
         this._moveTo = configs.moveTo || null;
         this._componentList = new dlist.DList();
-        this._controller = new Path.Controller(this);
     }
+
+    get controllerClass() { return Path.Controller; }
 
     _setBounds(newBounds) {
         var oldBounds = this.logicalBounds;

@@ -11,8 +11,9 @@ export class Plus extends models.Shape {
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._innerWidth = configs.innerWidth || 0.3;
         this._innerHeight = configs.innerHeight || 0.3;
-        this._controller = new Plus.Controller(this);
     }
+
+    get controllerClass() { return Plus.Controller; }
 
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);
