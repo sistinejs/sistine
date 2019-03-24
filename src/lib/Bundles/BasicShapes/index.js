@@ -5,7 +5,6 @@ import * as Polygon from "./Polygon"
 import * as Star from "./Star"
 import * as RoundedRectangle from "./RoundedRectangle"
 import * as Plus from "./Plus"
-import * as Circle from "./Circle"
 import * as LeftArrow from "./LeftArrow"
 import * as RightArrow from "./RightArrow"
 import * as DoubleArrow from "./DoubleArrow"
@@ -22,7 +21,6 @@ export const BasicShapes = {
     "Star": Star.Star,
     "RoundedRectangle": RoundedRectangle.RoundedRectangle,
     "Plus": Plus.Plus,
-    "Circle": Circle.Circle,
     "LeftArrow": LeftArrow.LeftArrow,
     "RightArrow": RightArrow.RightArrow,
     "DoubleArrow": DoubleArrow.DoubleArrow,

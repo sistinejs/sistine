@@ -9,6 +9,11 @@ shapeDefaults = {
 
 var Point = Sistine.Geom.Models.Point;
 
+function getTestSvgUrl(base) {
+    return "/src/svgtestset/" + base;
+    // return "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/" + base;
+}
+
 function addSampleShapes() {
     /*
     var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1)
@@ -36,7 +41,6 @@ function addSampleShapes() {
         fillStyle: 'red'
     });
     addShape(BasicShapes, "Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
-    */
 
     var path = addShape(BuiltinShapes, "Path")
     path.moveTo(100, 100);
@@ -56,6 +60,11 @@ function addSampleShapes() {
         p2: new Sistine.Geom.Models.Point(600, 300),
         p3: new Sistine.Geom.Models.Point(700, 200)
     })
+    */
+
+    Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("irony.svg"), function(doc) {
+        console.log("Here");
+    });
 }
 
 function addShape(Bundle, objid, configs) {
