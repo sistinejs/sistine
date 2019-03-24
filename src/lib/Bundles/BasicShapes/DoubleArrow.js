@@ -31,11 +31,10 @@ export class DoubleArrow extends models.Shape {
 
     draw(ctx) {
         var lBounds = this.logicalBounds;
-        var lw = this.lineWidth + 1;
-        var x = lBounds.x + lw;
-        var y = lBounds.y + lw;
-        var width = lBounds.width - (2 * lw);
-        var height = lBounds.height - (2 * lw);
+        var x = lBounds.x;
+        var y = lBounds.y;
+        var width = lBounds.width;
+        var height = lBounds.height;
         var sh = height * this._shaftWidth;
         var tl = width * this._tipLength;
         var tp = width * this._tipPullback;

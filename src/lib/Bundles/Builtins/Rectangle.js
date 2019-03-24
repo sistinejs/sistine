@@ -12,7 +12,7 @@ export class Rectangle extends models.Shape {
         super((configs = configs || {}));
         this._p1 = configs.p1 || new Geom.Models.Point(0, 0);
         this._p2 = configs.p2 || new Geom.Models.Point(100, 100);
-        this._controller = new RectangleController(this);
+        this._controller = new Rectangle.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -44,7 +44,7 @@ export class Rectangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class RectangleController extends controller.ShapeController {
+Rectangle.Controller = class RectangleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

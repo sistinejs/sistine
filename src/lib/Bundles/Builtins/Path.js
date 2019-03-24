@@ -17,7 +17,7 @@ export class Path extends models.Shape {
         this._closed = configs.closed || false;
         this._moveTo = configs.moveTo || null;
         this._componentList = new dlist.DList();
-        this._controller = new PathController(this);
+        this._controller = new Path.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -402,7 +402,7 @@ export class BezierToComponent extends PathComponent {
     }
 }
 
-export class PathController extends controller.ShapeController {
+Path.Controller = class PathController extends controller.ShapeController {
     _evalControlPoints() {
         var ours = [];
         var path = this.shape;

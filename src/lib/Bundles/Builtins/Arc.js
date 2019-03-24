@@ -13,7 +13,7 @@ export class Arc extends models.Shape {
         this._p0 = configs.p0 || new Geom.Models.Point();
         this._p1 = configs.p1 || new Geom.Models.Point();
         this._p2 = configs.p1 || new Geom.Models.Point();
-        this._controller = new ArcController(this);
+        this._controller = new Arc.Controller(this);
     }
 
     _setBounds(newBounds) {
@@ -59,7 +59,7 @@ export class Arc extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class ArcController extends controller.ShapeController {
+Arc.Controller = class ArcController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

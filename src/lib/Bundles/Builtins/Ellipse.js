@@ -31,11 +31,10 @@ export class Ellipse extends models.Shape {
 
     draw(ctx) {
         var lBounds = this.logicalBounds;
-        var lw = this.lineWidth + 1;
-        var x = lBounds.x + lw;
-        var y = lBounds.y + lw;
-        var w = lBounds.width - (2 * lw);
-        var h = lBounds.height - (2 * lw);
+        var x = lBounds.x;
+        var y = lBounds.y;
+        var w = lBounds.width;
+        var h = lBounds.height;
 
         ctx.beginPath();
         Geom.Utils.pathEllipse(ctx, x, y, w, h);

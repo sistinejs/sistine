@@ -10,7 +10,7 @@ export class Cylinder extends models.Shape {
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._ellipseHeight = configs.ellipseHeight || 0.4;
-        this._controller = new CylinderController(this);
+        this._controller = new Cylinder.Controller(this);
     }
 
     _evalBounds() {
@@ -18,22 +18,21 @@ export class Cylinder extends models.Shape {
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
         var bottom = Math.max(this._p1.y, this._p2.y);
-        var eh = (bottom - top) * this._ellipseHeight;
-        return new geom.Bounds(left, top - (eh / 2), right - left, eh + bottom - top);
+        return new geom.Bounds(left, top, right - left, bottom - top);
     }
 
     _setBounds(newBounds) {
+        console.log("Setting cylinder bounds: ", newBounds);
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
     }
 
     draw(ctx) {
-        var lw = this.lineWidth + 1;
         var lBounds = this.logicalBounds;
-        var x = lBounds.x + lw;
-        var y = lBounds.y + lw;
-        var width = lBounds.width - (2 * lw);
-        var height = lBounds.height - (2 * lw);
+        var x = lBounds.x;
+        var y = lBounds.y;
+        var width = lBounds.width;
+        var height = lBounds.height;
         var rx = width / 2;
         var eh = height * this._ellipseHeight;
         var eh2 = eh / 2;
