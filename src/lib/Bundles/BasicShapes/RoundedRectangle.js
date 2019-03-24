@@ -1,21 +1,12 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import * as geom from "../../Geom/models"
+import * as geomutils from "../../Geom/utils"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
     return new RoundedRectangleShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    y += height / 5;
-    height *= 0.6;
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
-    return newShape(configs);
 }
 
 export class RoundedRectangleShape extends models.Shape {

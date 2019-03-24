@@ -1,22 +1,15 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import * as geom from "../../Geom/models"
+import * as geomutils from "../../Geom/utils"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
-    return new LeftArrowShape(configs);
+    return new RightArrowShape(configs);
 }
 
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p1 = new geom.Point(x, y);
-    configs.p2 = new geom.Point(x + width, y + height);
-    return newShape(configs);
-}
-
-export class LeftArrowShape extends models.Shape {
+export class RightArrowShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._p1 = configs.p1 || new geom.Point(0, 0);
@@ -25,7 +18,12 @@ export class LeftArrowShape extends models.Shape {
         this._tipLength = configs.tipLength || 0.4;
         this._tipPullback = configs.tipPullback || 0;
         this._backDepth = configs.backDepth || 0;
-        this._controller = new LeftArrowController(this);
+        this._controller = new RightArrowController(this);
+    }
+
+    _setBounds(newBounds) {
+        this._p1.set(newBounds.left, newBounds.top);
+        this._p2.set(newBounds.right, newBounds.bottom);
     }
 
     _evalBounds() {
@@ -35,12 +33,8 @@ export class LeftArrowShape extends models.Shape {
         var bottom = Math.max(this._p1.y, this._p2.y);
         return new geom.Bounds(left, top, right - left, bottom - top);
     }
-    _setBounds(newBounds) {
-        this._p1.set(newBounds.left, newBounds.top);
-        this._p2.set(newBounds.right, newBounds.bottom);
-    }
 
-    get className() { return "LeftArrow"; };
+    get className() { return "RightArrow"; }
 
     draw(ctx) {
         var lw = this.lineWidth + 1;
@@ -55,17 +49,17 @@ export class LeftArrowShape extends models.Shape {
         var bd = width * this._backDepth;
 
         ctx.beginPath();
-        ctx.moveTo(x + width, y + (height - sh) / 2);
+        ctx.moveTo(x, y + (height - sh) / 2);
         if (bd > 0) {
-            ctx.lineTo(x + width - bd, y + height / 2);
+            ctx.lineTo(x + bd, y + height / 2);
         }
-        ctx.lineTo(x + width, y + (height + sh) / 2);
-        ctx.lineTo(x + tl, y + (height + sh) / 2);
-        ctx.lineTo(x + tl - tp, y + height);
-        ctx.lineTo(x, y + height / 2);
-        ctx.lineTo(x + tl + tp, y);
-        ctx.lineTo(x + tl, y + (height - sh) / 2);
-        ctx.lineTo(x + width, y + (height - sh) / 2);
+        ctx.lineTo(x, y + (height + sh) / 2);
+        ctx.lineTo(x + width - tl, y + (height + sh) / 2);
+        ctx.lineTo(x + width - tl - tp, y + height);
+        ctx.lineTo(x + width, y + height / 2);
+        ctx.lineTo(x + width - tl - tp, y);
+        ctx.lineTo(x + width - tl, y + (height - sh) / 2);
+        ctx.lineTo(x, y + (height - sh) / 2);
         if (this.fillStyle) {
             ctx.fill();
         }
@@ -78,7 +72,7 @@ export class LeftArrowShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class LeftArrowController extends controller.ShapeController {
+export class RightArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

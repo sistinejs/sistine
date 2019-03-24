@@ -1,29 +1,29 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
+import * as geom from "../../Geom/models"
+import * as geomutils from "../../Geom/utils"
 
 export function newShape(configs) {
     configs = configs || {};
-    return new StarShape(configs);
+    return new PolygonShape(configs);
 }
 
 export function newShapeForToolbar(x, y, width, height, configs) {
     configs = configs || {};
     configs.p1 = new geom.Point(x, y);
     configs.p2 = new geom.Point(x + width, y + height);
-    return new StarShape(configs);
+    return newShape(configs);
 }
 
-export class StarShape extends models.Shape {
+export class PolygonShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
         this._numSides = Math.max(3, configs.numSides || 5);
-        this._innerRadius = configs.innerRadius || null;
-        this._controller = new StarController(this);
+        this._edgePoints = [];
+        this._controller = new PolygonController(this);
     }
 
     _setBounds(newBounds) {
@@ -39,7 +39,7 @@ export class StarShape extends models.Shape {
         return new geom.Bounds(left, top, right - left, bottom - top);
     }
 
-    get className() { return "Star"; }
+    get className() { return "Polygon"; }
 
     setSize(w, h, force) {
         w = h = Math.min(w, h);
@@ -50,38 +50,24 @@ export class StarShape extends models.Shape {
         return this._numSides;
     }
 
-    get innerRadius() {
-        return this._innerRadius || (this.logicalBounds.innerRadius / 3.0);
-    }
-
     draw(ctx) {
-        var n = 2 * this._numSides;
+        var n = this._numSides;
         var theta = (Math.PI * 2.0) / n;
         var cx = this.logicalBounds.centerX;
         var cy = this.logicalBounds.centerY;
-        var R = Math.min(this.logicalBounds.width, this.logicalBounds.height) / 2.0;
-        var innerR = this.innerRadius;
+        var A = this.logicalBounds.width / 2.0;
+        var B = this.logicalBounds.height / 2.0;
 
-        var fx = cx;
-        var fy = cy - R;
+        var p0 = geomutils.pointOnEllipse(A, B, Math.PI / 2.0);
+        var pi = new geom.Point();
         ctx.beginPath();
-        ctx.moveTo(fx, fy);
-        for (var i = 1;i < n;i += 2) {
+        ctx.moveTo(cx + p0.x, cy + p0.y);
+        for (var i = 1;i < n;i++) {
             var currangle = (Math.PI / 2.0) + (i * theta);
-            var costheta = Math.cos(currangle);
-            var sintheta = Math.sin(currangle);
-            var px = cx + (innerR * costheta);
-            var py = cy - (innerR * sintheta);
-            ctx.lineTo(px, py);
-
-            var currangle = (Math.PI / 2.0) + ((i + 1) * theta);
-            var costheta = Math.cos(currangle);
-            var sintheta = Math.sin(currangle);
-            var px = cx + (R * costheta);
-            var py = cy - (R * sintheta);
-            ctx.lineTo(px, py);
+            geomutils.pointOnEllipse(A, B, currangle, pi);
+            ctx.lineTo(cx + pi.x, cy + pi.y);
         }
-        ctx.lineTo(fx, fy);
+        ctx.lineTo(cx + p0.x, cy + p0.y);
         if (this.fillStyle) {
             ctx.fill();
         }
@@ -94,7 +80,7 @@ export class StarShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class StarController extends controller.ShapeController {
+export class PolygonController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

@@ -1,12 +1,12 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import * as geom from "../../Geom/models"
+import * as geomutils from "../../Geom/utils"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
-    return new DoubleArrowShape(configs);
+    return new LeftArrowShape(configs);
 }
 
 export function newShapeForToolbar(x, y, width, height, configs) {
@@ -16,15 +16,16 @@ export function newShapeForToolbar(x, y, width, height, configs) {
     return newShape(configs);
 }
 
-export class DoubleArrowShape extends models.Shape {
+export class LeftArrowShape extends models.Shape {
     constructor(configs) {
         super(configs);
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
-        this._shaftWidth = configs.shaftWidth || 0.3;
-        this._tipLength = configs.tipLength || 0.3;
-        this._tipPullback = configs.tipPullback || 0.1;
-        this._controller = new DoubleArrowController(this);
+        this._shaftWidth = configs.shaftWidth || 0.4;
+        this._tipLength = configs.tipLength || 0.4;
+        this._tipPullback = configs.tipPullback || 0;
+        this._backDepth = configs.backDepth || 0;
+        this._controller = new LeftArrowController(this);
     }
 
     _evalBounds() {
@@ -39,11 +40,11 @@ export class DoubleArrowShape extends models.Shape {
         this._p2.set(newBounds.right, newBounds.bottom);
     }
 
-    get className() { return "DoubleArrow"; };
+    get className() { return "LeftArrow"; };
 
     draw(ctx) {
-        var lBounds = this.logicalBounds;
         var lw = this.lineWidth + 1;
+        var lBounds = this.logicalBounds;
         var x = lBounds.x + lw;
         var y = lBounds.y + lw;
         var width = lBounds.width - (2 * lw);
@@ -51,19 +52,20 @@ export class DoubleArrowShape extends models.Shape {
         var sh = height * this._shaftWidth;
         var tl = width * this._tipLength;
         var tp = width * this._tipPullback;
+        var bd = width * this._backDepth;
 
         ctx.beginPath();
-        ctx.moveTo(x, y + height / 2);
-        ctx.lineTo(x + tp + tl, y);
-        ctx.lineTo(x + tl, y + (height - sh) / 2);
-        ctx.lineTo(x + width - tl, y + (height - sh) / 2);
-        ctx.lineTo(x + width - tp - tl, y);
-        ctx.lineTo(x + width, y + height / 2);
-        ctx.lineTo(x + width - tp - tl, y + height);
-        ctx.lineTo(x + width - tl, y + (height + sh) / 2);
+        ctx.moveTo(x + width, y + (height - sh) / 2);
+        if (bd > 0) {
+            ctx.lineTo(x + width - bd, y + height / 2);
+        }
+        ctx.lineTo(x + width, y + (height + sh) / 2);
         ctx.lineTo(x + tl, y + (height + sh) / 2);
-        ctx.lineTo(x + tp + tl, y + height);
+        ctx.lineTo(x + tl - tp, y + height);
         ctx.lineTo(x, y + height / 2);
+        ctx.lineTo(x + tl + tp, y);
+        ctx.lineTo(x + tl, y + (height - sh) / 2);
+        ctx.lineTo(x + width, y + (height - sh) / 2);
         if (this.fillStyle) {
             ctx.fill();
         }
@@ -76,7 +78,7 @@ export class DoubleArrowShape extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class DoubleArrowController extends controller.ShapeController {
+export class LeftArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

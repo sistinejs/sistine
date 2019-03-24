@@ -1,20 +1,12 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import * as geom from "../../Geom/models"
+import * as geomutils from "../../Geom/utils"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
     return new TriangleShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p0 = configs.p0 || new geom.Point(x + width / 2, y);
-    configs.p1 = configs.p1 || new geom.Point(x + width, y + height);
-    configs.p2 = configs.p2 || new geom.Point(x, y + height);
-    return newShape(configs);
 }
 
 export class TriangleShape extends models.Shape {

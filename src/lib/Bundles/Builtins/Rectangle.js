@@ -1,7 +1,7 @@
 
 import { Geom } from "../../Geom/index"
-import * as models from "../models"
-import * as controller from "../controller"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;

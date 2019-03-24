@@ -36,6 +36,8 @@ class ShapesPanel extends Panel {
         shape_buttons.each(function(index, sbbutton) {
             var $sbbutton = $(sbbutton)
             var label = $sbbutton.text();
+            var bundleId = $sbbutton.attr("bundle");
+            console.log("bundleId: ", bundleId);
             $sbbutton.empty()
             $sbbutton.attr("title", label);
 

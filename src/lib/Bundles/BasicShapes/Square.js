@@ -1,19 +1,12 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import * as geom from "../../Geom/models"
+import * as geomutils from "../../Geom/utils"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 export function newShape(configs) {
     configs = configs || {};
     return new SquareShape(configs);
-}
-
-export function newShapeForToolbar(x, y, width, height, configs) {
-    configs = configs || {};
-    configs.p0 = new geom.Point(x, y);
-    configs.size = Math.min(width, height);
-    return newShape(configs);
 }
 
 export class SquareShape extends models.Shape {

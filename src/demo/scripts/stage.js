@@ -1,5 +1,7 @@
 
-var DefaultBundle = Sistine.Registry.DefaultBundle;
+var BasicShapes = Sistine.Bundles.BasicShapes;
+var BuiltinShapes = Sistine.Bundles.Builtins;
+
 shapeDefaults = {
     'strokeStyle': "black",
     'lineWidth': 2,
@@ -12,7 +14,7 @@ function addSampleShapes() {
     var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1)
                           .addStop(0, "black")
                           .addStop(1, "white");
-    addShape("Triangle", {
+    addShape(BasicShapes, "Triangle", {
         p0: new Point(140, 150),
         p1: new Point(80, 280),
         p2: new Point(280, 280),
@@ -23,34 +25,33 @@ function addSampleShapes() {
     var grd2 = new Sistine.Core.Styles.RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");
-    addShape("Circle", {
+    addShape(BasicShapes, "Circle", {
         center: new Point(200, 200),
         radius: 100,
         "lineWidth": 2, "fillStyle": grd2
     });
-    addShape("Square", {
+    addShape(BasicShapes, "Square", {
         p0: new Point(350, 50),
         size: 200,
         fillStyle: 'red'
     });
-    addShape("Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
+    addShape(BasicShapes, "Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
     */
 
-    var path = new Sistine.Core.Models.Path();
+    var path = addShape(BuiltinShapes, "Path")
     path.moveTo(100, 100);
     path.lineTo(100, 200);
     path.lineTo(300, 300);
     path.lineWidth = 10;
-    theApp.scene.add(path);
 }
 
-function addShape(objid, configs) {
+function addShape(Bundle, objid, configs) {
     configs = configs || {};
     var finalConfigs = {
         ...shapeDefaults,
         ...configs
     }
-    var newShape = DefaultBundle[objid].newShape(finalConfigs);
+    var newShape = Bundle[objid].newShape(finalConfigs);
     theApp.scene.add(newShape);
     return newShape;
 }

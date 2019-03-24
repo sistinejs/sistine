@@ -1,6 +1,7 @@
 import { Geom } from "../../Geom/index"
-import * as models from "../models"
-import * as controller from "../controller"
+import * as dlist from "../../Utils/dlist";
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
@@ -14,14 +15,14 @@ export function newShape(configs) {
 /**
  * A wrapper over a path.
  */
-export class Path extends Shape {
+export class Path extends models.Shape {
     constructor(configs) {
         super(configs);
         configs = configs || {};
         this._closed = configs.closed || false;
         this._moveTo = configs.moveTo || null;
         this._componentList = new dlist.DList();
-        this._controller = new controller.PathController(this);
+        this._controller = new PathController(this);
     }
 
     _setBounds(newBounds) {
@@ -46,7 +47,7 @@ export class Path extends Shape {
     }
 
     _evalBounds() {
-        var out = new geom.Bounds();
+        var out = new Geom.Models.Bounds();
         if (this._moveTo) {
             out.x = this._moveTo.x;
             out.y = this._moveTo.y;
@@ -82,7 +83,7 @@ export class Path extends Shape {
     }
 
     moveTo(x, y) {
-        this._moveTo = new Geom.models.Point(x, y);
+        this._moveTo = new Geom.Models.Point(x, y);
         this.markTransformed();
     }
 
@@ -134,7 +135,7 @@ export class Path extends Shape {
         ctx.lineWidth = 2;
         if (this._moveTo != null) {
             ctx.beginPath();
-            ctx.arc(this._moveTo.x, this._moveTo.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+            ctx.arc(this._moveTo.x, this._moveTo.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
             ctx.fill();
             ctx.stroke();
         }
@@ -144,7 +145,7 @@ export class Path extends Shape {
             for (var i = currComp.numControlPoints - 1;i >= 0;i--) {
                 var cpt = currComp.getControlPoint(i);
                 ctx.beginPath();
-                ctx.arc(cpt.x, cpt.y, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+                ctx.arc(cpt.x, cpt.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.stroke();
             }
@@ -181,7 +182,7 @@ export class PathComponent {
 export class LineToComponent extends PathComponent {
     constructor(x, y) {
         super();
-        this._endPoint = new Geom.models.Point(x, y);
+        this._endPoint = new Geom.Models.Point(x, y);
     }
 
     _evalBounds() {
@@ -195,7 +196,7 @@ export class LineToComponent extends PathComponent {
             maxx = Math.max(maxx, this.prev.endPoint.x);
             maxy = Math.max(maxy, this.prev.endPoint.y);
         }
-        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
+        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     get endPoint() { return this._endPoint; }
@@ -227,7 +228,7 @@ export class ArcComponent extends PathComponent {
         this.anticlockwise = anticlockwise;
         this._startPoint = Geom.Utils.pointOnCircle(radius, startAngle);
         this._endPoint = Geom.Utils.pointOnCircle(radius, endAngle);
-        this._arcCenter = new Geom.models.Point(x, y);
+        this._arcCenter = new Geom.Models.Point(x, y);
     }
 
     get endPoint() { return this._endPoint; }
@@ -253,7 +254,7 @@ export class ArcComponent extends PathComponent {
             maxx = Math.max(maxx, this.prev.endPoint.x);
             maxy = Math.max(maxy, this.prev.endPoint.y);
         }
-        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
+        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     get numControlPoints() {
@@ -264,10 +265,10 @@ export class ArcComponent extends PathComponent {
 export class ArcToComponent extends PathComponent {
     constructor(x1, y1, x2, y2, radius) {
         super();
-        this.p1 = new Geom.models.Point(x1, y1);
-        this.p2 = new Geom.models.Point(x2, y2);
+        this.p1 = new Geom.Models.Point(x1, y1);
+        this.p2 = new Geom.Models.Point(x2, y2);
         // TODO
-        this._arcCenter = new Geom.models.Point(-1, -1);
+        this._arcCenter = new Geom.Models.Point(-1, -1);
         this.radius = radius;
     }
 
@@ -298,7 +299,7 @@ export class ArcToComponent extends PathComponent {
             maxx = Math.max(maxx, this.prev.endPoint.x);
             maxy = Math.max(maxy, this.prev.endPoint.y);
         }
-        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
+        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     draw(ctx) {
@@ -309,8 +310,8 @@ export class ArcToComponent extends PathComponent {
 export class QuadraticToComponent extends PathComponent {
     constructor(x1, y1, x2, y2) {
         super();
-        this.p1 = new Geom.models.Point(x1, y1);
-        this.p2 = new Geom.models.Point(x2, y2);
+        this.p1 = new Geom.Models.Point(x1, y1);
+        this.p2 = new Geom.Models.Point(x2, y2);
     }
 
     _evalBounds() {
@@ -324,7 +325,7 @@ export class QuadraticToComponent extends PathComponent {
             maxx = Math.max(maxx, this.prev.endPoint.x);
             maxy = Math.max(maxy, this.prev.endPoint.y);
         }
-        return new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
+        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
     }
 
     draw(ctx) {
@@ -352,9 +353,9 @@ export class QuadraticToComponent extends PathComponent {
 export class BezierToComponent extends PathComponent {
     constructor(x1, y1, x2, y2, x3, y3) {
         super();
-        this.p1 = new Geom.models.Point(x1, y1);
-        this.p2 = new Geom.models.Point(x2, y2);
-        this.p3 = new Geom.models.Point(x3, y3);
+        this.p1 = new Geom.Models.Point(x1, y1);
+        this.p2 = new Geom.Models.Point(x2, y2);
+        this.p3 = new Geom.Models.Point(x3, y3);
     }
 
     draw(ctx) {
@@ -401,12 +402,12 @@ export class BezierToComponent extends PathComponent {
             maxx = Math.max(maxx, this.prev.endPoint.x);
             maxy = Math.max(maxy, this.prev.endPoint.y);
         }
-        var out = new geom.Bounds(minx, miny, maxx - minx, maxy - miny);
+        var out = new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
         return out;
     }
 }
 
-export class PathController extends ShapeController {
+export class PathController extends controller.ShapeController {
     _evalControlPoints() {
         var ours = [];
         var path = this.shape;

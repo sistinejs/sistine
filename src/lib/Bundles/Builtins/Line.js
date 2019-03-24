@@ -1,7 +1,7 @@
 
 import { Geom } from "../../Geom/index"
-import * as models from "../models"
-import * as controller from "../controller"
+import * as models from "../../Core/models"
+import * as controller from "../../Core/controller"
 
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
@@ -9,22 +9,20 @@ var HitInfo = controller.HitInfo;
 
 export function newShape(configs) {
     configs = configs || {};
-    return new Arc(configs);
+    return new Line(configs);
 }
 
-export class Arc extends models.Shape {
+export class Line extends models.Shape {
     constructor(configs) {
         super(configs);
         this._p0 = configs.p0 || new Geom.models.Point();
         this._p1 = configs.p1 || new Geom.models.Point();
-        this._p2 = configs.p1 || new Geom.models.Point();
-        this._controller = new ArcController(this);
+        this._controller = new LineController(this);
     }
 
     _setBounds(newBounds) {
         this._p0.set(newBounds.left, newBounds.top);
-        this._p1.set(newBounds.centerX, newBounds.centerY);
-        this._p2.set(newBounds.right, newBounds.bottom);
+        this._p1.set(newBounds.right, newBounds.bottom);
     }
 
     _evalBounds() {
@@ -35,7 +33,7 @@ export class Arc extends models.Shape {
         return new geom.Bounds(left, top, right - left, bottom - top);
     }
 
-    get className() { return "Arc"; };
+    get className() { return "Line"; };
 
     draw(ctx) {
         if (this.lineWidth > 0) {
@@ -64,7 +62,7 @@ export class Arc extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class ArcController extends controller.ShapeController {
+export class LineController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }
