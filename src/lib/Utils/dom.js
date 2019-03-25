@@ -50,3 +50,22 @@ export function fillChildComponent(elem) {
     elem[0].width = finalWidth;
     elem[0].height = finalHeight;
 }
+
+export function forEachChild(elem, visitor) {
+    var children = elem.children;
+    var L = children.length;
+    for (var i = 0;i < L;i++) {
+        var child = children[i];
+        if (visitor(child, i) == false) 
+            return ;
+    }
+}
+
+export function forEachAttribute(elem, visitor) {
+    var nodeNameMap = elem.attributes;
+    for (var i = 0;i < nodeNameMap.length; i++) {
+        var attrib = nodeNameMap[i];
+        if (visitor(attrib.name, attrib.value) == false) 
+            return ;
+    }
+}

@@ -4,20 +4,33 @@ import * as geomutils from "../../Geom/utils"
 import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
+const Length = geom.Length;
+
 export class Circle extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this._center = configs.center || new geom.Point(0, 0);
-        this._radius = configs.radius || 10;
+        this.cx = configs.cx;
+        this.cy = configs.cy;
+        this.radius = configs.radius || 10;
     }
 
     get controllerClass() { return Circle.Controller; }
 
-    _evalBounds() {
-        return new geom.Bounds(this._center.x - this._radius,
-                               this._center.y - this._radius,
-                               this._radius * 2,
-                               this._radius * 2);
+    get cx() { return this._cx; }
+    get cy() { return this._cy; }
+    get radius() { return this._radius; }
+    set cx(value) { this._cx = Length.parse(value); }
+    set cy(value) { this._cy = Length.parse(value); }
+    set radius(value) {
+        this._radius = Length.parse(value);
+        if (this._radius.value < 0) {
+            throw new Error("Radius cannot be negative");
+        }
+    }
+
+    _evalBoundingBox() {
+        var r = this._radius.pixelValue;
+        return new geom.Bounds(this._cx.pixelValue - r, this._cy.pixelValue - r, r * 2, r * 2);
     }
     _setBounds(newBounds) {
         this._center.x = newBounds.centerX;

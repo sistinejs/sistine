@@ -440,7 +440,7 @@ export class ShapeIndex {
      * Returns true if shape exists in this index.
      */
     shapeExists(shape) {
-        return shape.id in this._shapeIndexes;
+        return shape.uuid in this._shapeIndexes;
     }
 
     /**
@@ -450,13 +450,13 @@ export class ShapeIndex {
         shape.pane = shape.pane || this.defaultPane;
         // See if shape already has an index assigned to it
         if (this.shapeExists(shape)) {
-            var index = this._shapeIndexes[shape.id];
+            var index = this._shapeIndexes[shape.uuid];
             if (this._allShapes[index] != null) {
                 throw Error("Adding shape again without removing it first");
             }
             this._allShapes[index] = shape;
         } else {
-            this._shapeIndexes[shape.id] = this._allShapes.length;
+            this._shapeIndexes[shape.uuid] = this._allShapes.length;
             this._allShapes.push(shape);
         }
     }
@@ -474,7 +474,7 @@ export class ShapeIndex {
         if (!this.shapeExists(shape)) {
             throw Error("Shape does not exist in this index.");
         }
-        var index = this._shapeIndexes[shape.id];
+        var index = this._shapeIndexes[shape.uuid];
         this._allShapes[index] = null;
     }
 
@@ -488,7 +488,7 @@ export class ShapeIndex {
      * Returns true if shape exists in this index.
      */
     getShape(id) {
-        return shape.id in this._shapeIndexes;
+        return shape.uuid in this._shapeIndexes;
     }
 
     /**

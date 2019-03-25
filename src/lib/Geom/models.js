@@ -1,4 +1,97 @@
 
+export const PixelsPerCM = 37.79527559055118;
+export const PixelsPerInch = 96;
+export const PointsPerPixel = 0.75;
+export const PixelsPerPica = 16;
+
+export const LengthTypeUnknown = 0;
+export const LengthTypeNumber = 1;
+export const LengthTypePercentage = 2;
+export const LengthTypeEMS = 3;
+export const LengthTypeEXS = 4;
+export const LengthTypePX = 5;
+export const LengthTypeCM = 6;
+export const LengthTypeMM = 7;
+export const LengthTypeIN = 8;
+export const LengthTypePT = 9;
+export const LengthTypePC = 10;
+
+export class Length {
+    constructor(value, units) {
+        units = units || LengthTypeNumber;
+        this.value = value || 0;
+        this._units = units;
+        this._pixelValue = 0;
+        this._isAbsolute = (units == LengthTypeEMS || units == LengthTypeEXS || units == LengthTypePercentage);
+
+        if (units == LengthTypeNumber) {
+            this._pixelValue = value;
+        } else if (units == LengthTypePX) {
+            this._pixelValue = value;
+        } else if (units == LengthTypeCM) {
+            this._pixelValue = value * PixelsPerCM;
+        } else if (units == LengthTypeIN) {
+            this._pixelValue = value * PixelsPerInch;
+        } else if (units == LengthTypePT) {
+            this._pixelValue = value / PointsPerPixel;
+        } else if (units == LengthTypePC) {
+            this._pixelValue = value * PixelsPerPica;
+        }
+    }
+
+    get units() {
+        return this._units;
+    }
+
+    get isAbsolute() {
+        return this._isAbsolute;
+    }
+
+    get pixelValue() {
+        return this._pixelValue;
+    }
+}
+
+Length.parse = function(input) {
+    var units = LengthTypeNumber;
+    if (!$.isNumeric(input)) {
+        return new Length(parseFloat(input));
+    }
+    input = input.trim();
+    if (input.endsWith("em")) {
+        units = LengthTypeEMS;
+        input = input.substring(0, input.length - 2).trim();
+    } else if (input.endsWith("ex")) {
+        units = LengthTypeEXS;
+        input = input.substring(0, input.length - 2).trim();
+    } else if (input.endsWith("px")) {
+        units = LengthTypePX;
+        input = input.substring(0, input.length - 2).trim();
+    } else if (input.endsWith("cm")) {
+        units = LengthTypeCM;
+        input = input.substring(0, input.length - 2).trim();
+    } else if (input.endsWith("in")) {
+        units = LengthTypeIN;
+        input = input.substring(0, input.length - 2).trim();
+    } else if (input.endsWith("pt")) {
+        units = LengthTypePT;
+        input = input.substring(0, input.length - 2).trim();
+    } else if (input.endsWith("pc")) {
+        units = LengthTypePC;
+        input = input.substring(0, input.length - 2).trim();
+    } else if (input.endsWith("%")) {
+        units = LengthTypePercentage;
+        input = input.substring(0, input.length - 1).trim();
+    }
+    
+    if (!$.isNumeric(input)) {
+        throw new Error("Invalid length value: " + input);
+    }
+    var value = parseFloat(input);
+    units = LengthTypeNumber;
+    return new Length(value, units);
+}
+
 export class Transform {
     /**
      * Construct a 2D transform with 6 parameters forming the matrix:

@@ -2,3 +2,10 @@
 export function concat(...strings){
     return strings.join(' ');
 }
+
+/**
+ * Converts a hyphenated string into camelcase.
+ */
+export function toCamelCase(hyphenated) {
+    return hyphenated;
+}

@@ -64,6 +64,7 @@ function addSampleShapes() {
 
     Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("irony.svg"), function(doc) {
         console.log("Here");
+        theApp.scene.add(doc);
     });
 }
 

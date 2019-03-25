@@ -97,16 +97,33 @@ export class Scene {
     }
 }
 
+export class Element extends events.EventSource {
+    constructor() {
+        super();
+        this._parent = null;
+        this._defs = {};
+        this._metadata = {};
+    }
+
+    getMetaData(key) { return this._metadata[key] || null; }
+    setMetaData(key, value) { this._metadata[key] = value; return this; }
+
+    markUpdated() { this._lastUpdated = Date.now(); }
+
+    get hasChildren() { return false; }
+
+    get parent() { return this._parent; } 
+}
+
 /**
  * Holds information about the instance of a shape.
  */
-export class Shape extends events.EventSource {
+export class Shape extends Element {
     constructor(configs) {
         super();
         configs = configs || {};
-        this.id = ShapeCounter.next();
+        this._uuid = ShapeCounter.next();
         this._scene = null;
-        this._parent = null;
         this.isVisible = true;
         this._globalTransform = new geom.Transform();
         this._logicalBounds = null;
@@ -136,8 +153,7 @@ export class Shape extends events.EventSource {
         this.shouldStroke = true;
     }
 
-    get hasChildren() { return false; }
-
+    get uuid() { return this._uuid; }
     get logicalBounds() {
         if (this._logicalBounds == null) {
             this._logicalBounds = this._evalBounds();
@@ -145,13 +161,11 @@ export class Shape extends events.EventSource {
         return this._logicalBounds;
     }
 
-    markUpdated() { this._lastUpdated = Date.now(); }
     markTransformed() { 
         this.markUpdated();
         this._lastTransformed = Date.now(); 
     }
 
-    get parent() { return this._parent; } 
     get scene() { return this._scene; } 
     get controllerClass() { return controller.ShapeController; }
     get controller() { 
@@ -623,6 +637,7 @@ export class Group extends Shape {
     constructor(configs) {
         super(configs);
         this._children = [];
+        this._viewBox = null;
     }
 
     setScene(s) {
@@ -636,6 +651,22 @@ export class Group extends Shape {
     childAtIndex(i) { return this._children[i]; } 
     get hasChildren() { return this._children.length > 0; } 
     get childCount() { return this._children.length; } 
+
+    _evalBounds() {
+        if (this._viewBox == null) {
+            var out = new geom.Bounds(0, 0, 0, 0);
+            for (var i = 0;i < this._children.length;i++) {
+                out.union(this._children[i].logicalBounds);
+            }
+            return out;
+        } else {
+            return this._viewBox.copy();
+        }
+    }
+
+    _setBounds(newBounds) {
+        this._viewBox = newBounds.copy();
+    }
 }
 
 export class Layer extends Group { 
@@ -648,7 +679,7 @@ export class Selection extends events.EventSource {
     constructor() {
         super();
         this._shapes = [];
-        this._shapesById = {};
+        this._shapesByUUID = {};
         this.savedInfos = {};
     }
 
@@ -665,19 +696,19 @@ export class Selection extends events.EventSource {
     }
 
     forEach(handler, self, mutable) {
-        var shapesById = this._shapesById;
+        var shapesByUUID = this._shapesByUUID;
         if (mutable == true) {
-            shapesById = Object.assign({}, shapesById);
+            shapesByUUID = Object.assign({}, shapesByUUID);
         }
-        for (var shapeId in shapesById) {
-            var shape = shapesById[shapeId];
+        for (var shapeId in shapesByUUID) {
+            var shape = shapesByUUID[shapeId];
             if (handler(shape, self) == false)
                 break;
         }
     }
 
     contains(shape) {
-        return shape.id in this._shapesById;
+        return shape._uuid in this._shapesByUUID;
     }
     
     get(index) {
@@ -687,11 +718,11 @@ export class Selection extends events.EventSource {
     add(shape) {
         var event = new events.ShapesSelected(this, [shape]);
         if (this.validateBefore("ShapesSelected", event) != false) {
-            if ( ! (shape.id in this._shapesById)) {
+            if ( ! (shape._uuid in this._shapesByUUID)) {
                 this._shapes.push(shape);
             }
-            this._shapesById[shape.id] = shape;
-            this.savedInfos[shape.id] = shape.controller.snapshotFor();
+            this._shapesByUUID[shape._uuid] = shape;
+            this.savedInfos[shape._uuid] = shape.controller.snapshotFor();
             this.triggerOn("ShapesSelected", event);
         }
     }
@@ -699,16 +730,16 @@ export class Selection extends events.EventSource {
     remove(shape) {
         var event = new events.ShapesUnselected(this, [shape]);
         if (this.validateBefore("ShapesUnselected", event) != false) {
-            if ( shape.id in this._shapesById ) {
+            if ( shape._uuid in this._shapesByUUID ) {
                 for (var i = 0;i < this._shapes.length;i++) {
-                    if (this._shapes[i].id == shape.id) {
+                    if (this._shapes[i]._uuid == shape._uuid) {
                         this._shapes.splice(i, 1);
                         break ;
                     }
                 }
             }
-            delete this._shapesById[shape.id];
-            delete this.savedInfos[shape.id];
+            delete this._shapesByUUID[shape._uuid];
+            delete this.savedInfos[shape._uuid];
             this.triggerOn("ShapesUnselected", event);
         }
     }
@@ -716,12 +747,12 @@ export class Selection extends events.EventSource {
     checkpointShapes(hitInfo) {
         // Updated the save info for all selected shapes
         this.forEach(function(shape, self) {
-            self.savedInfos[shape.id] = shape.controller.snapshotFor(hitInfo);
+            self.savedInfos[shape._uuid] = shape.controller.snapshotFor(hitInfo);
         }, this);
     }
 
     getSavedInfo(shape) {
-        return this.savedInfos[shape.id];
+        return this.savedInfos[shape._uuid];
     }
 
     toggleMembership(shape) {
@@ -740,7 +771,7 @@ export class Selection extends events.EventSource {
         this.triggerOn("ShapesUnselected", event);
         this.savedInfos = {};
         this._shapes = [];
-        this._shapesById = {};
+        this._shapesByUUID = {};
         this._count = 0;
     }
 
@@ -796,7 +827,7 @@ export class Selection extends events.EventSource {
         this.forEach(function(shape) {
             var parId = shape.parent;
             if (parId) {
-                parId = shape.parent.id;
+                parId = shape.parent._uuid;
             }
             if (! (parId in groups)) {
                 groups[parId] = {
