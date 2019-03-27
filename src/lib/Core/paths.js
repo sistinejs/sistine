@@ -1,7 +1,7 @@
-import { Geom } from "../../Geom/index"
-import * as dlist from "../../Utils/dlist";
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
+import { Geom } from "../Geom/index"
+import * as dlist from "../Utils/dlist";
+import * as models from "./models"
+import * as controller from "./controller"
 
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
@@ -17,7 +17,10 @@ export class Path extends models.Shape {
         this._closed = configs.closed || false;
         this._moveTo = configs.moveTo || null;
         this._componentList = new dlist.DList();
+        this._currPoint = null;
     }
+
+    get currPoint() { return this._currPoint; }
 
     get controllerClass() { return Path.Controller; }
 

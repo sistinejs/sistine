@@ -138,156 +138,25 @@ function processSVGElement(elem, parent) {
     return out;
 }
 
-class PathTokenizer {
-    constructor(input) {
-        this._input = input;
-        this._comps = input.split(/([MmLlHhZzvVcCsSQqTtAa \n\t\r,Ee\.\-])/g);
-        this._pos = 0;
-        this.L = this._comps.length;
-        this._currToken = null;
-    }
-
-    _skipSpaces() { 
-        while (this._pos < this.L) {
-            var c = this._input[this._pos];
-            if (",\n\r\t ".indexOf(c) < 0) break ;
-            this._pos++;
-        }
-    }
-    _readDigits() {
-        var out = "";
-        while (this._pos < this.L) {
-            var c = this._input[this._pos];
-            if ("0123456789".indexOf(c) < 0) break;
-            out += c;
-            this._pos ++;
-        }
-        return out;
-    }
-
-    _currch() {
-        if (this._pos < this.L) {
-            return this._input[this._pos];
-        }
-        return null;
-    }
-
-    peek() {
-        while (this._currToken == null) {
-            this._skipSpaces();
-            var c = this._currch();
-            if (c == null) {
-                break ;
-            }
-            else if ("MmLlHhZzvVcCsSQqTtAa".indexOf(c) >= 0) {
-                this._currToken = c;
-                this._pos++;
-            } else {
-                // parse number
-                /**
-                    number:
-                        sign? integer-constant
-                        | sign? floating-point-constant
-                    integer-constant:   digit-sequence
-                    floating-point-constant:
-                        fractional-constant exponent?
-                        | digit-sequence exponent
-                    fractional-constant:
-                        digit-sequence? "." digit-sequence
-                        | digit-sequence "."
-                    exponent: ( "e" | "E" ) sign? digit-sequence
-                    sign: "+" | "-"
-                    digit-sequence: [0-9]+
-                  */
-                var out = "";
-                var isFloat = false;
-                if (c == "-") {
-                    out += c;
-                    this._pos++;
-                    this._skipSpaces();
-                }
-
-                // get all digits if we can
-                out += this._readDigits();
-                if (this._currch() == ".") {
-                    this._pos++;
-                    out += ".";
-                    isFloat = true;
-                }
-                out += this._readDigits();
-
-                // read the exponent
-                var c = this._currch();
-                if (c == "e" || c == "E") {
-                    out += c;
-                    this._pos++;
-                    if (this._currch() == "-") {
-                        this._pos++;
-                        out += "-";
-                    }
-                    out += this._readDigits();
-                    isFloat = true;
-                }
-                this._currToken = isFloat ? parseFloat(out) : parseInt(out);
-            }
-        }
-        return this._currToken;
-    }
-
-    next() {
-        var out = this.peek();
-        this._currToken = null;
-        return out;
-    }
-
-    hasNext() {
-        this.peek();
-        return this._currToken != null;
-    }
-
-    all() {
-        var out = [];
-        while (this.hasNext()) {
-            out.push(this.next());
-        }
-        return out;
-    }
-}
-
-function tokenizePathString(d) {
-    var comps = d.split(/([MmLlHhZzvVcCsSQqTtAa \n\t\r,\-])/g);
-    console.log("Comps: ", comps);
-    for (var i = comps.length - 1;i >= 0;i--) {
-        var c = comps[i];
-        if (c == "" || c == "," || c == "\n" || c == "\r" || c == "\t") {
-            // remove spaces
-            comps.splice(i, 1);
-        } else if (c == "-") {
-            comps.splice(i, 1);
-            comps[i] = "-" + comps[i];
-        } else if (c.endsWith("e") || c.endsWith("E")) {
-            comps[i] = comps[i] + comps[i + 1];
-            comps.splice(i + 1, 1);
-        } else if (c.length == 1 && "MmLlHhZzvVcCsSQqTtAa".indexOf(c) >= 0) {
-            // command do nothing
-        }
-    }
-    return comps;
-}
-
 function processPathElement(elem, parent) {
     var d = getAttribute(elem, "d");
     // var comps = tokenizePathString(d);
-    var tokenizer = new PathTokenizer(d);
-    var tokens = tokenizer.all();
+    var tokenizer = new Utils.SVG.PathTokenizer(d);
+    var out = new Builtins.Path();
     while (tokenizer.hasNext()) {
+        var command = tokenizer.ensureToken("COMMAND");
+        if (next.command == "z" || next.command == "Z") {
+            out.closePath();
+        } if (next.command == "m" || next.command == "M") {
+            var point = tokenizer.ensurePoint();
+            var isRelative = command.isRelative;
+        }
     }
     for (var i = 0;i < comps.length;) {
         var c = comps[i++];
         if (c == "M") {
         }
     }
-    var out = new Builtins.Path();
     parent.add(out);
     return out;
 }

@@ -6,7 +6,6 @@ import * as QuadCurve from "./QuadCurve"
 import * as CubicCurve from "./CubicCurve"
 import * as Rectangle from "./Rectangle"
 import * as Ellipse from "./Ellipse"
-import * as Path from "./Path"
 
 export const Builtins = {
     "Line": Line.Line,
@@ -16,6 +15,5 @@ export const Builtins = {
     "Rectangle": Rectangle.Rectangle,
     "Ellipse": Ellipse.Ellipse,
     "Circle": Circle.Circle,
-    "Path": Path.Path,
 }
 
