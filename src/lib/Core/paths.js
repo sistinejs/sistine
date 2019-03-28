@@ -15,7 +15,6 @@ export class Path extends models.Shape {
         super((configs = configs || {}));
         configs = configs || {};
         this._closed = configs.closed || false;
-        this._moveTo = configs.moveTo || null;
         this._componentList = new dlist.DList();
         this._currPoint = null;
     }
@@ -28,9 +27,6 @@ export class Path extends models.Shape {
         var oldBounds = this.logicalBounds;
         var sx = newBounds.width / oldBounds.width;
         var sy = newBounds.height / oldBounds.height;
-        if (this._moveTo) {
-            this._moveTo.scale(sx, sy, oldBounds.x, oldBounds.y).translate(newBounds.x, newBounds.y);
-        }
         var currComp = this._componentList.head;
         while (currComp != null) {
             var nCPT = currComp.numControlPoints;
@@ -46,10 +42,6 @@ export class Path extends models.Shape {
 
     _evalBounds() {
         var out = new Geom.Models.Bounds();
-        if (this._moveTo) {
-            out.x = this._moveTo.x;
-            out.y = this._moveTo.y;
-        }
         var currComp = this._componentList.head;
         while (currComp != null) {
             out.union(currComp.logicalBounds);
@@ -70,30 +62,103 @@ export class Path extends models.Shape {
         return this._componentList.count;
     }
 
-    moveTo(x, y) {
-        this._moveTo = new Geom.Models.Point(x, y);
-        this.markTransformed();
-    }
-
     close(yesorno) {
         this._closed = yesorno;
         this.markTransformed();
     }
 
-    lineTo(x, y) { 
-        this.addComponent(new LineToComponent(x, y));
+    setCurrentPoint(x, y, isRelative) {
+        if (this._currPoint == null) {
+            this._currPoint = new Geom.Models.Point(x, y);
+        }
+        else if (isRelative) {
+            this._currPoint.translate(x, y);
+        } else {
+            this._currPoint.set(x, y);
+        }
+        return this._currPoint;
     }
-    arc(x, y, radius, startAngle, endAngle, anticlockwise) {
+    get hasCurrentPoint() {
+        return this._currPoint !=- null;
+    }
+    _ensureCurrentPoint() {
+        if (this._currPoint == null) {
+            throw new Error("Current point is null");
+        }
+        return this._currPoint;
+    }
+
+    moveTo(x, y, isRelative) { 
+        var cp = this.setCurrentPoint(x, y, isRelative);
+        this.addComponent(new MoveToComponent(cp.x, cp.y));
+    }
+    lineTo(x, y, isRelative) { 
+        var cp = this.setCurrentPoint(x, y, isRelative);
+        this.addComponent(new LineToComponent(cp.x, cp.y));
+    }
+    hlineTo(x, isRelative) { 
+        var cp = this._ensureCurrentPoint();
+        if (isRelative) {
+            cp.x += x;
+        } else {
+            cp.x = x;
+        }
+        this.addComponent(new LineToComponent(cp.x, cp.y));
+    }
+    vlineTo(y, isRelative) { 
+        var cp = this._currPoint;
+        if (isRelative) {
+            cp.y += y;
+        } else {
+            cp.y = y;
+        }
+        this.addComponent(new LineToComponent(cp.x, cp.y));
+    }
+    quadraticCurveTo(cp1x, cp1y, x, y, isRelative, isSmooth) {
+        if (isSmooth) {
+            throw new Error("Smooth curves not yet implemented.");
+        }
+        var cp = this._currPoint || new Geom.Models.Point();
+        var x1 = cp1x;
+        var y1 = cp1y;
+        var x2 = x;
+        var y2 = y;
+        if (isRelative) {
+            x1 += cp.x;
+            y1 += cp.y;
+            x2 += cp.x;
+            y2 += cp.y;
+        }
+        this._currPoint = new Geom.Models.Point(x2, y2);
+        this.addComponent(new QuadraticToComponent(x1, y1, x2, y2));
+    }
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y, isRelative, isSmooth) {
+        if (isSmooth) {
+            throw new Error("Smooth curves not yet implemented.");
+        }
+        var cp = this._currPoint || new Geom.Models.Point();
+        var x1 = cp1x;
+        var y1 = cp1y;
+        var x2 = cp2x;
+        var y2 = cp2y;
+        var x3 = x;
+        var y3 = y;
+        if (isRelative) {
+            x1 += cp.x;
+            y1 += cp.y;
+            x2 += cp.x;
+            y2 += cp.y;
+            x3 += cp.x;
+            y3 += cp.y;
+        }
+        this._currPoint = new Geom.Models.Point(x3, y3);
+        this.addComponent(new BezierToComponent(x1, y1, x2, y2, x3, y3));
+    }
+    arc(x, y, radius, startAngle, endAngle, anticlockwise, isRelative) {
         this.addComponent(new ArcComponent(x, y, radius, startAngle, endAngle, anticlockwise));
     }
-    arcTo(x1, y1, x2, y2, radius) {
+    arcTo(x1, y1, x2, y2, radius, isRelative) {
         this.addComponent(new ArcToComponent(this._cmdArcTo, x1, y1, x2, y2, radius));
-    }
-    quadraticCurveTo(cp1x, cp1y, x, y) {
-        this.addComponent(new QuadraticToComponent(cp1x, cp1y, x, y));
-    }
-    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) {
-        this.addComponent(new BezierToComponent(cp1x, cp1y, cp2x, cp2y, x, y));
     }
 
     draw(ctx) {
@@ -165,6 +230,36 @@ export class PathComponent {
     // get controlPoints() { return this._controlPoints; } 
     // setControlPoint(index, x, y) { this._controlPoints[index].set(x, y); this.markTransformed(); }
     get numControlPoints() { return 0; } 
+}
+
+export class MoveToComponent extends PathComponent {
+    constructor(x, y) {
+        super();
+        this._endPoint = new Geom.Models.Point(x, y);
+    }
+
+    _evalBounds() {
+        return new Geom.Models.Bounds(this._endPoint.x, this._endPoint.y, 0, 0);
+    }
+
+    get endPoint() { return this._endPoint; }
+
+    draw(ctx) {
+        ctx.moveTo(this._endPoint.x, this._endPoint.y);
+    }
+
+    getControlPoint(index) {
+        return this._endPoint;
+    }
+
+    setControlPoint(index, x, y) {
+        this._endPoint.set(x, y);
+        this._logicalBounds = null;
+    }
+
+    get numControlPoints() {
+        return 1;
+    }
 }
 
 export class LineToComponent extends PathComponent {

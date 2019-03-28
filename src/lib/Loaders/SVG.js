@@ -4,6 +4,7 @@ import { Core } from "../Core/index"
 import { Utils } from "../Utils/index"
 import { Bundles } from "../Bundles/index"
 
+const PathTokenizer = Utils.SVG.PathTokenizer;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const Length = Geom.Models.Length;
@@ -141,24 +142,69 @@ function processSVGElement(elem, parent) {
 function processPathElement(elem, parent) {
     var d = getAttribute(elem, "d");
     // var comps = tokenizePathString(d);
-    var tokenizer = new Utils.SVG.PathTokenizer(d);
-    var out = new Builtins.Path();
+    var tokenizer = new PathTokenizer(d);
+    var newPath = new Core.Path();
     while (tokenizer.hasNext()) {
         var command = tokenizer.ensureToken("COMMAND");
-        if (next.command == "z" || next.command == "Z") {
-            out.closePath();
-        } if (next.command == "m" || next.command == "M") {
+        console.log("Found command: ", command);
+        var isRelative = command.isRelative || false;
+        var isSmooth = command.isSmooth || false;
+        if (command.name == "closePath") {
+            newPath.closePath();
+        } else if (command.name == "moveTo") {
             var point = tokenizer.ensurePoint();
-            var isRelative = command.isRelative;
+            newPath.moveTo(point.x, point.y, isRelative);
+            // Subsequent numbers are lineTo commands
+            while (tokenizer.peekType() == "NUMBER") {
+                point = tokenizer.ensurePoint();
+                newPath.lineTo(point.x, point.y, isRelative);
+            }
+        } else if (command.name == "lineTo") {
+            while (true) {
+                var point = tokenizer.ensurePoint();
+                newPath.lineTo(point.x, point.y, isRelative);
+                if (tokenizer.peekType() != "NUMBER") break ;
+            }
+        } else if (command.name == "hlineTo") {
+            while (true) {
+                var newval = tokenizer.ensureNumber();
+                newPath.hlineTo(newval, isRelative);
+                if (tokenizer.peekType() != "NUMBER") break ;
+            }
+        } else if (command.name == "vlineTo") {
+            while (true) {
+                var newval = tokenizer.ensureNumber();
+                newPath.vlineTo(newval, isRelative);
+                if (tokenizer.peekType() != "NUMBER") break ;
+            }
+        } else if (command.name == "quadCurve") {
+            while (true) {
+                var x1 = tokenizer.ensureNumber();
+                var y1 = tokenizer.ensureNumber();
+                var x2 = tokenizer.ensureNumber();
+                var y2 = tokenizer.ensureNumber();
+                newPath.quadraticCurveTo(x1, y1, x2, y2, isRelative, isSmooth);
+                if (tokenizer.peekType() != "NUMBER") break ;
+            }
+        } else if (command.name == "cubicCurve") {
+            while (true) {
+                var x1 = tokenizer.ensureNumber();
+                var y1 = tokenizer.ensureNumber();
+                var x2 = tokenizer.ensureNumber();
+                var y2 = tokenizer.ensureNumber();
+                var x3 = tokenizer.ensureNumber();
+                var y3 = tokenizer.ensureNumber();
+                newPath.bezierCurveTo(x1, y1, x2, y2, x3, y3, isRelative, isSmooth);
+                if (tokenizer.peekType() != "NUMBER") break ;
+            }
+        } else {
+            throw new Error("Command not implemented: ", command);
+            if (command.name == "arcTo") {
+            }
         }
     }
-    for (var i = 0;i < comps.length;) {
-        var c = comps[i++];
-        if (c == "M") {
-        }
-    }
-    parent.add(out);
-    return out;
+    parent.add(newPath);
+    return newPath;
 }
 
 function processCircleElement(elem, parent) {

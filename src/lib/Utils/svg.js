@@ -1,6 +1,8 @@
 import { Geom } from "../Geom/index"
 
 export const PATH_COMMANDS = {
+    'z': {command: 'z', name: "closePath", isRelative: true},
+    'Z': {command: 'Z', name: "closePath", isRelative: false},
     'm': {command: 'm', name: "moveTo", isRelative: true},
     'M': {command: 'M', name: "moveTo", isRelative: false},
     'l': {command: 'l', name: "lineTo", isRelative: true},
@@ -9,18 +11,16 @@ export const PATH_COMMANDS = {
     'H': {command: 'H', name: "hlineTo", isRelative: false},
     'v': {command: 'v', name: "vlineTo", isRelative: true},
     'V': {command: 'V', name: "vlineTo", isRelative: false},
-    'z': {command: 'z', name: "closePath", isRelative: true},
-    'Z': {command: 'Z', name: "closePath", isRelative: false},
     'a': {command: 'a', name: "arcTo", isRelative: true},
     'A': {command: 'A', name: "arcTo", isRelative: false},
     'q': {command: 'q', name: "quadCurve", isRelative: true},
     'Q': {command: 'Q', name: "quadCurve", isRelative: false},
-    't': {command: 't', name: "smoothQuadCurve", isRelative: true},
-    'T': {command: 'T', name: "smoothQuadCurve", isRelative: false},
+    't': {command: 't', name: "quadCurve", isRelative: true, isSmooth: true},
+    'T': {command: 'T', name: "quadCurve", isRelative: false, isSmooth: true},
     'c': {command: 'c', name: "cubicCurve", isRelative: true},
     'C': {command: 'C', name: "cubicCurve", isRelative: false},
-    's': {command: 's', name: "smoothCubicCurve", isRelative: true},
-    'S': {command: 'S', name: "smoothCubicCurve", isRelative: false},
+    's': {command: 's', name: "cubicCurve", isRelative: true, isSmooth: true},
+    'S': {command: 'S', name: "cubicCurve", isRelative: false, isSmooth: true},
 }
 
 class Token {
@@ -35,9 +35,8 @@ class Token {
 export class PathTokenizer {
     constructor(input) {
         this._input = input;
-        this._comps = input.split(/([MmLlHhZzvVcCsSQqTtAa \n\t\r,Ee\.\-])/g);
         this._pos = 0;
-        this.L = this._comps.length;
+        this.L = this._input.length;
         this._currToken = null;
         this._currCol = 0;
         this._currLine = 0;
@@ -58,59 +57,72 @@ export class PathTokenizer {
 
             var line = this._currLine;
             var col = this._currCol;
-            if (c in pathCommands) {
-                this._currToken = new Token("COMMAND", pathCommands[c], line, col);
+            if (c in PATH_COMMANDS) {
+                this._currToken = new Token("COMMAND", PATH_COMMANDS[c], line, col);
                 this._advance();
             } else {
                 // parse number
-                /**
-                    number:
-                        sign? integer-constant
-                        | sign? floating-point-constant
-                    integer-constant:   digit-sequence
-                    floating-point-constant:
-                        fractional-constant exponent?
-                        | digit-sequence exponent
-                    fractional-constant:
-                        digit-sequence? "." digit-sequence
-                        | digit-sequence "."
-                    exponent: ( "e" | "E" ) sign? digit-sequence
-                    sign: "+" | "-"
-                    digit-sequence: [0-9]+
-                  */
-                var out = "";
-                var isFloat = false;
-                if (c == "-") {
-                    out += c;
-                    this._advance();
-                    this._skipSpaces();
-                }
-
-                // get all digits if we can
-                out += this._readDigits();
-                if (this._currch() == ".") {
-                    this._advance();
-                    out += ".";
-                    isFloat = true;
-                }
-                out += this._readDigits();
-
-                // read the exponent
-                var c = this._currch();
-                if (c == "e" || c == "E") {
-                    out += c;
-                    this._advance();
-                    if (this._currch() == "-") {
-                        this._advance();
-                        out += "-";
-                    }
-                    out += this._readDigits();
-                    isFloat = true;
-                }
-                this._currToken = new Token("NUMBER", isFloat ? parseFloat(out) : parseInt(out), line, col);
+                var number = this._tokenizeNumber();
+                this._currToken = new Token("NUMBER", number, line, col);
             }
         }
         return this._currToken;
+    }
+
+    /**
+     * Parses a number with the following syntax:
+     * Source: https://www.w3.org/TR/SVG/paths.html#PathDataBNF
+     *
+     *  number:
+     *      sign? integer-constant
+     *      | sign? floating-point-constant
+     *  integer-constant:   digit-sequence
+     *  floating-point-constant:
+     *      fractional-constant exponent?
+     *      | digit-sequence exponent
+     *  fractional-constant:
+     *      digit-sequence? "." digit-sequence
+     *      | digit-sequence "."
+     *  exponent: ( "e" | "E" ) sign? digit-sequence
+     *  sign: "+" | "-"
+     *  digit-sequence: [0-9]+
+     */
+    _tokenizeNumber() {
+        var c = this._currch();
+        var out = "";
+        var isFloat = false;
+        if (c == "-") {
+            out += c;
+            this._advance();
+            this._skipSpaces();
+        }
+
+        if (".0123456789".indexOf(this._currch()) < 0) {
+            var msg = "Expected digit or '.' but found " + currch + ".";
+            this._throw(this._currLine, this._currRow, msg);
+        }
+        // get all digits if we can
+        out += this._readDigits();
+        if (this._currch() == ".") {
+            this._advance();
+            out += ".";
+            isFloat = true;
+        }
+        out += this._readDigits();
+
+        // read the exponent
+        var c = this._currch();
+        if (c == "e" || c == "E") {
+            out += c;
+            this._advance();
+            if (this._currch() == "-") {
+                this._advance();
+                out += "-";
+            }
+            out += this._readDigits();
+            isFloat = true;
+        }
+        return isFloat ? parseFloat(out) : parseInt(out);
     }
     
     next() {
@@ -135,25 +147,31 @@ export class PathTokenizer {
     /**
      * Ensures that the next token is a number.
      */
-    ensureToken(toktype, consume) {
+    ensureToken(toktype, peekOnly) {
+        var peekOnly = peekOnly || false;
         var out = this.peek();
         var foundType = "EOF";
         if (out != null) {
             foundType = out.type;
         }
         if (foundType != toktype) {
-            throw new Error("Expected token type (" + type + ") but found (" + foundType + ") instead.");
+            var msg = "Expected token type (" + toktype + ") but found (" + foundType + ") instead.";
+            this._throw(out.line, out.column, msg);
         }
-        if (consume || false) {
+        if (!peekOnly) {
             this.next();
         }
         return out.value;
     }
 
-    ensureNumber() { return ensureToken("NUMBER"); }
+    _throw(line, col, msg) {
+        throw new Error("Line " + line + ", Col: " + col + ": " + msg);
+    }
+
+    ensureNumber() { return this.ensureToken("NUMBER"); }
     ensurePoint() {
-        var x = ensureNumber();
-        var y = ensureNumber();
+        var x = this.ensureNumber();
+        var y = this.ensureNumber();
         return new Geom.Models.Point(x, y);
     }
 
@@ -181,7 +199,7 @@ export class PathTokenizer {
             var c = this._input[this._pos];
             if ("0123456789".indexOf(c) < 0) break;
             out += c;
-            this._pos ++;
+            this._advance();
         }
         return out;
     }
