@@ -33,9 +33,9 @@ export class Circle extends models.Shape {
         return new geom.Bounds(this._cx.pixelValue - r, this._cy.pixelValue - r, r * 2, r * 2);
     }
     _setBounds(newBounds) {
-        this._cx = newBounds.centerX;
-        this._cy = newBounds.centerY;
-        this._radius = newBounds.innerRadius;
+        this.cx = newBounds.centerX;
+        this.cy = newBounds.centerY;
+        this.radius = newBounds.innerRadius;
     }
     canSetBounds(newBounds) {
         newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);
@@ -47,17 +47,17 @@ export class Circle extends models.Shape {
     get radius() { return this._radius; }
 
     setSize(w, h, force) {
-        this._radius = Math.min(w, h);
+        this.radius = Math.min(w, h);
         return super.setSize(this._radius, this._radius, force);
     }
 
     draw(ctx) {
         ctx.beginPath();
-        ctx.arc(this._cx, this._cy, this._radius, 0, 2 * Math.PI);
-        if (this.fillStyle) {
+        ctx.arc(this._cx.value, this._cy.value, this._radius.value, 0, 2 * Math.PI);
+        if (this.shouldFill && this.fillStyle) {
             ctx.fill();
         }
-        if (this.lineWidth > 0) {
+        if (this.shouldStroke && this.lineWidth > 0) {
             ctx.stroke();
         }
     }

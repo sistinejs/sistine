@@ -109,9 +109,15 @@ export function processElement(root, parent) {
     return method(root, parent);
 }
 
+function processStyleAttributes(elem, shape) {
+    shape.fillStyle = elem.getAttribute("fill");
+}
+
 function processSVGElement(elem, parent) {
     var out = new Builtins.SVG();
     var bounds = new Bounds(0, 0, 100, 100);
+    var viewBox = null;
+    processStyleAttributes(elem, out);
     forEachAttribute(elem, function(attrib, value) {
         if (attrib === "x") {
             bounds.x = parseFloat(value);
@@ -122,7 +128,12 @@ function processSVGElement(elem, parent) {
         } else if (attrib === "height") {
             bounds.height = parseFloat(value);
         } else if (attrib === "viewBox") {
-            out.setMetaData("viewBox", value);
+            var value = value.split(" ");
+            viewBox = new Bounds();
+            viewBox.x = parseFloat(value[0]);
+            viewBox.y = parseFloat(value[1]);
+            viewBox.width = parseFloat(value[2]);
+            viewBox.height = parseFloat(value[3]);
         } else if (attrib === "version") {
             out.setMetaData("version", value);
         } else if (attrib === "baseProfile") {
@@ -134,10 +145,11 @@ function processSVGElement(elem, parent) {
             throw new Error("Cannot process attribute: " + attrib);
         }
     });
-    out.setBounds(bounds);
     forEachChild(elem, function(child, index) {
         processElement(child, out);
     });
+    out.setBounds(bounds);
+    out.viewBox = viewBox;
     return out;
 }
 
@@ -146,6 +158,7 @@ function processPathElement(elem, parent) {
     // var comps = tokenizePathString(d);
     var tokenizer = new PathTokenizer(d);
     var newPath = new Core.Path();
+    processStyleAttributes(elem, newPath);
     while (tokenizer.hasNext()) {
         var command = tokenizer.ensureToken("COMMAND");
         console.log("Found command: ", command);
@@ -216,6 +229,7 @@ function processCircleElement(elem, parent) {
     configs.cy = elem.getAttribute("cy") || 0;
     configs.radius = elem.getAttribute("r");
     var out = new Builtins.Circle(configs);
+    processStyleAttributes(elem, out);
     parent.add(out);
     return out;
 }

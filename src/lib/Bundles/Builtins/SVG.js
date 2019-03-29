@@ -25,6 +25,11 @@ export class SVG extends models.Group {
         this._bounds = newBounds.copy();
     }
 
+    set viewBox(vb) {
+        this._viewBox = vb;
+        this.markTransformed();
+    }
+
     _evalBoundingBox() {
         return this._bounds.copy();
     }
