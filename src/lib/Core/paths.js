@@ -15,7 +15,7 @@ export class Path extends models.Shape {
         super((configs = configs || {}));
         configs = configs || {};
         this._closed = configs.closed || false;
-        this._componentList = new dlist.DList();
+        this._components = [];
         this._currPoint = null;
     }
 
@@ -27,8 +27,8 @@ export class Path extends models.Shape {
         var oldBounds = this.boundingBox;
         var sx = newBounds.width / oldBounds.width;
         var sy = newBounds.height / oldBounds.height;
-        var currComp = this._componentList.head;
-        while (currComp != null) {
+        for (var i = 0;i < this._components.length;i++) {
+            var currComp = this._components[i];
             var nCPT = currComp.numControlPoints;
             for (var i = nCPT - 1;i >= 0;i--) {
                 var cpt = currComp.getControlPoint(i);
@@ -36,16 +36,14 @@ export class Path extends models.Shape {
                 var ny = newBounds.y + ((cpt.y - oldBounds.y) * sy);
                 currComp.setControlPoint(i, nx, ny);
             }
-            currComp = currComp.next;
         }
     }
 
     _evalBoundingBox() {
         var out = new Geom.Models.Bounds();
-        var currComp = this._componentList.head;
-        while (currComp != null) {
+        for (var i = 0;i < this._components.length;i++) {
+            var currComp = this._components[i];
             out.union(currComp.boundingBox);
-            currComp = currComp.next;
         }
         return out;
     }
@@ -54,12 +52,12 @@ export class Path extends models.Shape {
      * Add a new path component at the end of the path.
      */
     addComponent(component) {
-        this._componentList.add(component);
+        this._components.push(component);
         this.markTransformed();
     }
 
     get componentCount() {
-        return this._componentList.count;
+        return this._components.length;
     }
 
     close(yesorno) {
@@ -165,10 +163,9 @@ export class Path extends models.Shape {
         ctx.beginPath();
         if (this._moveTo != null)
             ctx.moveTo(this._moveTo.x, this._moveTo.y);
-        var currComp = this._componentList.head;
-        while (currComp != null) {
+        for (var i = 0;i < this._components.length;i++) {
+            var currComp = this._components[i];
             currComp.draw(ctx);
-            currComp = currComp.next;
         }
         if (this._closed) ctx.closePath();
         if (this.fillStyle) {
@@ -192,8 +189,8 @@ export class Path extends models.Shape {
             ctx.fill();
             ctx.stroke();
         }
-        var currComp = this._componentList.head;
-        while (currComp != null) {
+        for (var i = 0;i < this._components.length;i++) {
+            var currComp = this._components[i];
             currComp.draw(ctx);
             for (var i = currComp.numControlPoints - 1;i >= 0;i--) {
                 var cpt = currComp.getControlPoint(i);
@@ -202,7 +199,6 @@ export class Path extends models.Shape {
                 ctx.fill();
                 ctx.stroke();
             }
-            currComp = currComp.next;
         }
     }
 }
@@ -514,15 +510,14 @@ Path.Controller = class PathController extends controller.ShapeController {
             ours.push(new ControlPoint(path._moveTo, HitType.CONTROL, 0, "grab", {'component': null, 'index': 0}));
         }
         var j = 1;
-        var currComp = path._componentList.head;
-        while (currComp != null) {
+        for (var i = 0;i < this._components.length;i++) {
+            var currComp = this._components[i];
             var nCPT = currComp.numControlPoints;
             for (var i = 0;i < nCPT;i++) {
                 var cpt = currComp.getControlPoint(i);
                 var controlPoint = new ControlPoint(cpt, HitType.CONTROL, j++, "grab", {'component': currComp, 'index': i})
                 ours.push(controlPoint);
             }
-            currComp = currComp.next;
         }
         var parents = super._evalControlPoints();
         return ours.concat(parents);
