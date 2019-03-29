@@ -19,7 +19,7 @@ export class RoundedRectangle extends models.Shape {
         this._p2.set(newBounds.right, newBounds.bottom);
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
@@ -30,7 +30,7 @@ export class RoundedRectangle extends models.Shape {
     get className() { return "RoundedRectangle"; }
 
     draw(ctx) {
-        var lBounds = this.logicalBounds;
+        var lBounds = this.boundingBox;
         var x = lBounds.x;
         var y = lBounds.y;
         var width = lBounds.width;

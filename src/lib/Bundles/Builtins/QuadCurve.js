@@ -25,7 +25,7 @@ export class QuadCurve extends models.Shape {
             this._p1 = new Geom.Models.Point(newBounds.centerX, newBounds.top);
             this._p2 = new Geom.Models.Point(newBounds.right, newBounds.bottom);
         } else {
-            var oldBounds = this.logicalBounds;
+            var oldBounds = this.boundingBox;
             var sx = newBounds.width / oldBounds.width;
             var sy = newBounds.height / oldBounds.height;
             this._p0.x = newBounds.x + ((this._p0.x - oldBounds.x) * sx)
@@ -37,7 +37,7 @@ export class QuadCurve extends models.Shape {
         }
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         if (this._p0 == null) {
             // shape hasnt been created yet
             return new Geom.Models.Bounds();
@@ -106,8 +106,8 @@ QuadCurve.Controller = class QuadCurveController extends controller.ShapeControl
     }
 
     _checkMoveHitInfo(x, y) {
-        var logicalBounds = this.shape.logicalBounds;
-        if (logicalBounds.containsPoint(x, y)) {
+        var boundingBox = this.shape.boundingBox;
+        if (boundingBox.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
@@ -133,7 +133,7 @@ QuadCurve.Controller = class QuadCurveController extends controller.ShapeControl
         } else {
             line._p2.set(savedInfo.downP2.x + deltaX, savedInfo.downP2.y + deltaY);
         }
-        line._logicalBounds = null;
+        line._boundingBox = null;
         line.markTransformed();
     }
 

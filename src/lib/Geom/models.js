@@ -54,7 +54,7 @@ export class Length {
 
 Length.parse = function(input) {
     var units = LengthTypeNumber;
-    if (!$.isNumeric(input)) {
+    if ($.isNumeric(input)) {
         return new Length(parseFloat(input));
     }
     input = input.trim();
@@ -287,6 +287,7 @@ export class Bounds {
     set bottom(value) { this._height = value - this._y; }
     set width(value) { this._width = value; }
     set height(value) { this._height = value; }
+    get isZeroSized() { return this._width === 0 || this._height === 0; }
 
     /**
      * Extends this bounds by unioning the coordinates of this one with another bounds.

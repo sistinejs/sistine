@@ -24,7 +24,7 @@ export class Path extends models.Shape {
     get controllerClass() { return Path.Controller; }
 
     _setBounds(newBounds) {
-        var oldBounds = this.logicalBounds;
+        var oldBounds = this.boundingBox;
         var sx = newBounds.width / oldBounds.width;
         var sy = newBounds.height / oldBounds.height;
         var currComp = this._componentList.head;
@@ -40,11 +40,11 @@ export class Path extends models.Shape {
         }
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var out = new Geom.Models.Bounds();
         var currComp = this._componentList.head;
         while (currComp != null) {
-            out.union(currComp.logicalBounds);
+            out.union(currComp.boundingBox);
             currComp = currComp.next;
         }
         return out;
@@ -215,14 +215,14 @@ export class PathComponent {
     constructor() {
         this.next = null;
         this.prev = null;
-        this._logicalBounds = null;
+        this._boundingBox = null;
     }
 
-    get logicalBounds() {
-        if (this._logicalBounds == null) {
-            this._logicalBounds = this._evalBounds();
+    get boundingBox() {
+        if (this._boundingBox == null) {
+            this._boundingBox = this._evalBoundingBox();
         }
-        return this._logicalBounds;
+        return this._boundingBox;
     }
 
     getControlPoint(i) { throw new Error( "Not implemented"); }
@@ -238,7 +238,7 @@ export class MoveToComponent extends PathComponent {
         this._endPoint = new Geom.Models.Point(x, y);
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         return new Geom.Models.Bounds(this._endPoint.x, this._endPoint.y, 0, 0);
     }
 
@@ -254,7 +254,7 @@ export class MoveToComponent extends PathComponent {
 
     setControlPoint(index, x, y) {
         this._endPoint.set(x, y);
-        this._logicalBounds = null;
+        this._boundingBox = null;
     }
 
     get numControlPoints() {
@@ -268,7 +268,7 @@ export class LineToComponent extends PathComponent {
         this._endPoint = new Geom.Models.Point(x, y);
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var minx = this._endPoint.x;
         var miny = this._endPoint.y;
         var maxx = minx;
@@ -294,7 +294,7 @@ export class LineToComponent extends PathComponent {
 
     setControlPoint(index, x, y) {
         this._endPoint.set(x, y);
-        this._logicalBounds = null;
+        this._boundingBox = null;
     }
 
     get numControlPoints() {
@@ -326,7 +326,7 @@ export class ArcComponent extends PathComponent {
         }
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var minx = this._controlPoints[0].x;
         var miny = this._controlPoints[0].y;
         var maxx = minx;
@@ -371,7 +371,7 @@ export class ArcToComponent extends PathComponent {
         return 3;
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var minx = Math.min(this.p1.x, this.p2.x);
         var miny = Math.min(this.p1.y, this.p2.y);
         var maxx = Math.max(this.p1.x, this.p2.x);
@@ -397,7 +397,7 @@ export class QuadraticToComponent extends PathComponent {
         this.p2 = new Geom.Models.Point(x2, y2);
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var result = null;
         if (this.prev) {
             var p0 = this.prev.endPoint;
@@ -438,7 +438,7 @@ export class QuadraticToComponent extends PathComponent {
         } else {
             this.p2.set(x, y);
         }
-        this._logicalBounds = null;
+        this._boundingBox = null;
     }
 
     get numControlPoints() {
@@ -470,7 +470,7 @@ export class BezierToComponent extends PathComponent {
         } else {
             this.p3.set(x, y);
         }
-        this._logicalBounds = null;
+        this._boundingBox = null;
     }
 
     getControlPoint(i) {
@@ -487,7 +487,7 @@ export class BezierToComponent extends PathComponent {
         return 3;
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var result = null;
         if (this.prev) {
             result = Geom.Utils.boundsOfCubicCurve(this.prev.endPoint.x, this.prev.endPoint.y, 
@@ -547,7 +547,7 @@ Path.Controller = class PathController extends controller.ShapeController {
             var cpIndex = hitInfo.controlPoint.extraData.index;
             cpComponent.setControlPoint(cpIndex, nx, ny);
         }
-        path._logicalBounds = null;
+        path._boundingBox = null;
         path.markTransformed();
     }
 

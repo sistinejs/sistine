@@ -20,7 +20,7 @@ export class Triangle extends models.Shape {
             this._p1 = new geom.Point(newBounds.left, newBounds.bottom);
             this._p2 = new geom.Point(newBounds.right, newBounds.bottom);
         } else {
-            var oldBounds = this.logicalBounds;
+            var oldBounds = this.boundingBox;
             var sx = newBounds.width / oldBounds.width;
             var sy = newBounds.height / oldBounds.height;
             this._p0.x = newBounds.x + ((this._p0.x - oldBounds.x) * sx)
@@ -32,7 +32,7 @@ export class Triangle extends models.Shape {
         }
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         if (this._p0 == null) {
             // shape hasnt been created yet
             return new geom.Bounds();

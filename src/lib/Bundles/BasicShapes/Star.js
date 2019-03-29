@@ -20,7 +20,7 @@ export class Star extends models.Shape {
         this._p2.set(newBounds.right, newBounds.bottom);
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
@@ -40,15 +40,15 @@ export class Star extends models.Shape {
     }
 
     get innerRadius() {
-        return this._innerRadius || (this.logicalBounds.innerRadius / 3.0);
+        return this._innerRadius || (this.boundingBox.innerRadius / 3.0);
     }
 
     draw(ctx) {
         var n = 2 * this._numSides;
         var theta = (Math.PI * 2.0) / n;
-        var cx = this.logicalBounds.centerX;
-        var cy = this.logicalBounds.centerY;
-        var R = Math.min(this.logicalBounds.width, this.logicalBounds.height) / 2.0;
+        var cx = this.boundingBox.centerX;
+        var cy = this.boundingBox.centerY;
+        var R = Math.min(this.boundingBox.width, this.boundingBox.height) / 2.0;
         var innerR = this.innerRadius;
 
         var fx = cx;

@@ -15,7 +15,6 @@ function getTestSvgUrl(base) {
 }
 
 function addSampleShapes() {
-    /*
     var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1)
                           .addStop(0, "black")
                           .addStop(1, "white");
@@ -30,7 +29,7 @@ function addSampleShapes() {
     var grd2 = new Sistine.Core.Styles.RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");
-    addShape(BasicShapes, "Circle", {
+    addShape(BuiltinShapes, "Circle", {
         center: new Point(200, 200),
         radius: 100,
         "lineWidth": 2, "fillStyle": grd2
@@ -42,7 +41,7 @@ function addSampleShapes() {
     });
     addShape(BasicShapes, "Polygon", { "x": 350, "y": 175, "width": 200, "height": 200, "fillStyle": 'blue' });
 
-    var path = addShape(BuiltinShapes, "Path")
+    var path = addShape(Sistine.Core, "Path")
     path.moveTo(100, 100);
     path.lineTo(100, 200);
     path.quadraticCurveTo(300, 400, 325, 475);
@@ -60,12 +59,13 @@ function addSampleShapes() {
         p2: new Sistine.Geom.Models.Point(600, 300),
         p3: new Sistine.Geom.Models.Point(700, 200)
     })
-    */
 
+    /*
     Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("irony.svg"), function(doc) {
         console.log("Here");
         theApp.scene.add(doc);
     });
+    */
 }
 
 function addShape(Bundle, objid, configs) {

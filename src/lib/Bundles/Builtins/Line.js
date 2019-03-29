@@ -21,7 +21,7 @@ export class Line extends models.Shape {
         this._p1.set(newBounds.right, newBounds.bottom);
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var left = Math.min(this._p0.x, this._p1.x);
         var top = Math.min(this._p0.y, this._p1.y);
         var right = Math.max(this._p0.x, this._p1.x);
@@ -70,8 +70,8 @@ Line.Controller = class LineController extends controller.ShapeController {
     }
 
     _checkMoveHitInfo(x, y) {
-        var logicalBounds = this.shape.logicalBounds;
-        if (logicalBounds.containsPoint(x, y)) {
+        var boundingBox = this.shape.boundingBox;
+        if (boundingBox.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
@@ -90,7 +90,7 @@ Line.Controller = class LineController extends controller.ShapeController {
         } else {
             line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
         }
-        line._logicalBounds = null;
+        line._boundingBox = null;
         line.markTransformed();
     }
 

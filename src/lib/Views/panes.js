@@ -244,7 +244,7 @@ export class ShapesPane extends Pane {
     }
 
     drawShape(ctx, shape, stage, clipBounds) {
-        // TODO: Update clip logicalBounds as necessary
+        // TODO: Update clip boundingBox as necessary
         if (!shape.isVisible) return;
         var belongsToPane = shape.pane == this.name;
         shape.applyTransforms(ctx);
@@ -256,15 +256,15 @@ export class ShapesPane extends Pane {
         if (shape.hasChildren) {
             // ctx.save();
             // var angle = shape.get("angle");
-            var cx = 0; // shape.logicalBounds.centerX;
-            var cy = 0; // shape.logicalBounds.centerY;
+            var cx = 0; // shape.boundingBox.centerX;
+            var cy = 0; // shape.boundingBox.centerY;
             // ctx.translate(cx, cy);
             // ctx.rotate((Math.PI * shape.get("angle")) / 180.0);
-            ctx.translate(shape.logicalBounds.x - cx, shape.logicalBounds.y - cy);
+            ctx.translate(shape.boundingBox.x - cx, shape.boundingBox.y - cy);
             shape.forEachChild(function(child, index, self) {
                 self.drawShape(ctx, child, stage, clipBounds);
             }, this);
-            ctx.translate(cx - shape.logicalBounds.x, cy - shape.logicalBounds.y);
+            ctx.translate(cx - shape.boundingBox.x, cy - shape.boundingBox.y);
             // ctx.restore();
         }
         if (belongsToPane) {
@@ -279,11 +279,11 @@ export class ShapesPane extends Pane {
         if (shape) {
             this._ensureParentTransform(ctx, shape.parent);
             var angle = shape.get("angle");
-            var cx = shape.logicalBounds.centerX;
-            var cy = shape.logicalBounds.centerY;
+            var cx = shape.boundingBox.centerX;
+            var cy = shape.boundingBox.centerY;
             ctx.translate(cx, cy);
             ctx.rotate((Math.PI * shape.get("angle")) / 180.0);
-            ctx.translate(shape.logicalBounds.x - cx, shape.logicalBounds.y - cy);
+            ctx.translate(shape.boundingBox.x - cx, shape.boundingBox.y - cy);
         }
     }
 }

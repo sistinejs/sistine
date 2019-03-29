@@ -20,7 +20,7 @@ export class Polygon extends models.Shape {
         this._p2.set(newBounds.right, newBounds.bottom);
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
@@ -42,10 +42,10 @@ export class Polygon extends models.Shape {
     draw(ctx) {
         var n = this._numSides;
         var theta = (Math.PI * 2.0) / n;
-        var cx = this.logicalBounds.centerX;
-        var cy = this.logicalBounds.centerY;
-        var A = this.logicalBounds.width / 2.0;
-        var B = this.logicalBounds.height / 2.0;
+        var cx = this.boundingBox.centerX;
+        var cy = this.boundingBox.centerY;
+        var A = this.boundingBox.width / 2.0;
+        var B = this.boundingBox.height / 2.0;
 
         var p0 = geomutils.pointOnEllipse(A, B, Math.PI / 2.0);
         var pi = new geom.Point();

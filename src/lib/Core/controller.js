@@ -65,7 +65,7 @@ export class ShapeController {
 
     _evalControlPoints() {
         this._controlPointTS = Date.now();
-        var lBounds = this.shape.logicalBounds;
+        var lBounds = this.shape.boundingBox;
         var controlRadius = this.shape.controlRadius;
         var l = lBounds.left;
         var r = lBounds.right;
@@ -107,15 +107,15 @@ export class ShapeController {
     }
 
     _checkMoveHitInfo(x, y) {
-        var logicalBounds = this.shape.logicalBounds;
-        if (logicalBounds.containsPoint(x, y)) {
+        var boundingBox = this.shape.boundingBox;
+        if (boundingBox.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
 
     snapshotFor(hitInfo) {
-        return {'logicalBounds': this.shape.logicalBounds.copy(), rotation: this.shape.rotation};
+        return {'boundingBox': this.shape.boundingBox.copy(), rotation: this.shape.rotation};
     }
 
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
@@ -124,12 +124,12 @@ export class ShapeController {
         var shape = this.shape;
         console.log("ShapeController.applyHitInfo: ", deltaX, deltaY, shape.isGroup);
         if (hitInfo.hitType == HitType.MOVE) {
-            shape.setBounds(savedInfo.logicalBounds.move(deltaX, deltaY));
+            shape.setBounds(savedInfo.boundingBox.move(deltaX, deltaY));
         } else if (hitInfo.hitType == HitType.SIZE) {
-            var newTop = savedInfo.logicalBounds.top;
-            var newLeft = savedInfo.logicalBounds.left;
-            var newHeight = savedInfo.logicalBounds.height;
-            var newWidth = savedInfo.logicalBounds.width;
+            var newTop = savedInfo.boundingBox.top;
+            var newLeft = savedInfo.boundingBox.left;
+            var newHeight = savedInfo.boundingBox.height;
+            var newWidth = savedInfo.boundingBox.width;
             if (hitInfo.hitIndex == HitType.SIZE_N) {
                 newHeight -= deltaY;
                 newTop += deltaY;
@@ -159,8 +159,8 @@ export class ShapeController {
             }
             shape.setBounds(new geom.Bounds(newLeft, newTop, newWidth, newHeight));
         } else if (hitInfo.hitType == HitType.ROTATE) {
-            var centerX = hitInfo.hitShape.logicalBounds.centerX;
-            var centerY = hitInfo.hitShape.logicalBounds.centerY;
+            var centerX = hitInfo.hitShape.boundingBox.centerX;
+            var centerY = hitInfo.hitShape.boundingBox.centerY;
             var deltaX = currX - centerX;
             var deltaY = currY - centerY;
             var newAngle = 0;

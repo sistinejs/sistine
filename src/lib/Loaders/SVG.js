@@ -110,8 +110,8 @@ export function processElement(root, parent) {
 }
 
 function processSVGElement(elem, parent) {
-    var out = new Core.Models.Group();
-    var bounds = new Bounds();
+    var out = new Builtins.SVG();
+    var bounds = new Bounds(0, 0, 100, 100);
     forEachAttribute(elem, function(attrib, value) {
         if (attrib === "x") {
             bounds.x = parseFloat(value);
@@ -121,15 +121,17 @@ function processSVGElement(elem, parent) {
             bounds.width = parseFloat(value);
         } else if (attrib === "height") {
             bounds.height = parseFloat(value);
+        } else if (attrib === "viewBox") {
+            out.setMetaData("viewBox", value);
         } else if (attrib === "version") {
             out.setMetaData("version", value);
         } else if (attrib === "baseProfile") {
             out.setMetaData("baseProfile", value);
-        } else if ([ "xmlns", "viewBox" ].indexOf(attrib) >= 0) {
+        } else if ([ "xmlns" ].indexOf(attrib) >= 0) {
                 // ignore list
             console.log("Ingoring attribute: ", attrib, " = ", value);
         } else {
-            throw new Error("Cannot process attribute: ", attrib);
+            throw new Error("Cannot process attribute: " + attrib);
         }
     });
     out.setBounds(bounds);

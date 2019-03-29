@@ -9,8 +9,8 @@ const Length = geom.Length;
 export class Circle extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this.cx = configs.cx;
-        this.cy = configs.cy;
+        this.cx = configs.cx || 0;
+        this.cy = configs.cy || 0;
         this.radius = configs.radius || 10;
     }
 
@@ -33,8 +33,8 @@ export class Circle extends models.Shape {
         return new geom.Bounds(this._cx.pixelValue - r, this._cy.pixelValue - r, r * 2, r * 2);
     }
     _setBounds(newBounds) {
-        this._center.x = newBounds.centerX;
-        this._center.y = newBounds.centerY;
+        this._cx = newBounds.centerX;
+        this._cy = newBounds.centerY;
         this._radius = newBounds.innerRadius;
     }
     canSetBounds(newBounds) {
@@ -53,7 +53,7 @@ export class Circle extends models.Shape {
 
     draw(ctx) {
         ctx.beginPath();
-        ctx.arc(this._center.x, this._center.y, this._radius, 0, 2 * Math.PI);
+        ctx.arc(this._cx, this._cy, this._radius, 0, 2 * Math.PI);
         if (this.fillStyle) {
             ctx.fill();
         }
@@ -66,7 +66,7 @@ export class Circle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class CircleController extends controller.ShapeController {
+Circle.Controller = class CircleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

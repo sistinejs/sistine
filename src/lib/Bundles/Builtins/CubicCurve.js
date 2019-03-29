@@ -28,7 +28,7 @@ export class CubicCurve extends models.Shape {
             this._p2 = new Geom.Models.Point(newBounds.right, newBounds.bottom);
             this._p3 = new Geom.Models.Point(newBounds.right - w4, newBounds.top);
         } else {
-            var oldBounds = this.logicalBounds;
+            var oldBounds = this.boundingBox;
             var sx = newBounds.width / oldBounds.width;
             var sy = newBounds.height / oldBounds.height;
             this._p0.scale(sx, sy, oldBounds.x, oldBounds.y).translate(newBounds.x, newBounds.y);
@@ -38,7 +38,7 @@ export class CubicCurve extends models.Shape {
         }
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         if (this._p0 == null) {
             // shape hasnt been created yet
             return new Geom.Models.Bounds();
@@ -116,8 +116,8 @@ CubicCurve.Controller = class CubicCurveController extends controller.ShapeContr
     }
 
     _checkMoveHitInfo(x, y) {
-        var logicalBounds = this.shape.logicalBounds;
-        if (logicalBounds.containsPoint(x, y)) {
+        var boundingBox = this.shape.boundingBox;
+        if (boundingBox.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
@@ -145,7 +145,7 @@ CubicCurve.Controller = class CubicCurveController extends controller.ShapeContr
         } else {
             line._p3.set(savedInfo.downP3.x + deltaX, savedInfo.downP3.y + deltaY);
         }
-        line._logicalBounds = null;
+        line._boundingBox = null;
         line.markTransformed();
     }
 

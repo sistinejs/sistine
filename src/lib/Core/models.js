@@ -126,7 +126,7 @@ export class Shape extends Element {
         this._scene = null;
         this.isVisible = true;
         this._globalTransform = new geom.Transform();
-        this._logicalBounds = null;
+        this._boundingBox = null;
         this.markTransformed();
         this.controlRadius = DEFAULT_CONTROL_SIZE;
 
@@ -154,11 +154,11 @@ export class Shape extends Element {
     }
 
     get uuid() { return this._uuid; }
-    get logicalBounds() {
-        if (this._logicalBounds == null) {
-            this._logicalBounds = this._evalBounds();
+    get boundingBox() {
+        if (this._boundingBox == null) {
+            this._boundingBox = this._evalBoundingBox();
         }
-        return this._logicalBounds;
+        return this._boundingBox;
     }
 
     markTransformed() { 
@@ -319,7 +319,7 @@ export class Shape extends Element {
 
         // Check minimum sizes
         var C2 = this.controlRadius + this.controlRadius;
-        if (x * this.logicalBounds.width <= C2 || y * this.logicalBounds.height <= C2) return false;
+        if (x * this.boundingBox.width <= C2 || y * this.boundingBox.height <= C2) return false;
 
         var event = new events.GeometryChanged(this, "scale", [ oldScaleX, oldScaleY ], [ x, y ]);
         if (this.validateBefore(event.name, event) == false) return false;
@@ -351,12 +351,12 @@ export class Shape extends Element {
      */
     setBounds(newBounds) {
         if (this.canSetBounds(newBounds)) {
-            var oldBounds = this.logicalBounds.copy();
+            var oldBounds = this.boundingBox.copy();
             var event = new events.GeometryChanged(this, "bounds", oldBounds, newBounds);
             if (this.validateBefore(event.name, event) == false) return false;
             this._scaleFactor.x = this._scaleFactor.y = 1.0;
             this._setBounds(newBounds);
-            this._logicalBounds = null;
+            this._boundingBox = null;
             this.markTransformed();
             this.triggerOn(event.name, event);
             return true;
@@ -507,7 +507,7 @@ export class Shape extends Element {
         if (this._children.length > 0) {
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 0.5;
-            var lBounds = this.logicalBounds;
+            var lBounds = this.boundingBox;
             ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
         }
     }
@@ -546,9 +546,9 @@ export class Shape extends Element {
         if (angle || this._scaleFactor.x != 1 || this._scaleFactor.y != 1 ||
             this._translation.x || this._translation.y) {
             ctx.save(); 
-            var lBounds = this.logicalBounds;
-            var cx = this.logicalBounds.centerX;
-            var cy = this.logicalBounds.centerY;
+            var lBounds = this.boundingBox;
+            var cx = this.boundingBox.centerX;
+            var cy = this.boundingBox.centerY;
             ctx.translate(cx, cy);
             ctx.rotate(angle);
             ctx.scale(this._scaleFactor.x, this._scaleFactor.y);
@@ -566,7 +566,7 @@ export class Shape extends Element {
     drawControls(ctx, options) {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 0.5
-        var lBounds = this.logicalBounds;
+        var lBounds = this.boundingBox;
         var l = lBounds.left;
         var r = lBounds.right;
         var t = lBounds.top;
@@ -613,7 +613,7 @@ export class Shape extends Element {
      */
     containsPoint(x, y) {
         var newp = this.globalTransform.apply(x, y, {});
-        return this.logicalBounds.containsPoint(newp.x, newp.y);
+        return this.boundingBox.containsPoint(newp.x, newp.y);
     }
 
     /**
@@ -621,7 +621,7 @@ export class Shape extends Element {
      * false otherwise.
      */
     intersects(anotherBounds) {
-        return this.logicalBounds.intersects(anotherBounds);
+        return this.boundingBox.intersects(anotherBounds);
     }
 
     _locationChanged(oldX, oldY) { }
@@ -652,11 +652,11 @@ export class Group extends Shape {
     get hasChildren() { return this._children.length > 0; } 
     get childCount() { return this._children.length; } 
 
-    _evalBounds() {
+    _evalBoundingBox() {
         if (this._viewBox == null) {
             var out = new geom.Bounds(0, 0, 0, 0);
             for (var i = 0;i < this._children.length;i++) {
-                out.union(this._children[i].logicalBounds);
+                out.union(this._children[i].boundingBox);
             }
             return out;
         } else {
@@ -670,7 +670,7 @@ export class Group extends Shape {
 }
 
 export class Layer extends Group { 
-    _evalBounds() {
+    _evalBoundingBox() {
         return new geom.Bounds(0, 0, 0, 0);
     }
 }
@@ -832,18 +832,18 @@ export class Selection extends events.EventSource {
             if (! (parId in groups)) {
                 groups[parId] = {
                     parent: shape.parent,
-                    logicalBounds: shape.logicalBounds.copy(),
+                    boundingBox: shape.boundingBox.copy(),
                     shapes: []
                 };
             }
             groups[parId].shapes.push(shape);
-            groups[parId].logicalBounds.union(shape.logicalBounds);
+            groups[parId].boundingBox.union(shape.boundingBox);
         });
 
         this.clear();
         for (var parentId in groups) {
             var currGroup = groups[parentId];
-            var currBounds = currGroup.logicalBounds;
+            var currBounds = currGroup.boundingBox;
             var currParent = currGroup.parent;
             // Here create a new shape group if we have atleast 2 shapes
             if (currGroup.shapes.length > 1)  {
@@ -853,7 +853,7 @@ export class Selection extends events.EventSource {
                 newParent.setSize(currBounds.width, currBounds.height);
                 currGroup.shapes.forEach(function(child, index) {
                     newParent.add(child);
-                    child.setLocation(child.logicalBounds.x - currBounds.x, child.logicalBounds.y - currBounds.y);
+                    child.setLocation(child.boundingBox.x - currBounds.x, child.boundingBox.y - currBounds.y);
                 });
                 this.add(newParent);
             }
@@ -870,11 +870,11 @@ export class Selection extends events.EventSource {
             if (shape.isGroup) {
                 selection.remove(shape);
                 var newParent = shape.parent;
-                var lBounds = shape.logicalBounds;
+                var lBounds = shape.boundingBox;
                 shape.forEachChild(function(child, index, self) {
                     newParent.add(child);
-                    child.setLocation(lBounds.x + child.logicalBounds.x,
-                                      lBounds.y + child.logicalBounds.y);
+                    child.setLocation(lBounds.x + child.boundingBox.x,
+                                      lBounds.y + child.boundingBox.y);
                     selection.add(child);
                 }, this, true);
                 newParent.remove(shape);

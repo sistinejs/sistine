@@ -22,7 +22,7 @@ export class Square extends models.Shape {
         this._size = newBounds.width;
     }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         return new geom.Bounds(this._p0.x, this._p0.y, this._size, this._size);
     }
 

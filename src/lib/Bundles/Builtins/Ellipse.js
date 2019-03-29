@@ -16,7 +16,7 @@ export class Ellipse extends models.Shape {
 
     get controllerClass() { return Ellipse.Controller; }
 
-    _evalBounds() {
+    _evalBoundingBox() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
@@ -31,7 +31,7 @@ export class Ellipse extends models.Shape {
     get className() { return "Ellipse"; };
 
     draw(ctx) {
-        var lBounds = this.logicalBounds;
+        var lBounds = this.boundingBox;
         var x = lBounds.x;
         var y = lBounds.y;
         var w = lBounds.width;
