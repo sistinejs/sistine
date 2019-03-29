@@ -517,7 +517,7 @@ export class Shape extends Element {
      */
     applyStyles(ctx, options) {
         if (this.shouldFill && this.fillStyle) {
-            ctx.fillStyle = null;
+            this.fillStyle.apply(this, "fillStyle", ctx);
         }
         if (this.shouldStroke) {
             if (this.strokeStyle) {
