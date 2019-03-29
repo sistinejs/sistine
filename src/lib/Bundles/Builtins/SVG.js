@@ -21,6 +21,10 @@ export class SVG extends models.Group {
         this._controller = new SVG.Controller(this);
     }
 
+    _setBounds(newBounds) {
+        this._bounds = newBounds.copy();
+    }
+
     _evalBoundingBox() {
         return this._bounds.copy();
     }

@@ -15,6 +15,11 @@ function getTestSvgUrl(base) {
 }
 
 function addSampleShapes() {
+    // addSampleShapes1();
+    addSampleShapes2();
+}
+
+function addSampleShapes1() {
     var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1)
                           .addStop(0, "black")
                           .addStop(1, "white");
@@ -52,20 +57,20 @@ function addSampleShapes() {
         p0: new Sistine.Geom.Models.Point(100, 300),
         p1: new Sistine.Geom.Models.Point(200, 200),
         p2: new Sistine.Geom.Models.Point(300, 300)
-    })
+    });
     addShape(BuiltinShapes, "CubicCurve", {
         p0: new Sistine.Geom.Models.Point(400, 300),
         p1: new Sistine.Geom.Models.Point(500, 200),
         p2: new Sistine.Geom.Models.Point(600, 300),
         p3: new Sistine.Geom.Models.Point(700, 200)
-    })
+    });
+}
 
-    /*
+function addSampleShapes2() {
     Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("irony.svg"), function(doc) {
         console.log("Here");
         theApp.scene.add(doc);
     });
-    */
 }
 
 function addShape(Bundle, objid, configs) {

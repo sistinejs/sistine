@@ -637,7 +637,6 @@ export class Group extends Shape {
     constructor(configs) {
         super(configs);
         this._children = [];
-        this._viewBox = null;
     }
 
     setScene(s) {
@@ -653,19 +652,11 @@ export class Group extends Shape {
     get childCount() { return this._children.length; } 
 
     _evalBoundingBox() {
-        if (this._viewBox == null) {
-            var out = new geom.Bounds(0, 0, 0, 0);
-            for (var i = 0;i < this._children.length;i++) {
-                out.union(this._children[i].boundingBox);
-            }
-            return out;
-        } else {
-            return this._viewBox.copy();
+        var out = new geom.Bounds(0, 0, 0, 0);
+        for (var i = 0;i < this._children.length;i++) {
+            out.union(this._children[i].boundingBox);
         }
-    }
-
-    _setBounds(newBounds) {
-        this._viewBox = newBounds.copy();
+        return out;
     }
 }
 
