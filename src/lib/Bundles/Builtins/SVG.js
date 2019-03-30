@@ -16,7 +16,7 @@ export class SVG extends models.Group {
         this._viewBox = configs.bounds || null;
         this._preserveAspectRatio = configs.preserveAspectRatio || false;
         this._xAlign = (configs.xalign || AlignMid).toLowerCase();
-        this._yAlign = (configs.xalign || AlignMid).toLowerCase();
+        this._yAlign = (configs.yalign || AlignMid).toLowerCase();
         this._meetOrSlice = configs.meetOrSlice || "meet";
         this._controller = new SVG.Controller(this);
     }
@@ -25,6 +25,7 @@ export class SVG extends models.Group {
         this._bounds = newBounds.copy();
     }
 
+    get viewBox() { return this._viewBox; } 
     set viewBox(vb) {
         this._viewBox = vb;
         this.markTransformed();

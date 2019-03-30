@@ -48,7 +48,12 @@ export class StageState extends events.State {
 
     toWorld(x, y, result) { return this._mainPane.toWorld(x, y, result); } 
 
-    _onKeyDown(eventType, source, event) { console.log("KeyDown: ", event); }
+    _onKeyDown(eventType, source, event) {
+        console.log("KeyDown: ", event);
+        if (this.downPoints && this.downPoints[0]) 
+            console.log("DownPoint: ", this.downPoints[0].x, this.downPoints[0].y);
+        console.log("CurrPoints: ", this.currPoints[0].x, this.currPoints[0].y);
+    }
     _onKeyPress(eventType, source, event) { console.log("KeyPress: ", event); }
     _onKeyUp(eventType, source, event) {
         if (event.key == "Escape") {

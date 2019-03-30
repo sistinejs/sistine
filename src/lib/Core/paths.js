@@ -510,8 +510,9 @@ Path.Controller = class PathController extends controller.ShapeController {
             ours.push(new ControlPoint(path._moveTo, HitType.CONTROL, 0, "grab", {'component': null, 'index': 0}));
         }
         var j = 1;
-        for (var i = 0;i < this._components.length;i++) {
-            var currComp = this._components[i];
+        var components = path._components;
+        for (var i = 0;i < components.length;i++) {
+            var currComp = components[i];
             var nCPT = currComp.numControlPoints;
             for (var i = 0;i < nCPT;i++) {
                 var cpt = currComp.getControlPoint(i);

@@ -15,8 +15,8 @@ function getTestSvgUrl(base) {
 }
 
 function addSampleShapes() {
-    // addSampleShapes1();
-    addSampleShapes2();
+    addSampleShapes1();
+    // addSampleShapes2();
 }
 
 function addSampleShapes1() {
@@ -31,6 +31,7 @@ function addSampleShapes1() {
         "fillStyle": grd1
     });
 
+    return ;
     var grd2 = new Sistine.Core.Styles.RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");

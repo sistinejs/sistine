@@ -285,35 +285,35 @@ export class PropertyChanged extends Event {
     get name() { return "PropertyChanged"; }
 }
 
-export class ShapeAdded extends Event {
-    constructor(parent, shape) {
+export class ElementAdded extends Event {
+    constructor(parent, subject) {
         super();
         this.parent = parent;
-        this.shape = shape;
+        this.subject = subject;
     }
 
-    get name() { return "ShapeAdded"; }
+    get name() { return "ElementAdded"; }
 }
 
-export class ShapeRemoved extends Event {
-    constructor(parent, shape) {
+export class ElementRemoved extends Event {
+    constructor(parent, subject) {
         super();
         this.parent = parent;
-        this.shape = shape;
+        this.subject = subject;
     }
 
-    get name() { return "ShapeRemoved"; }
+    get name() { return "ElementRemoved"; }
 }
 
-export class ShapeIndexChanged extends Event {
-    constructor(shape, oldIndex, newIndex) {
+export class ElementIndexChanged extends Event {
+    constructor(subject, oldIndex, newIndex) {
         super();
-        this.shape = shape;
+        this.subject = subject;
         this.oldIndex = oldIndex;
         this.newIndex = newIndex;
     }
 
-    get name() { return "ShapeIndexChanged"; }
+    get name() { return "ElementIndexChanged"; }
 }
 
 export class ShapesSelected extends Event {

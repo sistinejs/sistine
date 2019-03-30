@@ -219,27 +219,10 @@ export class ShapesPane extends Pane {
     draw(ctx) {
         var pane = this;
         var stage = this._stage;
-        var byWalking = true;
-        if (byWalking) {
-            var scene = stage.scene;
-            for (var i = 0;i < scene.layers.length;i++) {
-                var layer = scene.layers[i];
-                this.drawShape(ctx, layer, stage, this.viewPort);
-            }
-        } else {
-            stage.shapeIndex.forShapesInViewPort(this, this.viewPort, function(shape) {
-                if (!shape.isVisible) return ;
-                ctx.save();
-                pane._ensureParentTransform(ctx, shape.parent);
-                shape.applyTransforms(ctx);
-                shape.applyStyles(ctx);
-                shape.draw(ctx);
-                if (stage.selection.contains(shape)) {
-                    shape.drawControls(ctx);
-                }
-                shape.revertTransforms(ctx);
-                ctx.restore();
-            });
+        var scene = stage.scene;
+        for (var i = 0;i < scene.layers.length;i++) {
+            var layer = scene.layers[i];
+            this.drawShape(ctx, layer, stage, this.viewPort);
         }
     }
 
@@ -267,12 +250,10 @@ export class ShapesPane extends Pane {
             ctx.translate(cx - shape.boundingBox.x, cy - shape.boundingBox.y);
             // ctx.restore();
         }
-        if (belongsToPane) {
-            if (stage.selection.contains(shape)) {
-                shape.drawControls(ctx);
-            }
-        }
         shape.revertTransforms(ctx);
+        if (belongsToPane && stage.selection.contains(shape)) {
+            shape.drawControls(ctx);
+        }
     }
 
     _ensureParentTransform(ctx, shape) {

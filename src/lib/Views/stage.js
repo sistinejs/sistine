@@ -117,8 +117,8 @@ export class Stage extends coreevents.EventSource {
         if (this._scene != s) {
             this._scene = s
             var self = this;
-            s.on("ShapeAdded, ShapeRemoved", function(eventType, source, event) {
-                self.paneNeedsRepaint(event.shape.pane);
+            s.on("ElementAdded, ElementRemoved", function(eventType, source, event) {
+                self.paneNeedsRepaint(event.subject.pane);
             }).on("PropertyChanged", function(eventType, source, event) {
                 self.paneNeedsRepaint(event.source.pane)
             });
@@ -398,10 +398,10 @@ export class ShapeIndex {
             this._shapeIndexes = {};
             this._allShapes = [];
             var self = this;
-            s.on("ShapeAdded", function(eventType, source, event) {
-                self.add(event.shape);
-            }).on("ShapeRemoved", function(eventType, source, event) {
-                self.remove(event.shape);
+            s.on("ElementAdded", function(eventType, source, event) {
+                self.add(event.subject);
+            }).on("ElementRemoved", function(eventType, source, event) {
+                self.remove(event.subject);
             });
             this.reIndex();     // Build the index for this new scene!
         }

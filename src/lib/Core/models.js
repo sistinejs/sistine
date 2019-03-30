@@ -12,7 +12,7 @@ export const EV_PROPERTY_CHANGED = 0;
 export const EV_SHAPE_ADDED = 1;
 export const EV_SHAPE_REMOVED = 2;
 
-const ShapeCounter = new counters.Counter("ShapeIDs");
+const ElementCounter = new counters.Counter("ElementIDs");
 
 /**
  * The Scene is the raw model where all layers and shapes are 
@@ -100,10 +100,25 @@ export class Scene {
 export class Element extends events.EventSource {
     constructor() {
         super();
+        this._uuid = ElementCounter.next();
         this._parent = null;
         this._defs = {};
         this._metadata = {};
     }
+
+    forEachChild(handler, self, mutable) {
+        var children = this._children;
+        if (mutable == true) {
+            children = children.slice(0, children.length);
+        }
+        for (var index in children) {
+            var child = children[index];
+            if (handler(child, index, self) == false)
+                break;
+        }
+    }
+
+    get uuid() { return this._uuid; }
 
     getMetaData(key) { return this._metadata[key] || null; }
     setMetaData(key, value) { this._metadata[key] = value; return this; }
@@ -113,6 +128,162 @@ export class Element extends events.EventSource {
     get hasChildren() { return false; }
 
     get parent() { return this._parent; } 
+
+    canSetProperty(property, newValue) {
+        var oldValue = this["_" + property];
+        if (oldValue == newValue) 
+            return null;
+        var event = new events.PropertyChanged(this, property, oldValue, newValue);
+        if (this.validateBefore("PropertyChanged:" + property, event) == false)
+            return null;
+        return event;
+    }
+
+    set(property, newValue) {
+        var event = this.canSetProperty(property, newValue);
+        if (event == null)
+            return false;
+        this["_" + property] = newValue;
+        this.markUpdated();
+        this.triggerOn("PropertyChanged:" + property, event);
+        return true;
+    }
+
+    /**
+     * Adds a new element to this group.
+     * Returns true if a element was successfully added
+     * false if the addition was blocked.
+     */
+    add(element, index) {
+        index = index || -1;
+        if (element.parent != this) {
+            var event = new events.ElementAdded(this, element);
+            if (this.validateBefore("ElementAdded", event) != false) {
+                // remove from old parent - Important!
+                if (element.removeFromParent()) {
+                    this._children.push(element);
+                    element._parent = this;
+                    element.setScene(this.scene);
+                    this.triggerOn("ElementAdded", event);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes an existing element from this group.
+     * Returns true if a element was successfully removed,
+     * false if the removal was blocked.
+     */
+    remove(element) {
+        if (element.parent == this) {
+            var event = new events.ElementRemoved(this, element);
+            if (this.validateBefore("ElementRemoved", event) != false) {
+                for (var i = 0;i < this._children.length;i++) {
+                    if (this._children[i] == element) {
+                        this._children.splice(i, 1);
+                        element._parent = null;
+                        this.triggerOn("ElementRemoved", event);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    removeFromParent() {
+        if (this.parent == null) return true;
+        if (this.parent.remove(this)) {
+            this._parent = null;
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Changes the index of a given element within the parent.  The indexOrDelta 
+     * parameter denotes whether a element is to be moved to an absolute index or 
+     * relative to its current position depending on the 'relative' parameter.
+     */
+    changeIndexTo(element, indexOrDelta, relative) {
+        if (element.parent != this) return ;
+
+        var newIndex = indexOrDelta;
+        if (relative || false) {
+            newIndex = index + indexOrDelta;
+        }
+
+        if (newIndex < 0)
+            newIndex = 0;
+        if (newIndex >= this._children.length)
+            newIndex = this._children.length - 1;
+
+        var index = this._children.indexOf(element);
+        if (newIndex == index) {
+            return ;
+        }
+        var event = new events.ElementIndexChanged(element, index, newIndex);
+        if (this.validateBefore("ElementIndexChanged", event) != false) {
+            this._children.splice(index, 1);
+            this._children.splice(newIndex, 0, element);
+            this.triggerOn("ElementIndexChanged", event);
+        }
+    }
+
+    /**
+     * Brings a child element forward by one level.
+     */
+    bringForward(element) {
+        return this.changeIndexTo(element, 1, true);
+
+        if (index >= 0 && index < this._children.length - 1) {
+            var temp = this._children[index];
+            this._children[index] = this._children[index + 1];
+            this._children[index + 1] = temp;
+        }
+    }
+
+    /**
+     * Sends a child element backward by one index.
+     */
+    sendBackward(element) {
+        return this.changeIndexTo(element, -1, true);
+
+        if (index > 0) {
+            var temp = this._children[index];
+            this._children[index] = this._children[index - 1];
+            this._children[index - 1] = temp;
+        }
+    }
+
+    /**
+     * Brings a child element to the front of the child stack.
+     */
+    bringToFront(element) {
+        return this.changeIndexTo(element, this._children.length, false);
+
+        if (element.parent != this) return ;
+        var index = this._children.indexOf(element);
+        if (index >= 0 && index < this._children.length - 1) {
+            this._children.splice(index, 1);
+            this._children.push(element);
+        }
+    }
+
+    /**
+     * Sends a child element to the back of the child stack.
+     */
+    sendToBack(element) {
+        return this.changeIndexTo(element, 0, false);
+
+        if (index > 0) {
+            this._children.splice(index, 1);
+            this._children.splice(0, 0, element);
+        }
+    }
 }
 
 /**
@@ -122,23 +293,20 @@ export class Shape extends Element {
     constructor(configs) {
         super();
         configs = configs || {};
-        this._uuid = ShapeCounter.next();
         this._scene = null;
-        this.isVisible = true;
+        // What is the point of the global transform?
         this._globalTransform = new geom.Transform();
+        this._globalInverseTransform = new geom.Transform();
         this._boundingBox = null;
-        this.markTransformed();
+
+        this.isVisible = true;
         this.controlRadius = DEFAULT_CONTROL_SIZE;
 
         // Transform properties
-        this._rotation = 0;
+        this.markTransformed();
         this._translation = new geom.Point(0, 0);
+        this._rotation = 0;
         this._scaleFactor = new geom.Point(1, 1);
-        this._shearFactor = new geom.Point(1, 1);
-
-        // The reference width and height denote the "original" width and height
-        // for this shape and is used as a way to know what the current "scale" is.
-        this._controller = null; 
 
         // Observable properties
         this.name = configs.name || this.className;
@@ -153,7 +321,6 @@ export class Shape extends Element {
         this.shouldStroke = true;
     }
 
-    get uuid() { return this._uuid; }
     get boundingBox() {
         if (this._boundingBox == null) {
             this._boundingBox = this._evalBoundingBox();
@@ -213,12 +380,21 @@ export class Shape extends Element {
         return this.set("fillStyle", value); 
     }
 
+    /**
+    * The globalTransform tells how to convert a global coordinate into 
+    * the coordinate system representing this shape.
+    * The inverse of this transform will map a point with respect to the shape
+    * back into the global coordinate system.
+    *
+    * The globalTransform of a shape is simply the cumulative transforms 
+    * applied inorder from the root shape all the way to this shape's transform.
+    */
     get globalTransform() {
         var gt = this._globalTransform;
         if (this._parent != null) {
             var pt = this._parent.globalTransform;
             if (pt.timeStamp > gt.timeStamp ||
-                this._lastUpdated > gt.timeStamp) {
+                this._lastTransformed > gt.timeStamp) {
                 // updated ourselves
                 this._globalTransform = this._updateTransform(pt.copy());
             }
@@ -260,38 +436,6 @@ export class Shape extends Element {
             return true;
         }
         return false;
-    }
-
-    forEachChild(handler, self, mutable) {
-        var shapes = this._children;
-        if (mutable == true) {
-            shapes = shapes.slice(0, shapes.length);
-        }
-        for (var index in shapes) {
-            var shape = shapes[index];
-            if (handler(shape, index, self) == false)
-                break;
-        }
-    }
-
-    canSetProperty(property, newValue) {
-        var oldValue = this["_" + property];
-        if (oldValue == newValue) 
-            return null;
-        var event = new events.PropertyChanged(this, property, oldValue, newValue);
-        if (this.validateBefore("PropertyChanged:" + property, event) == false)
-            return null;
-        return event;
-    }
-
-    set(property, newValue) {
-        var event = this.canSetProperty(property, newValue);
-        if (event == null)
-            return false;
-        this["_" + property] = newValue;
-        this.markUpdated();
-        this.triggerOn("PropertyChanged:" + property, event);
-        return true;
     }
 
     move(dx, dy) { return this.moveTo(this._translation.x + dx, this._translation.y + dy); } 
@@ -365,142 +509,6 @@ export class Shape extends Element {
     canSetBounds(newBounds) { return true; }
     _setBounds(newBounds) {
         throw Error("Not Implemented for: ", this);
-    }
-
-    /**
-     * Adds a new shape to this group.
-     * Returns true if a shape was successfully added
-     * false if the addition was blocked.
-     */
-    add(shape, index) {
-        index = index || -1;
-        if (shape.parent != this) {
-            var event = new events.ShapeAdded(this, shape);
-            if (this.validateBefore("ShapeAdded", event) != false) {
-                // remove from old parent - Important!
-                if (shape.removeFromParent()) {
-                    this._children.push(shape);
-                    shape._parent = this;
-                    shape.setScene(this.scene);
-                    this.triggerOn("ShapeAdded", event);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Removes an existing shape from this group.
-     * Returns true if a shape was successfully removed,
-     * false if the removal was blocked.
-     */
-    remove(shape) {
-        if (shape.parent == this) {
-            var event = new events.ShapeRemoved(this, shape);
-            if (this.validateBefore("ShapeRemoved", event) != false) {
-                for (var i = 0;i < this._children.length;i++) {
-                    if (this._children[i] == shape) {
-                        this._children.splice(i, 1);
-                        shape._parent = null;
-                        this.triggerOn("ShapeRemoved", event);
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    removeFromParent() {
-        if (this.parent == null) return true;
-        if (this.parent.remove(this)) {
-            this._parent = null;
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Changes the index of a given shape within the parent.  The indexOrDelta 
-     * parameter denotes whether a shape is to be moved to an absolute index or 
-     * relative to its current position depending on the 'relative' parameter.
-     */
-    changeShapeIndex(shape, indexOrDelta, relative) {
-        if (shape.parent != this) return ;
-
-        var newIndex = indexOrDelta;
-        if (relative || false) {
-            newIndex = index + indexOrDelta;
-        }
-
-        if (newIndex < 0)
-            newIndex = 0;
-        if (newIndex >= this._children.length)
-            newIndex = this._children.length - 1;
-
-        var index = this._children.indexOf(shape);
-        if (newIndex == index) {
-            return ;
-        }
-        var event = new events.ShapeIndexChanged(shape, index, newIndex);
-        if (this.validateBefore("ShapeIndexChanged", event) != false) {
-            this._children.splice(index, 1);
-            this._children.splice(newIndex, 0, shape);
-            this.triggerOn("ShapeIndexChanged", event);
-        }
-    }
-
-    /**
-     * Brings a child shape forward by one level.
-     */
-    bringForward(shape) {
-        return this.changeShapeIndex(shape, 1, true);
-
-        if (index >= 0 && index < this._children.length - 1) {
-            var temp = this._children[index];
-            this._children[index] = this._children[index + 1];
-            this._children[index + 1] = temp;
-        }
-    }
-
-    /**
-     * Sends a child shape backward by one index.
-     */
-    sendBackward(shape) {
-        return this.changeShapeIndex(shape, -1, true);
-
-        if (index > 0) {
-            var temp = this._children[index];
-            this._children[index] = this._children[index - 1];
-            this._children[index - 1] = temp;
-        }
-    }
-
-    /**
-     * Brings a child shape to the front of the child stack.
-     */
-    bringToFront(shape) {
-        return this.changeShapeIndex(shape, this._children.length, false);
-
-        if (shape.parent != this) return ;
-        var index = this._children.indexOf(shape);
-        if (index >= 0 && index < this._children.length - 1) {
-            this._children.splice(index, 1);
-            this._children.push(shape);
-        }
-    }
-
-    /**
-     * Sends a child shape to the back of the child stack.
-     */
-    sendToBack(shape) {
-        return this.changeShapeIndex(shape, 0, false);
-
-        if (index > 0) {
-            this._children.splice(index, 1);
-            this._children.splice(0, 0, shape);
-        }
     }
 
     draw(ctx) {
@@ -614,14 +622,6 @@ export class Shape extends Element {
     containsPoint(x, y) {
         var newp = this.globalTransform.apply(x, y, {});
         return this.boundingBox.containsPoint(newp.x, newp.y);
-    }
-
-    /**
-     * Returns true if this shape intersects another bounds instance,
-     * false otherwise.
-     */
-    intersects(anotherBounds) {
-        return this.boundingBox.intersects(anotherBounds);
     }
 
     _locationChanged(oldX, oldY) { }
