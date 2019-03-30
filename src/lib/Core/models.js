@@ -126,6 +126,7 @@ export class Element extends events.EventSource {
     markUpdated() { this._lastUpdated = Date.now(); }
 
     get hasChildren() { return false; }
+    get childCount() { return 0; } 
 
     get parent() { return this._parent; } 
 
@@ -635,9 +636,14 @@ export class Shape extends Element {
  */
 export class Group extends Shape {
     constructor(configs) {
-        super(configs);
+        super((configs = configs || {}));
+        this._bounds = configs.bounds || new geom.Bounds();
         this._children = [];
     }
+
+    childAtIndex(i) { return this._children[i]; } 
+    get hasChildren() { return this._children.length > 0; } 
+    get childCount() { return this._children.length; } 
 
     setScene(s) {
         if (!super.setScene(s)) return false;
@@ -647,16 +653,20 @@ export class Group extends Shape {
         return true;
     }
 
-    childAtIndex(i) { return this._children[i]; } 
-    get hasChildren() { return this._children.length > 0; } 
-    get childCount() { return this._children.length; } 
+    set bounds(newBounds) {
+        this._bounds = newBounds.copy();
+    }
 
     _evalBoundingBox() {
-        var out = new geom.Bounds(0, 0, 0, 0);
-        for (var i = 0;i < this._children.length;i++) {
-            out.union(this._children[i].boundingBox);
+        if (this._bounds) {
+            return this._bounds.copy();
+        } else {
+            var out = new geom.Bounds(0, 0, 0, 0);
+            for (var i = 0;i < this._children.length;i++) {
+                out.union(this._children[i].boundingBox);
+            }
+            return out;
         }
-        return out;
     }
 }
 

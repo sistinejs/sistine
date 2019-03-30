@@ -12,7 +12,6 @@ export const AlignAny = "*"
 export class SVG extends models.Group {
     constructor(configs) {
         super((configs = configs || {}));
-        this._bounds = configs.bounds || new geom.Bounds();
         this._viewBox = configs.bounds || null;
         this._preserveAspectRatio = configs.preserveAspectRatio || false;
         this._xAlign = (configs.xalign || AlignMid).toLowerCase();
@@ -21,21 +20,11 @@ export class SVG extends models.Group {
         this._controller = new SVG.Controller(this);
     }
 
-    _setBounds(newBounds) {
-        this._bounds = newBounds.copy();
-    }
-
     get viewBox() { return this._viewBox; } 
     set viewBox(vb) {
         this._viewBox = vb;
         this.markTransformed();
     }
-
-    _evalBoundingBox() {
-        return this._bounds.copy();
-    }
-
-    get className() { return "SVG"; }
 
     applyTransforms(ctx) {
         // Apply scale and the cropping
