@@ -254,6 +254,7 @@ export class ShapesPane extends Pane {
         if (belongsToPane && stage.selection.contains(shape)) {
             shape.drawControls(ctx);
         }
+        // if (belongsToPane && stage.selection.contains(shape)) shape.drawControls(ctx);
     }
 
     _ensureParentTransform(ctx, shape) {

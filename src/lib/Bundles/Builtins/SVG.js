@@ -28,16 +28,18 @@ export class SVG extends models.Group {
 
     applyTransforms(ctx) {
         // Apply scale and the cropping
+        ctx.translate(this._bounds.x, this._bounds.y);
         if (this._viewBox && !this._viewBox.isZeroSized) {
             ctx.save(); 
             // todo - consider aspect ratios
             var scaleX = this._bounds.width / this._viewBox.width;
             var scaleY = this._bounds.height / this._viewBox.height;
-            ctx.scale(scaleX, scaleY);
             ctx.translate(this._viewBox.x, this._viewBox.y);
+            ctx.scale(scaleX, scaleY);
 
             // clip too?
         }
+        ctx.translate(-this._bounds.x, -this._bounds.y);
     }
 
     revertTransforms(ctx) {

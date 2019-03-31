@@ -15,8 +15,8 @@ function getTestSvgUrl(base) {
 }
 
 function addSampleShapes() {
-    addSampleShapes1();
-    // addSampleShapes2();
+    // addSampleShapes1();
+    addSampleShapes2();
 }
 
 function addSampleShapes1() {

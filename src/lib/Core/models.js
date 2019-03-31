@@ -1,18 +1,12 @@
 
-import * as counters from "./counters";
+import * as mixins from "./mixins";
+import * as base from "./base";
 import * as events from "./events";
-import * as styles from "./styles";
 import * as controller from "./controller";
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
 export const DEFAULT_CONTROL_SIZE = 5;
-
-export const EV_PROPERTY_CHANGED = 0;
-export const EV_SHAPE_ADDED = 1;
-export const EV_SHAPE_REMOVED = 2;
-
-const ElementCounter = new counters.Counter("ElementIDs");
 
 /**
  * The Scene is the raw model where all layers and shapes are 
@@ -97,229 +91,18 @@ export class Scene {
     }
 }
 
-export class Element extends events.EventSource {
-    constructor() {
-        super();
-        this._uuid = ElementCounter.next();
-        this._parent = null;
-        this._defs = {};
-        this._metadata = {};
-    }
-
-    forEachChild(handler, self, mutable) {
-        var children = this._children;
-        if (mutable == true) {
-            children = children.slice(0, children.length);
-        }
-        for (var index in children) {
-            var child = children[index];
-            if (handler(child, index, self) == false)
-                break;
-        }
-    }
-
-    get uuid() { return this._uuid; }
-
-    getMetaData(key) { return this._metadata[key] || null; }
-    setMetaData(key, value) { this._metadata[key] = value; return this; }
-
-    markUpdated() { this._lastUpdated = Date.now(); }
-
-    get hasChildren() { return false; }
-    get childCount() { return 0; } 
-
-    get parent() { return this._parent; } 
-
-    canSetProperty(property, newValue) {
-        var oldValue = this["_" + property];
-        if (oldValue == newValue) 
-            return null;
-        var event = new events.PropertyChanged(this, property, oldValue, newValue);
-        if (this.validateBefore("PropertyChanged:" + property, event) == false)
-            return null;
-        return event;
-    }
-
-    set(property, newValue) {
-        var event = this.canSetProperty(property, newValue);
-        if (event == null)
-            return false;
-        this["_" + property] = newValue;
-        this.markUpdated();
-        this.triggerOn("PropertyChanged:" + property, event);
-        return true;
-    }
-
-    /**
-     * Adds a new element to this group.
-     * Returns true if a element was successfully added
-     * false if the addition was blocked.
-     */
-    add(element, index) {
-        index = index || -1;
-        if (element.parent != this) {
-            var event = new events.ElementAdded(this, element);
-            if (this.validateBefore("ElementAdded", event) != false) {
-                // remove from old parent - Important!
-                if (element.removeFromParent()) {
-                    this._children.push(element);
-                    element._parent = this;
-                    element.setScene(this.scene);
-                    this.triggerOn("ElementAdded", event);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Removes an existing element from this group.
-     * Returns true if a element was successfully removed,
-     * false if the removal was blocked.
-     */
-    remove(element) {
-        if (element.parent == this) {
-            var event = new events.ElementRemoved(this, element);
-            if (this.validateBefore("ElementRemoved", event) != false) {
-                for (var i = 0;i < this._children.length;i++) {
-                    if (this._children[i] == element) {
-                        this._children.splice(i, 1);
-                        element._parent = null;
-                        this.triggerOn("ElementRemoved", event);
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    removeFromParent() {
-        if (this.parent == null) return true;
-        if (this.parent.remove(this)) {
-            this._parent = null;
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Changes the index of a given element within the parent.  The indexOrDelta 
-     * parameter denotes whether a element is to be moved to an absolute index or 
-     * relative to its current position depending on the 'relative' parameter.
-     */
-    changeIndexTo(element, indexOrDelta, relative) {
-        if (element.parent != this) return ;
-
-        var newIndex = indexOrDelta;
-        if (relative || false) {
-            newIndex = index + indexOrDelta;
-        }
-
-        if (newIndex < 0)
-            newIndex = 0;
-        if (newIndex >= this._children.length)
-            newIndex = this._children.length - 1;
-
-        var index = this._children.indexOf(element);
-        if (newIndex == index) {
-            return ;
-        }
-        var event = new events.ElementIndexChanged(element, index, newIndex);
-        if (this.validateBefore("ElementIndexChanged", event) != false) {
-            this._children.splice(index, 1);
-            this._children.splice(newIndex, 0, element);
-            this.triggerOn("ElementIndexChanged", event);
-        }
-    }
-
-    /**
-     * Brings a child element forward by one level.
-     */
-    bringForward(element) {
-        return this.changeIndexTo(element, 1, true);
-
-        if (index >= 0 && index < this._children.length - 1) {
-            var temp = this._children[index];
-            this._children[index] = this._children[index + 1];
-            this._children[index + 1] = temp;
-        }
-    }
-
-    /**
-     * Sends a child element backward by one index.
-     */
-    sendBackward(element) {
-        return this.changeIndexTo(element, -1, true);
-
-        if (index > 0) {
-            var temp = this._children[index];
-            this._children[index] = this._children[index - 1];
-            this._children[index - 1] = temp;
-        }
-    }
-
-    /**
-     * Brings a child element to the front of the child stack.
-     */
-    bringToFront(element) {
-        return this.changeIndexTo(element, this._children.length, false);
-
-        if (element.parent != this) return ;
-        var index = this._children.indexOf(element);
-        if (index >= 0 && index < this._children.length - 1) {
-            this._children.splice(index, 1);
-            this._children.push(element);
-        }
-    }
-
-    /**
-     * Sends a child element to the back of the child stack.
-     */
-    sendToBack(element) {
-        return this.changeIndexTo(element, 0, false);
-
-        if (index > 0) {
-            this._children.splice(index, 1);
-            this._children.splice(0, 0, element);
-        }
-    }
-}
-
 /**
  * Holds information about the instance of a shape.
  */
-export class Shape extends Element {
+export class Shape extends mixins.Styleable {
     constructor(configs) {
-        super();
         configs = configs || {};
+        super(configs);
         this._scene = null;
-        // What is the point of the global transform?
-        this._globalTransform = new geom.Transform();
-        this._globalInverseTransform = new geom.Transform();
         this._boundingBox = null;
 
         this.isVisible = true;
         this.controlRadius = DEFAULT_CONTROL_SIZE;
-
-        // Transform properties
-        this.markTransformed();
-        this._translation = new geom.Point(0, 0);
-        this._rotation = 0;
-        this._scaleFactor = new geom.Point(1, 1);
-
-        // Observable properties
-        this.name = configs.name || this.className;
-        this.zIndex = configs.zIndex || 0;
-        this.lineWidth = configs.lineWidth || 2;
-        this.lineJoin = configs.lineJoin || null;
-        this.lineCap = configs.lineCap || null;
-        this.miterLimit = configs.miterLimit || null;
-        this.fillStyle = configs.fillStyle || null;
-        this.strokeStyle = configs.strokeStyle || null;
-        this.shouldFill = true;
-        this.shouldStroke = true;
     }
 
     get boundingBox() {
@@ -329,11 +112,6 @@ export class Shape extends Element {
         return this._boundingBox;
     }
 
-    markTransformed() { 
-        this.markUpdated();
-        this._lastTransformed = Date.now(); 
-    }
-
     get scene() { return this._scene; } 
     get controllerClass() { return controller.ShapeController; }
     get controller() { 
@@ -341,80 +119,6 @@ export class Shape extends Element {
             this._controller = new this.controllerClass(this);
         }
         return this._controller; 
-    }
-
-    // Observable Properties that will trigger change events
-    get name() { return this._name; }
-    set name(value) { return this.set("name", value); }
-
-    get rotation() { return this._rotation; }
-    set rotation(value) { return this.set("rotation", value); }
-
-    get zIndex() { return this._zIndex; }
-    set zIndex(value) { return this.set("zIndex", value); }
-
-    get lineWidth() { return this._lineWidth; }
-    set lineWidth(value) { return this.set("lineWidth", value); }
-
-    get lineJoin() { return this._lineJoin; }
-    set lineJoin(value) { return this.set("lineJoin", value); }
-
-    get lineCap() { return this._lineCap; }
-    set lineCap(value) { return this.set("lineCap", value); }
-
-    get miterLimit() { return this._miterLimit; }
-    set miterLimit(value) { return this.set("miterLimit", value); }
-
-    get strokeStyle() { return this._strokeStyle; }
-    set strokeStyle(value) { 
-        if (value != null && typeof value === "string") {
-            value = new styles.Literal(value);
-        }
-        return this.set("strokeStyle", value); 
-    }
-
-    get fillStyle() { return this._fillStyle; }
-    set fillStyle(value) { 
-        if (value != null && typeof value === "string") {
-            value = new styles.Literal(value);
-        }
-        return this.set("fillStyle", value); 
-    }
-
-    /**
-    * The globalTransform tells how to convert a global coordinate into 
-    * the coordinate system representing this shape.
-    * The inverse of this transform will map a point with respect to the shape
-    * back into the global coordinate system.
-    *
-    * The globalTransform of a shape is simply the cumulative transforms 
-    * applied inorder from the root shape all the way to this shape's transform.
-    */
-    get globalTransform() {
-        var gt = this._globalTransform;
-        if (this._parent != null) {
-            var pt = this._parent.globalTransform;
-            if (pt.timeStamp > gt.timeStamp ||
-                this._lastTransformed > gt.timeStamp) {
-                // updated ourselves
-                this._globalTransform = this._updateTransform(pt.copy());
-            }
-        } else if (this._lastUpdated > gt.timeStamp) {
-            this._globalTransform = this._updateTransform();
-        }
-        return this._globalTransform;
-    }
-    _updateTransform(result) {
-        result = result || new geom.Transform();
-        var cx = this._translation.x;
-        var cy = this._translation.y;
-        // Notice we are doing "invserse transforms here"
-        // since we need to map a point "back" to global form
-        result.translate(cx, cy)
-              .rotate(- this._rotation)
-              .scale(1.0 / this._scaleFactor.x, 1.0 / this._scaleFactor.y)
-              .translate(-cx, -cy);
-        return result;
     }
 
     set controller(c) {
@@ -439,57 +143,6 @@ export class Shape extends Element {
         return false;
     }
 
-    move(dx, dy) { return this.moveTo(this._translation.x + dx, this._translation.y + dy); } 
-    moveTo(x, y) {
-        var oldX = this._translation.x;
-        var oldY = this._translation.y;
-        if (x == oldX && y == oldY) return false;
-
-        var event = new events.GeometryChanged(this, "location", [ oldX, oldY ], [ x, y ]);
-
-        if (this.validateBefore(event.name, event) == false) return false;
-
-        this._translation.x = x;
-        this._translation.y = y;
-        this.markTransformed();
-        this._locationChanged(oldX, oldY);
-        this.triggerOn(event.name, event);
-        return true;
-    }
-    scale(sx, sy) { return this.scaleTo(this._scaleFactor.x * sx, this._scaleFactor.y * sy); } 
-    scaleTo(x, y) {
-        var oldScaleX = this._scaleFactor.x;
-        var oldScaleY = this._scaleFactor.y;
-        if (x == oldScaleX && y == oldScaleY) return false;
-
-        // Check minimum sizes
-        var C2 = this.controlRadius + this.controlRadius;
-        if (x * this.boundingBox.width <= C2 || y * this.boundingBox.height <= C2) return false;
-
-        var event = new events.GeometryChanged(this, "scale", [ oldScaleX, oldScaleY ], [ x, y ]);
-        if (this.validateBefore(event.name, event) == false) return false;
-
-        this._scaleFactor.set(x, y);
-        this.markTransformed();
-        this._scaleChanged(oldScaleX, oldScaleY);
-        this.triggerOn(event.name, event);
-        return true;
-    }
-    rotate(theta) { return this.rotateTo(this._rotation + theta); }
-    rotateTo(theta) {
-        if (theta == this._rotation) return false;
-
-        var event = new events.GeometryChanged(this, "angle", this._rotation, theta);
-        if (this.validateBefore(event.name, event) == false) return false;
-
-        var oldAngle = this._rotation;
-        this._rotation = theta;
-        this.markTransformed();
-        this._rotationChanged(oldAngle);
-        this.triggerOn(event.name, event);
-        return true;
-    }
-
     /**
      * A easy wrapper to control shape dimensions by just setting its bounds.
      * This will also reset the scaleFactor to 1.
@@ -506,7 +159,7 @@ export class Shape extends Element {
             this.triggerOn(event.name, event);
             return true;
         }
-    } 
+    }
     canSetBounds(newBounds) { return true; }
     _setBounds(newBounds) {
         throw Error("Not Implemented for: ", this);
@@ -547,28 +200,6 @@ export class Shape extends Element {
             if (this.lineDashOffset) {
                 ctx.lineDashOffset = this.lineDashOffset;
             }
-        }
-    }
-
-    applyTransforms(ctx) {
-        var angle = this._rotation;
-        if (angle || this._scaleFactor.x != 1 || this._scaleFactor.y != 1 ||
-            this._translation.x || this._translation.y) {
-            ctx.save(); 
-            var lBounds = this.boundingBox;
-            var cx = this.boundingBox.centerX;
-            var cy = this.boundingBox.centerY;
-            ctx.translate(cx, cy);
-            ctx.rotate(angle);
-            ctx.scale(this._scaleFactor.x, this._scaleFactor.y);
-            ctx.translate(-cx + this._translation.x, -cy + this._translation.y);
-        }
-    }
-
-    revertTransforms(ctx) {
-        var angle = this._rotation;
-        if (angle) {
-            ctx.restore(); 
         }
     }
 
@@ -653,7 +284,7 @@ export class Group extends Shape {
         return true;
     }
 
-    set bounds(newBounds) {
+    _setBounds(newBounds) {
         this._bounds = newBounds.copy();
     }
 

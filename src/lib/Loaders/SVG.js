@@ -110,12 +110,22 @@ export function processElement(root, parent) {
 }
 
 function processStyleAttributes(elem, shape) {
-    shape.fillStyle = elem.getAttribute("fill");
+    var fill = elem.getAttribute("fill") || null;
+    var fillRule = elem.getAttribute("fill-rule") || "inherit";
+    var fillOpacity = elem.getAttribute("fill-opacity") || "inherit";
+    var stroke = elem.getAttribute("stroke");
+    var strokeWidth = elem.getAttribute("stroke-width") || "inherit";
+    var strokeLineCap = elem.getAttribute("stroke-linecap") || "inherit";
+    var strokeLineJoin = elem.getAttribute("stroke-linejoin") || "inherit";
+    var strokeMiterLimit = elem.getAttribute("stroke-miterlimit") || "inherit";
+    var strokeOpacity = elem.getAttribute("stroke-opacity") || "inherit";
+    var strokeDashArray = elem.getAttribute("stroke-dasharray") || "inherit";
+    var strokeDashOffset = elem.getAttribute("stroke-dashoffset") || "inherit";
 }
 
 function processSVGElement(elem, parent) {
     var out = new Builtins.SVG();
-    var bounds = new Bounds(0, 0, 100, 100);
+    var bounds = parent ? new Bounds() : new Bounds(50, 50, 100, 100);
     var viewBox = null;
     processStyleAttributes(elem, out);
     forEachAttribute(elem, function(attrib, value) {
