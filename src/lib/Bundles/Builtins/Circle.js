@@ -54,12 +54,8 @@ export class Circle extends models.Shape {
     draw(ctx) {
         ctx.beginPath();
         ctx.arc(this._cx.value, this._cy.value, this._radius.value, 0, 2 * Math.PI);
-        if (this.shouldFill && this.fillStyle) {
-            ctx.fill();
-        }
-        if (this.shouldStroke && this.lineWidth > 0) {
-            ctx.stroke();
-        }
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

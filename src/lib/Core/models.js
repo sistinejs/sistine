@@ -174,35 +174,6 @@ export class Shape extends mixins.Styleable {
         }
     }
 
-    /**
-     * Draws this shape on a given context.
-     */
-    applyStyles(ctx, options) {
-        if (this.shouldFill && this.fillStyle) {
-            this.fillStyle.apply(this, "fillStyle", ctx);
-        }
-        if (this.shouldStroke) {
-            if (this.strokeStyle) {
-                this.strokeStyle.apply(this, "strokeStyle", ctx);
-            }
-            if (this.lineJoin) {
-                ctx.lineJoin = this.lineJoin;
-            }
-            if (this.lineCap) {
-                ctx.lineCap = this.lineCap;
-            }
-            if (this.lineDash) {
-                ctx.setLineDash(this.lineDash);
-            }
-            if (this.lineWidth > 0) {
-                ctx.lineWidth = this.lineWidth;
-            }
-            if (this.lineDashOffset) {
-                ctx.lineDashOffset = this.lineDashOffset;
-            }
-        }
-    }
-
     drawControls(ctx, options) {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 0.5

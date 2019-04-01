@@ -3,6 +3,35 @@ import * as events from "./events";
 
 const ElementCounter = new counters.Counter("ElementIDs");
 
+export class Property {
+    constructor(name, value) {
+        this.name = name;
+        this.set(value);
+    }
+
+    set(newValue, eventSource) {
+        var oldValue = this.vaue;
+        if (oldValue == newValue) 
+            return null;
+        var event = null;
+        if (eventSource) {
+            event = new events.PropertyChanged(this, property, oldValue, newValue);
+            if (eventSource.validateBefore("PropertyChanged:" + this.name, event) == false)
+                return false;
+        }
+
+        this.value = newValue || null;
+        this.inherit = newValue === undefined;
+
+        this.markUpdated();
+        if (eventSource) 
+            eventSource.triggerOn("PropertyChanged:" + this.name, event);
+        return true;
+    }
+
+    markUpdated() { this.lastUpdated = Date.now(); }
+}
+
 export class Element extends events.EventSource {
     constructor() {
         super();
@@ -25,6 +54,15 @@ export class Element extends events.EventSource {
         }
     }
 
+    /**
+     * Makes the value of a particular property inherited.
+     */
+    inherit(property) {
+    }
+
+    isInherited(property) {
+    }
+
     get uuid() { return this._uuid; }
 
     getMetaData(key) { return this._metadata[key] || null; }
@@ -36,35 +74,6 @@ export class Element extends events.EventSource {
     get childCount() { return 0; } 
 
     get parent() { return this._parent; } 
-
-    canSetProperty(property, newValue) {
-        var oldValue = this["_" + property];
-        if (oldValue == newValue) 
-            return null;
-        var event = new events.PropertyChanged(this, property, oldValue, newValue);
-        if (this.validateBefore("PropertyChanged:" + property, event) == false)
-            return null;
-        return event;
-    }
-
-    set(property, newValue) {
-        var event = this.canSetProperty(property, newValue);
-        if (event == null)
-            return false;
-        this["_" + property] = newValue;
-        this.markUpdated();
-        this.triggerOn("PropertyChanged:" + property, event);
-        return true;
-    }
-
-    /**
-     * Makes the value of a particular property inherited.
-     */
-    inherit(property) {
-    }
-
-    isInherited(property) {
-    }
 
     /**
      * Adds a new element to this group.

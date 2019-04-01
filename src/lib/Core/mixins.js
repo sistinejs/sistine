@@ -3,6 +3,8 @@ import * as geom from "../Geom/models"
 import * as events from "./events";
 import * as styles from "./styles";
 
+const Property = base.Property;
+
 export class Transformable extends base.Element {
     constructor(configs) {
         super(configs);
@@ -21,6 +23,9 @@ export class Transformable extends base.Element {
         this.markUpdated();
         this._lastTransformed = Date.now(); 
     }
+
+    get rotation() { return this._rotation; }
+    set rotation(value) { return this.set("rotation", value); }
 
     /**
     * The globalTransform tells how to convert a global coordinate into 
@@ -141,49 +146,90 @@ export class Styleable extends Transformable {
     constructor(configs) {
         super(configs);
         // Observable properties
-        this.zIndex = configs.zIndex || 0;
-        this.lineWidth = configs.lineWidth || 2;
-        this.lineJoin = configs.lineJoin || null;
-        this.lineCap = configs.lineCap || null;
-        this.miterLimit = configs.miterLimit || null;
-        this.fillStyle = configs.fillStyle || null;
-        this.strokeStyle = configs.strokeStyle || null;
-        this.shouldFill = true;
-        this.shouldStroke = true;
+        this.zIndex = configs.zIndex;
+
+        this._fillStyle = new Property("fillStyle", configs.fillStyle);
+        this._fillRule = new Property("fillRule", configs.fillRule);
+        this._fillOpacity = new Property("fillOpacity", configs.fillOpacity);
+
+        this._strokeStyle = new Property("strokeStyle", configs.strokeStyle);
+        this._lineWidth = new Property("lineWidth", configs.lineWidth);
+        this._lineJoin = new Property("lineJoin", configs.lineJoin);
+        this._lineCap = new Property("lineCap", configs.lineCap);
+        this._dashOffset = new Property("dashOffset", configs.dashOffset);
+        this._dashArray = new Property("dashArray", configs.dashArray);
+        this._miterLimit = new Property("miterLimit", configs.miterLimit);
+        this._strokeOpacity = new Property("strokeOpacity", configs.strokeOpacity);
     }
 
     // Observable Properties that will trigger change events
-    get rotation() { return this._rotation; }
-    set rotation(value) { return this.set("rotation", value); }
-
-    get zIndex() { return this._zIndex; }
-    set zIndex(value) { return this.set("zIndex", value); }
-
     get lineWidth() { return this._lineWidth; }
-    set lineWidth(value) { return this.set("lineWidth", value); }
+    set lineWidth(value) { this._lineWidth.set(value); }
 
     get lineJoin() { return this._lineJoin; }
-    set lineJoin(value) { return this.set("lineJoin", value); }
+    set lineJoin(value) { this._lineJoin.set(value); }
 
     get lineCap() { return this._lineCap; }
-    set lineCap(value) { return this.set("lineCap", value); }
+    set lineCap(value) { this._lineCap.set(value); }
 
     get miterLimit() { return this._miterLimit; }
-    set miterLimit(value) { return this.set("miterLimit", value); }
+    set miterLimit(value) { this._miterLimit.set(value); }
+
+    get strokeOpacity() { return this._strokeOpacity; }
+    set strokeOpacity(value) { this._strokeOpacity.set(value); }
+
+    get dashOffset() { return this._dashOffset; }
+    set dashOffset(value) { this._dashOffset.set(value); }
+
+    get dashArray() { return this._dashArray; }
+    set dashArray(value) { this._dashArray.set(value); }
 
     get strokeStyle() { return this._strokeStyle; }
     set strokeStyle(value) {
         if (value != null && typeof value === "string") {
             value = new styles.Literal(value);
         }
-        return this.set("strokeStyle", value); 
+        this._strokeStyle.set(value);
     }
 
     get fillStyle() { return this._fillStyle; }
-    set fillStyle(value) { 
+    set fillStyle(value) {
         if (value != null && typeof value === "string") {
             value = new styles.Literal(value);
         }
-        return this.set("fillStyle", value); 
+        this._fillStyle.set(value);
+    }
+
+    get fillOpacity() { return this._fillOpacity; }
+    set fillOpacity(value) { this._fillOpacity.set(value); }
+
+    get fillRule() { return this._fillRule; }
+    set fillRule(value) { this._fillRule.set(value); }
+
+    /**
+     * Draws this shape on a given context.
+     */
+    applyStyles(ctx, options) {
+        if (this.fillStyle.value && !this.fillStyle.inherit) {
+            this.fillStyle.value.apply(this, "fillStyle", ctx);
+        }
+        if (this.strokeStyle.value && !this.strokeStyle.inherit) {
+            this.strokeStyle.apply(this, "strokeStyle", ctx);
+        }
+        if (this.dashArray.value && !this.dashArray.inherit) {
+            ctx.setLineDash(this.dashArray);
+        }
+        if (this.lineJoin.value || !this.lineJoin.inherit) {
+            ctx.lineJoin = this.lineJoin;
+        }
+        if (this.lineCap.value || !this.lineCap.inherit) {
+            ctx.lineCap = this.lineCap;
+        }
+        if (this.lineWidth > 0) {
+            ctx.lineWidth = this.lineWidth;
+        }
+        if (this.dashOffset.value || !this.dashOffset.inherit) {
+            ctx.dashOffset = this.dashOffset;
+        }
     }
 }

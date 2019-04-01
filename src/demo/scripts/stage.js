@@ -8,6 +8,7 @@ shapeDefaults = {
 };
 
 var Point = Sistine.Geom.Models.Point;
+var Bounds = Sistine.Geom.Models.Bounds;
 
 function getTestSvgUrl(base) {
     return "/src/svgtestset/" + base;
@@ -55,21 +56,34 @@ function addSampleShapes1() {
     path.lineWidth = 10;
 
     addShape(BuiltinShapes, "QuadCurve", {
-        p0: new Sistine.Geom.Models.Point(100, 300),
-        p1: new Sistine.Geom.Models.Point(200, 200),
-        p2: new Sistine.Geom.Models.Point(300, 300)
+        p0: new Point(100, 300),
+        p1: new Point(200, 200),
+        p2: new Point(300, 300)
     });
     addShape(BuiltinShapes, "CubicCurve", {
-        p0: new Sistine.Geom.Models.Point(400, 300),
-        p1: new Sistine.Geom.Models.Point(500, 200),
-        p2: new Sistine.Geom.Models.Point(600, 300),
-        p3: new Sistine.Geom.Models.Point(700, 200)
+        p0: new Point(400, 300),
+        p1: new Point(500, 200),
+        p2: new Point(600, 300),
+        p3: new Point(700, 200)
     });
 }
 
 function addSampleShapes2() {
-    Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("irony.svg"), function(doc) {
-        console.log("Here");
+    Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("irony.svg"), {
+        bounds: new Bounds(50, 50, 100, 100)
+    }, function(doc) {
+        theApp.scene.add(doc);
+    });
+
+    Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("adobe.svg"), {
+        bounds: new Bounds(150, 50, 100, 100)
+    }, function(doc) {
+        theApp.scene.add(doc);
+    });
+
+    Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("osi.svg"), {
+        bounds: new Bounds(250, 50, 100, 100)
+    }, function(doc) {
         theApp.scene.add(doc);
     });
 }

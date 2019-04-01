@@ -14,7 +14,6 @@ export class Path extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
         configs = configs || {};
-        this._closed = configs.closed || false;
         this._components = [];
         this._currPoint = null;
     }
@@ -60,11 +59,6 @@ export class Path extends models.Shape {
         return this._components.length;
     }
 
-    close(yesorno) {
-        this._closed = yesorno;
-        this.markTransformed();
-    }
-
     setCurrentPoint(x, y, isRelative) {
         if (this._currPoint == null) {
             this._currPoint = new Geom.Models.Point(x, y);
@@ -86,13 +80,21 @@ export class Path extends models.Shape {
         return this._currPoint;
     }
 
+    get currentComponent() {
+        if (this._components.length == 0) return null;
+        return this._components[this._components.length - 1];
+    }
+
     moveTo(x, y, isRelative) { 
         var cp = this.setCurrentPoint(x, y, isRelative);
-        this.addComponent(new MoveToComponent(cp.x, cp.y));
+        this.addComponent(new MoveToComponent(this.currentComponent, cp.x, cp.y));
+    }
+    closePath() {
+        this.addComponent(new CloseComponent(this.currentComponent));
     }
     lineTo(x, y, isRelative) { 
         var cp = this.setCurrentPoint(x, y, isRelative);
-        this.addComponent(new LineToComponent(cp.x, cp.y));
+        this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
     }
     hlineTo(x, isRelative) { 
         var cp = this._ensureCurrentPoint();
@@ -101,7 +103,7 @@ export class Path extends models.Shape {
         } else {
             cp.x = x;
         }
-        this.addComponent(new LineToComponent(cp.x, cp.y));
+        this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
     }
     vlineTo(y, isRelative) { 
         var cp = this._currPoint;
@@ -110,7 +112,7 @@ export class Path extends models.Shape {
         } else {
             cp.y = y;
         }
-        this.addComponent(new LineToComponent(cp.x, cp.y));
+        this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
     }
     quadraticCurveTo(cp1x, cp1y, x, y, isRelative, isSmooth) {
         if (isSmooth) {
@@ -128,7 +130,7 @@ export class Path extends models.Shape {
             y2 += cp.y;
         }
         this._currPoint = new Geom.Models.Point(x2, y2);
-        this.addComponent(new QuadraticToComponent(x1, y1, x2, y2));
+        this.addComponent(new QuadraticToComponent(this.currentComponent, x1, y1, x2, y2));
     }
     bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y, isRelative, isSmooth) {
         if (isSmooth) {
@@ -150,13 +152,16 @@ export class Path extends models.Shape {
             y3 += cp.y;
         }
         this._currPoint = new Geom.Models.Point(x3, y3);
-        this.addComponent(new BezierToComponent(x1, y1, x2, y2, x3, y3));
+        this.addComponent(new BezierToComponent(this.currentComponent, x1, y1, x2, y2, x3, y3));
     }
     arc(x, y, radius, startAngle, endAngle, anticlockwise, isRelative) {
-        this.addComponent(new ArcComponent(x, y, radius, startAngle, endAngle, anticlockwise));
+        this.addComponent(new ArcComponent(this.currentComponent, x, y, radius, startAngle, endAngle, anticlockwise));
     }
     arcTo(x1, y1, x2, y2, radius, isRelative) {
-        this.addComponent(new ArcToComponent(this._cmdArcTo, x1, y1, x2, y2, radius));
+        this.addComponent(new ArcToComponent(this.currentComponent, this._cmdArcTo, x1, y1, x2, y2, radius));
+    }
+    svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY) {
+        this.addComponent(new SVGArcToComponent(this.currentComponent, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY));
     }
 
     draw(ctx) {
@@ -208,9 +213,10 @@ export class Path extends models.Shape {
  * like lines, arcs, quadratic beziers etc.
  */
 export class PathComponent {
-    constructor() {
+    constructor(prev) {
         this.next = null;
-        this.prev = null;
+        this.prev = prev || null;
+        if (prev) prev.next = this;
         this._boundingBox = null;
     }
 
@@ -226,11 +232,35 @@ export class PathComponent {
     // get controlPoints() { return this._controlPoints; } 
     // setControlPoint(index, x, y) { this._controlPoints[index].set(x, y); this.markTransformed(); }
     get numControlPoints() { return 0; } 
+
+    /**
+     * Called when the previous component has changed in which case the 
+     * current component needs to be updated.
+     */
+    previousChanged() { }
+
+    _notifyNext() {
+        if (this.next != null) {
+            this.next.previousChanged();
+        }
+    }
+}
+
+export class CloseComponent extends PathComponent {
+    _evalBoundingBox() {
+        return new Geom.Models.Bounds();
+    }
+
+    get endPoint() {
+        return this.prev ? this.prev.endPoint : null;
+    }
+
+    draw(ctx) { ctx.closePath(); }
 }
 
 export class MoveToComponent extends PathComponent {
-    constructor(x, y) {
-        super();
+    constructor(prev, x, y) {
+        super(prev);
         this._endPoint = new Geom.Models.Point(x, y);
     }
 
@@ -251,6 +281,7 @@ export class MoveToComponent extends PathComponent {
     setControlPoint(index, x, y) {
         this._endPoint.set(x, y);
         this._boundingBox = null;
+        this.notifyNext();
     }
 
     get numControlPoints() {
@@ -259,8 +290,8 @@ export class MoveToComponent extends PathComponent {
 }
 
 export class LineToComponent extends PathComponent {
-    constructor(x, y) {
-        super();
+    constructor(prev, x, y) {
+        super(prev);
         this._endPoint = new Geom.Models.Point(x, y);
     }
 
@@ -291,104 +322,17 @@ export class LineToComponent extends PathComponent {
     setControlPoint(index, x, y) {
         this._endPoint.set(x, y);
         this._boundingBox = null;
+        this.notifyNext();
     }
 
     get numControlPoints() {
         return 1;
-    }
-}
-
-export class ArcComponent extends PathComponent {
-    constructor(x, y, radius, startAngle, endAngle, anticlockwise) {
-        super();
-        this.radius = radius;
-        this.startAngle = startAngle;
-        this.endAngle = endAngle;
-        this.anticlockwise = anticlockwise;
-        this._startPoint = Geom.Utils.pointOnCircle(radius, startAngle);
-        this._endPoint = Geom.Utils.pointOnCircle(radius, endAngle);
-        this._arcCenter = new Geom.Models.Point(x, y);
-    }
-
-    get endPoint() { return this._endPoint; }
-
-    getControlPoint(index) {
-        if (index == 0) {
-            return this._endPoint;
-        } else if (index == 1) {
-            return this._startPoint;
-        } else {
-            return this._arcCenter;
-        }
-    }
-
-    _evalBoundingBox() {
-        var minx = this._controlPoints[0].x;
-        var miny = this._controlPoints[0].y;
-        var maxx = minx;
-        var maxy = miny;
-        if (this.prev) {
-            minx = Math.min(minx, this.prev.endPoint.x);
-            miny = Math.min(miny, this.prev.endPoint.y);
-            maxx = Math.max(maxx, this.prev.endPoint.x);
-            maxy = Math.max(maxy, this.prev.endPoint.y);
-        }
-        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
-    }
-
-    get numControlPoints() {
-        return 1;
-    }
-}
-
-export class ArcToComponent extends PathComponent {
-    constructor(x1, y1, x2, y2, radius) {
-        super();
-        this.p1 = new Geom.Models.Point(x1, y1);
-        this.p2 = new Geom.Models.Point(x2, y2);
-        // TODO
-        this._arcCenter = new Geom.Models.Point(-1, -1);
-        this.radius = radius;
-    }
-
-    get endPoint() { return this.p2; }
-
-    getControlPoint(index) {
-        if (index == 0) {
-            return this.p1;
-        } else if (index == 1) {
-            return this.p2;
-        } else {
-            return this._arcCenter;
-        }
-    }
-
-    get numControlPoints() {
-        return 3;
-    }
-
-    _evalBoundingBox() {
-        var minx = Math.min(this.p1.x, this.p2.x);
-        var miny = Math.min(this.p1.y, this.p2.y);
-        var maxx = Math.max(this.p1.x, this.p2.x);
-        var maxy = Math.max(this.p1.y, this.p2.y);
-        if (this.prev) {
-            minx = Math.min(minx, this.prev.endPoint.x);
-            miny = Math.min(miny, this.prev.endPoint.y);
-            maxx = Math.max(maxx, this.prev.endPoint.x);
-            maxy = Math.max(maxy, this.prev.endPoint.y);
-        }
-        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
-    }
-
-    draw(ctx) {
-        ctx.arcTo(this.p1.x, this.p1.y, this.p2.x, this.p2.x, this.radius);
     }
 }
 
 export class QuadraticToComponent extends PathComponent {
-    constructor(x1, y1, x2, y2) {
-        super();
+    constructor(prev, x1, y1, x2, y2) {
+        super(prev);
         this.p1 = new Geom.Models.Point(x1, y1);
         this.p2 = new Geom.Models.Point(x2, y2);
     }
@@ -443,8 +387,8 @@ export class QuadraticToComponent extends PathComponent {
 }
 
 export class BezierToComponent extends PathComponent {
-    constructor(x1, y1, x2, y2, x3, y3) {
-        super();
+    constructor(prev, x1, y1, x2, y2, x3, y3) {
+        super(prev);
         this.p1 = new Geom.Models.Point(x1, y1);
         this.p2 = new Geom.Models.Point(x2, y2);
         this.p3 = new Geom.Models.Point(x3, y3);
@@ -499,6 +443,144 @@ export class BezierToComponent extends PathComponent {
         return new Geom.Models.Bounds(result.left, result.top,
                                       result.right - result.left,
                                       result.bottom - result.top);
+    }
+}
+
+/**
+ * Base component of different kinds of arc commands.
+ * Any rotated elliptical arc can be drawn given the current point,
+ * endpoint, ellipse center, ellipse radius, rotation on the x axis
+ * and whether to be drawn clockwise or anticlockwise.
+ */
+export class GenericArcComponent extends PathComponent {
+    constructor(prev, rx, ry, centerX, centerY, rotation, endX, endY, anticlockwise) {
+        super(prev);
+        this.rx = rx;
+        this.ry = ry;
+        this._center = new Geom.Models.Point(centerX, centerY);
+        this._endPoint = new Geom.Models.Point(endX, endY);
+        this._rotationPoint = new Geom.Models.Point();
+        this.isAnticlockwise = anticlockwise || false;
+    }
+
+    previousChanged() {
+        var p1 = this.prev.endPoint;
+        var p2 = this.endPoint;
+        // use endpoint to center parametrization to calculate new center or new radii
+        // var params = Geom.Utils.endpointsToCenter(p1.x, p1.y, rx, ry, phi, fA, fS, x2, y2);
+    }
+
+    get endPoint() { return this._endPoint; }
+
+    get startAngle() {
+    }
+
+    get endAngle() {
+    }
+
+    draw(ctx) {
+        ctx.ellipse(this._center.x, this._center.y,
+                    this.rx, this.ry, this.rotation,
+                    this.startAngle, this.endAngle, this.isAnticlockwise);
+    }
+
+    set isAnticlockwise(anticlockwise) {
+        this._isAnticlockwise = anticlockwise || false;
+        this._boundingBox = null;
+    }
+
+    getControlPoint(index) {
+        if (index == 0) {
+            return this._endPoint;
+        } else if (index == 1) {
+            return this._center;
+        } else {
+            return this._rotationPoint;
+        }
+    }
+
+    get numControlPoints() {
+        return 3;
+    }
+
+    setControlPoint(index, x, y) {
+        if (index == 0) {
+            this._endPoint.set(x, y);
+            this.notifyNext();
+        } else if (index == 1) {
+            this._center.set(x, y);
+        } else {
+            this._rotationPoint.set(x, y);
+        }
+        this._boundingBox = null;
+    }
+
+    _evalBoundingBox() {
+        var minx = this._controlPoints[0].x;
+        var miny = this._controlPoints[0].y;
+        var maxx = minx;
+        var maxy = miny;
+        if (this.prev) {
+            minx = Math.min(minx, this.prev.endPoint.x);
+            miny = Math.min(miny, this.prev.endPoint.y);
+            maxx = Math.max(maxx, this.prev.endPoint.x);
+            maxy = Math.max(maxy, this.prev.endPoint.y);
+        }
+        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
+    }
+}
+
+export class ArcComponent extends GenericArcComponent {
+    constructor(x, y, radius, startAngle, endAngle, anticlockwise) {
+        var params = Geom.Utils.centerToEndpoints(x, y, radius, radius, 0, startAngle, endAngle - startAngle);
+        super(rx, ry, x, y, 0, params.x2, params.y2, !params.clockwise);
+    }
+}
+
+export class ArcToComponent extends PathComponent {
+    constructor(prev, x1, y1, x2, y2, radius) {
+        super(prev);
+        this.p1 = new Geom.Models.Point(x1, y1);
+        this.p2 = new Geom.Models.Point(x2, y2);
+    }
+
+    draw(ctx) {
+        ctx.arcTo(this.startPoint.x, this.startPoint.y,
+                  this.endPoint.x, this.endPoint.x, this.radius);
+    }
+
+    get endPoint() {
+        return this.p2;
+    }
+
+    getControlPoint(index) {
+        if (index == 0) {
+            return this.p1;
+        } else {
+            return this.p2;
+        }
+    }
+
+    setControlPoint(index, x, y) {
+        if (index == 0) {
+            this.p1.set(x, y);
+        } else {
+            this.p2.set(x, y);
+        }
+        this._boundingBox = null;
+    }
+
+    get numControlPoints() {
+        return 2;
+    }
+}
+
+export class SVGArcToComponent extends GenericArcComponent {
+    constructor(prev, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY) {
+        var prevX = prev.endPoint.x;
+        var prevY = prev.endPoint.y;
+        var params = Geom.Utils.endpointsToCenter(prevX, prevY, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY);
+        super(prev, rx, ry, params.cx, params.cy, rotation, endX, endY, !params.anticlockwise);
     }
 }
 

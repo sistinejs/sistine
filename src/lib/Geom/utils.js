@@ -10,6 +10,7 @@ var pow = Math.pow,
     cos = Math.cos,
     tan = Math.tan,
     PI = Math.PI;
+var PIx2 = Math.PI * 2.0;
 
 export function copysign(x, y) {
     var out = abs(x);
@@ -193,3 +194,144 @@ export function boundsOfCubicCurve(x0, y0, x1, y1, x2, y2, x3, y3)
   };
 };
 
+/**
+ * Converts from center to endpoint parametrization.  
+ *
+ * Given an arc denoted by:
+ *      cx cy rx ry φ θ1 Δθ
+ *
+ * Returns:
+ *      x1 y1 x2 y2 fA fS
+ *
+ * Source: https://www.w3.org/TR/SVG11/implnote.html#ArcConversionCenterToEndpoint
+ */
+export function centerToEndpoints(cx, cy, rx, ry, phi, theta, deltaTheta) {
+    var sinphi = Math.sin(phi);
+    var cosphi = Math.cos(phi);
+    var sintheta = Math.sin(theta);
+    var costheta = Math.cos(theta);
+    var sintheta2 = Math.sin(theta + deltaTheta);
+    var costheta2 = Math.cos(theta + deltaTheta);
+    return {
+        x1: cx + (rx * costheta1 * cosphi) - (ry * sintheta1 * sinphi),
+        y1: cy + (rx * costheta1 * sinphi) + (ry * sintheta1 * cosphi),
+        x2: cx + (rx * costheta2 * cosphi) - (ry * sintheta2 * sinphi),
+        y2: cy + (rx * costheta2 * sinphi) + (ry * sintheta2 * cosphi),
+        fA: Math.abs(deltaTheta) > Math.PI,
+        fS: deltaTheta > Math.PI,
+        clockwise: deltaTheta > Math.PI,
+    };
+}
+
+/**
+ * Converts from endpoint to center point parametrization.
+ *
+ * Given the following variables:
+ *      x1 y1 x2 y2 fA fS rx ry φ
+ * 
+ * Returns:
+ *      cx cy θ1 Δθ
+ *
+ * Source: https://www.w3.org/TR/SVG11/implnote.html#ArcConversionEndpointToCenter
+ */
+export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
+    var cx, cy, startAngle, deltaAngle, endAngle;
+
+    if (rx < 0) {
+        rx = -rx;
+    }
+    if (ry < 0) {
+        ry = -ry;
+    }
+
+    // F.6.6: Step 1 - ensure radii are non-zero so treat as non zero
+    if (rx == 0.0 || ry == 0.0) { // invalid arguments
+        return outputObj = { /* cx, cy, startAngle, deltaAngle */
+            cx: (x1 + x2) / 2.0,
+            cy: (y1 + y2) / 2.0,
+            startAngle: 0,
+            deltaAngle: Math.PI / 2,
+            endAngle: Math.PI / 2,
+            isLine: true,
+            clockwise: true
+        }
+    }
+
+    var s_phi = Math.sin(phi);
+    var c_phi = Math.cos(phi);
+    var hd_x = (x1 - x2) / 2.0; // half diff of x
+    var hd_y = (y1 - y2) / 2.0; // half diff of y
+    var hs_x = (x1 + x2) / 2.0; // half sum of x
+    var hs_y = (y1 + y2) / 2.0; // half sum of y
+
+    // F6.5.1
+    var x1_ = c_phi * hd_x + s_phi * hd_y;
+    var y1_ = c_phi * hd_y - s_phi * hd_x;
+
+    // F.6.6 Correction of out-of-range radii
+    //   Step 3: Ensure radii are large enough
+    var lambda = (x1_ * x1_) / (rx * rx) + (y1_ * y1_) / (ry * ry);
+    if (lambda > 1) {
+        rx = rx * Math.sqrt(lambda);
+        ry = ry * Math.sqrt(lambda);
+    }
+
+    var rxry = rx * ry;
+    var rxy1_ = rx * y1_;
+    var ryx1_ = ry * x1_;
+    var sum_of_sq = rxy1_ * rxy1_ + ryx1_ * ryx1_; // sum of square
+    if (!sum_of_sq) {
+        throw Error('start point can not be same as end point');
+    }
+    var coe = Math.sqrt(Math.abs((rxry * rxry - sum_of_sq) / sum_of_sq));
+    if (fA == fS) { coe = -coe; }
+
+    // F6.5.2
+    var cx_ = coe * rxy1_ / ry;
+    var cy_ = -coe * ryx1_ / rx;
+
+    // F6.5.3
+    cx = c_phi * cx_ - s_phi * cy_ + hs_x;
+    cy = s_phi * cx_ + c_phi * cy_ + hs_y;
+
+    var xcr1 = (x1_ - cx_) / rx;
+    var xcr2 = (x1_ + cx_) / rx;
+    var ycr1 = (y1_ - cy_) / ry;
+    var ycr2 = (y1_ + cy_) / ry;
+
+    // F6.5.5
+    startAngle = angleBetweenVectors(1.0, 0.0, xcr1, ycr1);
+
+    // F6.5.6
+    deltaAngle = angleBetweenVectors(xcr1, ycr1, -xcr2, -ycr2);
+    while (deltaAngle > PIx2) { deltaAngle -= PIx2; }
+    while (deltaAngle < 0.0) { deltaAngle += PIx2; }
+    if (fS == false || fS == 0) { deltaAngle -= PIx2; }
+    endAngle = startAngle + deltaAngle;
+    while (endAngle > PIx2) { endAngle -= PIx2; }
+    while (endAngle < 0.0) { endAngle += PIx2; }
+
+    var outputObj = { /* cx, cy, startAngle, deltaAngle */
+        cx: cx,
+        cy: cy,
+        startAngle: startAngle,
+        deltaAngle: deltaAngle,
+        endAngle: endAngle,
+        isLine: false,
+        clockwise: (fS == true || fS == 1)
+    }
+    return outputObj;
+}
+
+/**
+ * Calculates the angle in radians between two vectors.
+ */
+export function angleBetweenVectors(ux, uy, vx, vy) {
+    var  dot = ux * vx + uy * vy;
+    var  mod = Math.sqrt( ( ux * ux + uy * uy ) * ( vx * vx + vy * vy ) );
+    var  rad = Math.acos( dot / mod );
+    if( ux * vy - uy * vx < 0.0 ) {
+        rad = -rad;
+    }
+    return rad;
+}
