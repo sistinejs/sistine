@@ -11,7 +11,7 @@ var Point = Sistine.Geom.Models.Point;
 var Bounds = Sistine.Geom.Models.Bounds;
 
 function getTestSvgUrl(base) {
-    return "/src/svgtestset/" + base;
+    return "/src/svgtests/" + base;
     // return "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/" + base;
 }
 
