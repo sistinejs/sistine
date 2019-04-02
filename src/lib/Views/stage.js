@@ -56,7 +56,7 @@ class TouchState {
 }
 
 /**
- * The stage model if where all layers and shapes are managed. 
+ * The stage model if where all shapes are managed. 
  * As far as possible this does not perform any view related operations as 
  * that is decoupled into the view entity.
  */
@@ -495,23 +495,11 @@ export class ShapeIndex {
      * Given a coordinate (x,y) returns the topmost shape that contains this point.
      */
     getShapeAt(x, y, root) {
-        root = root || null;
-        if (root == null) {
-            var L = this.scene.layerCount;
-            for (var i = 0; i < L;i++) {
-                var layer = this.scene.layerAtIndex(i);
-                var shape = this.getShapeAt(x, y, layer);
-                if (shape != null) {
-                    return shape;
-                }
-            }
-        } else {
-            // Go through all of root's children to see if its children has it
-            for (var i = 0;i < root.childCount;i++) {
-                var shape = root.childAtIndex(i);
-                if (shape.containsPoint(x, y)) {
-                    return shape;
-                }
+        root = root || this._scene;
+        for (var i = 0;i < root.childCount;i++) {
+            var shape = root.childAtIndex(i);
+            if (shape.containsPoint(x, y)) {
+                return shape;
             }
         }
         return null;
@@ -520,10 +508,7 @@ export class ShapeIndex {
     reIndex() {
         var scene = this._scene;
         if (scene) {
-            for (var index in scene.layers) {
-                var layer = scene.layers[index];
-                this._reIndexShape(layer);
-            }
+            this._reIndexShape(scene);
         }
     }
 

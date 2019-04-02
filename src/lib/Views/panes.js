@@ -220,10 +220,7 @@ export class ShapesPane extends Pane {
         var pane = this;
         var stage = this._stage;
         var scene = stage.scene;
-        for (var i = 0;i < scene.layers.length;i++) {
-            var layer = scene.layers[i];
-            this.drawShape(ctx, layer, stage, this.viewPort);
-        }
+        this.drawShape(ctx, scene, stage, this.viewPort);
     }
 
     drawShape(ctx, shape, stage, clipBounds) {

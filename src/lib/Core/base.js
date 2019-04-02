@@ -6,6 +6,7 @@ const ElementCounter = new counters.Counter("ElementIDs");
 export class Property {
     constructor(name, value) {
         this.name = name;
+        this.inherit = value === undefined;
         this.set(value);
     }
 

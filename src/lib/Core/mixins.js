@@ -164,7 +164,13 @@ export class Styleable extends Transformable {
 
     // Observable Properties that will trigger change events
     get lineWidth() { return this._lineWidth; }
-    set lineWidth(value) { this._lineWidth.set(value); }
+    set lineWidth(value) {
+        if (value) {
+            this._lineWidth.set(geom.Length.parse(value));
+        } else {
+            this._lineWidth.set(value);
+        }
+    }
 
     get lineJoin() { return this._lineJoin; }
     set lineJoin(value) { this._lineJoin.set(value); }
@@ -226,8 +232,8 @@ export class Styleable extends Transformable {
         if (this.lineCap.value || !this.lineCap.inherit) {
             ctx.lineCap = this.lineCap.value;
         }
-        if (this.lineWidth > 0) {
-            ctx.lineWidth = this.lineWidth.value;
+        if (this.lineWidth.value || !this.lineCap.inherit) {
+            ctx.lineWidth = this.lineWidth.value.value;
         }
         if (this.dashOffset.value || !this.dashOffset.inherit) {
             ctx.dashOffset = this.dashOffset.value;
