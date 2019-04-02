@@ -123,13 +123,13 @@ export class SVGLoader {
         shape.fillRule = elem.getAttribute("fill-rule");
         shape.fillOpacity = elem.getAttribute("fill-opacity")
         shape.strokeStyle = elem.getAttribute("stroke");
-        shape.lineWidth = elem.getAttribute("stroke-width")
-        shape.lineCap = elem.getAttribute("stroke-linecap")
-        shape.lineJoin = elem.getAttribute("stroke-linejoin")
-        shape.miterLimit = elem.getAttribute("stroke-miterlimit")
-        shape.strokeOpacity = elem.getAttribute("stroke-opacity")
-        shape.dashArray = elem.getAttribute("stroke-dasharray")
-        shape.dashOffset = elem.getAttribute("stroke-dashoffset")
+        shape.lineWidth = elem.getAttribute("stroke-width");
+        shape.lineCap = elem.getAttribute("stroke-linecap");
+        shape.lineJoin = elem.getAttribute("stroke-linejoin");
+        shape.miterLimit = elem.getAttribute("stroke-miterlimit");
+        shape.strokeOpacity = elem.getAttribute("stroke-opacity");
+        shape.dashArray = elem.getAttribute("stroke-dasharray");
+        shape.dashOffset = elem.getAttribute("stroke-dashoffset");
         return shape;
     }
 

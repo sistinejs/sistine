@@ -69,20 +69,8 @@ function addSampleShapes1() {
 }
 
 function addSampleShapes2() {
-    Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("irony.svg"), {
-        bounds: new Bounds(50, 50, 100, 100)
-    }, function(doc) {
-        theApp.scene.add(doc);
-    });
-
-    Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("adobe.svg"), {
-        bounds: new Bounds(150, 50, 100, 100)
-    }, function(doc) {
-        theApp.scene.add(doc);
-    });
-
     Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("osi.svg"), {
-        bounds: new Bounds(250, 50, 100, 100)
+        bounds: new Bounds(50, 50, 100, 100)
     }, function(doc) {
         theApp.scene.add(doc);
     });

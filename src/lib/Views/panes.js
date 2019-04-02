@@ -250,6 +250,7 @@ export class ShapesPane extends Pane {
             ctx.translate(cx - shape.boundingBox.x, cy - shape.boundingBox.y);
             // ctx.restore();
         }
+        shape.revertStyles(ctx);
         shape.revertTransforms(ctx);
         if (belongsToPane && stage.selection.contains(shape)) {
             shape.drawControls(ctx);

@@ -210,6 +210,7 @@ export class Styleable extends Transformable {
      * Draws this shape on a given context.
      */
     applyStyles(ctx, options) {
+        ctx.save();
         if (this.fillStyle.value && !this.fillStyle.inherit) {
             this.fillStyle.value.apply(this, "fillStyle", ctx);
         }
@@ -217,19 +218,23 @@ export class Styleable extends Transformable {
             this.strokeStyle.value.apply(this, "strokeStyle", ctx);
         }
         if (this.dashArray.value && !this.dashArray.inherit) {
-            ctx.setLineDash(this.dashArray);
+            ctx.setLineDash(this.dashArray.value);
         }
         if (this.lineJoin.value || !this.lineJoin.inherit) {
-            ctx.lineJoin = this.lineJoin;
+            ctx.lineJoin = this.lineJoin.value;
         }
         if (this.lineCap.value || !this.lineCap.inherit) {
-            ctx.lineCap = this.lineCap;
+            ctx.lineCap = this.lineCap.value;
         }
         if (this.lineWidth > 0) {
-            ctx.lineWidth = this.lineWidth;
+            ctx.lineWidth = this.lineWidth.value;
         }
         if (this.dashOffset.value || !this.dashOffset.inherit) {
-            ctx.dashOffset = this.dashOffset;
+            ctx.dashOffset = this.dashOffset.value;
         }
+    }
+
+    revertStyles(ctx) {
+        ctx.restore();
     }
 }
