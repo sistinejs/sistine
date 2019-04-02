@@ -214,7 +214,7 @@ export class Styleable extends Transformable {
             this.fillStyle.value.apply(this, "fillStyle", ctx);
         }
         if (this.strokeStyle.value && !this.strokeStyle.inherit) {
-            this.strokeStyle.apply(this, "strokeStyle", ctx);
+            this.strokeStyle.value.apply(this, "strokeStyle", ctx);
         }
         if (this.dashArray.value && !this.dashArray.inherit) {
             ctx.setLineDash(this.dashArray);

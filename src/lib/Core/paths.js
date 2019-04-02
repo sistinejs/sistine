@@ -446,94 +446,19 @@ export class BezierToComponent extends PathComponent {
     }
 }
 
-/**
- * Base component of different kinds of arc commands.
- * Any rotated elliptical arc can be drawn given the current point,
- * endpoint, ellipse center, ellipse radius, rotation on the x axis
- * and whether to be drawn clockwise or anticlockwise.
- */
-export class GenericArcComponent extends PathComponent {
-    constructor(prev, rx, ry, centerX, centerY, rotation, endX, endY, anticlockwise) {
+export class ArcComponent extends PathComponent {
+    constructor(prev, x, y, radius, startAngle, endAngle, anticlockwise) {
         super(prev);
-        this.rx = rx;
-        this.ry = ry;
-        this._center = new Geom.Models.Point(centerX, centerY);
-        this._endPoint = new Geom.Models.Point(endX, endY);
-        this._rotationPoint = new Geom.Models.Point();
-        this.isAnticlockwise = anticlockwise || false;
-    }
-
-    previousChanged() {
-        var p1 = this.prev.endPoint;
-        var p2 = this.endPoint;
-        // use endpoint to center parametrization to calculate new center or new radii
-        // var params = Geom.Utils.endpointsToCenter(p1.x, p1.y, rx, ry, phi, fA, fS, x2, y2);
-    }
-
-    get endPoint() { return this._endPoint; }
-
-    get startAngle() {
-    }
-
-    get endAngle() {
+        this._cx = cx;
+        this._cy = cy;
+        this._radius = radius;
+        this._startAngle = startAngle;
+        this._endAngle = endAngle;
+        this._anticlockwise = anticlockwise;
     }
 
     draw(ctx) {
-        ctx.ellipse(this._center.x, this._center.y,
-                    this.rx, this.ry, this.rotation,
-                    this.startAngle, this.endAngle, this.isAnticlockwise);
-    }
-
-    set isAnticlockwise(anticlockwise) {
-        this._isAnticlockwise = anticlockwise || false;
-        this._boundingBox = null;
-    }
-
-    getControlPoint(index) {
-        if (index == 0) {
-            return this._endPoint;
-        } else if (index == 1) {
-            return this._center;
-        } else {
-            return this._rotationPoint;
-        }
-    }
-
-    get numControlPoints() {
-        return 3;
-    }
-
-    setControlPoint(index, x, y) {
-        if (index == 0) {
-            this._endPoint.set(x, y);
-            this.notifyNext();
-        } else if (index == 1) {
-            this._center.set(x, y);
-        } else {
-            this._rotationPoint.set(x, y);
-        }
-        this._boundingBox = null;
-    }
-
-    _evalBoundingBox() {
-        var minx = this._controlPoints[0].x;
-        var miny = this._controlPoints[0].y;
-        var maxx = minx;
-        var maxy = miny;
-        if (this.prev) {
-            minx = Math.min(minx, this.prev.endPoint.x);
-            miny = Math.min(miny, this.prev.endPoint.y);
-            maxx = Math.max(maxx, this.prev.endPoint.x);
-            maxy = Math.max(maxy, this.prev.endPoint.y);
-        }
-        return new Geom.Models.Bounds(minx, miny, maxx - minx, maxy - miny);
-    }
-}
-
-export class ArcComponent extends GenericArcComponent {
-    constructor(x, y, radius, startAngle, endAngle, anticlockwise) {
-        var params = Geom.Utils.centerToEndpoints(x, y, radius, radius, 0, startAngle, endAngle - startAngle);
-        super(rx, ry, x, y, 0, params.x2, params.y2, !params.clockwise);
+        ctx.arc(this._cx, this._cy, this._radius, this._startAngle, this._endAngle, this._anticlockwise);
     }
 }
 
@@ -575,14 +500,139 @@ export class ArcToComponent extends PathComponent {
     }
 }
 
-export class SVGArcToComponent extends GenericArcComponent {
+/**
+ * An elliptical arc parametrized by endpoints as in an SVG path.
+ */
+export class SVGArcToComponent extends PathComponent {
     constructor(prev, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY) {
-        var prevX = prev.endPoint.x;
-        var prevY = prev.endPoint.y;
-        var params = Geom.Utils.endpointsToCenter(prevX, prevY, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY);
-        super(prev, rx, ry, params.cx, params.cy, rotation, endX, endY, !params.anticlockwise);
+        super(prev);
+        this._rx = rx;
+        this._ry = ry;
+        this._rotation = rotation;
+        this._endPoint = new Geom.Models.Point(endX, endY);
+        this._isLargeArc = isLargeArc;
+        this._shouldSweep = shouldSweep;
+    }
+
+    get startPoint() { return this.prev.endPoint; }
+    get endPoint() { return this._endPoint; }
+    get startAngle() { return this._startAngle; }
+    get endAngle() { return this._endAngle; }
+
+    draw(ctx) {
+        ctx.ellipse(this._center.x, this._center.y,
+                    this.rx, this.ry, this.rotation,
+                    this.startAngle, this.endAngle, this.isAnticlockwise);
+    }
+
+    set isAnticlockwise(anticlockwise) {
+        this._isAnticlockwise = anticlockwise || false;
+        this._boundingBox = null;
+    }
+
+    _evalBoundingBox() {
+        var prevX = this.startPoint.x;
+        var prevY = this.startPoint.y;
+        var params = Geom.Utils.endpointsToCenter(prevX, prevY, this._rx, this._ry, this._rotation,
+                                                  this._isLargeArc, this._shouldSweep,
+                                                  this._endPoint.x, this._endPoint.y);
+        this._rotationPoint = new Geom.Models.Point();
+        this._center = new Geom.Models.Point(params.cx, params.cy);
+        this._startAngle = params.startAngle;
+        this._endAngle = params.endAngle;
+        this._anticlockwise = params.anticlockwise;
+
+        var bounds = Geom.Utils.ellipticalArcBounds(this._center.x, this._center.y,
+                                                    this._rx, this._ry,
+                                                    this._rotation, this._startAngle,
+                                                    this._endAngle - this._startAngle,
+                                                    this._anticlockwise);
+        return new Geom.Models.Bounds(params.xmin, params.ymin,
+                                      params.xmax - params.xmin,
+                                      params.ymax - params.ymin);
     }
 }
+
+/**
+ * An elliptical arc parametrized by center points.
+ */
+export class EllipticalArcComponent extends PathComponent {
+    constructor(prev, centerX, centerY, rx, ry, rotation, startAngle, endAngle, anticlockwise) {
+        super(prev);
+        this.rx = rx;
+        this.ry = ry;
+        this._center = new Geom.Models.Point(centerX, centerY);
+        this._startPoint = new Geom.Models.Point();
+        this._endPoint = new Geom.Models.Point();
+        this._startAngle = startAngle;
+        this._endAngle = endAngle;
+        this._rotation = rotation;
+        this._rotationPoint = new Geom.Models.Point();
+        this.isAnticlockwise = anticlockwise || false;
+    }
+
+    get startPoint() { return this._startPoint; }
+    get endPoint() { return this._endPoint; }
+    get startAngle() { return this._startAngle; }
+    get endAngle() { return this._endAngle; }
+
+    draw(ctx) {
+        ctx.ellipse(this._center.x, this._center.y,
+                    this.rx, this.ry, this.rotation,
+                    this.startAngle, this.endAngle, this.isAnticlockwise);
+    }
+
+    set isAnticlockwise(anticlockwise) {
+        this._isAnticlockwise = anticlockwise || false;
+        this._boundingBox = null;
+    }
+
+    get numControlPoints() { return 4; } 
+
+    getControlPoint(index) {
+        if (index == 0) {
+            return this._endPoint;
+        } else if (index == 1) {
+            return this._center;
+        } else if (index == 2) {
+            return this._startPoint;
+        } else {
+            return this._rotationPoint;
+        }
+    }
+
+    setControlPoint(index, x, y) {
+        if (index == 0) {
+            this._endPoint.set(x, y);
+            this.notifyNext();
+        } else if (index == 1) {
+            this._center.set(x, y);
+        } else if (index == 2) {
+            this._startPoint.set(x, y);
+        } else {
+            this._rotationPoint.set(x, y);
+        }
+        this._boundingBox = null;
+    }
+
+    _evalBoundingBox() {
+        var params = Geom.Utils.centerToEndpoints(this._center.x, this._center.y,
+                                                  this._rx, this._ry,
+                                                  this._rotation, this._startAngle,
+                                                  this._endAngle - this._startAngle);
+        this._startPoint.set(params.x1, params.y1);
+        this._endPoint.set(params.x2, params.y2);
+        var bounds = Geom.Utils.ellipticalArcBounds(this._center.x, this._center.y,
+                                                    this._rx, this._ry,
+                                                    this._rotation, this._startAngle,
+                                                    this._endAngle - this._startAngle,
+                                                    this._anticlockwise);
+        return new Geom.Models.Bounds(params.xmin, params.ymin,
+                                      params.xmax - params.xmin,
+                                      params.ymax - params.ymin);
+    }
+}
+
 
 Path.Controller = class PathController extends controller.ShapeController {
     _evalControlPoints() {

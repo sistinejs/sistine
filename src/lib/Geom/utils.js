@@ -8,6 +8,8 @@ var pow = Math.pow,
     abs = Math.abs,
     sin = Math.sin,
     cos = Math.cos,
+    asin = Math.asin,
+    acos = Math.acos,
     tan = Math.tan,
     PI = Math.PI;
 var PIx2 = Math.PI * 2.0;
@@ -206,20 +208,20 @@ export function boundsOfCubicCurve(x0, y0, x1, y1, x2, y2, x3, y3)
  * Source: https://www.w3.org/TR/SVG11/implnote.html#ArcConversionCenterToEndpoint
  */
 export function centerToEndpoints(cx, cy, rx, ry, phi, theta, deltaTheta) {
-    var sinphi = Math.sin(phi);
-    var cosphi = Math.cos(phi);
-    var sintheta = Math.sin(theta);
-    var costheta = Math.cos(theta);
-    var sintheta2 = Math.sin(theta + deltaTheta);
-    var costheta2 = Math.cos(theta + deltaTheta);
+    var sinphi = sin(phi);
+    var cosphi = cos(phi);
+    var sintheta = sin(theta);
+    var costheta = cos(theta);
+    var sintheta2 = sin(theta + deltaTheta);
+    var costheta2 = cos(theta + deltaTheta);
     return {
         x1: cx + (rx * costheta1 * cosphi) - (ry * sintheta1 * sinphi),
         y1: cy + (rx * costheta1 * sinphi) + (ry * sintheta1 * cosphi),
         x2: cx + (rx * costheta2 * cosphi) - (ry * sintheta2 * sinphi),
         y2: cy + (rx * costheta2 * sinphi) + (ry * sintheta2 * cosphi),
-        fA: Math.abs(deltaTheta) > Math.PI,
-        fS: deltaTheta > Math.PI,
-        clockwise: deltaTheta > Math.PI,
+        fA: abs(deltaTheta) > PI,
+        fS: deltaTheta > PI,
+        clockwise: deltaTheta > PI,
     };
 }
 
@@ -250,15 +252,15 @@ export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
             cx: (x1 + x2) / 2.0,
             cy: (y1 + y2) / 2.0,
             startAngle: 0,
-            deltaAngle: Math.PI / 2,
-            endAngle: Math.PI / 2,
+            deltaAngle: PI / 2,
+            endAngle: PI / 2,
             isLine: true,
             clockwise: true
         }
     }
 
-    var s_phi = Math.sin(phi);
-    var c_phi = Math.cos(phi);
+    var s_phi = sin(phi);
+    var c_phi = cos(phi);
     var hd_x = (x1 - x2) / 2.0; // half diff of x
     var hd_y = (y1 - y2) / 2.0; // half diff of y
     var hs_x = (x1 + x2) / 2.0; // half sum of x
@@ -272,8 +274,8 @@ export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
     //   Step 3: Ensure radii are large enough
     var lambda = (x1_ * x1_) / (rx * rx) + (y1_ * y1_) / (ry * ry);
     if (lambda > 1) {
-        rx = rx * Math.sqrt(lambda);
-        ry = ry * Math.sqrt(lambda);
+        rx = rx * sqrt(lambda);
+        ry = ry * sqrt(lambda);
     }
 
     var rxry = rx * ry;
@@ -283,7 +285,7 @@ export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
     if (!sum_of_sq) {
         throw Error('start point can not be same as end point');
     }
-    var coe = Math.sqrt(Math.abs((rxry * rxry - sum_of_sq) / sum_of_sq));
+    var coe = sqrt(abs((rxry * rxry - sum_of_sq) / sum_of_sq));
     if (fA == fS) { coe = -coe; }
 
     // F6.5.2
@@ -328,10 +330,171 @@ export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
  */
 export function angleBetweenVectors(ux, uy, vx, vy) {
     var  dot = ux * vx + uy * vy;
-    var  mod = Math.sqrt( ( ux * ux + uy * uy ) * ( vx * vx + vy * vy ) );
-    var  rad = Math.acos( dot / mod );
+    var  mod = sqrt( ( ux * ux + uy * uy ) * ( vx * vx + vy * vy ) );
+    var  rad = acos( dot / mod );
     if( ux * vy - uy * vx < 0.0 ) {
         rad = -rad;
     }
     return rad;
+}
+
+/**
+ * Returns the floating-point remainder of numer/denom (rounded towards zero):
+ *
+ *      fmod = numer - tquot * denom
+ *
+ * Where tquot is the truncated (i.e., rounded towards zero) result of: numer/denom.
+ */
+export function fmod(x, y) {
+    var r = x / y;
+    return x - (y * Math.floor(r))
+}
+
+export function getAngle(bx, by) {
+    return fmod(PIx2 + (by > 0.0 ? 1.0 : -1.0) * acos(bx / sqrt(bx * bx + by * by)), PIx2);
+}
+
+export function ellipticalArcBounds(centerX, centerY, rx, ry, rotation, startAngle, endAngle, anticlockwise) {
+  if (rx < 0.0)
+    rx *= -1.0;
+  if (ry < 0.0)
+    ry *= -1.0;
+
+  if (rx == 0.0 || ry == 0.0) {
+      return {
+        xmin: (x1 < x2 ? x1 : x2),
+        xmax: (x1 > x2 ? x1 : x2),
+        ymin: (y1 < y2 ? y1 : y2),
+        ymax: (y1 > y2 ? y1 : y2),
+      };
+  }
+}
+
+export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
+  if (rx < 0.0)
+    rx *= -1.0;
+  if (ry < 0.0)
+    ry *= -1.0;
+
+  if (rx == 0.0 || ry == 0.0) {
+      return {
+        xmin: (x1 < x2 ? x1 : x2),
+        xmax: (x1 > x2 ? x1 : x2),
+        ymin: (y1 < y2 ? y1 : y2),
+        ymax: (y1 > y2 ? y1 : y2),
+      };
+  }
+
+  x1prime = cos(phi)*(x1 - x2)/2 + sin(phi)*(y1 - y2)/2;
+  y1prime = -sin(phi)*(x1 - x2)/2 + cos(phi)*(y1 - y2)/2;
+
+  radicant = (rx*rx*ry*ry - rx*rx*y1prime*y1prime - ry*ry*x1prime*x1prime);
+  radicant /= (rx*rx*y1prime*y1prime + ry*ry*x1prime*x1prime);
+  cxprime = 0.0;
+  cyprime = 0.0;
+  if (radicant < 0.0) {
+    ratio = rx/ry;
+    radicant = y1prime*y1prime + x1prime*x1prime/(ratio*ratio);
+    if (radicant < 0.0) {
+      return {
+          xmin: (x1 < x2 ? x1 : x2),
+          xmax: (x1 > x2 ? x1 : x2),
+          ymin: (y1 < y2 ? y1 : y2),
+          ymax: (y1 > y2 ? y1 : y2),
+      };
+    }
+    ry=sqrt(radicant);
+    rx=ratio*ry;
+  } else {
+    factor = (largeArc==sweep ? -1.0 : 1.0)*sqrt(radicant);
+
+    cxprime = factor*rx*y1prime/ry;
+    cyprime = -factor*ry*x1prime/rx;
+  }
+
+  cx = cxprime*cos(phi) - cyprime*sin(phi) + (x1 + x2)/2;
+  cy = cxprime*sin(phi) + cyprime*cos(phi) + (y1 + y2)/2;
+
+  var xmin, xmax, ymin, ymax;
+  var txmin, txmax, tymin, tymax;
+
+  if (phi == 0 || phi == PI) {
+    xmin = cx - rx;
+    txmin = getAngle(-rx, 0);
+    xmax = cx + rx;
+    txmax = getAngle(rx, 0);
+    ymin = cy - ry;
+    tymin = getAngle(0, -ry);
+    ymax = cy + ry;
+    tymax = getAngle(0, ry);
+  } else if (phi == PI / 2.0 || phi == 3.0*PI/2.0) {
+    xmin = cx - ry;
+    txmin = getAngle(-ry, 0);
+    xmax = cx + ry;
+    txmax = getAngle(ry, 0);
+    ymin = cy - rx;
+    tymin = getAngle(0, -rx);
+    ymax = cy + rx;
+    tymax = getAngle(0, rx);
+  }  else {
+    txmin = -atan(ry*tan(phi)/rx);
+    txmax = PI - atan (ry*tan(phi)/rx);
+    xmin = cx + rx*cos(txmin)*cos(phi) - ry*sin(txmin)*sin(phi);
+    xmax = cx + rx*cos(txmax)*cos(phi) - ry*sin(txmax)*sin(phi);
+    if (xmin > xmax) {
+        var tmp = xmin; xmin = xmax; xmax = tmp;
+        tmp = txmin; txmin = txmax; txmax = tmp;
+    }
+    tmpY = cy + rx*cos(txmin)*sin(phi) + ry*sin(txmin)*cos(phi);
+    txmin = getAngle(xmin - cx, tmpY - cy);
+    tmpY = cy + rx*cos(txmax)*sin(phi) + ry*sin(txmax)*cos(phi);
+    txmax = getAngle(xmax - cx, tmpY - cy);
+
+
+    tymin = atan(ry/(tan(phi)*rx));
+    tymax = atan(ry/(tan(phi)*rx))+PI;
+    ymin = cy + rx*cos(tymin)*sin(phi) + ry*sin(tymin)*cos(phi);
+    ymax = cy + rx*cos(tymax)*sin(phi) + ry*sin(tymax)*cos(phi);
+    if (ymin > ymax) {
+        var tmp = ymin; ymin = ymax; ymax = tmp;
+        tmp = tymin; tymin = tymax; tymax = tmp;
+    }
+    tmpX = cx + rx*cos(tymin)*cos(phi) - ry*sin(tymin)*sin(phi);
+    tymin = getAngle(tmpX - cx, ymin - cy);
+    tmpX = cx + rx*cos(tymax)*cos(phi) - ry*sin(tymax)*sin(phi);
+    tymax = getAngle(tmpX - cx, ymax - cy);
+  }
+
+  angle1 = getAngle(x1 - cx, y1 - cy);
+  angle2 = getAngle(x2 - cx, y2 - cy);
+
+  if (!sweep) {
+      var tmp = angle1;
+      angle1 = angle2;
+      angle2 = tmp;
+  }
+
+  otherArc = false;
+  if (angle1 > angle2) {
+      var tmp = angle1;
+      angle1 = angle2;
+      angle2 = tmp;
+    otherArc = true;
+  }
+
+  if ((!otherArc && (angle1 > txmin || angle2 < txmin)) || (otherArc && !(angle1 > txmin || angle2 < txmin)))
+    xmin = x1 < x2 ? x1 : x2;
+  if ((!otherArc && (angle1 > txmax || angle2 < txmax)) || (otherArc && !(angle1 > txmax || angle2 < txmax)))
+    xmax = x1 > x2 ? x1 : x2;
+  if ((!otherArc && (angle1 > tymin || angle2 < tymin)) || (otherArc && !(angle1 > tymin || angle2 < tymin)))
+    ymin = y1 < y2 ? y1 : y2;
+  if ((!otherArc && (angle1 > tymax || angle2 < tymax)) || (otherArc && !(angle1 > tymax || angle2 < tymax)))
+    ymax = y1 > y2 ? y1 : y2;
+
+    return {
+        "xmin": xmin,
+        "ymin": ymin,
+        "xmax": xmax,
+        "ymax": ymax,
+    };
 }
