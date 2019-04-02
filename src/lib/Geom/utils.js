@@ -385,15 +385,16 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
       };
   }
 
-  x1prime = cos(phi)*(x1 - x2)/2 + sin(phi)*(y1 - y2)/2;
-  y1prime = -sin(phi)*(x1 - x2)/2 + cos(phi)*(y1 - y2)/2;
+  var x1prime = cos(phi)*(x1 - x2)/2 + sin(phi)*(y1 - y2)/2;
+  var y1prime = -sin(phi)*(x1 - x2)/2 + cos(phi)*(y1 - y2)/2;
 
-  radicant = (rx*rx*ry*ry - rx*rx*y1prime*y1prime - ry*ry*x1prime*x1prime);
+  var radicant = (rx*rx*ry*ry - rx*rx*y1prime*y1prime - ry*ry*x1prime*x1prime);
   radicant /= (rx*rx*y1prime*y1prime + ry*ry*x1prime*x1prime);
-  cxprime = 0.0;
-  cyprime = 0.0;
+  var cxprime = 0.0;
+  var cyprime = 0.0;
+
   if (radicant < 0.0) {
-    ratio = rx/ry;
+    var ratio = rx/ry;
     radicant = y1prime*y1prime + x1prime*x1prime/(ratio*ratio);
     if (radicant < 0.0) {
       return {
@@ -412,8 +413,8 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
     cyprime = -factor*ry*x1prime/rx;
   }
 
-  cx = cxprime*cos(phi) - cyprime*sin(phi) + (x1 + x2)/2;
-  cy = cxprime*sin(phi) + cyprime*cos(phi) + (y1 + y2)/2;
+  var cx = cxprime*cos(phi) - cyprime*sin(phi) + (x1 + x2)/2;
+  var cy = cxprime*sin(phi) + cyprime*cos(phi) + (y1 + y2)/2;
 
   var xmin, xmax, ymin, ymax;
   var txmin, txmax, tymin, tymax;
@@ -465,8 +466,8 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
     tymax = getAngle(tmpX - cx, ymax - cy);
   }
 
-  angle1 = getAngle(x1 - cx, y1 - cy);
-  angle2 = getAngle(x2 - cx, y2 - cy);
+  var angle1 = getAngle(x1 - cx, y1 - cy);
+  var angle2 = getAngle(x2 - cx, y2 - cy);
 
   if (!sweep) {
       var tmp = angle1;
@@ -474,7 +475,7 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
       angle2 = tmp;
   }
 
-  otherArc = false;
+  var otherArc = false;
   if (angle1 > angle2) {
       var tmp = angle1;
       angle1 = angle2;
