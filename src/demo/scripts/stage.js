@@ -70,7 +70,7 @@ function addSampleShapes1() {
 
 function addSampleShapes2() {
     Sistine.Loaders.SVG.loadFromURL(getTestSvgUrl("osi.svg"), {
-        bounds: new Bounds(50, 50, 100, 100)
+        bounds: new Bounds(0, 0, 100, 100)
     }, function(doc) {
         theApp.scene.add(doc);
     });

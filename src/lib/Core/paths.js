@@ -509,6 +509,8 @@ export class SVGArcToComponent extends PathComponent {
         this._rx = rx;
         this._ry = ry;
         this._rotation = rotation;
+        this._rotationPoint = new Geom.Models.Point();
+        this._center = new Geom.Models.Point();
         this._endPoint = new Geom.Models.Point(endX, endY);
         this._isLargeArc = isLargeArc;
         this._shouldSweep = shouldSweep;
@@ -522,7 +524,7 @@ export class SVGArcToComponent extends PathComponent {
     draw(ctx) {
         ctx.ellipse(this._center.x, this._center.y,
                     this._rx, this._ry, this._rotation,
-                    this.startAngle, this.endAngle, this._anticlockwise);
+                    this._startAngle, this._endAngle, this._anticlockwise);
     }
 
     set isAnticlockwise(anticlockwise) {
@@ -536,8 +538,8 @@ export class SVGArcToComponent extends PathComponent {
         var params = Geom.Utils.endpointsToCenter(prevX, prevY, this._rx, this._ry, this._rotation,
                                                   this._isLargeArc, this._shouldSweep,
                                                   this._endPoint.x, this._endPoint.y);
-        this._rotationPoint = new Geom.Models.Point();
-        this._center = new Geom.Models.Point(params.cx, params.cy);
+        this._rotationPoint.set();
+        this._center.set(params.cx, params.cy);
         this._startAngle = params.startAngle;
         this._endAngle = params.endAngle;
         this._anticlockwise = !params.clockwise;

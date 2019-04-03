@@ -313,7 +313,7 @@ export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
     while (endAngle > PIx2) { endAngle -= PIx2; }
     while (endAngle < 0.0) { endAngle += PIx2; }
 
-    var outputObj = { /* cx, cy, startAngle, deltaAngle */
+    var outputObj = {
         cx: cx,
         cy: cy,
         startAngle: startAngle,
