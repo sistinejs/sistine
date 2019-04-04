@@ -242,7 +242,7 @@ export class SVGLoader {
                     var shouldSweep = tokenizer.ensureNumber() == 1;
                     var endX = tokenizer.ensureNumber();
                     var endY = tokenizer.ensureNumber();
-                    newPath.svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY);
+                    newPath.svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY, isRelative);
                     if (tokenizer.peekType() != "NUMBER") break ;
                 }
             } else {

@@ -160,23 +160,21 @@ export class Path extends models.Shape {
     arcTo(x1, y1, x2, y2, radius, isRelative) {
         this.addComponent(new ArcToComponent(this.currentComponent, this._cmdArcTo, x1, y1, x2, y2, radius));
     }
-    svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY) {
-        this.addComponent(new SVGArcToComponent(this.currentComponent, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY));
+    svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY, isRelative) {
+        var cp = this.setCurrentPoint(endX, endY, isRelative);
+        this.addComponent(new SVGArcToComponent(this.currentComponent, rx, ry, rotation, isLargeArc, shouldSweep, cp.x, cp.y));
     }
 
     draw(ctx) {
         ctx.beginPath();
-        if (this._moveTo != null)
-            ctx.moveTo(this._moveTo.x, this._moveTo.y);
         for (var i = 0;i < this._components.length;i++) {
             var currComp = this._components[i];
             currComp.draw(ctx);
         }
-        if (this._closed) ctx.closePath();
-        if (this.fillStyle) {
+        if (this.fillStyle.value && !this.fillStyle.inherit) {
             ctx.fill();
         }
-        if (this.lineWidth > 0) {
+        if (this.lineWidth.value.value > 0) {
             ctx.stroke();
         }
         // Draw fornow till we figure out hit tests and bounding boxes
@@ -188,12 +186,6 @@ export class Path extends models.Shape {
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
-        if (this._moveTo != null) {
-            ctx.beginPath();
-            ctx.arc(this._moveTo.x, this._moveTo.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-        }
         for (var i = 0;i < this._components.length;i++) {
             var currComp = this._components[i];
             currComp.draw(ctx);
@@ -540,6 +532,8 @@ export class SVGArcToComponent extends PathComponent {
                                                   this._endPoint.x, this._endPoint.y);
         this._rotationPoint.set();
         this._center.set(params.cx, params.cy);
+        this._rx = params.rx;
+        this._ry = params.ry;
         this._startAngle = params.startAngle;
         this._endAngle = params.endAngle;
         this._anticlockwise = !params.clockwise;
@@ -639,9 +633,6 @@ Path.Controller = class PathController extends controller.ShapeController {
     _evalControlPoints() {
         var ours = [];
         var path = this.shape;
-        if (path._moveTo) {
-            ours.push(new ControlPoint(path._moveTo, HitType.CONTROL, 0, "grab", {'component': null, 'index': 0}));
-        }
         var j = 1;
         var components = path._components;
         for (var i = 0;i < components.length;i++) {
@@ -668,14 +659,9 @@ Path.Controller = class PathController extends controller.ShapeController {
         var downPoint = savedInfo.downPoint;
         var nx = downPoint.x + deltaX;
         var ny = downPoint.y + deltaY;
-        if (hitInfo.hitIndex == 0) {
-            // change moveTo
-            path._moveTo.set(nx, ny);
-        } else {
-            var cpComponent = hitInfo.controlPoint.extraData.component;
-            var cpIndex = hitInfo.controlPoint.extraData.index;
-            cpComponent.setControlPoint(cpIndex, nx, ny);
-        }
+        var cpComponent = hitInfo.controlPoint.extraData.component;
+        var cpIndex = hitInfo.controlPoint.extraData.index;
+        cpComponent.setControlPoint(cpIndex, nx, ny);
         path._boundingBox = null;
         path.markTransformed();
     }

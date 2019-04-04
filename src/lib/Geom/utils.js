@@ -316,6 +316,8 @@ export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
     var outputObj = {
         cx: cx,
         cy: cy,
+        rx: rx,
+        ry: ry,
         startAngle: startAngle,
         deltaAngle: deltaAngle,
         endAngle: endAngle,
@@ -392,16 +394,17 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
   radicant /= (rx*rx*y1prime*y1prime + ry*ry*x1prime*x1prime);
   var cxprime = 0.0;
   var cyprime = 0.0;
+    var factor = 1.0;
 
   if (radicant < 0.0) {
     var ratio = rx/ry;
     radicant = y1prime*y1prime + x1prime*x1prime/(ratio*ratio);
     if (radicant < 0.0) {
       return {
-          xmin: (x1 < x2 ? x1 : x2),
-          xmax: (x1 > x2 ? x1 : x2),
-          ymin: (y1 < y2 ? y1 : y2),
-          ymax: (y1 > y2 ? y1 : y2),
+          "xmin": (x1 < x2 ? x1 : x2),
+          "xmax": (x1 > x2 ? x1 : x2),
+          "ymin": (y1 < y2 ? y1 : y2),
+          "ymax": (y1 > y2 ? y1 : y2)
       };
     }
     ry=sqrt(radicant);
@@ -497,5 +500,7 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
         "ymin": ymin,
         "xmax": xmax,
         "ymax": ymax,
+        "rx": rx,
+        "ry": ry
     };
 }
