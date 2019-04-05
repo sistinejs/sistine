@@ -198,11 +198,12 @@ export class SVGLoader {
     }
 
     processPathElement(elem, parent) {
+        this.processStyleAttributes(elem, newPath);
+
+        // process path data
         var d = getAttribute(elem, "d");
-        // var comps = tokenizePathString(d);
         var tokenizer = new PathTokenizer(d);
         var newPath = new Core.Path();
-        this.processStyleAttributes(elem, newPath);
         while (tokenizer.hasNext()) {
             var command = tokenizer.ensureToken("COMMAND");
             // console.log("Found command: ", command);

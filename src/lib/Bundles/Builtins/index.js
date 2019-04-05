@@ -1,7 +1,6 @@
 
 import * as Line from "./Line"
 import * as Arc from "./Arc"
-import * as SVG from "./SVG"
 import * as Circle from "./Circle"
 import * as QuadCurve from "./QuadCurve"
 import * as CubicCurve from "./CubicCurve"
@@ -16,6 +15,5 @@ export const Builtins = {
     "Rectangle": Rectangle.Rectangle,
     "Ellipse": Ellipse.Ellipse,
     "Circle": Circle.Circle,
-    "SVG": SVG.SVG,
 }
 

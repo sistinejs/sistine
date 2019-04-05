@@ -1,5 +1,17 @@
 import { Geom } from "../Geom/index"
 
+function isDigit(ch) {
+    return "0123456789".indexOf(ch) >= 0;
+}
+
+function isIdentChar(ch) {
+    return "0123456789".indexOf(ch) >= 0;
+}
+
+function isIdentChar(ch) {
+    return "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(ch) >= 0;
+}
+
 export const PATH_COMMANDS = {
     'z': {command: 'z', name: "closePath", isRelative: true},
     'Z': {command: 'Z', name: "closePath", isRelative: false},
@@ -102,17 +114,6 @@ export class Tokenizer {
         }
         return isFloat ? parseFloat(out) : parseInt(out);
     }
-    
-    next() {
-        var out = this.peek();
-        this._currToken = null;
-        return out;
-    }
-
-    hasNext() {
-        this.peek();
-        return this._currToken != null;
-    }
 
     all() {
         var out = [];
@@ -163,23 +164,33 @@ export class Tokenizer {
         this._pos++;
     }
 
+    _isSpaceChar(c) { return ",\n\r\t ".indexOf(c) >= 0; }
+
     _skipSpaces() { 
         while (this._pos < this.L) {
             var c = this._input[this._pos];
-            if (",\n\r\t ".indexOf(c) < 0) break ;
+            if (!this._isSpachChar(c)) break ;
             this._advance();
         }
     }
 
-    _readDigits() {
+    _readWhile(func) {
         var out = "";
         while (this._pos < this.L) {
             var c = this._input[this._pos];
-            if ("0123456789".indexOf(c) < 0) break;
+            if (!func(c)) break ;
             out += c;
             this._advance();
         }
         return out;
+    }
+
+    _readDigits() {
+        return this._readWhile(isDigit);
+    }
+
+    _readIdentifier() {
+        return this._readWhile(isIdentChar);
     }
 
     _currch() {
@@ -187,6 +198,17 @@ export class Tokenizer {
             return this._input[this._pos];
         }
         return null;
+    }
+    
+    next() {
+        var out = this.peek();
+        this._currToken = null;
+        return out;
+    }
+
+    hasNext() {
+        this.peek();
+        return this._currToken != null;
     }
 
     peek() {
@@ -222,10 +244,32 @@ export class PathTokenizer extends Tokenizer {
 }
 
 export class TransformTokenizer extends Tokenizer {
+    _isSpaceChar(c) { return "(),\n\r\t ".indexOf(c) >= 0; }
     _readToken(line, col) {
         var c = this._currch();
         var out = null;
+        if (isIdentChar(c)) {
+            out = new Token("IDENT", this._readIdent(), line, col);
+        } else {
+            // parse number
+            var number = this._tokenizeNumber();
+            out = new Token("NUMBER", number, line, col);
+        }
         return out;
+    }
+}
+
+export class TransformParser {
+    constructor(input) {
+        this._tokenizer = new TransformTokenizer(input);
+    }
+
+    hasNext() {
+    }
+
+    next() {
+        if (!tokenizer.hasNext()) return null;
+
     }
 }
 
