@@ -32,7 +32,7 @@ class Token {
     }
 }
 
-export class PathTokenizer {
+export class Tokenizer {
     constructor(input) {
         this._input = input;
         this._pos = 0;
@@ -45,28 +45,6 @@ export class PathTokenizer {
     peekType() {
         var out = this.peek();
         return out == null ? null : out.type;
-    }
-
-    peek() {
-        while (this._currToken == null) {
-            this._skipSpaces();
-            var c = this._currch();
-            if (c == null) {
-                break ;
-            }
-
-            var line = this._currLine;
-            var col = this._currCol;
-            if (c in PATH_COMMANDS) {
-                this._currToken = new Token("COMMAND", PATH_COMMANDS[c], line, col);
-                this._advance();
-            } else {
-                // parse number
-                var number = this._tokenizeNumber();
-                this._currToken = new Token("NUMBER", number, line, col);
-            }
-        }
-        return this._currToken;
     }
 
     /**
@@ -209,6 +187,45 @@ export class PathTokenizer {
             return this._input[this._pos];
         }
         return null;
+    }
+
+    peek() {
+        while (this._currToken == null) {
+            this._skipSpaces();
+            var c = this._currch();
+            if (c == null) {
+                break ;
+            }
+
+            var line = this._currLine;
+            var col = this._currCol;
+            this._currToken = this._readToken(line, col);
+        }
+        return this._currToken;
+    }
+}
+
+export class PathTokenizer extends Tokenizer {
+    _readToken(line, col) {
+        var out = null;
+        var c = this._currch();
+        if (c in PATH_COMMANDS) {
+            out = new Token("COMMAND", PATH_COMMANDS[c], line, col);
+            this._advance();
+        } else {
+            // parse number
+            var number = this._tokenizeNumber();
+            out = new Token("NUMBER", number, line, col);
+        }
+        return out;
+    }
+}
+
+export class TransformTokenizer extends Tokenizer {
+    _readToken(line, col) {
+        var c = this._currch();
+        var out = null;
+        return out;
     }
 }
 

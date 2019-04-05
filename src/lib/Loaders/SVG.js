@@ -55,6 +55,22 @@ const elementProcessors = {
                                               "zoomAndPan", "version", "baseProfile", "contentScriptType",
                                               "contentStyleType", "version", "baseProfile" ])
     },
+    "g": { "method": "processGElement",
+             "validChildren": animationElements
+                                .concat(descriptiveElements)
+                                .concat(shapeElements)
+                                .concat(structuralElements)
+                                .concat(gradientElements)
+                                .concat(["a", "altGlyphDef", "clipPath", "color-profile",
+                                         "cursor", "filter", "font", "font-face", "foreignObject",
+                                         "image", "marker", "mask", "pattern", "script", "style",
+                                         "switch", "text", "view" ]),
+             "validAttributes": conditionalProcessingAttributes
+                                    .concat(coreAttributes)
+                                    .concat(graphicalEventAttributes)
+                                    .concat(presentationAttributes)
+                                    .concat([ "class", "style", "externalResourcesRequired", "transform" ])
+    },
     "path": { "method": "processPathElement",
              "validChildren": animationElements
                                 .concat(descriptiveElements),
@@ -118,36 +134,16 @@ export class SVGLoader {
         return this[method](root, parent);
     }
 
-    processStyleAttributes(elem, shape) {
-        shape.fillStyle = elem.getAttribute("fill");
-        shape.fillRule = elem.getAttribute("fill-rule");
-        shape.fillOpacity = elem.getAttribute("fill-opacity")
-        shape.strokeStyle = elem.getAttribute("stroke");
-        shape.lineWidth = elem.getAttribute("stroke-width");
-        shape.lineCap = elem.getAttribute("stroke-linecap");
-        shape.lineJoin = elem.getAttribute("stroke-linejoin");
-        shape.miterLimit = elem.getAttribute("stroke-miterlimit");
-        shape.strokeOpacity = elem.getAttribute("stroke-opacity");
-        shape.dashArray = elem.getAttribute("stroke-dasharray");
-        shape.dashOffset = elem.getAttribute("stroke-dashoffset");
-        return shape;
-    }
-
     processSVGElement(elem, parent) {
         var out = new Builtins.SVG();
         var bounds = parent ? new Bounds() : this.configs.bounds.copy();
         var viewBox = null;
         this.processStyleAttributes(elem, out);
+        this.processBoundsAttributes(elem, bounds);
+        this.processTransformAttributes(elem, out);
+        this.processMetaAttributes(elem, out);
         forEachAttribute(elem, function(attrib, value) {
-            if (attrib === "x") {
-                bounds.x = parseFloat(value);
-            } else if (attrib === "y") {
-                bounds.y = parseFloat(value);
-            } else if (attrib === "width") {
-                bounds.width = parseFloat(value);
-            } else if (attrib === "height") {
-                bounds.height = parseFloat(value);
-            } else if (attrib === "viewBox") {
+            if (attrib === "viewBox") {
                 var value = value.split(" ");
                 viewBox = new Bounds();
                 viewBox.x = parseFloat(value[0]);
@@ -158,7 +154,34 @@ export class SVGLoader {
                 out.setMetaData("version", value);
             } else if (attrib === "baseProfile") {
                 out.setMetaData("baseProfile", value);
-            } else if ([ "xmlns" ].indexOf(attrib) >= 0) {
+            } else if ([ "xmlns" ].indexOf(attrib) >= 0 ||
+                       elementProcessors[elem.tagName].validAttributes.indexOf(attrib) >= 0) {
+                    // ignore list
+                console.log("Ingoring attribute: ", attrib, " = ", value);
+            } else {
+                throw new Error("Cannot process attribute: " + attrib);
+            }
+        });
+        var self = this;
+        forEachChild(elem, function(child, index) {
+            self.processElement(child, out);
+        });
+        out.setBounds(bounds);
+        out.viewBox = viewBox;
+        return out;
+    }
+
+    processGElement(elem, parent) {
+        var out = new Core.Models.Group();
+        var bounds = parent ? new Bounds() : this.configs.bounds.copy();
+        var viewBox = null;
+        this.processStyleAttributes(elem, out);
+        this.processBoundsAttributes(elem, bounds);
+        this.processTransformAttributes(elem, out);
+        this.processMetaAttributes(elem, out);
+        forEachAttribute(elem, function(attrib, value) {
+            if ([ "xmlns" ].indexOf(attrib) >= 0 ||
+                elementProcessors[elem.tagName].validAttributes.indexOf(attrib) >= 0) {
                     // ignore list
                 console.log("Ingoring attribute: ", attrib, " = ", value);
             } else {
@@ -182,7 +205,7 @@ export class SVGLoader {
         this.processStyleAttributes(elem, newPath);
         while (tokenizer.hasNext()) {
             var command = tokenizer.ensureToken("COMMAND");
-            console.log("Found command: ", command);
+            // console.log("Found command: ", command);
             var isRelative = command.isRelative || false;
             var isSmooth = command.isSmooth || false;
             if (command.name == "closePath") {
@@ -282,6 +305,51 @@ export class SVGLoader {
     }
 
     processDefsElement(elem, parent) {
+    }
+
+    /**
+     * Processing of different kinds of attributes.
+     */
+    processStyleAttributes(elem, shape) {
+        shape.fillStyle = elem.getAttribute("fill");
+        shape.fillRule = elem.getAttribute("fill-rule");
+        shape.fillOpacity = elem.getAttribute("fill-opacity")
+        shape.strokeStyle = elem.getAttribute("stroke");
+        shape.lineWidth = elem.getAttribute("stroke-width");
+        shape.lineCap = elem.getAttribute("stroke-linecap");
+        shape.lineJoin = elem.getAttribute("stroke-linejoin");
+        shape.miterLimit = elem.getAttribute("stroke-miterlimit");
+        shape.strokeOpacity = elem.getAttribute("stroke-opacity");
+        shape.dashArray = elem.getAttribute("stroke-dasharray");
+        shape.dashOffset = elem.getAttribute("stroke-dashoffset");
+        return shape;
+    }
+
+    processMetaAttributes(elem, shape) {
+        if (elem.hasAttribute("version")) {
+            shape.setMetaData("version", elem.getAttribute("version"));
+        }
+        if (elem.hasAttribute("baseProfile")) {
+            shape.setMetaData("baseProfile", elem.getAttribute("baseProfile"));
+        }
+    }
+
+    processBoundsAttributes(elem, shape, bounds) {
+        if (elem.hasAttribute("x")) {
+            bounds.x = elem.getAttribute("x");
+        }
+        if (elem.hasAttribute("y")) {
+            bounds.y = elem.getAttribute("y");
+        }
+        if (elem.hasAttribute("width")) {
+            bounds.width = elem.getAttribute("width");
+        }
+        if (elem.hasAttribute("height")) {
+            bounds.height = elem.getAttribute("height");
+        }
+    }
+
+    processTransformAttributes(elem, shape) {
     }
 }
 

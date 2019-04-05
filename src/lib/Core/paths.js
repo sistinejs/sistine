@@ -174,7 +174,7 @@ export class Path extends models.Shape {
         if (this.fillStyle.value && !this.fillStyle.inherit) {
             ctx.fill();
         }
-        if (this.lineWidth.value.value > 0) {
+        if (this.lineWidth.value && this.lineWidth.value > 0) {
             ctx.stroke();
         }
         // Draw fornow till we figure out hit tests and bounding boxes
