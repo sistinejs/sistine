@@ -19,8 +19,8 @@ export const PATH_COMMANDS = {
     'H': {command: 'H', name: "hlineTo", isRelative: false},
     'v': {command: 'v', name: "vlineTo", isRelative: true},
     'V': {command: 'V', name: "vlineTo", isRelative: false},
-    'a': {command: 'a', name: "svgArcTo", isRelative: true},
-    'A': {command: 'A', name: "svgArcTo", isRelative: false},
+    'a': {command: 'a', name: "arcTo", isRelative: true},
+    'A': {command: 'A', name: "arcTo", isRelative: false},
     'q': {command: 'q', name: "quadCurve", isRelative: true},
     'Q': {command: 'Q', name: "quadCurve", isRelative: false},
     't': {command: 't', name: "quadCurve", isRelative: true, isSmooth: true},
@@ -278,12 +278,12 @@ export class PathDataParser extends Iterator {
                 var point = tokenizer.ensurePoint();
                 args = [point.x, point.y];
             } else if (currCommand.name == "hlineTo") {
-                var point = tokenizer.ensurePoint();
+                var point = tokenizer.ensureNumber();
                 args = [point.x, point.y];
             } else if (currCommand.name == "vlineTo") {
-                var point = tokenizer.ensurePoint();
+                var point = tokenizer.ensureNumber();
                 args = [point.x, point.y];
-            } else if (currCommand.name == "svgArcTo") {
+            } else if (currCommand.name == "arcTo") {
                 var rx = tokenizer.ensureNumber();
                 var ry = tokenizer.ensureNumber();
                 var rotation = tokenizer.ensureNumber();

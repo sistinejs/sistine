@@ -62,14 +62,12 @@ export class Shape extends mixins.Styleable {
 
     /**
      * A easy wrapper to control shape dimensions by just setting its bounds.
-     * This will also reset the scaleFactor to 1.
      */
     setBounds(newBounds) {
         if (this.canSetBounds(newBounds)) {
             var oldBounds = this.boundingBox.copy();
             var event = new events.GeometryChanged(this, "bounds", oldBounds, newBounds);
             if (this.validateBefore(event.name, event) == false) return false;
-            this._scaleFactor.x = this._scaleFactor.y = 1.0;
             this._setBounds(newBounds);
             this._boundingBox = null;
             this.markTransformed();

@@ -12,10 +12,9 @@ export class Transformable extends base.Element {
         // What is the point of the global transform?
         this._globalTransform = new geom.Transform();
         this._globalInverseTransform = new geom.Transform();
+
+        // Transforms on this shape
         this._transform = new geom.Transform();
-        this._translation = new geom.Point(0, 0);
-        this._rotation = 0;
-        this._scaleFactor = new geom.Point(1, 1);
         this.markTransformed();
     }
 
@@ -52,110 +51,96 @@ export class Transformable extends base.Element {
     }
     _updateTransform(result) {
         result = result || new geom.Transform();
-        var cx = this._translation.x;
-        var cy = this._translation.y;
         // Notice we are doing "invserse transforms here"
         // since we need to map a point "back" to global form
+        result.multiply(this._transform);
+        return result;
+        /**
+        var cx = this._translation.x;
+        var cy = this._translation.y;
         result.translate(cx, cy)
               .rotate(- this._rotation)
               .scale(1.0 / this._scaleFactor.x, 1.0 / this._scaleFactor.y)
               .translate(-cx, -cy);
-        return result;
+        **/
     }
 
     /**
      * Sets the shape's current transform matrix.
      */
     setTransform(t) {
+        this._transform = t.copy();
+        this.markTransformed();
     }
 
     /**
      * Transform's the shape by the given transform matrix.
      */
     transform(t) {
+        this._transform.multiply(t);
+        this.markTransformed();
     }
 
     translate(tx, ty) {
-        return this.moveTo(this._translation.x + dx, this._translation.y + dy);
-    }
-
-    moveTo(x, y) {
-        var oldX = this._translation.x;
-        var oldY = this._translation.y;
-        if (x == oldX && y == oldY) return false;
-
-        var event = new events.GeometryChanged(this, "location", [ oldX, oldY ], [ x, y ]);
+        var event = new events.TransformChanged(this, "translate", [ tx, ty ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
-
-        this._translation.x = x;
-        this._translation.y = y;
+        this._transform.translate(tx, ty);
         this.markTransformed();
-        this._locationChanged(oldX, oldY);
         this.triggerOn(event.name, event);
         return true;
     }
     scale(sx, sy) {
-        return this.scaleTo(this._scaleFactor.x * sx, this._scaleFactor.y * sy);
-    }
-    scaleTo(x, y) {
-        var oldScaleX = this._scaleFactor.x;
-        var oldScaleY = this._scaleFactor.y;
-        if (x == oldScaleX && y == oldScaleY) return false;
+        var event = new events.TransformChanged(this, "scale", [ sx, sy ]);
 
-        // Check minimum sizes
-        var C2 = this.controlRadius + this.controlRadius;
-        if (x * this.boundingBox.width <= C2 || y * this.boundingBox.height <= C2) return false;
-
-        var event = new events.GeometryChanged(this, "scale", [ oldScaleX, oldScaleY ], [ x, y ]);
         if (this.validateBefore(event.name, event) == false) return false;
-
-        this._scaleFactor.set(x, y);
+        this._transform.scale(sx, sy);
         this.markTransformed();
-        this._scaleChanged(oldScaleX, oldScaleY);
         this.triggerOn(event.name, event);
         return true;
     }
-    rotate(theta) { return this.rotateTo(this._rotation + theta); }
-    rotateTo(theta) {
-        if (theta == this._rotation) return false;
+    rotate(theta) {
+        var event = new events.TransformChanged(this, "rotation", [ theta ]);
 
-        var event = new events.GeometryChanged(this, "angle", this._rotation, theta);
         if (this.validateBefore(event.name, event) == false) return false;
-
-        var oldAngle = this._rotation;
-        this._rotation = theta;
+        this._transform.rotate(theta);
         this.markTransformed();
-        this._rotationChanged(oldAngle);
         this.triggerOn(event.name, event);
         return true;
     }
+    skewX(sx) {
+        var event = new events.TransformChanged(this, "skewX", [ sx ]);
 
-    /**
-     * Transforms the shape with a given Transform object.
-     */
-    transform(t) {
-        this._transform.multiply(t);
+        if (this.validateBefore(event.name, event) == false) return false;
+        this._transform.skewX(sx);
+        this.markTransformed();
+        this.triggerOn(event.name, event);
+        return true;
+    }
+    skewY(sy) {
+        var event = new events.TransformChanged(this, "skewY", [ sy ]);
+
+        if (this.validateBefore(event.name, event) == false) return false;
+        this._transform.skewY(sy);
+        this.markTransformed();
+        this.triggerOn(event.name, event);
+        return true;
     }
 
     applyTransforms(ctx) {
-        var angle = this._rotation;
-        if (angle || this._scaleFactor.x != 1 || this._scaleFactor.y != 1 ||
-            this._translation.x || this._translation.y) {
+        if (!this._transform.isIdentity) {
             ctx.save(); 
-            var lBounds = this.boundingBox;
-            var cx = this.boundingBox.centerX;
-            var cy = this.boundingBox.centerY;
-            ctx.translate(cx, cy);
-            ctx.rotate(angle);
-            ctx.scale(this._scaleFactor.x, this._scaleFactor.y);
-            ctx.translate(-cx + this._translation.x, -cy + this._translation.y);
+            ctx.transform(this._transform.a,
+                          this._transform.b,
+                          this._transform.c,
+                          this._transform.d,
+                          this._transform.e,
+                          this._transform.f);
         }
     }
 
     revertTransforms(ctx) {
-        var angle = this._rotation;
-        if (angle) {
+        if (!this._transform.isIdentity) {
             ctx.restore(); 
         }
     }

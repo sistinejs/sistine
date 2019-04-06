@@ -261,6 +261,18 @@ export class StateMachine {
     }
 }
 
+export class TransformChanged extends Event {
+    constructor(source, command, oldValue, newValue) {
+        super();
+        this.source = source;
+        this.command = command;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
+    get name() { return "TransformChanged"; }
+}
+
 export class GeometryChanged extends Event {
     constructor(source, property, oldValue, newValue) {
         super();

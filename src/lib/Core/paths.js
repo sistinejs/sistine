@@ -114,7 +114,7 @@ export class Path extends models.Shape {
         }
         this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
     }
-    quadraticCurveTo(cp1x, cp1y, x, y, isRelative, isSmooth) {
+    quadCurveTo(cp1x, cp1y, x, y, isRelative, isSmooth) {
         if (isSmooth) {
             throw new Error("Smooth curves not yet implemented.");
         }
@@ -349,7 +349,7 @@ export class QuadraticToComponent extends PathComponent {
     }
 
     draw(ctx) {
-        ctx.quadraticCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
+        ctx.quadCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
     }
 
     get endPoint() {

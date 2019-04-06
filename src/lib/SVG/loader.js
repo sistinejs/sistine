@@ -294,11 +294,22 @@ export class SVGLoader {
 
     processPathDataAttributes(elem, shape) {
         var attrib = elem.getAttribute("d");
+        var funcs = {
+            "closePath": "closePath",
+            "moveTo": "moveTo",
+            "lineTo": "lineTo",
+            "hlineTo": "hlineTo",
+            "vlineTo": "vlineTo",
+            "arcTo": "svgArcTo",
+            "quadCurve": "quadCurveTo",
+            "cubicCurve": "bezierCurveTo",
+        }
         if (!attrib) return ;
         var parser = new PathDataParser(attrib);
         while (parser.hasNext()) {
             var command = parser.next();
-            shape[command.name].apply(shape, command.args);
+            var func = funcs[command.name];
+            shape[func].apply(shape, command.args);
         }
     }
 }
