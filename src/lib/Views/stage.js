@@ -1,7 +1,7 @@
 
 import * as coreevents from "../Core/events";
 import * as events from "./events";
-import * as models from "../Core/models";
+import { Core } from "../Core";
 import * as panes from "./panes";
 import * as handlers from "./handlers";
 import * as cursors from "./cursors";
@@ -80,7 +80,7 @@ export class Stage extends coreevents.EventSource {
 
         this._divId = divId;
         this._parentDiv = $("#" + divId);
-        this.scene = scene || new models.Scene();
+        this.scene = scene || new Core.Models.Scene();
         this._shapeIndex = new ShapeIndex(this._scene);
 
         // Track mouse/touch drag events
@@ -90,7 +90,7 @@ export class Stage extends coreevents.EventSource {
         this._mainPane = this.acquirePane("main");
 
         // Information regarding Selections
-        this.selection = new models.Selection();
+        this.selection = new Core.Selection();
         var self = this;
         this.selection.on("ShapesSelected", function(eventType, source, event) {
             event.shapes.forEach(function(shape) {

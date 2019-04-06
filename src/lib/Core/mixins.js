@@ -23,18 +23,15 @@ export class Transformable extends base.Element {
         this._lastTransformed = Date.now(); 
     }
 
-    get rotation() { return this._rotation; }
-    set rotation(value) { return this.set("rotation", value); }
-
     /**
-    * The globalTransform tells how to convert a global coordinate into 
-    * the coordinate system representing this shape.
-    * The inverse of this transform will map a point with respect to the shape
-    * back into the global coordinate system.
-    *
-    * The globalTransform of a shape is simply the cumulative transforms 
-    * applied inorder from the root shape all the way to this shape's transform.
-    */
+     * The globalTransform tells how to convert a global coordinate into 
+     * the coordinate system representing this shape.
+     * The inverse of this transform will map a point with respect to the shape
+     * back into the global coordinate system.
+     *
+     * The globalTransform of a shape is simply the cumulative transforms 
+     * applied inorder from the root shape all the way to this shape's transform.
+     */
     get globalTransform() {
         var gt = this._globalTransform;
         if (this._parent != null) {
@@ -108,20 +105,10 @@ export class Transformable extends base.Element {
         this.triggerOn(event.name, event);
         return true;
     }
-    skewX(sx) {
-        var event = new events.TransformChanged(this, "skewX", [ sx ]);
-
+    skew(sx, sy) {
+        var event = new events.TransformChanged(this, "skew", this._transform, [ sx, sy ]);
         if (this.validateBefore(event.name, event) == false) return false;
-        this._transform.skewX(sx);
-        this.markTransformed();
-        this.triggerOn(event.name, event);
-        return true;
-    }
-    skewY(sy) {
-        var event = new events.TransformChanged(this, "skewY", [ sy ]);
-
-        if (this.validateBefore(event.name, event) == false) return false;
-        this._transform.skewY(sy);
+        this._transform.skew(sx, sy);
         this.markTransformed();
         this.triggerOn(event.name, event);
         return true;

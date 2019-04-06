@@ -171,6 +171,31 @@ export class Transform {
         return result;
     }
 
+    /**
+     * Skews by a particular factor along x and/or y axes.
+     *
+     * Equivalent to the multiplication by the following transform:
+     *
+     *    __          __
+     *    |  1  sx  0  |
+     *    |  sy  1  0  |
+     *    |  0   0  1  |
+     *    --          --
+     */
+    skew(sx, sy, result) {
+        result = result || this;
+        var a = this.a, A = 1;
+        var b = this.b, B = sy;
+        var c = this.c, C = sx;
+        var d = this.d, D = 1;
+        var e = this.e, E = 0;
+        var f = this.f, F = 0;
+        var na = a * A + c * B,   nc = a * C + c * D,    ne = a * E + c * F + e;
+        var nb = b * A + d * B,   nd = b * C + d * D,    nf = b * E + d * F + f;
+        result.set(na, nb, nc, nd, ne, nf);
+        return result;
+    }
+
     scale(sx, sy, result) {
         result = result || this;
         result.a = this.a * sx;
