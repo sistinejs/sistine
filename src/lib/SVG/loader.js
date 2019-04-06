@@ -197,6 +197,7 @@ export class SVGLoader {
         });
         out.setBounds(bounds);
         out.viewBox = viewBox;
+        parent.add(out);
         return out;
     }
 

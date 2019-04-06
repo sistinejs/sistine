@@ -171,7 +171,7 @@ export class Group extends Shape {
     }
 
     _setBounds(newBounds) {
-        this._bounds = newBounds.copy();
+        this._bounds = newBounds == null ? null : newBounds.copy();
     }
 
     _evalBoundingBox() {
