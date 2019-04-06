@@ -5,10 +5,6 @@ function isDigit(ch) {
 }
 
 function isIdentChar(ch) {
-    return "0123456789".indexOf(ch) >= 0;
-}
-
-function isIdentChar(ch) {
     return "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(ch) >= 0;
 }
 
@@ -44,12 +40,38 @@ class Token {
     }
 }
 
-export class Tokenizer {
+class Iterator {
+    constructor() {
+        this._current = null;
+    }
+
+    all() {
+        var out = [];
+        while (this.hasNext()) {
+            out.push(this.next());
+        }
+        return out;
+    }
+
+    next() {
+        var out = this.peek();
+        this._current = null;
+        return out;
+    }
+
+    hasNext() {
+        this.peek();
+        return this._current != null;
+    }
+}
+
+export class Tokenizer extends Iterator {
     constructor(input) {
+        super();
         this._input = input;
         this._pos = 0;
         this.L = this._input.length;
-        this._currToken = null;
+        this._current = null;
         this._currCol = 0;
         this._currLine = 0;
     }
@@ -115,14 +137,6 @@ export class Tokenizer {
         return isFloat ? parseFloat(out) : parseInt(out);
     }
 
-    all() {
-        var out = [];
-        while (this.hasNext()) {
-            out.push(this.next());
-        }
-        return out;
-    }
-
     /**
      * Ensures that the next token is a number.
      */
@@ -169,7 +183,7 @@ export class Tokenizer {
     _skipSpaces() { 
         while (this._pos < this.L) {
             var c = this._input[this._pos];
-            if (!this._isSpachChar(c)) break ;
+            if (!this._isSpaceChar(c)) break ;
             this._advance();
         }
     }
@@ -189,7 +203,7 @@ export class Tokenizer {
         return this._readWhile(isDigit);
     }
 
-    _readIdentifier() {
+    _readIdent() {
         return this._readWhile(isIdentChar);
     }
 
@@ -199,20 +213,9 @@ export class Tokenizer {
         }
         return null;
     }
-    
-    next() {
-        var out = this.peek();
-        this._currToken = null;
-        return out;
-    }
-
-    hasNext() {
-        this.peek();
-        return this._currToken != null;
-    }
 
     peek() {
-        while (this._currToken == null) {
+        while (this._current == null) {
             this._skipSpaces();
             var c = this._currch();
             if (c == null) {
@@ -221,9 +224,9 @@ export class Tokenizer {
 
             var line = this._currLine;
             var col = this._currCol;
-            this._currToken = this._readToken(line, col);
+            this._current = this._readToken(line, col);
         }
-        return this._currToken;
+        return this._current;
     }
 }
 
@@ -259,17 +262,61 @@ export class TransformTokenizer extends Tokenizer {
     }
 }
 
-export class TransformParser {
+export class TransformParser extends Iterator {
     constructor(input) {
+        super();
         this._tokenizer = new TransformTokenizer(input);
     }
 
-    hasNext() {
-    }
-
-    next() {
-        if (!tokenizer.hasNext()) return null;
-
+    peek() {
+        if (this._current == null) {
+            var tokenizer = this._tokenizer;
+            if (!tokenizer.hasNext()) return null;
+            var token = tokenizer.next();
+            var tokValue = token.value.toLowerCase();
+            if (tokValue == "matrix") {
+                var a = tokenizer.ensureNumber();
+                var b = tokenizer.ensureNumber();
+                var c = tokenizer.ensureNumber();
+                var d = tokenizer.ensureNumber();
+                var e = tokenizer.ensureNumber();
+                var f = tokenizer.ensureNumber();
+                this._current = new Geom.Models.Transform(a,b,c,d,e,f);
+            } else if (tokValue == "translate") {
+                var tx = tokenizer.ensureNumber();
+                var ty = 0;
+                var token = tokenizer.peek();
+                if (token != null && token.type == "NUMBER") {
+                    ty = tokenizer.ensureNumber();
+                }
+                this._current = new Geom.Models.Transform().translate(dx, dy);
+            } else if (tokValue == "scale") {
+                var sx = tokenizer.ensureNumber();
+                var sy = sx;
+                var token = tokenizer.peek();
+                if (token != null && token.type == "NUMBER") {
+                    sy = tokenizer.ensureNumber();
+                }
+                this._current = new Geom.Models.Transform().scale(sx, sy);
+            } else if (tokValue == "rotate") {
+                var sx = tokenizer.ensureNumber();
+                var sy = sx;
+                var token = tokenizer.peek();
+                if (token != null && token.type == "NUMBER") {
+                    sy = tokenizer.ensureNumber();
+                }
+                this._current = new Geom.Models.Transform().scale(sx, sy);
+            } else if (tokValue == "skewx") {
+                var sx = tokenizer.ensureNumber();
+                this._current = new Geom.Models.Transform().skewX(sx);
+            } else if (tokValue == "skewy") {
+                var sy = tokenizer.ensureNumber();
+                this._current = new Geom.Models.Transform().skewY(sy);
+            } else {
+                tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
+            }
+        }
+        return this._current;
     }
 }
 

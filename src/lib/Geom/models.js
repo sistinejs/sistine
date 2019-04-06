@@ -118,6 +118,11 @@ export class Transform {
         this.timeStamp = Date.now();
     }
 
+    get isIdentity() {
+        return this.a == 1 && this.b == 0 && this.c == 0 &&
+               this.d == 1 && this.e == 0 && this.f == 0;
+    }
+
     /**
      * Applies this transform to a point and returns the result.
      */

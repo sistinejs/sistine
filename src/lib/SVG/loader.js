@@ -1,10 +1,13 @@
 
-import { Geom } from "../Geom/index"
 import { Core } from "../Core/index"
+import { Geom } from "../Geom/index"
 import { Utils } from "../Utils/index"
 import { Bundles } from "../Bundles/index"
+import * as parser from "./parser"
+import * as models from "./models"
 
-const PathTokenizer = Utils.SVG.PathTokenizer;
+const PathTokenizer = parser.PathTokenizer;
+const TransformParser = parser.TransformParser;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const Length = Geom.Models.Length;
@@ -135,7 +138,7 @@ export class SVGLoader {
     }
 
     processSVGElement(elem, parent) {
-        var out = new Builtins.SVG();
+        var out = new models.SVG();
         var bounds = parent ? new Bounds() : this.configs.bounds.copy();
         var viewBox = null;
         this.processStyleAttributes(elem, out);
@@ -198,12 +201,12 @@ export class SVGLoader {
     }
 
     processPathElement(elem, parent) {
+        var newPath = new Core.Path();
         this.processStyleAttributes(elem, newPath);
 
         // process path data
         var d = getAttribute(elem, "d");
         var tokenizer = new PathTokenizer(d);
-        var newPath = new Core.Path();
         while (tokenizer.hasNext()) {
             var command = tokenizer.ensureToken("COMMAND");
             // console.log("Found command: ", command);
@@ -351,6 +354,14 @@ export class SVGLoader {
     }
 
     processTransformAttributes(elem, shape) {
+        var attrib = elem.getAttribute("transform");
+        if (attrib) {
+            var parser = new TransformParser(attrib);
+            while (parser.hasNext()) {
+                var transform = parser.next();
+                shape.transform(transform);
+            }
+        }
     }
 }
 

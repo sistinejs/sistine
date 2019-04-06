@@ -119,6 +119,13 @@ export class Transformable extends base.Element {
         return true;
     }
 
+    /**
+     * Transforms the shape with a given Transform object.
+     */
+    transform(t) {
+        this._transform.multiply(t);
+    }
+
     applyTransforms(ctx) {
         var angle = this._rotation;
         if (angle || this._scaleFactor.x != 1 || this._scaleFactor.y != 1 ||
