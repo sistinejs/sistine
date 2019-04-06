@@ -19,8 +19,8 @@ export const PATH_COMMANDS = {
     'H': {command: 'H', name: "hlineTo", isRelative: false},
     'v': {command: 'v', name: "vlineTo", isRelative: true},
     'V': {command: 'V', name: "vlineTo", isRelative: false},
-    'a': {command: 'a', name: "arcTo", isRelative: true},
-    'A': {command: 'A', name: "arcTo", isRelative: false},
+    'a': {command: 'a', name: "svgArcTo", isRelative: true},
+    'A': {command: 'A', name: "svgArcTo", isRelative: false},
     'q': {command: 'q', name: "quadCurve", isRelative: true},
     'Q': {command: 'Q', name: "quadCurve", isRelative: false},
     't': {command: 't', name: "quadCurve", isRelative: true, isSmooth: true},
@@ -246,6 +246,78 @@ export class PathTokenizer extends Tokenizer {
     }
 }
 
+export class PathDataParser extends Iterator {
+    constructor(input) {
+        super();
+        this._tokenizer = new PathTokenizer(input);
+        this._last = null;
+    }
+
+    peek() {
+        if (this._current == null) {
+            var tokenizer = this._tokenizer;
+            if (!tokenizer.hasNext()) return null;
+            var token = tokenizer.peek();
+            var currCommand = null;
+            if (token.type == "NUMBER") {
+                // then use the "last command as is
+                if (this._last == null) {
+                    throw new Error("Expected command.  Found number");
+                }
+                currCommand = this._last;
+            } else {
+                currCommand = tokenizer.next().value;
+            }
+            this._last = currCommand;
+            var args = [];
+            if (currCommand.name == "closePath") {
+            } else if (currCommand.name == "moveTo") {
+                var point = tokenizer.ensurePoint();
+                args = [point.x, point.y];
+            } else if (currCommand.name == "lineTo") {
+                var point = tokenizer.ensurePoint();
+                args = [point.x, point.y];
+            } else if (currCommand.name == "hlineTo") {
+                var point = tokenizer.ensurePoint();
+                args = [point.x, point.y];
+            } else if (currCommand.name == "vlineTo") {
+                var point = tokenizer.ensurePoint();
+                args = [point.x, point.y];
+            } else if (currCommand.name == "svgArcTo") {
+                var rx = tokenizer.ensureNumber();
+                var ry = tokenizer.ensureNumber();
+                var rotation = tokenizer.ensureNumber();
+                var isLargeArc = tokenizer.ensureNumber() == 1;
+                var shouldSweep = tokenizer.ensureNumber() == 1;
+                var endX = tokenizer.ensureNumber();
+                var endY = tokenizer.ensureNumber();
+                args = [ rx, ry, rotation, isLargeArc, shouldSweep, endX, endY ];
+            } else if (currCommand.name == "quadCurve") {
+                var x1 = tokenizer.ensureNumber();
+                var y1 = tokenizer.ensureNumber();
+                var x2 = tokenizer.ensureNumber();
+                var y2 = tokenizer.ensureNumber();
+                args = [ x1, y1, x2, y2 ];
+            } else if (currCommand.name == "cubicCurve") {
+                var x1 = tokenizer.ensureNumber();
+                var y1 = tokenizer.ensureNumber();
+                var x2 = tokenizer.ensureNumber();
+                var y2 = tokenizer.ensureNumber();
+                var x3 = tokenizer.ensureNumber();
+                var y3 = tokenizer.ensureNumber();
+                args = [ x1, y1, x2, y2, x3, y3 ];
+            } else {
+                tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
+            }
+            args.push(currCommand.isRelative);
+            args.push(currCommand.isSmooth);
+            this._current = {'name': currCommand.name, 'args': args};
+        }
+        return this._current;
+    }
+}
+
+
 export class TransformTokenizer extends Tokenizer {
     _isSpaceChar(c) { return "(),\n\r\t ".indexOf(c) >= 0; }
     _readToken(line, col) {
@@ -281,7 +353,7 @@ export class TransformParser extends Iterator {
                 var d = tokenizer.ensureNumber();
                 var e = tokenizer.ensureNumber();
                 var f = tokenizer.ensureNumber();
-                this._current = new Geom.Models.Transform(a,b,c,d,e,f);
+                this._current = {'name': "matrix", 'args': [a,b,c,d,e,f]};
             } else if (tokValue == "translate") {
                 var tx = tokenizer.ensureNumber();
                 var ty = 0;
@@ -289,7 +361,7 @@ export class TransformParser extends Iterator {
                 if (token != null && token.type == "NUMBER") {
                     ty = tokenizer.ensureNumber();
                 }
-                this._current = new Geom.Models.Transform().translate(dx, dy);
+                this._current = {'name': "translate", 'args': [tx, ty]};
             } else if (tokValue == "scale") {
                 var sx = tokenizer.ensureNumber();
                 var sy = sx;
@@ -297,21 +369,16 @@ export class TransformParser extends Iterator {
                 if (token != null && token.type == "NUMBER") {
                     sy = tokenizer.ensureNumber();
                 }
-                this._current = new Geom.Models.Transform().scale(sx, sy);
+                this._current = {'name': "scale", 'args': [sx, sy]};
             } else if (tokValue == "rotate") {
-                var sx = tokenizer.ensureNumber();
-                var sy = sx;
-                var token = tokenizer.peek();
-                if (token != null && token.type == "NUMBER") {
-                    sy = tokenizer.ensureNumber();
-                }
-                this._current = new Geom.Models.Transform().scale(sx, sy);
+                var theta = tokenizer.ensureNumber();
+                this._current = {'name': "rotate", 'args': [theta]};
             } else if (tokValue == "skewx") {
                 var sx = tokenizer.ensureNumber();
-                this._current = new Geom.Models.Transform().skewX(sx);
+                this._current = {'name': "skewX", 'args': [sx]};
             } else if (tokValue == "skewy") {
                 var sy = tokenizer.ensureNumber();
-                this._current = new Geom.Models.Transform().skewY(sy);
+                this._current = {'name': "skewY", 'args': [sy]};
             } else {
                 tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
             }

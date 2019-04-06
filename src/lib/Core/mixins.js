@@ -63,7 +63,19 @@ export class Transformable extends base.Element {
         return result;
     }
 
-    move(dx, dy) {
+    /**
+     * Sets the shape's current transform matrix.
+     */
+    setTransform(t) {
+    }
+
+    /**
+     * Transform's the shape by the given transform matrix.
+     */
+    transform(t) {
+    }
+
+    translate(tx, ty) {
         return this.moveTo(this._translation.x + dx, this._translation.y + dy);
     }
 

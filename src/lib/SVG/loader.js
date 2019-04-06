@@ -6,7 +6,7 @@ import { Bundles } from "../Bundles/index"
 import * as parser from "./parser"
 import * as models from "./models"
 
-const PathTokenizer = parser.PathTokenizer;
+const PathDataParser = parser.PathDataParser;
 const TransformParser = parser.TransformParser;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
@@ -203,79 +203,7 @@ export class SVGLoader {
     processPathElement(elem, parent) {
         var newPath = new Core.Path();
         this.processStyleAttributes(elem, newPath);
-
-        // process path data
-        var d = getAttribute(elem, "d");
-        var tokenizer = new PathTokenizer(d);
-        while (tokenizer.hasNext()) {
-            var command = tokenizer.ensureToken("COMMAND");
-            // console.log("Found command: ", command);
-            var isRelative = command.isRelative || false;
-            var isSmooth = command.isSmooth || false;
-            if (command.name == "closePath") {
-                newPath.closePath();
-            } else if (command.name == "moveTo") {
-                var point = tokenizer.ensurePoint();
-                newPath.moveTo(point.x, point.y, isRelative);
-                // Subsequent numbers are lineTo commands
-                while (tokenizer.peekType() == "NUMBER") {
-                    point = tokenizer.ensurePoint();
-                    newPath.lineTo(point.x, point.y, isRelative);
-                }
-            } else if (command.name == "lineTo") {
-                while (true) {
-                    var point = tokenizer.ensurePoint();
-                    newPath.lineTo(point.x, point.y, isRelative);
-                    if (tokenizer.peekType() != "NUMBER") break ;
-                }
-            } else if (command.name == "hlineTo") {
-                while (true) {
-                    var newval = tokenizer.ensureNumber();
-                    newPath.hlineTo(newval, isRelative);
-                    if (tokenizer.peekType() != "NUMBER") break ;
-                }
-            } else if (command.name == "vlineTo") {
-                while (true) {
-                    var newval = tokenizer.ensureNumber();
-                    newPath.vlineTo(newval, isRelative);
-                    if (tokenizer.peekType() != "NUMBER") break ;
-                }
-            } else if (command.name == "quadCurve") {
-                while (true) {
-                    var x1 = tokenizer.ensureNumber();
-                    var y1 = tokenizer.ensureNumber();
-                    var x2 = tokenizer.ensureNumber();
-                    var y2 = tokenizer.ensureNumber();
-                    newPath.quadraticCurveTo(x1, y1, x2, y2, isRelative, isSmooth);
-                    if (tokenizer.peekType() != "NUMBER") break ;
-                }
-            } else if (command.name == "cubicCurve") {
-                while (true) {
-                    var x1 = tokenizer.ensureNumber();
-                    var y1 = tokenizer.ensureNumber();
-                    var x2 = tokenizer.ensureNumber();
-                    var y2 = tokenizer.ensureNumber();
-                    var x3 = tokenizer.ensureNumber();
-                    var y3 = tokenizer.ensureNumber();
-                    newPath.bezierCurveTo(x1, y1, x2, y2, x3, y3, isRelative, isSmooth);
-                    if (tokenizer.peekType() != "NUMBER") break ;
-                }
-            } else if (command.name == "arcTo") {
-                while (true) {
-                    var rx = tokenizer.ensureNumber();
-                    var ry = tokenizer.ensureNumber();
-                    var rotation = tokenizer.ensureNumber();
-                    var isLargeArc = tokenizer.ensureNumber() == 1;
-                    var shouldSweep = tokenizer.ensureNumber() == 1;
-                    var endX = tokenizer.ensureNumber();
-                    var endY = tokenizer.ensureNumber();
-                    newPath.svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY, isRelative);
-                    if (tokenizer.peekType() != "NUMBER") break ;
-                }
-            } else {
-                throw new Error("Command not implemented: ", command);
-            }
-        }
+        this.processPathDataAttributes(elem, newPath);
         parent.add(newPath);
         return newPath;
     }
@@ -358,9 +286,19 @@ export class SVGLoader {
         if (attrib) {
             var parser = new TransformParser(attrib);
             while (parser.hasNext()) {
-                var transform = parser.next();
-                shape.transform(transform);
+                var command = parser.next();
+                shape[command.name].apply(shape, command.args);
             }
+        }
+    }
+
+    processPathDataAttributes(elem, shape) {
+        var attrib = elem.getAttribute("d");
+        if (!attrib) return ;
+        var parser = new PathDataParser(attrib);
+        while (parser.hasNext()) {
+            var command = parser.next();
+            shape[command.name].apply(shape, command.args);
         }
     }
 }
