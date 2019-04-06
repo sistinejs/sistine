@@ -57,12 +57,8 @@ export class Polygon extends models.Shape {
             ctx.lineTo(cx + pi.x, cy + pi.y);
         }
         ctx.lineTo(cx + p0.x, cy + p0.y);
-        if (this.fillStyle) {
-            ctx.fill();
-        }
-        if (this.lineWidth > 0) {
-            ctx.stroke();
-        }
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

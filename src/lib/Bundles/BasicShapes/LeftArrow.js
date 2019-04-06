@@ -54,12 +54,8 @@ export class LeftArrow extends models.Shape {
         ctx.lineTo(x + tl + tp, y);
         ctx.lineTo(x + tl, y + (height - sh) / 2);
         ctx.lineTo(x + width, y + (height - sh) / 2);
-        if (this.fillStyle) {
-            ctx.fill();
-        }
-        if (this.lineWidth > 0) {
-            ctx.stroke();
-        }
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

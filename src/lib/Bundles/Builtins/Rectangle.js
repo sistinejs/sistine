@@ -33,12 +33,8 @@ export class Rectangle extends models.Shape {
 
     draw(ctx) {
         var lBounds = this.boundingBox;
-        if (this.fillStyle) {
-            ctx.fillRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
-        }
-        if (this.lineWidth > 0) {
-            ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
-        }
+        ctx.fillRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
+        ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
     }
 }
 

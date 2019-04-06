@@ -62,12 +62,8 @@ export class CubicCurve extends models.Shape {
         if (this.closed) {
             ctx.closePath();
         }
-        if (this.fillStyle) {
-            ctx.fill();
-        }
-        if (this.lineWidth > 0) {
-            ctx.stroke();
-        }
+        ctx.fill();
+        ctx.stroke();
     }
 
     drawControls(ctx) {

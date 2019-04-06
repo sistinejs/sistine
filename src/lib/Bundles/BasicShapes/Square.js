@@ -37,12 +37,8 @@ export class Square extends models.Shape {
         var size = this._size;
         var left = this._p0.x;
         var top = this._p0.y;
-        if (this.fillStyle) {
-            ctx.fillRect(left, top, size, size);
-        }
-        if (this.lineWidth > 0) {
-            ctx.strokeRect(left, top, size, size);
-        }
+        ctx.fillRect(left, top, size, size);
+        ctx.strokeRect(left, top, size, size);
     }
 }
 

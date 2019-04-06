@@ -32,12 +32,10 @@ export class Line extends models.Shape {
     get className() { return "Line"; };
 
     draw(ctx) {
-        if (this.lineWidth > 0) {
-            ctx.beginPath();
-            ctx.moveTo(this._p0.x, this._p0.y);
-            ctx.lineTo(this._p1.x, this._p1.y);
-            ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.moveTo(this._p0.x, this._p0.y);
+        ctx.lineTo(this._p1.x, this._p1.y);
+        ctx.stroke();
     }
 
     drawControls(ctx) {

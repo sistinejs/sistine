@@ -80,14 +80,7 @@ export class Shape extends mixins.Styleable {
         throw Error("Not Implemented for: ", this);
     }
 
-    draw(ctx) {
-        if (this._children.length > 0) {
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 0.5;
-            var lBounds = this.boundingBox;
-            ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
-        }
-    }
+    draw(ctx) { }
 
     drawControls(ctx, options) {
         ctx.strokeStyle = 'black';

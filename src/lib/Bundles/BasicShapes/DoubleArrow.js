@@ -52,12 +52,8 @@ export class DoubleArrow extends models.Shape {
         ctx.lineTo(x + tl, y + (height + sh) / 2);
         ctx.lineTo(x + tp + tl, y + height);
         ctx.lineTo(x, y + height / 2);
-        if (this.fillStyle) {
-            ctx.fill();
-        }
-        if (this.lineWidth > 0) {
-            ctx.stroke();
-        }
+        ctx.fill();
+        ctx.stroke();
     }
 }
 
