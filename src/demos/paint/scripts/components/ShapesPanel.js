@@ -42,7 +42,7 @@ class ShapesPanel extends Panel {
             $sbbutton.attr("title", label);
 
             var shapeId = sbbutton.id.replace(/SB_/, "");
-            var buttonImage = $("<img src = '" + "./src/demo/icons/shapes/" + shapeId + ".png' />");
+            var buttonImage = $("<img src = '" + "./src/demos/paint/icons/shapes/" + shapeId + ".png' />");
             $sbbutton.button({ iconPosition: "top" }).append(buttonImage);
             Sistine.Utils.DOM.fillChildComponent(buttonImage);
 

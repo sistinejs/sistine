@@ -11,34 +11,68 @@ module.exports = (env, options) => {
         // new uglifyJsPlugin(),
         // new CleanWebpackPlugin('dist'),
         new HTMLWebpackPlugin({
-            // template: path.resolve(__dirname, 'src/demo/index.html')
-            template: path.resolve(__dirname, 'src/demo/index.ejs')
+            title: "Demo List Page",
+            myPageHeader: "Demo List",
+            template: path.resolve(__dirname, 'src/demos/index.ejs'),
+        }),
+
+
+        // Items for svgcmp demo
+        new HTMLWebpackPlugin({
+            hash: true,
+            title: "SVG Comparison Demo",
+            myPageHeader: "SVG Comparison Demo",
+            template: path.resolve(__dirname, 'src/demos/svgcmp/index.ejs'),
+            filename: "svgcmp.html"
         }),
         new HtmlWebpackIncludeAssetsPlugin({
+            files: [ "svgcmp.html" ],
             assets: [
                 "./src/ext/spectrum/spectrum.css",
-                "./src/demo/css/demo.css",
-                "./src/demo/css/sidebars.css",
-                "./src/demo/css/menubar.css",
-                "./src/demo/css/toolbars.css",
-                "./src/demo/css/panels.css",
                 "./src/ext/slider/jquery.limitslider.js",
                 "./src/ext/spectrum/spectrum.js",
-                "./src/demo/scripts/App.js",
-                "./src/demo/scripts/components/Panel.js",
-                "./src/demo/scripts/components/ShapesPanel.js",
-                "./src/demo/scripts/components/Toolbar.js",
-                "./src/demo/scripts/components/NumericSlider.js",
-                "./src/demo/scripts/components/FillPropertiesPanel.js",
-                "./src/demo/scripts/components/TextPropertiesPanel.js",
-                "./src/demo/scripts/components/LayoutPropertiesPanel.js",
-                "./src/demo/scripts/components/StrokePropertiesPanel.js",
-                "./src/demo/scripts/components/PaintStylePanel.js",
-                "./src/demo/scripts/components/GradientStylePanel.js",
-                "./src/demo/scripts/components/Sidebar.js",
-                "./src/demo/scripts/events.js",
-                "./src/demo/scripts/actions.js",
-                "./src/demo/scripts/stage.js",
+
+                "./src/demos/svgcmp/css/svgcmp.css",
+            ],
+            append: true
+        }),
+
+
+        // Items for paint demo
+        new HTMLWebpackPlugin({
+            hash: true,
+            title: "Painting Application Demo",
+            myPageHeader: "Painting Application Demo",
+            template: path.resolve(__dirname, 'src/demos/paint/index.ejs'),
+            filename: "paint.html"
+        }),
+        new HtmlWebpackIncludeAssetsPlugin({
+            files: [ "paint.html" ],
+            assets: [
+                "./src/ext/spectrum/spectrum.css",
+                "./src/ext/slider/jquery.limitslider.js",
+                "./src/ext/spectrum/spectrum.js",
+
+                "./src/demos/paint/css/paint.css",
+                "./src/demos/paint/css/sidebars.css",
+                "./src/demos/paint/css/menubar.css",
+                "./src/demos/paint/css/toolbars.css",
+                "./src/demos/paint/css/panels.css",
+                "./src/demos/paint/scripts/App.js",
+                "./src/demos/paint/scripts/components/Panel.js",
+                "./src/demos/paint/scripts/components/ShapesPanel.js",
+                "./src/demos/paint/scripts/components/Toolbar.js",
+                "./src/demos/paint/scripts/components/NumericSlider.js",
+                "./src/demos/paint/scripts/components/FillPropertiesPanel.js",
+                "./src/demos/paint/scripts/components/TextPropertiesPanel.js",
+                "./src/demos/paint/scripts/components/LayoutPropertiesPanel.js",
+                "./src/demos/paint/scripts/components/StrokePropertiesPanel.js",
+                "./src/demos/paint/scripts/components/PaintStylePanel.js",
+                "./src/demos/paint/scripts/components/GradientStylePanel.js",
+                "./src/demos/paint/scripts/components/Sidebar.js",
+                "./src/demos/paint/scripts/events.js",
+                "./src/demos/paint/scripts/actions.js",
+                "./src/demos/paint/scripts/stage.js",
             ],
             append: true
         }),
@@ -60,7 +94,7 @@ module.exports = (env, options) => {
         libraryTarget: 'umd',
         libraryExport: 'default',
         path: path.resolve(__dirname, 'dist'),
-        filename: 'index.js'
+        filename: '/index.js'
     };
     if (options.debug) {
         output.filename = "[name].js";
@@ -73,7 +107,7 @@ module.exports = (env, options) => {
             rules: [
                 // The rule for rendering index.html from an ejs template.
                 {
-                  test: /\/src\/demo\/index.ejs$/,
+                  test: /\/src\/demos\/.*index.ejs$/,
                   use: [{
                     loader: 'extract-loader'
                   },
