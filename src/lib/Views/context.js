@@ -17,7 +17,7 @@ class AttribFrame {
             this._assignProperty("_fillOpacity", 1.0, PROPERTY_STATE_PRESENT);
             this._assignProperty("_fillRule", "nonzero", PROPERTY_STATE_PRESENT);
 
-            this._assignProperty("_strokeStyle", null, PROPERTY_STATE_PRESENT);
+            this._assignProperty("_strokeStyle", "#000000", PROPERTY_STATE_PRESENT);
             this._assignProperty("_strokeOpacity", 1.0, PROPERTY_STATE_PRESENT);
             this._assignProperty("_lineWidth", 1.0, PROPERTY_STATE_PRESENT);
             this._assignProperty("_lineCap", "butt", PROPERTY_STATE_PRESENT);
@@ -288,16 +288,19 @@ class AttribFrame {
 export class VirtualContext {
     constructor(ctx) {
         this.ctx = ctx;
-        this._attribStack = [ new AttribFrame() ];
-        this.currentFrame = this._attribStack[0];
+        this.currentFrame = new AttribFrame();
     }
 
     save() {
+        this.currentFrame = new AttribFrame(this.currentFrame);
         this.ctx.save();
     }
 
     restore() {
-        this.ctx.restore();
+        if (this.currentFrame.parent != null) {
+            this.currentFrame = this.currentFrame.parent;
+            this.ctx.restore();
+        }
     }
 
     fill() {
@@ -326,14 +329,12 @@ export class VirtualContext {
     }
 
     fillRect(x, y, w, h) {
-        if (this.canFill) {
+        if (this.currentFrame.fillStyle != null)
             this.ctx.fillRect(x, y, w, h);
-        }
     }
     strokeRect(x, y, w, h) {
-        if (this.canFill) {
+        if (this.currentFrame.strokeStyle != null)
             this.ctx.strokeRect(x, y, w, h);
-        }
     }
 
     // Pass throughs
@@ -342,6 +343,19 @@ export class VirtualContext {
     closePath() { this.ctx.closePath(); }
     moveTo(x, y) { this.ctx.moveTo(x, y); }
     lineTo(x, y) { this.ctx.lineTo(x, y); }
+    ellipse(x, y, rx, ry, theta, startAngle, endAngle, anticlockwise) {
+        console.log("here args: ", arguments);
+        this.ctx.ellipse(x, y, rx, ry, theta, startAngle, endAngle, anticlockwise);
+    }
+    arc(x, y, radius, startAngle, endAngle) {
+        this.ctx.arc(x, y, radius, startAngle, endAngle);
+    }
+    bezierCurveTo(x1, y1, x2, y2, x3, y3) {
+        this.ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+    }
+    quadraticCurveTo(x1, y1, x2, y2) {
+        this.ctx.quadraticCurveTo(x1, y1, x2, y2);
+    }
 
     set fillStyle(style) {
         this.currentFrame.fillStyle = style;
@@ -351,6 +365,101 @@ export class VirtualContext {
     set strokeStyle(style) {
         this.currentFrame.strokeStyle = style;
         this.ctx.strokeStyle = style;
+    }
+
+    set fillOpacity(value) {
+        this.currentFrame.fillOpacity = value;
+        this.ctx.fillOpacity = value;
+    }
+
+    set fillRule(value) {
+        this.currentFrame.fillRule = value;
+        this.ctx.fillRule = value;
+    }
+
+    set strokeOpacity(value) {
+        this.currentFrame.strokeOpacity = value;
+        this.ctx.strokeOpacity = value;
+    }
+
+    set lineWidth(value) {
+        this.currentFrame.lineWidth = value;
+        this.ctx.lineWidth = value;
+    }
+
+    set lineCap(value) {
+        this.currentFrame.lineCap = value;
+        this.ctx.lineCap = value;
+    }
+
+    set lineJoin(value) {
+        this.currentFrame.lineJoin = value;
+        this.ctx.lineJoin = value;
+    }
+
+    set miterLimit(value) {
+        this.currentFrame.miterLimit = value;
+        this.ctx.miterLimit = value;
+    }
+
+    set lineDash(value) {
+        this.currentFrame.lineDash = value;
+        this.ctx.lineDash = value;
+    }
+
+    set lineDashOffset(value) {
+        this.currentFrame.lineDashOffset = value;
+        this.ctx.lineDashOffset = value;
+    }
+
+    set shadowOffsetX(value) {
+        this.currentFrame.shadowOffsetX = value;
+        this.ctx.shadowOffsetX = value;
+    }
+
+    set shadowOffsetY(value) {
+        this.currentFrame.shadowOffsetY = value;
+        this.ctx.shadowOffsetY = value;
+    }
+
+    set shadowBlur(value) {
+        this.currentFrame.shadowBlur = value;
+        this.ctx.shadowBlur = value;
+    }
+
+    set shadowColor(value) {
+        this.currentFrame.shadowColor = value;
+        this.ctx.shadowColor = value;
+    }
+
+    set font(value) {
+        this.currentFrame.font = value;
+        this.ctx.font = value;
+    }
+
+    set textAlign(value) {
+        this.currentFrame.textAlign = value;
+        this.ctx.textAlign = value;
+    }
+
+    set textBaseline(value) {
+        this.currentFrame.textBaseline = value;
+        this.ctx.textBaseline = value;
+    }
+
+    set direction(value) {
+        this.currentFrame.direction = value;
+        this.ctx.direction = value;
+    }
+
+    set imageSmoothingEnabled(value) {
+        this.currentFrame.imageSmoothingEnabled = value;
+        this.ctx.imageSmoothingEnabled = value;
+    }
+
+    set globalCompositeOperation(value) {
+        this.currentFrame.globalCompositeOperation = value;
+        this.ctx.globalCompositeOperation = value;
     }
 }
 

@@ -93,12 +93,22 @@ function loadSVG(entry) {
 
 function loadSVGFromURL(url) {
     console.log("Loading SVG from URL: ", url);
+    $("#svg_area_div").empty();
+
+    var useIframe = false;
+    if (useIframe) {
+        var $iframe = $("<iframe src = '" + url + "'/>");
+        $iframe.attr("width", "100%");
+        $iframe.attr("height", "100%");
+        $("#svg_area_div").append($iframe);
+    }
     Sistine.SVG.Loader.loadFromURL(url, {}, function(shape, svg) {
-        var $svg = $(svg);
-        $svg.attr("width", "100%");
-        $svg.attr("height", "100%");
-        $("#svg_area_div").empty();
-        $("#svg_area_div").append($svg);
+        if (!useIframe) {
+            var $svg = $(svg);
+            $svg.attr("width", "100%");
+            $svg.attr("height", "100%");
+            $("#svg_area_div").append($svg);
+        }
         theStage.scene.removeAll();
         var width = theStage.element.width();
         var height = theStage.element.height();

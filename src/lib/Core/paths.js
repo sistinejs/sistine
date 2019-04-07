@@ -345,7 +345,7 @@ export class QuadraticToComponent extends PathComponent {
     }
 
     draw(ctx) {
-        ctx.quadCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
+        ctx.quadraticCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
     }
 
     get endPoint() {
@@ -510,6 +510,7 @@ export class SVGArcToComponent extends PathComponent {
     get endAngle() { return this._endAngle; }
 
     draw(ctx) {
+        this.boundingBox;   // ensures missing pieces are evaluated
         ctx.ellipse(this._center.x, this._center.y,
                     this._rx, this._ry, this._rotation,
                     this._startAngle, this._endAngle, this._anticlockwise);
