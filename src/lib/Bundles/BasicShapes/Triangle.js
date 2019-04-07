@@ -52,7 +52,8 @@ export class Triangle extends models.Shape {
         ctx.lineTo(this._p1.x, this._p1.y);
         ctx.lineTo(this._p2.x, this._p2.y);
         ctx.lineTo(this._p0.x, this._p0.y);
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

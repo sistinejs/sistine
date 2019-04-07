@@ -55,7 +55,8 @@ export class RightArrow extends models.Shape {
         ctx.lineTo(x + width - tl - tp, y);
         ctx.lineTo(x + width - tl, y + (height - sh) / 2);
         ctx.lineTo(x, y + (height - sh) / 2);
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

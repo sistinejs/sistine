@@ -44,10 +44,12 @@ export class Line extends models.Shape {
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(this._p0.x, this._p0.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
         ctx.beginPath();
         ctx.arc(this._p1.x, this._p1.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

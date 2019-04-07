@@ -42,7 +42,8 @@ export class Cylinder extends models.Shape {
         // TODO - Can we just make this a "group" with an ellipse and a path?
         ctx.beginPath();
         ctx.ellipse(x + rx, y + eh2, rx, eh2, 0, 0, 2 * Math.PI);
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
 
         ctx.beginPath();
         ctx.moveTo(x, y + eh2);
@@ -51,7 +52,8 @@ export class Cylinder extends models.Shape {
         ctx.lineTo(x + width, y + eh2);
         ctx.ellipse(x + rx, y + eh2, rx, eh2, 0, 0, Math.PI);
         // ctx.lineTo(x + width, y + eh / 2);
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

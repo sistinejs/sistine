@@ -171,7 +171,8 @@ export class Path extends models.Shape {
             var currComp = this._components[i];
             currComp.draw(ctx);
         }
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
         // Draw fornow till we figure out hit tests and bounding boxes
         // this.drawControls(ctx);
     }

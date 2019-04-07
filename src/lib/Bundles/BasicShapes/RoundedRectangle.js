@@ -49,7 +49,8 @@ export class RoundedRectangle extends models.Shape {
         ctx.quadraticCurveTo(x, y, x + radius, y);
         ctx.closePath();
 
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

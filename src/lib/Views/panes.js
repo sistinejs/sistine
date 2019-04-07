@@ -1,6 +1,7 @@
 
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
+import { VirtualContext } from "./context"
 import { getcssint } from "../Utils/dom"
 
 /**
@@ -79,7 +80,8 @@ export class Pane {
     get name() { return this._name; }
     get divId() { return this._divId; }
     get canvasId() { return this._canvasId; }
-    get context() { return this._context; }
+    get rawContext() { return this._rawContext; }
+    get virtualContext() { return this._virtualContext; }
     get element() { return this._canvas; }
 
     /**
@@ -106,7 +108,7 @@ export class Pane {
 
     paint(force) {
         if (force || this.needsRepaint) {
-            var ctx = this.context;
+            var ctx = this.virtualContext;
             this.clear(ctx);
             ctx.save();
             this.draw(ctx);
@@ -119,7 +121,8 @@ export class Pane {
         var divId = this._divId;
         this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
         this._parentDiv.append(this._canvas);
-        this._context = this._canvas[0].getContext("2d");
+        this._rawContext = this._canvas[0].getContext("2d");
+        this._virtualContext = new VirtualContext(this._rawContext);
         this.layout();
     }
 
@@ -171,7 +174,7 @@ export class Pane {
         this._viewBounds.bottom = p2.y;
         // this.transformChanged = true;
         // if (this.transformChanged) {
-            var ctx = this.context;
+            var ctx = this.virtualContext;
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(this.zoom, this.zoom);
             ctx.translate(-this.offset.x, -this.offset.y);
@@ -293,7 +296,7 @@ export class BGPane extends Pane {
     }
 
     draw(ctx) {
-        var ctx = this.context;
+        var ctx = this.virtualContext;
         var width = this.width;
         var height = this.height;
         var zoom = this.zoom;

@@ -56,7 +56,8 @@ export class Plus extends models.Shape {
         ctx.lineTo(x, y + (height - iw) / 2);
         ctx.lineTo(x + (width - iw) / 2, y + (height - iw) / 2);
         ctx.lineTo(x + (width - iw) / 2, y);
-        this.fillAndStroke(ctx);
+        ctx.fill();
+        ctx.stroke();
     }
 }
 

@@ -80,11 +80,6 @@ export class Shape extends mixins.Styleable {
         throw Error("Not Implemented for: ", this);
     }
 
-    fillAndStroke(ctx) {
-        if (ctx.fillStyle) ctx.fill();
-        if (ctx.strokeStyle) ctx.stroke();
-    }
-
     draw(ctx) { }
 
     drawControls(ctx, options) {
