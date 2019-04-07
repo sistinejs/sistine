@@ -1,9 +1,25 @@
+const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
+const HTMLWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
 // const CleanWebpackPlugin = require("clean-webpack-plugin");
+
+// Read Samples first
+function readdir(path) {
+    var items = fs.readdirSync(path);
+    return items.map(function(item) {
+        var file = path;
+        if (item.startsWith("/") || file.endsWith("/")) {
+            file += item;
+        } else {
+            file += ('/' + item);
+        }
+        var stats = fs.statSync(file);
+        return {'file': file, 'name': item, 'stats': stats};
+    });
+}
 
 module.exports = (env, options) => {
     console.log("Options: ", options);
@@ -15,30 +31,13 @@ module.exports = (env, options) => {
             myPageHeader: "Demo List",
             template: path.resolve(__dirname, 'src/demos/index.ejs'),
         }),
-
-
-        // Items for svgcmp demo
         new HTMLWebpackPlugin({
-            hash: true,
+            inject: "head",
             title: "SVG Comparison Demo",
             myPageHeader: "SVG Comparison Demo",
             template: path.resolve(__dirname, 'src/demos/svgcmp/index.ejs'),
             filename: "svgcmp.html"
         }),
-        new HtmlWebpackIncludeAssetsPlugin({
-            files: [ "svgcmp.html" ],
-            assets: [
-                "./src/ext/spectrum/spectrum.css",
-                "./src/ext/slider/jquery.limitslider.js",
-                "./src/ext/spectrum/spectrum.js",
-
-                "./src/demos/svgcmp/css/svgcmp.css",
-            ],
-            append: true
-        }),
-
-
-        // Items for paint demo
         new HTMLWebpackPlugin({
             hash: true,
             title: "Painting Application Demo",
@@ -46,7 +45,19 @@ module.exports = (env, options) => {
             template: path.resolve(__dirname, 'src/demos/paint/index.ejs'),
             filename: "paint.html"
         }),
-        new HtmlWebpackIncludeAssetsPlugin({
+        new HTMLWebpackIncludeAssetsPlugin({
+            files: [ "svgcmp.html" ],
+            assets: [
+                "./src/ext/spectrum/spectrum.css",
+                "./src/ext/slider/jquery.limitslider.js",
+                "./src/ext/spectrum/spectrum.js",
+
+                "./src/demos/svgcmp/css/svgcmp.css",
+                "./src/demos/svgcmp/scripts/svgcmp.js",
+            ],
+            append: true
+        }),
+        new HTMLWebpackIncludeAssetsPlugin({
             files: [ "paint.html" ],
             assets: [
                 "./src/ext/spectrum/spectrum.css",
@@ -181,10 +192,20 @@ module.exports = (env, options) => {
         },
         plugins: plugins
     };
-    if (options.debug) {
-        options.devtool = 'inline-source-map';
-        options.devServer = { hot: true };
-        options.resolve = { extensions: ['.js', '.jsx'] };
+    if (options.debug || options.dev) {
+        webpack_configs.devtool = 'inline-source-map';
+        webpack_configs.resolve = { extensions: ['.js', '.jsx'] };
+        webpack_configs.devServer = {
+            hot: true,
+            before: function(app, server) {
+                app.get(/\/dir\/.*/, function(req, res) {
+                    var path = "./" + req.path.substr(5);
+                    console.log("Listing dir: ", path);
+                    var listing = readdir(path);
+                    res.json({ entries: listing });
+                });
+            }
+        }
     }
     return webpack_configs;
 };

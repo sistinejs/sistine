@@ -19,7 +19,7 @@ class App {
     }
 
     _setupStage() {
-        this.stage = new Sistine.Views.Stage.Stage("stage_div", this.scene);
+        this.stage = new Sistine.Views.Stage("stage_div", this.scene);
         this.stage.isEditable = true;
         this.stage.showBackground = true;
 

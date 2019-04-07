@@ -1,12 +1,9 @@
 
 :root {
-    --header-height: 70px;
-    --toolbar-button-height: 30px;
-    --sidebar-panel-width: 50px;
-    --toolpanel-width: 280px;
-    --footer-height: 0px;
+    --header-height: 60px;
+    --svg-samples-div-width: 400px;
+    --footer-height: 30px;
     --split-bar-width: 10px;
-    --shape-icon-size: 50px;
 }
 
 #header_div {
@@ -18,27 +15,6 @@
     border: solid 0px green;
 }
 
-#menubar_div {
-    position: absolute;
-    vertical-align: middle;
-    float: left;
-    height: var(--toolbar-button-height);
-    right: 0px;
-    left: 0px;
-    top: 0px;
-}
-
-#toolbar_div {
-    position: absolute;
-    border-top: solid 2px darkGray;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    height: var(--toolbar-button-height);
-    right: 0px;
-    left: 0px;
-    bottom: 0px;
-}
-
 #footer_div {
     position: absolute;
     bottom: 0px;
@@ -48,13 +24,23 @@
     border: solid 0px blue;
 }
 
-#center_div {
+#svg_samples_div {
     position: absolute;
     top: var(--header-height);
     bottom: var(--footer-height);
     left: 0px;
+    width: var(--svg-samples-div-width);
+    border: solid 1px green;
+    overflow: scroll;
+}
+
+#center_div {
+    position: absolute;
+    top: var(--header-height);
+    bottom: var(--footer-height);
+    left: var(--svg-samples-div-width);
     right: 0px;
-    border: solid 0px green;
+    border: solid 1px green;
 }
 
 #splitbar {
@@ -62,58 +48,27 @@
     cursor: ew-resize;
     top: 0px;
     bottom: 0px;
-    left: var(--toolpanel-width);
+    left: var(--svg-samples-div-width);
     width: var(--split-bar-width);
     background-color: gray;
 }
 
-#shapespanel_div {
+#stage_div {
+    background: red;
     position: absolute;
     border: solid 1px black;
     left: 0px;
-    width: var(--toolpanel-width);
     top: 0;
     bottom: 0;
     overflow: scroll;
 }
 
-#shapespanel_accordian {
-    position: absolute;
-    border: solid 0px brown;
-    left: 0px;
-    right: 0px;
-    top: 0px;
-    bottom: 0px;
-}
-
-#stage_div {
+#svg_area_div {
+    background: blue;
     position: absolute;
     border: solid 1px black;
-    right: var(--sidebar-panel-width);
+    right: 0;
     top: 0;
     bottom: 0;
-}
-
-.ui-accordion .ui-accordion-content {
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-.toolbar_button {
-    float: left;
-    outline-width: 0px !important;
-    padding: 0px;
-    height: var(--toolbar-button-height);
-    width: var(--toolbar-button-height);
-}
-
-.shape_button {
-    float: left;
-    outline-width: 0px !important;
-    padding: 0px;
-    width: var(--shape-icon-size);
-    height: var(--shape-icon-size);
 }
 

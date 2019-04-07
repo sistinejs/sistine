@@ -11,7 +11,7 @@ var Point = Sistine.Geom.Models.Point;
 var Bounds = Sistine.Geom.Models.Bounds;
 
 function getTestSvgUrl(base) {
-    return "/src/svgtests/" + base;
+    return "/src/demos/svgcmp/samples/" + base;
     // return "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/" + base;
 }
 
@@ -32,7 +32,6 @@ function addSampleShapes1() {
         "fillStyle": grd1
     });
 
-    return ;
     var grd2 = new Sistine.Core.Styles.RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5)
                                  .addStop(0, "red")
                                  .addStop(1, "blue");
