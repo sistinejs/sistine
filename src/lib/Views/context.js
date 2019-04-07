@@ -305,12 +305,17 @@ export class VirtualContext {
 
     fill() {
         if (this.currentFrame.fillStyle != null)
-            this.ctx.fill();
+            this.ctx.fill(this.currentFrame.fillRule);
     }
 
     stroke() {
         if (this.currentFrame.strokeStyle != null)
             this.ctx.stroke();
+    }
+
+    transform(a, b, c, d, e, f) {
+        // this.currentFrame.transform.multiply(new geom.Transform(a, b, c, d, e, f));
+        this.ctx.setTransform(a, b, c, d, e, f);
     }
 
     setTransform(a, b, c, d, e, f) {

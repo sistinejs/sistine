@@ -6,6 +6,7 @@ import { Bundles } from "../Bundles/index"
 import * as parser from "./parser"
 import * as models from "./models"
 
+const NumbersTokenizer = parser.NumbersTokenizer;
 const PathDataParser = parser.PathDataParser;
 const TransformParser = parser.TransformParser;
 const Builtins = Bundles.Builtins;
@@ -33,6 +34,7 @@ const presentationAttributes = [ "alignment-baseline", "baseline-shift", "clip",
                                  "stroke-miterlimit", "stroke-opacity", "stroke-width", "text-anchor", "text-decoration",
                                  "text-rendering", "unicode-bidi", "visibility", "word-spacing", "writing-mode" ];
 
+const textContentChildElements = [ "altGlyph", "textPath", "tref", "tspan" ];
 const animationElements = [ "animate", "animateColor", "animateMotion", "animateTransform", "set" ];
 const descriptiveElements = [ "desc", "metadata", "title" ];
 const shapeElements = [ "circle", "ellipse", "line", "path", "polygon", "polyline", "rect" ];
@@ -102,7 +104,30 @@ const elementProcessors = {
                                     .concat(presentationAttributes)
                                     .concat([ "class", "style", "externalResourcesRequired",
                                               "transform", "x", "y", "rx", "ry", "width", "height"])
-    }
+    },
+    "text": { "method": "processTextElement",
+             "validChildren": animationElements
+                                .concat(descriptiveElements)
+                                .concat(textContentChildElements)
+                                .concat(["a"]),
+             "validAttributes": conditionalProcessingAttributes
+                                    .concat(coreAttributes)
+                                    .concat(graphicalEventAttributes)
+                                    .concat(presentationAttributes)
+                                    .concat([ "class", "style", "externalResourcesRequired", "transform",
+                                              "lengthAdjust", "x", "y", "dx", "dy", "rotate", "textLength"])
+    },
+    "tspan": { "method": "processTSpanElement",
+             "validChildren": descriptiveElements
+                              .concat(["a", "altGlyph", "animate", "animateColor",
+                                       "set", "tref", "tspan" ]),
+             "validAttributes": conditionalProcessingAttributes
+                                    .concat(coreAttributes)
+                                    .concat(graphicalEventAttributes)
+                                    .concat(presentationAttributes)
+                                    .concat([ "class", "style", "externalResourcesRequired", "transform",
+                                              "lengthAdjust", "x", "y", "dx", "dy", "rotate", "textLength"])
+    },
 }
 
 /**
@@ -239,7 +264,45 @@ export class SVGLoader {
         return out;
     }
 
+    processTextElement(elem, parent) {
+        var text = new Core.Text();
+        this.processStyleAttributes(elem, text);
+        this.processTextAttributes(elem, text);
+        parent.add(text);
+    }
+
+    processTSpanElement(elem, parent) {
+        var text = new Core.Text();
+        this.processStyleAttributes(elem, text);
+        this.processTextAttributes(elem, text);
+        parent.add(text);
+    }
+
     processDefsElement(elem, parent) {
+    }
+
+    processTextAttributes(elem, text) {
+        new NumbersTokenizer(elem.getAttribute("x") || "")
+            .all().forEach(function(token) {
+                text.addX(token.value);
+             });
+        new NumbersTokenizer(elem.getAttribute("y") || "")
+            .all().forEach(function(token) {
+                text.addY(token.value);
+             });
+        new NumbersTokenizer(elem.getAttribute("dx") || "")
+            .all().forEach(function(token) {
+                text.addDX(token.value);
+             });
+        new NumbersTokenizer(elem.getAttribute("dy") || "")
+            .all().forEach(function(token) {
+                text.addDY(token.value);
+             });
+        new NumbersTokenizer(elem.getAttribute("rotation") || "")
+            .all().forEach(function(token) {
+                text.addRotation(token.value);
+             });
+        console.log("Here...");
     }
 
     /**

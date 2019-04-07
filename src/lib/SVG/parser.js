@@ -76,6 +76,14 @@ export class Tokenizer extends Iterator {
         this._currLine = 0;
     }
 
+    allValues() {
+        var out = [];
+        while (this.hasNext()) {
+            out.push(this.next().value);
+        }
+        return out;
+    }
+
     peekType() {
         var out = this.peek();
         return out == null ? null : out.type;
@@ -230,7 +238,7 @@ export class Tokenizer extends Iterator {
     }
 }
 
-export class PathTokenizer extends Tokenizer {
+export class PathDataTokenizer extends Tokenizer {
     _readToken(line, col) {
         var out = null;
         var c = this._currch();
@@ -249,7 +257,7 @@ export class PathTokenizer extends Tokenizer {
 export class PathDataParser extends Iterator {
     constructor(input) {
         super();
-        this._tokenizer = new PathTokenizer(input);
+        this._tokenizer = new PathDataTokenizer(input);
         this._last = null;
     }
 
@@ -316,7 +324,6 @@ export class PathDataParser extends Iterator {
         return this._current;
     }
 }
-
 
 export class TransformTokenizer extends Tokenizer {
     _isSpaceChar(c) { return "(),\n\r\t ".indexOf(c) >= 0; }
@@ -387,3 +394,31 @@ export class TransformParser extends Iterator {
     }
 }
 
+export class NumbersTokenizer extends Tokenizer {
+    _readToken(line, col) {
+        var out = null;
+        var c = this._currch();
+        var number = this._tokenizeNumber();
+        return new Token("NUMBER", number, line, col);
+    }
+}
+
+export class NumbersParser extends Iterator {
+    constructor(input) {
+        super();
+        this._tokenizer = new NumbersTokenizer(input);
+    }
+
+    peek() {
+        if (this._current == null) {
+            var tokenizer = this._tokenizer;
+            if (!tokenizer.hasNext()) return null;
+            var token = tokenizer.peek();
+            if (token.type != "NUMBER") {
+                throw new Error("Expected Number.  Found: " + token.type);
+            }
+            this._current = tokenizer.next().value;
+        }
+        return this._current;
+    }
+}
