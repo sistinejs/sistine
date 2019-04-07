@@ -146,7 +146,8 @@ export class SVGLoader {
         this.processTransformAttributes(elem, out);
         this.processMetaAttributes(elem, out);
         forEachAttribute(elem, function(attrib, value) {
-            if (attrib === "viewBox") {
+            attrib = attrib.toLowerCase();
+            if (attrib === "viewbox") {
                 var value = value.split(" ");
                 viewBox = new Bounds();
                 viewBox.x = parseFloat(value[0]);
@@ -157,7 +158,8 @@ export class SVGLoader {
                 out.setMetaData("version", value);
             } else if (attrib === "baseProfile") {
                 out.setMetaData("baseProfile", value);
-            } else if ([ "xmlns" ].indexOf(attrib) >= 0 ||
+            } else if (attrib.startsWith("xmlns:") ||
+                        [ "xmlns", "inkscape:version" ].indexOf(attrib) >= 0 ||
                        elementProcessors[elem.tagName].validAttributes.indexOf(attrib) >= 0) {
                     // ignore list
                 console.log("Ingoring attribute: ", attrib, " = ", value);
@@ -267,7 +269,7 @@ export class SVGLoader {
         }
     }
 
-    processBoundsAttributes(elem, shape, bounds) {
+    processBoundsAttributes(elem, bounds) {
         if (elem.hasAttribute("x")) {
             bounds.x = elem.getAttribute("x");
         }
