@@ -35,7 +35,16 @@ function layout() {
     // setup stage_div width
     svg_area_div.css("left", splitbar.position().left + splitbar.width());
 
-    if (theStage) { theStage.layout(); }
+    if (theStage) { 
+        theStage.layout(); 
+        var svg = theStage.scene.childAtIndex(0);
+        if (svg) {
+            var width = theStage.element.width();
+            var height = theStage.element.height();
+            svg.setBounds(new Bounds(0, 0, width, height));
+            theStage.paneNeedsRepaint();
+        }
+    }
 }
 
 
@@ -84,15 +93,18 @@ function loadSVG(entry) {
 
 function loadSVGFromURL(url) {
     console.log("Loading SVG from URL: ", url);
-    Sistine.SVG.Loader.loadFromURL(url, {
-        bounds: new Bounds(0, 0, 300, 300)
-    }, function(shape, svg) {
+    Sistine.SVG.Loader.loadFromURL(url, {}, function(shape, svg) {
         var $svg = $(svg);
         $svg.attr("width", "100%");
         $svg.attr("height", "100%");
         $("#svg_area_div").empty();
         $("#svg_area_div").append($svg);
+        theStage.scene.removeAll();
+        var width = theStage.element.width();
+        var height = theStage.element.height();
+        shape.setBounds(new Bounds(0, 0, width, height));
         theStage.scene.add(shape);
+        theStage.paneNeedsRepaint();
     });
 }
 

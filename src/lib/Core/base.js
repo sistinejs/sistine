@@ -121,6 +121,13 @@ export class Element extends events.EventSource {
         return false;
     }
 
+    removeAll() {
+        for (var i = 0;i < this._children.length;i++) {
+            this._children[i].removeFromParent();
+        }
+        this._children = [];
+    }
+
     removeFromParent() {
         if (this.parent == null) return true;
         if (this.parent.remove(this)) {

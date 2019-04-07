@@ -119,6 +119,9 @@ export class Stage extends coreevents.EventSource {
             this._scene = s
             var self = this;
             s.on("ElementAdded, ElementRemoved", function(eventType, source, event) {
+                if (!event.subject.pane) {
+                    self.setShapePane(event.subject, "main");
+                }
                 self.paneNeedsRepaint(event.subject.pane);
             }).on("PropertyChanged", function(eventType, source, event) {
                 self.paneNeedsRepaint(event.source.pane)
