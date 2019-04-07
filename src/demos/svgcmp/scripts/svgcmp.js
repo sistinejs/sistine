@@ -1,4 +1,7 @@
 
+var Point = Sistine.Geom.Models.Point;
+var Bounds = Sistine.Geom.Models.Bounds;
+
 var theStage = null;
 var theSVG = null;
 var svgSamplesTable = null;
@@ -75,11 +78,21 @@ function initSVGArea() {
 }
 
 function loadSVG(entry) {
-    console.log("Loading SVG: ", entry);
     var url = "/" + allSvgSamples[entry].file;
     loadSVGFromURL(url);
 }
 
 function loadSVGFromURL(url) {
+    console.log("Loading SVG from URL: ", url);
+    Sistine.SVG.Loader.loadFromURL(url, {
+        bounds: new Bounds(0, 0, 300, 300)
+    }, function(shape, svg) {
+        var $svg = $(svg);
+        $svg.attr("width", "100%");
+        $svg.attr("height", "100%");
+        $("#svg_area_div").empty();
+        $("#svg_area_div").append($svg);
+        theStage.scene.add(shape);
+    });
 }
 

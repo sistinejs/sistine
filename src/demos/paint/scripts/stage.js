@@ -70,8 +70,8 @@ function addSampleShapes1() {
 function addSampleShapes2() {
     Sistine.SVG.Loader.loadFromURL(getTestSvgUrl("acid.svg"), {
         bounds: new Bounds(0, 0, 300, 300)
-    }, function(doc) {
-        theApp.scene.add(doc);
+    }, function(shape) {
+        theApp.scene.add(shape);
     });
 }
 

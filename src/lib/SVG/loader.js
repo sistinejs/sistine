@@ -114,7 +114,7 @@ export function loadFromURL(url, configs, callback) {
     $.get(url, function(data) {
          // var svgDoc = $.processXML(data);
         var result = loader.processElement(data.rootElement, null);
-        callback(result);
+        callback(result, data.rootElement);
     }).fail(function() {
         console.log("Error parsing SVG: ", arguments);
     });

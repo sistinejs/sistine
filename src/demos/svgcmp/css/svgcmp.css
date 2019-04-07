@@ -21,7 +21,7 @@
     left: 0px;
     right: 0px;
     height: var(--footer-height);
-    border: solid 0px blue;
+    border: solid 1px blue;
 }
 
 #svg_samples_div {
@@ -54,7 +54,6 @@
 }
 
 #stage_div {
-    background: red;
     position: absolute;
     border: solid 1px black;
     left: 0px;
@@ -64,7 +63,6 @@
 }
 
 #svg_area_div {
-    background: blue;
     position: absolute;
     border: solid 1px black;
     right: 0;
