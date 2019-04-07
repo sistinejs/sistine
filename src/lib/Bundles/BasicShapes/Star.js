@@ -71,8 +71,7 @@ export class Star extends models.Shape {
             ctx.lineTo(px, py);
         }
         ctx.lineTo(fx, fy);
-        ctx.fill();
-        ctx.stroke();
+        this.fillAndStroke(ctx);
     }
 }
 

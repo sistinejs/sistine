@@ -46,12 +46,10 @@ export class Arc extends models.Shape {
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(this._p0.x, this._p0.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
+        this.fillAndStroke(ctx);
         ctx.beginPath();
         ctx.arc(this._p1.x, this._p1.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
+        this.fillAndStroke(ctx);
     }
 }
 

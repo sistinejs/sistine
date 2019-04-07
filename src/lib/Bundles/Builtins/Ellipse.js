@@ -39,8 +39,7 @@ export class Ellipse extends models.Shape {
 
         ctx.beginPath();
         Geom.Utils.pathEllipse(ctx, x, y, w, h);
-        ctx.fill();
-        ctx.stroke();
+        this.fillAndStroke(ctx);
     }
 }
 
