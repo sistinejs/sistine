@@ -302,7 +302,7 @@ export class SVGLoader {
             .all().forEach(function(token) {
                 text.addRotation(token.value);
              });
-        console.log("Here...");
+        text.textLength = elem.getAttribute("textLength") || null;
     }
 
     /**

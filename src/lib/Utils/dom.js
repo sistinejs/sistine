@@ -1,6 +1,28 @@
 
+const fontMetrics = {
+}
+
 export function getcssint(elem, attrib) {
     return parseInt(elem.css(attrib).replace(/px/, ""));
+}
+
+export function getFontMetrics(fontFamily, fontSize) {
+    if (!(fontFamily in fontMetrics)) {
+        fontMetrics[fontFamily] = {};
+    }
+    var familyMetrics = fontMetrics[fontFamily];
+    if (!(fontSize in familyMetrics)) {
+        var a = $("<div style='position:absolute;top:0;left:0'>M</div>");
+        a.css("font-family", fontFamily);
+        a.css("font-size", fontSize);
+        $($(document)[0].body).append(a)
+        familyMetrics[fontSize] = {
+            'height': a[0].offsetHeight,
+            'size': fontSize
+        };
+        a.remove();
+    }
+    return familyMetrics[fontSize];
 }
 
 export function centerElem(elem, axis) {
