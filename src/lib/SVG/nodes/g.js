@@ -1,5 +1,18 @@
 
 import * as base from "./base"
+import { Core } from "../../Core/index"
+import { Geom } from "../../Geom/index"
+import { Utils } from "../../Utils/index"
+import * as parser from "../parser"
+import * as models from "../models"
+
+const NumbersTokenizer = parser.NumbersTokenizer;
+const PathDataParser = parser.PathDataParser;
+const TransformParser = parser.TransformParser;
+const Length = Geom.Models.Length;
+const Point = Geom.Models.Point;
+const forEachChild = Utils.DOM.forEachChild;
+const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export class GNodeProcessor extends base.NodeProcessor {
     get validChildren() {
@@ -43,7 +56,7 @@ export class GNodeProcessor extends base.NodeProcessor {
         out.setBounds(bounds);
         out.viewBox = viewBox;
         parent.add(out);
-        this.processChildren(elem, parent);
+        this.processChildrenOf(elem, out);
         return out;
     }
 }

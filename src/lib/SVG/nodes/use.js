@@ -2,7 +2,7 @@
 
 import * as base from "./base"
 
-export class DefsNodeProcessor extends base.NodeProcessor {
+export class UseNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.animationElements
                 .concat(base.descriptiveElements)

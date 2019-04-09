@@ -9,9 +9,9 @@ const Length = geom.Length;
 export class Circle extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this.cx = configs.cx || 0;
-        this.cy = configs.cy || 0;
-        this.radius = configs.radius || 10;
+        this._cx = Length.parse(configs.cx || 0);
+        this._cy = Length.parse(configs.cy || 0);
+        this._r = Length.parse(configs.r || 0);
     }
 
     get controllerClass() { return Circle.Controller; }
@@ -29,8 +29,11 @@ export class Circle extends models.Shape {
     }
 
     _evalBoundingBox() {
-        var r = this._radius.pixelValue;
+        var r = this._r.pixelValue;
         return new geom.Bounds(this._cx.pixelValue - r, this._cy.pixelValue - r, r * 2, r * 2);
+        return new Geom.Models.Bounds(this._cx.value - r,
+                                      this._cy.value - r,
+                                      r * 2, r * 2);
     }
     _setBounds(newBounds) {
         this.cx = newBounds.centerX;

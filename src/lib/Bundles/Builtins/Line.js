@@ -10,22 +10,26 @@ var HitInfo = controller.HitInfo;
 export class Line extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this._p0 = configs.p0 || new Geom.Models.Point();
-        this._p1 = configs.p1 || new Geom.Models.Point();
+        this._x1 = Length.parse(configs.x1 || 0);
+        this._y1 = Length.parse(configs.y1 || 0);
+        this._x2 = Length.parse(configs.x2 || 0);
+        this._y2 = Length.parse(configs.y2 || 0);
     }
 
     get controllerClass() { return Line.Controller; }
 
     _setBounds(newBounds) {
-        this._p0.set(newBounds.left, newBounds.top);
-        this._p1.set(newBounds.right, newBounds.bottom);
+        this._x1 = newBounds.left;
+        this._y1 = newBounds.top;
+        this._x2 = newBounds.right;
+        this._y2 = newBounds.bottom;
     }
 
     _evalBoundingBox() {
-        var left = Math.min(this._p0.x, this._p1.x);
-        var top = Math.min(this._p0.y, this._p1.y);
-        var right = Math.max(this._p0.x, this._p1.x);
-        var bottom = Math.max(this._p0.y, this._p1.y);
+        var left = Math.min(this._x1, this._x2);
+        var right = Math.max(this._x1, this._x2);
+        var top = Math.min(this._y1, this._y2);
+        var bottom = Math.max(this._y1, this._y2);
         return new Geom.Models.Bounds(left, top, right - left, bottom - top);
     }
 
@@ -33,8 +37,8 @@ export class Line extends models.Shape {
 
     draw(ctx) {
         ctx.beginPath();
-        ctx.moveTo(this._p0.x, this._p0.y);
-        ctx.lineTo(this._p1.x, this._p1.y);
+        ctx.moveTo(this._x1.value, this._y1.value);
+        ctx.lineTo(this._x2.value, this._y2.value);
         ctx.stroke();
     }
 
@@ -43,11 +47,11 @@ export class Line extends models.Shape {
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(this._p0.x, this._p0.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._x1, this._y1, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(this._p1.x, this._p1.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._x2, this._y2, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -63,8 +67,8 @@ Line.Controller = class LineController extends controller.ShapeController {
 
     _evalControlPoints() {
         var line = this.shape;
-        return [new ControlPoint(line._p0, HitType.CONTROL, 0, "grab"),
-                new ControlPoint(line._p1, HitType.CONTROL, 1, "grab")]
+        return [new ControlPoint(line._p1, HitType.CONTROL, 0, "grab"),
+                new ControlPoint(line._p2, HitType.CONTROL, 1, "grab")]
     }
 
     _checkMoveHitInfo(x, y) {
@@ -80,13 +84,13 @@ Line.Controller = class LineController extends controller.ShapeController {
         var deltaY = currY - downY;
         var line = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
-            line._p0.set(savedInfo.downP0.x + deltaX, savedInfo.downP0.y + deltaY);
             line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
+            line._p2.set(savedInfo.downP2.x + deltaX, savedInfo.downP2.y + deltaY);
         }
         else if (hitInfo.hitIndex == 0) {
-            line._p0.set(savedInfo.downP0.x + deltaX, savedInfo.downP0.y + deltaY);
-        } else {
             line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
+        } else {
+            line._p2.set(savedInfo.downP2.x + deltaX, savedInfo.downP2.y + deltaY);
         }
         line._boundingBox = null;
         line.markTransformed();
@@ -94,8 +98,8 @@ Line.Controller = class LineController extends controller.ShapeController {
 
     snapshotFor(hitInfo) {
         return {
-            downP0: this.shape._p0.copy(),
             downP1: this.shape._p1.copy(),
+            downP2: this.shape._p2.copy(),
         };
     }
 }

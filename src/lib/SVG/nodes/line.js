@@ -17,7 +17,7 @@ const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
-export class RectNodeProcessor extends base.NodeProcessor {
+export class LineNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.animationElements.concat(base.descriptiveElements);
     }
@@ -27,23 +27,21 @@ export class RectNodeProcessor extends base.NodeProcessor {
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)
                 .concat(base.presentationAttributes)
-                .concat([ "class", "style", "externalResourcesRequired",
-                          "transform", "x", "y", "rx", "ry",
-                          "width", "height"]);
+                .concat(["class", "style", "externalResourcesRequired",
+                          "transform",
+                         "x1", "y1", "x2", "y2" ])
     }
 
     processElement(elem, parent) {
         var configs = {};
-        configs.cx = elem.getAttribute("cx") || 0;
-        configs.cy = elem.getAttribute("cy") || 0;
-        configs.radius = elem.getAttribute("r");
-        configs.x = elem.getAttribute("x") || 0;
-        configs.y = elem.getAttribute("y") || 0;
-        configs.rx = elem.getAttribute("rx") || 0;
-        configs.ry = elem.getAttribute("ry") || 0;
-        configs.width = elem.getAttribute("width");
-        configs.height = elem.getAttribute("height");
-        var out = new Builtins.Rectangle(configs);
+        var x1 = elem.getAttribute("x1") || 0;
+        var y1 = elem.getAttribute("y1") || 0;
+        var x2 = elem.getAttribute("x2") || 0;
+        var y2 = elem.getAttribute("y2") || 0;
+        configs.p1 = new Point(x1, y1);
+        configs.p2 = new Point(x2, y2);
+        var out = new Builtins.Line(configs);
+        this.processStyleAttributes(elem, out);
         parent.add(out);
         return out;
     }
