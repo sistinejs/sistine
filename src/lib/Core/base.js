@@ -39,7 +39,10 @@ export class Element extends events.EventSource {
         this._uuid = ElementCounter.next();
         this._parent = null;
         this._defs = {};
+        this._titles = [];
+        this._descriptions = [];
         this._metadata = {};
+        this._miscdata = {};
         var self = this;
     }
 
@@ -66,8 +69,12 @@ export class Element extends events.EventSource {
 
     get uuid() { return this._uuid; }
 
+    addTitle(t) { this._titles.push(t); }
+    addDescription(d) { this._descriptions.push(d); }
     getMetaData(key) { return this._metadata[key] || null; }
     setMetaData(key, value) { this._metadata[key] = value; return this; }
+    getMiscData(key) { return this._miscdata[key] || null; }
+    setMiscData(key, value) { this._miscdata[key] = value; return this; }
 
     markUpdated() { this._lastUpdated = Date.now(); }
 

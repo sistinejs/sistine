@@ -5,13 +5,12 @@
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink" 
      width="600px" height="388px">
-	<title>
-		Poll Finds Faith in Obama, Mixed With Patience
-	</title>
+	<title> Poll Finds Faith in Obama, Mixed With Patience </title>
 	<desc>
 		Poll results on Americans and their view of the state of the economy.
 	</desc>
 	
+	<title> Another Poll Finds Faith in Obama, Mixed With BS </title>
 	<defs>
 		<rect id="bar" width="196" height="21" fill="#88A4B9" stroke-fill="#DEE9EF" stroke-width="1"/>
 		
