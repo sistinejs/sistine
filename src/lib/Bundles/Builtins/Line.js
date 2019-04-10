@@ -10,19 +10,19 @@ var HitInfo = controller.HitInfo;
 export class Line extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this._x1 = Length.parse(configs.x1 || 0);
-        this._y1 = Length.parse(configs.y1 || 0);
-        this._x2 = Length.parse(configs.x2 || 0);
-        this._y2 = Length.parse(configs.y2 || 0);
+        this._x1 = configs.x1 || 0;
+        this._y1 = configs.y1 || 0;
+        this._y2 = configs.y2 || 0;
+        this._x2 = configs.x2 || 0;
     }
 
     get controllerClass() { return Line.Controller; }
 
     _setBounds(newBounds) {
-        this._x1 = newBounds.left;
-        this._y1 = newBounds.top;
-        this._x2 = newBounds.right;
-        this._y2 = newBounds.bottom;
+        this._x1 = newBounds.x1;
+        this._y1 = newBounds.y1;
+        this._x2 = newBounds.x2;
+        this._y2 = newBounds.y2;
     }
 
     _evalBoundingBox() {
@@ -32,8 +32,6 @@ export class Line extends models.Shape {
         var bottom = Math.max(this._y1, this._y2);
         return new Geom.Models.Bounds(left, top, right - left, bottom - top);
     }
-
-    get className() { return "Line"; };
 
     draw(ctx) {
         ctx.beginPath();
@@ -67,8 +65,8 @@ Line.Controller = class LineController extends controller.ShapeController {
 
     _evalControlPoints() {
         var line = this.shape;
-        return [new ControlPoint(line._p1, HitType.CONTROL, 0, "grab"),
-                new ControlPoint(line._p2, HitType.CONTROL, 1, "grab")]
+        return [new ControlPoint(line._p1.x, line._p1.y, HitType.CONTROL, 1, "grab"),
+                new ControlPoint(line._p2.x, line._p2.y, HitType.CONTROL, 2, "grab")]
     }
 
     _checkMoveHitInfo(x, y) {
@@ -87,7 +85,7 @@ Line.Controller = class LineController extends controller.ShapeController {
             line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
             line._p2.set(savedInfo.downP2.x + deltaX, savedInfo.downP2.y + deltaY);
         }
-        else if (hitInfo.hitIndex == 0) {
+        else if (hitInfo.hitIndex == 1) {
             line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
         } else {
             line._p2.set(savedInfo.downP2.x + deltaX, savedInfo.downP2.y + deltaY);

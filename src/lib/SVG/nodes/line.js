@@ -12,7 +12,6 @@ const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
 const PathDataParser = parser.PathDataParser;
 const TransformParser = parser.TransformParser;
-const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;

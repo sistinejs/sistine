@@ -296,28 +296,31 @@ export class Bounds {
         this._height = height || 0;
     }
     get innerRadius() { return Math.min(this._width, this._height) / 2.0; }
-    get left() { return this._x; }
-    get top() { return this._y; }
     get x() { return this._x; }
     get y() { return this._y; }
-    get right() { return this._x + this._width; }
-    get bottom() { return this._y + this._height; }
+    get x2() { return this._x + this._width; }
+    get y2() { return this._y + this._height; }
     get width() { return this._width; }
     get height() { return this._height; }
+    get left() { return this._width >= 0 ? this._x : this._x + this._width; }
+    get top() { return this._height >= 0 ? this._y : this._y + this._height; }
+    get right() { return this._width < 0 ? this._x : this._x + this._width; }
+    get bottom() { return this._height < 0 ? this._y : this._y + this._height; }
     get centerX() { return this._x + (this._width / 2.0) };
     get centerY() { return this._y + (this._height / 2.0) };
 
-    set left(value) { this._x = value; }
-    set top(value) { this._y = value; }
     set x(value) { this._x = value; }
     set y(value) { this._y = value; }
     set centerX(value) { this._x = value - (this._width / 2.0); }
     set centerY(value) { this._y = value - (this._height / 2.0); }
-    set right(value) { this._width = value - this._x; }
-    set bottom(value) { this._height = value - this._y; }
     set width(value) { this._width = value; }
     set height(value) { this._height = value; }
     get isZeroSized() { return this._width === 0 || this._height === 0; }
+
+    set left(value) { this._x = value; }
+    set top(value) { this._y = value; }
+    set right(value) { this._width = value - this._x; }
+    set bottom(value) { this._height = value - this._y; }
 
     /**
      * Extends this bounds by unioning the coordinates of this one with another bounds.

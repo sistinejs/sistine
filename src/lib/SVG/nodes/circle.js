@@ -12,7 +12,6 @@ const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
 const PathDataParser = parser.PathDataParser;
 const TransformParser = parser.TransformParser;
-const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
@@ -33,7 +32,6 @@ export class CircleNodeProcessor extends base.NodeProcessor {
 
     processElement(elem, parent) {
         var configs = {};
-        var value = 
         configs.cx = elem.getAttribute("cx") || 0;
         configs.cy = elem.getAttribute("cy") || 0;
         configs.radius = elem.getAttribute("r");

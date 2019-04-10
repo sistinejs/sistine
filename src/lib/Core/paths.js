@@ -637,7 +637,7 @@ Path.Controller = class PathController extends controller.ShapeController {
             var nCPT = currComp.numControlPoints;
             for (var i = 0;i < nCPT;i++) {
                 var cpt = currComp.getControlPoint(i);
-                var controlPoint = new ControlPoint(cpt, HitType.CONTROL, j++, "grab", {'component': currComp, 'index': i})
+                var controlPoint = new ControlPoint(cpt.x, cpt.y, HitType.CONTROL, j++, "grab", {'component': currComp, 'index': i})
                 ours.push(controlPoint);
             }
         }

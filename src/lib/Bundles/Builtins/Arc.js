@@ -10,24 +10,53 @@ var HitInfo = controller.HitInfo;
 export class Arc extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this._p0 = configs.p0 || new Geom.Models.Point();
-        this._p1 = configs.p1 || new Geom.Models.Point();
-        this._p2 = configs.p1 || new Geom.Models.Point();
+        this._created = false;
+        if (configs.x0 && configs.y0) {
+            this._created = true;
+        } else {
+            this._x0 = configs.x0 || 0;
+            this._y0 = configs.y0 || 0;
+            this._x1 = configs.x1 || 0;
+            this._y1 = configs.y1 || 0;
+            this._x2 = configs.x2 || 0;
+            this._y2 = configs.y2 || 0;
+        }
     }
 
     get controllerClass() { return Arc.Controller; }
 
     _setBounds(newBounds) {
-        this._p0.set(newBounds.left, newBounds.top);
-        this._p1.set(newBounds.centerX, newBounds.centerY);
-        this._p2.set(newBounds.right, newBounds.bottom);
+        if (!this._created) {
+            // creating by bounds
+            this._x0 = newBounds.left;
+            this._y0 = newBounds.bottom;
+            this._x1 = newBounds.centerX;
+            this._y1 = newBounds.top;
+            this._x2 = newBounds.right;
+            this._y2 = newBounds.bottom;
+            this._created = true;
+        } else {
+            var oldBounds = this.boundingBox;
+            var sx = newBounds.width / oldBounds.width;
+            var sy = newBounds.height / oldBounds.height;
+            this._x0 = newBounds.x + ((this._x0 - oldBounds.x) * sx)
+            this._y0 = newBounds.y + ((this._y0 - oldBounds.y) * sy)
+            this._x1 = newBounds.x + ((this._x1 - oldBounds.x) * sx)
+            this._y1 = newBounds.y + ((this._y1 - oldBounds.y) * sy)
+            this._x2 = newBounds.x + ((this._x2 - oldBounds.x) * sx)
+            this._y2 = newBounds.y + ((this._y2 - oldBounds.y) * sy);
+        }
     }
 
     _evalBoundingBox() {
-        var left = Math.min(this._p0.x, this._p1.x);
-        var top = Math.min(this._p0.y, this._p1.y);
-        var right = Math.max(this._p0.x, this._p1.x);
-        var bottom = Math.max(this._p0.y, this._p1.y);
+        if (!this._created) {
+            // shape hasnt been created yet
+            return new Geom.Models.Bounds();
+        }
+        var left = Math.min(this._x0, this._x1);
+        var top = Math.min(this._y0, this._y1);
+        var right = Math.max(this._x0, this._x1);
+        var bottom = Math.max(this._y0, this._y1);
         return new Geom.Models.Bounds(left, top, right - left, bottom - top);
     }
 
@@ -35,21 +64,21 @@ export class Arc extends models.Shape {
 
     draw(ctx) {
         ctx.beginPath();
-        ctx.moveTo(this._p0.x, this._p0.y);
-        ctx.lineTo(this._p1.x, this._p1.y);
+        ctx.moveTo(this._x0, this._y0);
+        ctx.arcTo(this._x1, this._y1);
         ctx.stroke();
     }
 
     drawControls(ctx) {
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
-        ctx.lineWidth = 2;
+        ctx.arcWidth = 2;
         ctx.beginPath();
-        ctx.arc(this._p0.x, this._p0.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._x0, this._y0, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(this._p1.x, this._p1.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._x1, this._y1, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -64,9 +93,9 @@ Arc.Controller = class ArcController extends controller.ShapeController {
     }
 
     _evalControlPoints() {
-        var line = this.shape;
-        return [new ControlPoint(line._p0, HitType.CONTROL, 0, "grab"),
-                new ControlPoint(line._p1, HitType.CONTROL, 1, "grab")]
+        var arc = this.shape;
+        return [new ControlPoint(arc._x0, arc._y0, HitType.CONTROL, 0, "grab"),
+                new ControlPoint(arc._x1, arc._y1, HitType.CONTROL, 1, "grab")]
     }
 
     _checkMoveHitInfo(x, y) {
@@ -80,24 +109,35 @@ Arc.Controller = class ArcController extends controller.ShapeController {
     applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
-        var line = this.shape;
+        var arc = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
-            line._p0.set(savedInfo.downP0.x + deltaX, savedInfo.downP0.y + deltaY);
-            line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
+            arc._x0 = savedInfo.downX0 + deltaX;
+            arc._y0 = savedInfo.downY0 + deltaY;
+            arc._x1 = savedInfo.downX1 + deltaX;
+            arc._y1 = savedInfo.downY1 + deltaY;
+            arc._x2 = savedInfo.downX2 + deltaX;
+            arc._y2 = savedInfo.downY2 + deltaY;
         }
         else if (hitInfo.hitIndex == 0) {
-            line._p0.set(savedInfo.downP0.x + deltaX, savedInfo.downP0.y + deltaY);
-        } else {
-            line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
+            arc._x0 = savedInfo.downX0 + deltaX;
+            arc._y0 = savedInfo.downY0 + deltaY;
+        } else if (hitInfo.hitIndex == 1) {
+            arc._x1 = savedInfo.downX1 + deltaX;
+            arc._y1 = savedInfo.downY1 + deltaY;
+        } else if (hitInfo.hitIndex == 2) {
+            arc._x2 = savedInfo.downX2 + deltaX;
+            arc._y2 = savedInfo.downY2 + deltaY;
         }
-        line._boundingBox = null;
-        line.markTransformed();
+        arc._boundingBox = null;
+        arc.markTransformed();
     }
 
     snapshotFor(hitInfo) {
         return {
-            downP0: this.shape._p0.copy(),
-            downP1: this.shape._p1.copy(),
+            downX0: this.shape._x0,
+            downY0: this.shape._y0,
+            downX1: this.shape._x1,
+            downY1: this.shape._y1,
         };
     }
 }

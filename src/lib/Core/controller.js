@@ -21,8 +21,9 @@ export const HitType = {
 }
 
 export class ControlPoint {
-    constructor(point, pointType, pointIndex, cursor, extraData) {
-        this.point = point;
+    constructor(x, y, pointType, pointIndex, cursor, extraData) {
+        this.x = x;
+        this.y = y;
         this.pointType = pointType || 0;
         this.pointIndex = pointIndex || 0;
         this.cursor = cursor || "auto";
@@ -72,18 +73,18 @@ export class ShapeController {
         var t = lBounds.top;
         var b = lBounds.bottom;
         var out = [];
-        out.push(new ControlPoint(new geom.Point((l + r) / 2, t), HitType.SIZE, 0, "n-resize"));
-        out.push(new ControlPoint(new geom.Point(r, t), HitType.SIZE, 1, "ne-resize"));
-        out.push(new ControlPoint(new geom.Point(r, (t + b) / 2), HitType.SIZE, 2, "e-resize"));
-        out.push(new ControlPoint(new geom.Point(r, b), HitType.SIZE, 3, "se-resize"));
-        out.push(new ControlPoint(new geom.Point((l + r) / 2, b), HitType.SIZE, 4, "s-resize"));
-        out.push(new ControlPoint(new geom.Point(l, b), HitType.SIZE, 5, "sw-resize"));
-        out.push(new ControlPoint(new geom.Point(l, (t + b) / 2), HitType.SIZE, 6, "w-resize"));
-        out.push(new ControlPoint(new geom.Point(l, t), HitType.SIZE, 7, "nw-resize"));
+        out.push(new ControlPoint((l + r) / 2, t, HitType.SIZE, 0, "n-resize"));
+        out.push(new ControlPoint(r, t, HitType.SIZE, 1, "ne-resize"));
+        out.push(new ControlPoint(r, (t + b) / 2, HitType.SIZE, 2, "e-resize"));
+        out.push(new ControlPoint(r, b, HitType.SIZE, 3, "se-resize"));
+        out.push(new ControlPoint((l + r) / 2, b, HitType.SIZE, 4, "s-resize"));
+        out.push(new ControlPoint(l, b, HitType.SIZE, 5, "sw-resize"));
+        out.push(new ControlPoint(l, (t + b) / 2, HitType.SIZE, 6, "w-resize"));
+        out.push(new ControlPoint(l, t, HitType.SIZE, 7, "nw-resize"));
 
         var rotX = lBounds.right + 50;
         var rotY = lBounds.centerY;
-        out.push(new ControlPoint(new geom.Point(rotX, rotY), HitType.ROTATE, 0, "grab"));
+        out.push(new ControlPoint(rotX, rotY, HitType.ROTATE, 0, "grab"));
         return out;
     }
 
