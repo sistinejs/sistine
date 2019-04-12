@@ -10,33 +10,38 @@ var HitInfo = controller.HitInfo;
 export class Line extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this._x1 = configs.x1 || 0;
-        this._y1 = configs.y1 || 0;
-        this._y2 = configs.y2 || 0;
-        this._x2 = configs.x2 || 0;
+        this._created = false;
+        if (configs.x0 && configs.y0) {
+            this._created = true;
+        } else {
+            this._x0 = configs.x0 || 0;
+            this._y0 = configs.y0 || 0;
+            this._y1 = configs.y1 || 0;
+            this._x1 = configs.x1 || 0;
+        }
     }
 
     get controllerClass() { return Line.Controller; }
 
     _setBounds(newBounds) {
+        this._x0 = newBounds.x0;
+        this._y0 = newBounds.y0;
         this._x1 = newBounds.x1;
         this._y1 = newBounds.y1;
-        this._x2 = newBounds.x2;
-        this._y2 = newBounds.y2;
     }
 
     _evalBoundingBox() {
-        var left = Math.min(this._x1, this._x2);
-        var right = Math.max(this._x1, this._x2);
-        var top = Math.min(this._y1, this._y2);
-        var bottom = Math.max(this._y1, this._y2);
+        var left = Math.min(this._x0, this._x1);
+        var right = Math.max(this._x0, this._x1);
+        var top = Math.min(this._y0, this._y1);
+        var bottom = Math.max(this._y0, this._y1);
         return new Geom.Models.Bounds(left, top, right - left, bottom - top);
     }
 
     draw(ctx) {
         ctx.beginPath();
-        ctx.moveTo(this._x1.value, this._y1.value);
-        ctx.lineTo(this._x2.value, this._y2.value);
+        ctx.moveTo(this._x0, this._y0);
+        ctx.lineTo(this._x1, this._y1);
         ctx.stroke();
     }
 
@@ -45,11 +50,11 @@ export class Line extends models.Shape {
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(this._x1, this._y1, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._x0, this._y0, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(this._x2, this._y2, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._x1, this._y1, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -65,8 +70,8 @@ Line.Controller = class LineController extends controller.ShapeController {
 
     _evalControlPoints() {
         var line = this.shape;
-        return [new ControlPoint(line._p1.x, line._p1.y, HitType.CONTROL, 1, "grab"),
-                new ControlPoint(line._p2.x, line._p2.y, HitType.CONTROL, 2, "grab")]
+        return [new ControlPoint(line._x0, line._y0, HitType.CONTROL, 0, "grab"),
+                new ControlPoint(line._x1, line._y1, HitType.CONTROL, 1, "grab")]
     }
 
     _checkMoveHitInfo(x, y) {
@@ -82,22 +87,28 @@ Line.Controller = class LineController extends controller.ShapeController {
         var deltaY = currY - downY;
         var line = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
-            line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
-            line._p2.set(savedInfo.downP2.x + deltaX, savedInfo.downP2.y + deltaY);
+            line._x0 = savedInfo.downX0 + deltaX;
+            line._y0 = savedInfo.downY0 + deltaY;
+            line._x1 = savedInfo.downX1 + deltaX;
+            line._y1 = savedInfo.downY1 + deltaY;
         }
         else if (hitInfo.hitIndex == 1) {
-            line._p1.set(savedInfo.downP1.x + deltaX, savedInfo.downP1.y + deltaY);
+            line._x0 = savedInfo.downX0 + deltaX;
+            line._y0 = savedInfo.downY0 + deltaY;
         } else {
-            line._p2.set(savedInfo.downP2.x + deltaX, savedInfo.downP2.y + deltaY);
+            line._x1 = savedInfo.downX1 + deltaX;
+            line._y1 = savedInfo.downY1 + deltaY;
         }
         line._boundingBox = null;
         line.markTransformed();
     }
 
     snapshotFor(hitInfo) {
-        return {
-            downP1: this.shape._p1.copy(),
-            downP2: this.shape._p2.copy(),
-        };
+        var out = super.snapshotFor(hitInfo);
+        out.downX0 = this.shape._x0;
+        out.downY0 = this.shape._y0;
+        out.downX1 = this.shape._x1;
+        out.downY1 = this.shape._y1;
+        return out;
     }
 }

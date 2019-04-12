@@ -18,30 +18,30 @@ export class Ellipse extends models.Shape {
 
     get cx() { return this._cx; }
     get cy() { return this._cy; }
-    set cx(value) { this._cx = Length.parse(value); }
-    set cy(value) { this._cy = Length.parse(value); }
+    set cx(value) { this._cx = value; }
+    set cy(value) { this._cy = value; }
 
     get rx() { return this._rx; }
     get ry() { return this._ry; }
     set rx (value) {
-        this._rx = Length.parse(value);
-        if (this._rx.value < 0) {
-            throw new Error("Radius cannot be negative");
+        this._rx = value;
+        if (this._rx < 0) {
+            throw new Error("Radius X cannot be negative");
         }
     }
     set ry (value) {
-        this._ry = Length.parse(value);
-        if (this._ry.value < 0) {
-            throw new Error("Radius cannot be negative");
+        this._ry = value;
+        if (this._ry < 0) {
+            throw new Error("Radius Y cannot be negative");
         }
     }
 
     get controllerClass() { return Ellipse.Controller; }
 
     _evalBoundingBox() {
-        return new Geom.Models.Bounds(this._cx.value - this._rx.value,
-                                      this._cy.value - this._ry.value,
-                                      top, rx.value * 2, ry.value * 2);
+        return new Geom.Models.Bounds(this._cx - this._rx,
+                                      this._cy - this._ry,
+                                      top, rx * 2, ry * 2);
     }
     _setBounds(newBounds) {
         this.cx = newBounds.centerX;
