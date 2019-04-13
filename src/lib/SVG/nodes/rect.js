@@ -33,17 +33,15 @@ export class RectNodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem, parent) {
-        var configs = {};
-        configs.cx = elem.getAttribute("cx") || 0;
-        configs.cy = elem.getAttribute("cy") || 0;
-        configs.radius = elem.getAttribute("r");
-        configs.x = elem.getAttribute("x") || 0;
-        configs.y = elem.getAttribute("y") || 0;
-        configs.rx = elem.getAttribute("rx") || 0;
-        configs.ry = elem.getAttribute("ry") || 0;
-        configs.width = elem.getAttribute("width");
-        configs.height = elem.getAttribute("height");
         var out = new Builtins.Rectangle(configs);
+        this.extractXLengthAttribute(elem, "x", parent, out, "x");
+        this.extractYLengthAttribute(elem, "y", parent, out, "y");
+        this.extractXLengthAttribute(elem, "cx", parent, out, "cx");
+        this.extractYLengthAttribute(elem, "cy", parent, out, "cy");
+        this.extractXLengthAttribute(elem, "width", parent, out, "width");
+        this.extractYLengthAttribute(elem, "height", parent, out, "height");
+        this.extractDiagLengthAttribute(elem, "rx", parent, out, "rx");
+        this.extractDiagLengthAttribute(elem, "ry", parent, out, "ry");
         parent.add(out);
         return out;
     }

@@ -145,4 +145,44 @@ export class NodeProcessor {
             }
         }
     }
+
+    extractXLengthAttribute(elem, attrib, source, target, targetAttrib) {
+        var sourceAttrib = "width";
+        var attrib = Length.parse(elem.getAttribute(targetAttrib) || 0);
+        if (attrib.isAbsolute) {
+            target[targetAttrib] = attrib.pixelValue;
+        } else {
+            // add a constraint
+            ConstraintManager.add(new PercentageConstraint(ET_PARENT, source, sourceAttrib,
+                                  target, targetAttrib, attrib.value));
+        }
+    }
+
+    extractYLengthAttribute(elem, attrib, source, target, targetAttrib) {
+        var sourceAttrib = "height";
+        var attrib = Length.parse(elem.getAttribute(targetAttrib) || 0);
+        if (attrib.isAbsolute) {
+            target[targetAttrib] = attrib.pixelValue;
+        } else {
+            // add a constraint
+            ConstraintManager.add(new PercentageConstraint(ET_PARENT, source, sourceAttrib,
+                                  target, targetAttrib, attrib.value));
+        }
+    }
+
+    extractDiagLengthAttribute(elem, elemAttrib, source, target, targetAttrib) {
+        var sourceAttrib = "height";
+        var attrib = Length.parse(elem.getAttribute(elemAttrib) || 0);
+        if (attrib.isAbsolute) {
+            target[targetAttrib] = attrib.pixelValue;
+            return ;
+        }
+
+        // we have constraints!!
+        ConstraintManager.add(new PercentageConstraint(ET_PARENT, source, sourceAttrib,
+                              target, targetAttrib, attrib.value));
+        source.on("BoundsChanged", function(event) {
+            target.x;
+        });
+    }
 }

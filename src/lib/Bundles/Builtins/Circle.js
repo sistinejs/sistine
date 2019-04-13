@@ -24,17 +24,17 @@ export class Circle extends models.Shape {
     get cx() { return this._cx; }
     get cy() { return this._cy; }
     get radius() { return this._radius; }
-    set cx(value) { this._cx = value; }
-    set cy(value) { this._cy = value; }
+    set cx(value) { this._cx = parseFloat(value); }
+    set cy(value) { this._cy = parseFloat(value); }
     set radius(value) {
-        this._radius = value;
+        this._radius = parseFloat(value);
         if (this._radius < 0) {
             throw new Error("Radius cannot be negative");
         }
     }
 
     _evalBoundingBox() {
-        var r = this._r.pixelValue;
+        var r = this._radius;
         return new geom.Bounds(this._cx.pixelValue - r, this._cy.pixelValue - r, r * 2, r * 2);
         return new Geom.Models.Bounds(this._cx - r,
                                       this._cy - r,

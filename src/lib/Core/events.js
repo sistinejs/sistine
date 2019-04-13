@@ -86,7 +86,7 @@ export class EventHub {
     constructor(next) {
         this._onCallbacks = {};
         this._beforeCallbacks = {};
-        this._callbacks = {};
+        this._handlers = {};
         this._next = [];
         if (next != null) {
             this._next.push(next);
@@ -167,7 +167,8 @@ export class EventHub {
         if (this._trigger(eventType, source, eventData, this._beforeCallbacks) == false) {
             return false;
         }
-        for (var i = 0, L = (this._handlers[eventType] || []).length;i >= 0;i--) {
+        var handlers = (this._handlers[eventType] || []);
+        for (var i = handlers.length - 1;i >= 0;i--) {
             if (handlers[i].handleBefore(eventType, source, eventData) == false) {
                 return false;
             }
@@ -183,7 +184,8 @@ export class EventHub {
         if (this._trigger(eventType, source, eventData, this._onCallbacks) == false) {
             return false;
         }
-        for (var i = 0, L = (this._handlers[eventType] || []).length;i >= 0;i--) {
+        var handlers = (this._handlers[eventType] || []);
+        for (var i = handlers.length - 1;i >= 0;i--) {
             if (handlers[i].handleOn(eventType, source, eventData) == false) {
                 return false;
             }
