@@ -66,7 +66,7 @@ export class Shape extends mixins.Styleable {
     setBounds(newBounds) {
         if (this.canSetBounds(newBounds)) {
             var oldBounds = this.boundingBox.copy();
-            var event = new events.GeometryChanged(this, "bounds", oldBounds, newBounds);
+            var event = new events.BoundsChanged(this, "bounds", oldBounds, newBounds);
             if (this.validateBefore(event.name, event) == false) return false;
             this._setBounds(newBounds);
             this._boundingBox = null;

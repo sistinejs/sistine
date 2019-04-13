@@ -1,6 +1,11 @@
 
 import * as counters from "./counters";
 
+export class EventHandler {
+    handleBefore(event) { }
+    handleOn(event) { }
+}
+
 export class Event {
     constructor() {
         this._eventType = null ; // eventType;
@@ -34,19 +39,30 @@ export class EventSource {
         return this._eventHub;
     }
 
-    on(eventTypes, handler) {
+    ensureHub() {
         if (this._eventHub == null) {
             this._eventHub = new EventHub();
         }
-        this._eventHub.on(eventTypes, handler);
+        return this._eventHub;
+    }
+
+    addHandler(eventTypes, handler) {
+        this.ensureHub().addHandler(eventTypes, handler);
         return this;
     }
 
-    before(eventTypes, handler) {
-        if (this._eventHub == null) {
-            this._eventHub = new EventHub();
-        }
-        this._eventHub.before(eventTypes, handler);
+    removeHandler(eventTypes, handler) {
+        this.ensureHub().removeHandler(eventTypes, handler);
+        return this;
+    }
+
+    on(eventTypes, callback) {
+        this.ensureHub().on(eventTypes, callback);
+        return this;
+    }
+
+    before(eventTypes, callback) {
+        this.ensureHub().before(eventTypes, callback);
         return this;
     }
 
@@ -68,8 +84,9 @@ export class EventSource {
 
 export class EventHub {
     constructor(next) {
-        this._onHandlers = {};
-        this._beforeHandlers = {};
+        this._onCallbacks = {};
+        this._beforeCallbacks = {};
+        this._callbacks = {};
         this._next = [];
         if (next != null) {
             this._next.push(next);
@@ -93,37 +110,45 @@ export class EventHub {
         }
     }
 
-    before(eventTypes, handler) {
-        return this._addHandler(eventTypes, this._beforeHandlers, handler);
+    before(eventTypes, callback) {
+        return this._addHandler(eventTypes, this._beforeCallbacks, callback);
     }
 
-    on(eventTypes, handler) {
-        return this._addHandler(eventTypes, this._onHandlers, handler);
+    on(eventTypes, callback) {
+        return this._addHandler(eventTypes, this._onCallbacks, callback);
     }
 
-    removeBefore(eventTypes, handler) {
-        return this._removeHandler(eventTypes, this._beforeHandlers, handler);
+    removeBefore(eventTypes, callback) {
+        return this._removeHandler(eventTypes, this._beforeCallbacks, callback);
     }
 
-    removeOn(eventTypes, handler) {
-        return this._removeHandler(eventTypes, this._onHandlers, handler);
+    removeOn(eventTypes, callback) {
+        return this._removeHandler(eventTypes, this._onCallbacks, callback);
     }
 
-    _addHandler(eventTypes, handlers, handler) {
+    addHandler(eventTypes, handler) {
+        return this._addHandler(eventTypes, this._handlers, handler);
+    }
+
+    removeHandler(eventTypes, handler) {
+        return this._removeHandler(eventTypes, this._handlers, handler);
+    }
+
+    _addHandler(eventTypes, handlerlist, handler) {
         eventTypes = eventTypes.split(",");
         eventTypes.forEach(function(eventType) {
             eventType = eventType.trim();
-            handlers[eventType] = handlers[eventType] || [];
-            handlers[eventType].push(handler);
+            handlerlist[eventType] = handlerlist[eventType] || [];
+            handlerlist[eventType].push(handler);
         });
         return this;
     }
 
-    _removeHandler(handlers, handler) {
+    _removeHandler(handlerlist, handler) {
         eventTypes = eventTypes.split(",");
         eventTypes.forEach(function(eventType) {
             eventType = eventType.trim();
-            var evHandlers = handlers[eventType] || [];
+            var evHandlers = handlerlist[eventType] || [];
             for (var i = 0;i < evHandlers.length;i++) {
                 if (evHandlers[i] == handler) {
                     evHandlers.splice(i, 1);
@@ -139,8 +164,13 @@ export class EventHub {
      * a change has indeed gone through.
      */
     validateBefore(eventType, source, eventData) {
-        if (this._trigger(eventType, source, eventData, this._beforeHandlers) == false) {
+        if (this._trigger(eventType, source, eventData, this._beforeCallbacks) == false) {
             return false;
+        }
+        for (var i = 0, L = (this._handlers[eventType] || []).length;i >= 0;i--) {
+            if (handlers[i].handleBefore(eventType, source, eventData) == false) {
+                return false;
+            }
         }
         for (var i = this._next.length - 1;i >= 0;i --) {
             if (this._next[i].validateBefore(eventType, source, eventData) == false) {
@@ -150,9 +180,16 @@ export class EventHub {
         return true;
     }
     triggerOn(eventType, source, eventData) {
-        if (this._trigger(eventType, source, eventData, this._onHandlers) == false) {
+        if (this._trigger(eventType, source, eventData, this._onCallbacks) == false) {
             return false;
         }
+        for (var i = 0, L = (this._handlers[eventType] || []).length;i >= 0;i--) {
+            if (handlers[i].handleOn(eventType, source, eventData) == false) {
+                return false;
+            }
+        }
+
+        // also go through handlers
         for (var i = this._next.length - 1;i >= 0;i --) {
             if (this._next[i].triggerOn(eventType, source, eventData) == false) {
                 return false;
@@ -161,12 +198,12 @@ export class EventHub {
         return true;
     }
 
-    _trigger(eventType, source, eventData, handlers) {
-        handlers = handlers[eventType] || [];
-        var L = handlers.length;
+    _trigger(eventType, source, eventData, callbacks) {
+        callbacks = callbacks[eventType] || [];
+        var L = callbacks.length;
         for (var i = 0;i < L;i++) {
-            var handler = handlers[i];
-            if (handler(eventType, source, eventData) == false) {
+            var callback = callbacks[i];
+            if (callback(eventType, source, eventData) == false) {
                 return false;
             }
         }
@@ -273,7 +310,7 @@ export class TransformChanged extends Event {
     get name() { return "TransformChanged"; }
 }
 
-export class GeometryChanged extends Event {
+export class BoundsChanged extends Event {
     constructor(source, property, oldValue, newValue) {
         super();
         this.source = source;
@@ -282,7 +319,7 @@ export class GeometryChanged extends Event {
         this.newValue = newValue;
     }
 
-    get name() { return "GeometryChanged"; }
+    get name() { return "BoundsChanged"; }
 }
 
 export class PropertyChanged extends Event {
