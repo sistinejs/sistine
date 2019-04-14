@@ -4,6 +4,7 @@ import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import * as parser from "../parser"
 import * as base from "./base"
+import * as layouts from "../layouts"
 
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
@@ -28,9 +29,12 @@ export class PathNodeProcessor extends base.NodeProcessor {
                           "transform", "d", "pathLength"])
     }
 
+    hasStyles() { return true; }
+    hasTransforms() { return true; }
+
     processElement(elem, parent) {
         var newPath = new Core.Path();
-        this.processStyleAttributes(elem, newPath);
+        super.processElement(elem, newPath);
         this.processPathDataAttributes(elem, newPath);
         parent.add(newPath);
         return newPath;

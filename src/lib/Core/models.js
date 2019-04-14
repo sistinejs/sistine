@@ -49,11 +49,11 @@ export class Shape extends mixins.Styleable {
             // unchain previous scene
             this.markUpdated();
             if (this._scene) {
-                this._eventHub.unchain(this._scene.eventHub);
+                this.eventHub.unchain(this._scene.eventHub);
             }
             this._scene = s;
             if (this._scene) {
-                this._eventHub.chain(this._scene.eventHub);
+                this.eventHub.chain(this._scene.eventHub);
             }
             return true;
         }

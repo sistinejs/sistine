@@ -22,7 +22,7 @@ export class Length {
         this.value = value || 0;
         this._units = units;
         this._pixelValue = 0;
-        this._isAbsolute = (units == LengthTypeEMS || units == LengthTypeEXS || units == LengthTypePercentage);
+        this._isAbsolute = (units == LengthTypeNumber || units == LengthTypeEMS || units == LengthTypeEXS);
 
         if (units == LengthTypeNumber) {
             this._pixelValue = value;

@@ -5,8 +5,10 @@ import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import { Bundles } from "../../Bundles/index"
 import * as parser from "../parser"
+import * as layouts from "../layouts"
 import * as models from "../models"
 
+const CM = layouts.defaultCM;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
@@ -31,16 +33,16 @@ export class LineNodeProcessor extends base.NodeProcessor {
                          "x1", "y1", "x2", "y2" ])
     }
 
+    hasStyles() { return true; }
+    hasTransforms() { return true; }
+
     processElement(elem, parent) {
-        var configs = {};
-        var x1 = elem.getAttribute("x1") || 0;
-        var y1 = elem.getAttribute("y1") || 0;
-        var x2 = elem.getAttribute("x2") || 0;
-        var y2 = elem.getAttribute("y2") || 0;
-        configs.p1 = new Point(x1, y1);
-        configs.p2 = new Point(x2, y2);
-        var out = new Builtins.Line(configs);
-        this.processStyleAttributes(elem, out);
+        var out = new Builtins.Line();
+        super.processElement(elem, out);
+        CM.addXConstraint(out, "x1", this.getLength(elem, "x1"));
+        CM.addYConstraint(out, "y1", this.getLength(elem, "y1"));
+        CM.addXConstraint(out, "x2", this.getLength(elem, "x2"));
+        CM.addYConstraint(out, "y2", this.getLength(elem, "y2"));
         parent.add(out);
         return out;
     }

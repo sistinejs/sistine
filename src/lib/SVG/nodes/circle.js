@@ -5,8 +5,10 @@ import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import { Bundles } from "../../Bundles/index"
 import * as parser from "../parser"
+import * as layouts from "../layouts"
 import * as models from "../models"
 
+const CM = layouts.defaultCM;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
@@ -30,13 +32,15 @@ export class CircleNodeProcessor extends base.NodeProcessor {
                           "transform", "cx", "cy", "r"]);
     }
 
+    hasStyles() { return true; }
+    hasTransforms() { return true; }
+
     processElement(elem, parent) {
-        var configs = {};
-        configs.cx = elem.getAttribute("cx") || 0;
-        configs.cy = elem.getAttribute("cy") || 0;
-        configs.radius = elem.getAttribute("r");
-        var out = new Builtins.Circle(configs);
-        this.processStyleAttributes(elem, out);
+        var out = new Builtins.Circle();
+        super.processElement(elem, out);
+        CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));
+        CM.addYConstraint(out, "cy", this.getLength(elem, "cy"));
+        CM.addXYConstraint(out, "radius", this.getLength(elem, "r"));
         parent.add(out);
         return out;
     }

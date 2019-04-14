@@ -17,7 +17,7 @@ export class Property {
         var event = null;
         if (eventSource) {
             event = new events.PropertyChanged(this, property, oldValue, newValue);
-            if (eventSource.validateBefore("PropertyChanged:" + this.name, event) == false)
+            if (eventSource.validateBefore(event.name, event) == false)
                 return false;
         }
 
@@ -26,7 +26,7 @@ export class Property {
 
         this.markUpdated();
         if (eventSource) 
-            eventSource.triggerOn("PropertyChanged:" + this.name, event);
+            eventSource.triggerOn(event.name, event);
         return true;
     }
 
@@ -92,13 +92,15 @@ export class Element extends events.EventSource {
         index = index || -1;
         if (element.parent != this) {
             var event = new events.ElementAdded(this, element);
-            if (this.validateBefore("ElementAdded", event) != false) {
+            if (this.validateBefore(event.name, event) != false &&
+                element.validateBefore(event.name, event) != false) {
                 // remove from old parent - Important!
                 if (element.removeFromParent()) {
                     this._children.push(element);
                     element._parent = this;
                     element.setScene(this.scene);
-                    this.triggerOn("ElementAdded", event);
+                    this.triggerOn(event.name, event);
+                    element.triggerOn(event.name, event);
                     return true;
                 }
             }
@@ -113,13 +115,16 @@ export class Element extends events.EventSource {
      */
     remove(element) {
         if (element.parent == this) {
-            var event = new events.ElementRemoved(this, element);
-            if (this.validateBefore("ElementRemoved", event) != false) {
+            var parentEvent = new events.ElementRemoved(this, element);
+            var childEvent = new events.ElementRemoved(element, this);
+            if (this.validateBefore(event.name, event) != false &&
+                element.validateBefore(event.name, event) != false) {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == element) {
                         this._children.splice(i, 1);
                         element._parent = null;
-                        this.triggerOn("ElementRemoved", event);
+                        this.triggerOn(event.name, event);
+                        element.triggerOn(event.name, event);
                         return true;
                     }
                 }
@@ -167,10 +172,12 @@ export class Element extends events.EventSource {
             return ;
         }
         var event = new events.ElementIndexChanged(element, index, newIndex);
-        if (this.validateBefore("ElementIndexChanged", event) != false) {
+        if (this.validateBefore(event.name, event) != false &&
+            element.validateBefore(event.name, event) != false) {
             this._children.splice(index, 1);
             this._children.splice(newIndex, 0, element);
-            this.triggerOn("ElementIndexChanged", event);
+            this.triggerOn(event.name, event);
+            element.triggerOn(event.name, event);
         }
     }
 

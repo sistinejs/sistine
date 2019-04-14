@@ -6,7 +6,9 @@ import { Utils } from "../../Utils/index"
 import { Bundles } from "../../Bundles/index"
 import * as parser from "../parser"
 import * as models from "../models"
+import * as layouts from "../layouts"
 
+const CM = layouts.defaultCM;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
@@ -31,14 +33,16 @@ export class EllipseNodeProcessor extends base.NodeProcessor {
                           "transform", "cx", "cy", "r"]);
     }
 
+    hasStyles() { return true; }
+    hasTransforms() { return true; }
+
     processElement(elem, parent) {
-        var configs = {};
-        var value = 
-        configs.cx = elem.getAttribute("cx") || 0;
-        configs.cy = elem.getAttribute("cy") || 0;
-        configs.radius = elem.getAttribute("r");
-        var out = new Builtins.Ellipse(configs);
-        this.processStyleAttributes(elem, out);
+        var out = new Builtins.Ellipse();
+        super.processElement(elem, out);
+        CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));
+        CM.addYConstraint(out, "cy", this.getLength(elem, "cy"));
+        CM.addXYConstraint(out, "rx", this.getLength(elem, "rx"));
+        CM.addXYConstraint(out, "ry", this.getLength(elem, "ry"));
         parent.add(out);
         return out;
     }

@@ -86,11 +86,20 @@ export class NodeProcessor {
         return [];
     }
 
+    getLength(elem, attrib) {
+        return Length.parse(elem.getAttribute(attrib) || 0);
+    }
+
     processChildrenOf(elem, parent) {
         var loader = this.loader;
         forEachChild(elem, function(child, index) {
             loader.processElement(child, parent);
         });
+    }
+
+    processElement(elem, shape) {
+        if (this.hasStyles) this.processStyleAttributes(elem, shape);
+        if (this.hasTransforms) this.processTransformAttributes(elem, shape);
     }
 
     /**
@@ -144,45 +153,5 @@ export class NodeProcessor {
                 shape[command.name].apply(shape, command.args);
             }
         }
-    }
-
-    extractXLengthAttribute(elem, attrib, source, target, targetAttrib) {
-        var sourceAttrib = "width";
-        var attrib = Length.parse(elem.getAttribute(targetAttrib) || 0);
-        if (attrib.isAbsolute) {
-            target[targetAttrib] = attrib.pixelValue;
-        } else {
-            // add a constraint
-            ConstraintManager.add(new PercentageConstraint(ET_PARENT, source, sourceAttrib,
-                                  target, targetAttrib, attrib.value));
-        }
-    }
-
-    extractYLengthAttribute(elem, attrib, source, target, targetAttrib) {
-        var sourceAttrib = "height";
-        var attrib = Length.parse(elem.getAttribute(targetAttrib) || 0);
-        if (attrib.isAbsolute) {
-            target[targetAttrib] = attrib.pixelValue;
-        } else {
-            // add a constraint
-            ConstraintManager.add(new PercentageConstraint(ET_PARENT, source, sourceAttrib,
-                                  target, targetAttrib, attrib.value));
-        }
-    }
-
-    extractDiagLengthAttribute(elem, elemAttrib, source, target, targetAttrib) {
-        var sourceAttrib = "height";
-        var attrib = Length.parse(elem.getAttribute(elemAttrib) || 0);
-        if (attrib.isAbsolute) {
-            target[targetAttrib] = attrib.pixelValue;
-            return ;
-        }
-
-        // we have constraints!!
-        ConstraintManager.add(new PercentageConstraint(ET_PARENT, source, sourceAttrib,
-                              target, targetAttrib, attrib.value));
-        source.on("BoundsChanged", function(event) {
-            target.x;
-        });
     }
 }

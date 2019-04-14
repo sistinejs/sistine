@@ -10,12 +10,12 @@ export class Circle extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
         this._created = false;
-        if (configs.x0 && configs.y0) {
+        if (configs.cx && configs.cy) {
             this._created = true;
         } else {
-            this._cx = configs.cx;
-            this._cy = configs.cy;
-            this._radius = configs.radius;
+            this._cx = configs.cx || 0;
+            this._cy = configs.cy || 0;
+            this._radius = configs.radius || 0;
         }
     }
 

@@ -2,8 +2,8 @@
 import * as counters from "./counters";
 
 export class EventHandler {
-    handleBefore(event) { }
-    handleOn(event) { }
+    handleBefore(eventType, source, eventData) { }
+    handleOn(eventType, source, eventData) { }
 }
 
 export class Event {
@@ -21,6 +21,8 @@ export class Event {
         this._suppressed = true;
     }
 
+    get name() { return this.constructor.name; }
+
     get wasSuppressed() {
         return this._suppressed;
     }
@@ -33,52 +35,47 @@ export class Event {
 export class EventSource {
     constructor() {
         this._eventHub = new EventHub();
+        this._muted = false;
     }
+
+    get isMuted() { return this._muted; }
+    mute() { this._muted = true; }
+    unmute() { this._muted = false; }
 
     get eventHub() {
         return this._eventHub;
     }
 
-    ensureHub() {
-        if (this._eventHub == null) {
-            this._eventHub = new EventHub();
-        }
-        return this._eventHub;
-    }
-
     addHandler(eventTypes, handler) {
-        this.ensureHub().addHandler(eventTypes, handler);
+        this._eventHub.addHandler(eventTypes, handler);
         return this;
     }
 
     removeHandler(eventTypes, handler) {
-        this.ensureHub().removeHandler(eventTypes, handler);
+        this._eventHub.removeHandler(eventTypes, handler);
         return this;
     }
 
     on(eventTypes, callback) {
-        this.ensureHub().on(eventTypes, callback);
+        this._eventHub.on(eventTypes, callback);
         return this;
     }
 
     before(eventTypes, callback) {
-        this.ensureHub().before(eventTypes, callback);
+        this._eventHub.before(eventTypes, callback);
         return this;
     }
 
     validateBefore(eventType, eventData) {
+        if (this._muted) return true;
         var source = this;
         return this._eventHub.validateBefore(eventType, source, eventData) != false;
     }
 
     triggerOn(eventType, eventData) {
+        if (this._muted) return true;
         var source = this;
         return this._eventHub.triggerOn(eventType, source, eventData) != false;
-    }
-
-    validateAndTrigger(eventType, eventData, action) {
-        var source = this;
-        return this._eventHub.validateAndTrigger(eventType, source, eventData, action);
     }
 }
 
@@ -144,7 +141,7 @@ export class EventHub {
         return this;
     }
 
-    _removeHandler(handlerlist, handler) {
+    _removeHandler(eventTypes, handlerlist, handler) {
         eventTypes = eventTypes.split(",");
         eventTypes.forEach(function(eventType) {
             eventType = eventType.trim();
@@ -168,7 +165,7 @@ export class EventHub {
             return false;
         }
         var handlers = (this._handlers[eventType] || []);
-        for (var i = handlers.length - 1;i >= 0;i--) {
+        for (var i = 0, L = handlers.length;i < L;i++) {
             if (handlers[i].handleBefore(eventType, source, eventData) == false) {
                 return false;
             }
@@ -185,7 +182,7 @@ export class EventHub {
             return false;
         }
         var handlers = (this._handlers[eventType] || []);
-        for (var i = handlers.length - 1;i >= 0;i--) {
+        for (var i = 0, L = handlers.length;i < L;i++) {
             if (handlers[i].handleOn(eventType, source, eventData) == false) {
                 return false;
             }
@@ -202,21 +199,13 @@ export class EventHub {
 
     _trigger(eventType, source, eventData, callbacks) {
         callbacks = callbacks[eventType] || [];
-        var L = callbacks.length;
-        for (var i = 0;i < L;i++) {
+        for (var i = 0, L = callbacks.length;i < L;i++) {
             var callback = callbacks[i];
             if (callback(eventType, source, eventData) == false) {
                 return false;
             }
         }
         return true;
-    }
-
-    validateAndTrigger(eventType, source, eventData, action) {
-        if (this.validateBefore(eventType, source, eventData) == false) 
-            return false;
-        action();
-        return this.triggerOn(eventType, source, eventData) != false;
     }
 }
 
@@ -308,8 +297,7 @@ export class TransformChanged extends Event {
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
-
-    get name() { return "TransformChanged"; }
+    get klass() { return TransformChanged; }
 }
 
 export class BoundsChanged extends Event {
@@ -320,8 +308,6 @@ export class BoundsChanged extends Event {
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
-
-    get name() { return "BoundsChanged"; }
 }
 
 export class PropertyChanged extends Event {
@@ -332,8 +318,6 @@ export class PropertyChanged extends Event {
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
-
-    get name() { return "PropertyChanged"; }
 }
 
 export class ElementAdded extends Event {
@@ -342,8 +326,6 @@ export class ElementAdded extends Event {
         this.parent = parent;
         this.subject = subject;
     }
-
-    get name() { return "ElementAdded"; }
 }
 
 export class ElementRemoved extends Event {
@@ -352,8 +334,6 @@ export class ElementRemoved extends Event {
         this.parent = parent;
         this.subject = subject;
     }
-
-    get name() { return "ElementRemoved"; }
 }
 
 export class ElementIndexChanged extends Event {

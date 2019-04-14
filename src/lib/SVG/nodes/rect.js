@@ -6,7 +6,9 @@ import { Utils } from "../../Utils/index"
 import { Bundles } from "../../Bundles/index"
 import * as parser from "../parser"
 import * as models from "../models"
+import * as layouts from "../layouts"
 
+const CM = layouts.defaultCM;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
@@ -32,16 +34,18 @@ export class RectNodeProcessor extends base.NodeProcessor {
                           "width", "height"]);
     }
 
+    hasStyles() { return true; }
+    hasTransforms() { return true; }
+
     processElement(elem, parent) {
         var out = new Builtins.Rectangle(configs);
-        this.extractXLengthAttribute(elem, "x", parent, out, "x");
-        this.extractYLengthAttribute(elem, "y", parent, out, "y");
-        this.extractXLengthAttribute(elem, "cx", parent, out, "cx");
-        this.extractYLengthAttribute(elem, "cy", parent, out, "cy");
-        this.extractXLengthAttribute(elem, "width", parent, out, "width");
-        this.extractYLengthAttribute(elem, "height", parent, out, "height");
-        this.extractDiagLengthAttribute(elem, "rx", parent, out, "rx");
-        this.extractDiagLengthAttribute(elem, "ry", parent, out, "ry");
+        super.processElement(elem, out);
+        CM.addXConstraint(out, "x", this.getLength(elem, "x"));
+        CM.addYConstraint(out, "y", this.getLength(elem, "y"));
+        CM.addXConstraint(out, "width", this.getLength(elem, "width"));
+        CM.addYConstraint(out, "height", this.getLength(elem, "height"));
+        CM.addXYConstraint(out, "rx", this.getLength(elem, "rx"));
+        CM.addXYConstraint(out, "ry", this.getLength(elem, "ry"));
         parent.add(out);
         return out;
     }
