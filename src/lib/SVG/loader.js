@@ -22,6 +22,8 @@ const elementProcessors = {
     "g": "GNodeProcessor",
     "rect": "RectNodeProcessor",
     "circle": "CircleNodeProcessor",
+    "ellipse": "EllipseNodeProcessor",
+    "line": "LineNodeProcessor",
     "path": "PathNodeProcessor",
     "text": "TextNodeProcessor",
     "tspan": "TSpanNodeProcessor",

@@ -38,7 +38,7 @@ export class RectNodeProcessor extends base.NodeProcessor {
     hasTransforms() { return true; }
 
     processElement(elem, parent) {
-        var out = new Builtins.Rectangle(configs);
+        var out = new Builtins.Rectangle();
         super.processElement(elem, out);
         CM.addXConstraint(out, "x", this.getLength(elem, "x"));
         CM.addYConstraint(out, "y", this.getLength(elem, "y"));

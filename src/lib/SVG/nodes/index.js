@@ -2,6 +2,8 @@
 import * as text from "./text"
 import * as path from "./path"
 import * as circle from "./circle"
+import * as ellipse from "./ellipse"
+import * as line from "./line"
 import * as rect from "./rect"
 import * as g from "./g"
 import * as svg from "./svg"
@@ -17,7 +19,9 @@ export const Nodes = {
     PathNodeProcessor: path.PathNodeProcessor,
     GNodeProcessor: g.GNodeProcessor,
     SVGNodeProcessor: svg.SVGNodeProcessor,
+    LineNodeProcessor: line.LineNodeProcessor,
     CircleNodeProcessor: circle.CircleNodeProcessor,
+    EllipseNodeProcessor: ellipse.EllipseNodeProcessor,
     RectNodeProcessor: rect.RectNodeProcessor,
     TitleNodeProcessor: desc.TitleNodeProcessor,
     DescNodeProcessor: desc.DescNodeProcessor,

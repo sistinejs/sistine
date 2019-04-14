@@ -57,16 +57,14 @@ export class Rectangle extends models.Shape {
     }
 
     _setBounds(newBounds) {
-        this._p1.set(newBounds.left, newBounds.top);
-        this._p2.set(newBounds.right, newBounds.bottom);
+        this._x = newBounds.left;
+        this._y = newBounds.top;
+        this._width = newBounds.width;
+        this._height = newBounds.height;
     }
 
     _evalBoundingBox() {
-        var left = Math.min(this._p1.x, this._p2.x);
-        var top = Math.min(this._p1.y, this._p2.y);
-        var right = Math.max(this._p1.x, this._p2.x);
-        var bottom = Math.max(this._p1.y, this._p2.y);
-        return new Geom.Models.Bounds(left, top, right - left, bottom - top);
+        return new Geom.Models.Bounds(this.x, this.y, this.width, this.height);
     }
 
     get className() { return "Rectangle"; }

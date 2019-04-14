@@ -10,10 +10,10 @@ var HitInfo = controller.HitInfo;
 export class Ellipse extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this._cx = Length.parse(configs.cx || 0);
-        this._cy = Length.parse(configs.cy || 0);
-        this._rx = Length.parse(configs.rx || 0);
-        this._ry = Length.parse(configs.ry || 0);
+        this._cx = configs.cx || 0;
+        this._cy = configs.cy || 0;
+        this._rx = configs.rx || 0;
+        this._ry = configs.ry || 0;
     }
 
     get cx() { return this._cx; }
@@ -41,7 +41,7 @@ export class Ellipse extends models.Shape {
     _evalBoundingBox() {
         return new Geom.Models.Bounds(this._cx - this._rx,
                                       this._cy - this._ry,
-                                      top, rx * 2, ry * 2);
+                                      top, this._rx * 2, this._ry * 2);
     }
     _setBounds(newBounds) {
         this.cx = newBounds.centerX;

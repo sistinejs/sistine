@@ -58,7 +58,7 @@ export class SVGNodeProcessor extends base.NodeProcessor {
                 viewBox.width = parseFloat(value[2]);
                 viewBox.height = parseFloat(value[3]);
             } else if (attrib.startsWith("xmlns:") ||
-                        [ "xmlns", "inkscape:version" ].indexOf(attrib) >= 0 ||
+                        [ "xmlns", "baseprofile", "inkscape:version" ].indexOf(attrib) >= 0 ||
                        self.validAttributes.indexOf(attrib) >= 0) {
                     // ignore list
                 console.log("Ingoring attribute: ", attrib, " = ", value);
