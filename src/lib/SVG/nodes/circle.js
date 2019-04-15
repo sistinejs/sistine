@@ -32,8 +32,8 @@ export class CircleNodeProcessor extends base.NodeProcessor {
                           "transform", "cx", "cy", "r"]);
     }
 
-    hasStyles() { return true; }
-    hasTransforms() { return true; }
+    get hasStyles() { return true; }
+    get hasTransforms() { return true; }
 
     processElement(elem, parent) {
         var out = new Builtins.Circle();

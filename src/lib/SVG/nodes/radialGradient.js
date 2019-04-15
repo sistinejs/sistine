@@ -9,7 +9,6 @@ import * as models from "../models"
 import * as layouts from "../layouts"
 
 const CM = layouts.defaultCM;
-const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = parser.NumbersTokenizer;
 const PathDataParser = parser.PathDataParser;
@@ -19,7 +18,7 @@ const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
-export class RectNodeProcessor extends base.NodeProcessor {
+export class RadialGradientNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.animationElements.concat(base.descriptiveElements);
     }
@@ -30,20 +29,14 @@ export class RectNodeProcessor extends base.NodeProcessor {
                 .concat(base.graphicalEventAttributes)
                 .concat(base.presentationAttributes)
                 .concat([ "class", "style", "externalResourcesRequired",
-                          "transform", "x", "y", "rx", "ry",
-                          "width", "height"]);
+                          "transform", "cx", "cy", "r"]);
     }
 
-    get hasStyles() { return true; }
-    get hasTransforms() { return true; }
-
     processElement(elem, parent) {
-        var out = new Builtins.Rectangle();
+        var out = new Builtins.Ellipse();
         super.processElement(elem, out);
-        CM.addXConstraint(out, "x", this.getLength(elem, "x"));
-        CM.addYConstraint(out, "y", this.getLength(elem, "y"));
-        CM.addXConstraint(out, "width", this.getLength(elem, "width"));
-        CM.addYConstraint(out, "height", this.getLength(elem, "height"));
+        CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));
+        CM.addYConstraint(out, "cy", this.getLength(elem, "cy"));
         CM.addXYConstraint(out, "rx", this.getLength(elem, "rx"));
         CM.addXYConstraint(out, "ry", this.getLength(elem, "ry"));
         parent.add(out);

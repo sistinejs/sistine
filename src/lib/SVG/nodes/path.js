@@ -29,8 +29,8 @@ export class PathNodeProcessor extends base.NodeProcessor {
                           "transform", "d", "pathLength"])
     }
 
-    hasStyles() { return true; }
-    hasTransforms() { return true; }
+    get hasStyles() { return true; }
+    get hasTransforms() { return true; }
 
     processElement(elem, parent) {
         var newPath = new Core.Path();

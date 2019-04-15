@@ -33,8 +33,8 @@ export class LineNodeProcessor extends base.NodeProcessor {
                          "x1", "y1", "x2", "y2" ])
     }
 
-    hasStyles() { return true; }
-    hasTransforms() { return true; }
+    get hasStyles() { return true; }
+    get hasTransforms() { return true; }
 
     processElement(elem, parent) {
         var out = new Builtins.Line();

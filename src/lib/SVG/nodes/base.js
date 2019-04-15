@@ -78,6 +78,9 @@ export class NodeProcessor {
         return this.loader.configs;
     }
 
+    get hasStyles() { return false; }
+    get hasTransforms() { return false; }
+
     get validChildren() {
         return [];
     }
