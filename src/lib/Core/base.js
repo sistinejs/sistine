@@ -75,6 +75,15 @@ export class Element extends events.EventSource {
     setMetaData(key, value) { this._metadata[key] = value; return this; }
     getMiscData(key) { return this._miscdata[key] || null; }
     setMiscData(key, value) { this._miscdata[key] = value; return this; }
+    addDef(id, value) { this._defs[id] = value; }
+    getDef(id) { 
+        if (id in this._defs) {
+            return this._defs[id];
+        } else if (this._parent != null) {
+            return this._parent.getDef(id);
+        }
+        return null;
+    }
 
     markUpdated() { this._lastUpdated = Date.now(); }
 

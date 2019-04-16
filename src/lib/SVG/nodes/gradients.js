@@ -18,7 +18,7 @@ const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
-export class LinearGradientNodeProcessor extends base.NodeProcessor {
+class GradientNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.descriptiveElements
                 .concat(["animate", "animateTransform", "set", "stop"]);
@@ -29,44 +29,89 @@ export class LinearGradientNodeProcessor extends base.NodeProcessor {
                 .concat(base.presentationAttributes)
                 .concat(base.xlinkAttributes)
                 .concat([ "class", "style", "externalResourcesRequired",
-                          "x1", "y1", "x2", "y2", "gradientUnits",
-                          "gradientTransform", "spreadMethod", "xlink:href"])
+                          "gradientUnits", "gradientTransform",
+                          "spreadMethod", "xlink:href"])
     }
 
     processElement(elem, parent) {
-        var out = new Builtins.Ellipse();
-        super.processElement(elem, out);
-        CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));
-        CM.addYConstraint(out, "cy", this.getLength(elem, "cy"));
-        CM.addXYConstraint(out, "rx", this.getLength(elem, "rx"));
-        CM.addXYConstraint(out, "ry", this.getLength(elem, "ry"));
-        parent.add(out);
+        var out = this.newGradient(elem);
+        var id = this.ensureAttribute(elem, "id");
+        var gradientUnits = elem.getAttribute("gradientUnits") || "objectBoundingBox";
+        this.processTransformAttributes(elem, out, "gradientTransform");
+        parent.addDef(id, out);
+
+        var self = this;
+        forEachChild(elem, function(child, index) {
+            if (child.tagName == "set") {
+                throw new Error("Cannot process elem: ", child.tagName);
+            } else if (child.tagName == "stop") {
+                self.processStopNode(child, out);
+            } else if (child.tagName == "animate") {
+                throw new Error("Cannot process elem: ", child.tagName);
+            } else if (child.tagName == "animateTransform") {
+                throw new Error("Cannot process elem: ", child.tagName);
+            } else {
+                throw new Error("Cannot process elem: ", child.tagName);
+            }
+        });
         return out;
+    }
+
+    processStopNode(elem, gradient) {
+        var offset = this.getDecimal(elem, "offset", 0);
+        var stopColor = elem.getAttribute(elem, "stop-color");
+        var stopOpacity = elem.getAttribute(elem, "stop-opacity");
+        if (stopOpacity) {
+            throw new Error("Not sure how to use stop opacity.");
+        }
+        gradient.addStop(offset, stopColor);
+
+        forEachChild(elem, function(child, index) {
+            if (child.tagName == "set") {
+                throw new Error("Cannot process elem: ", child.tagName);
+            } else if (child.tagName == "animate") {
+                throw new Error("Cannot process elem: ", child.tagName);
+            } else if (child.tagName == "animateColor") {
+                throw new Error("Cannot process elem: ", child.tagName);
+            }
+        });
+    }
+
+    getDecimal(elem, attrib, defaultValue) {
+        var val = Length.parse(elem.getAttribute(attrib) || defaultValue);
+        if (val.isAbsolute) {
+            return val.value;
+        } else {
+            return val.value / 100.0;
+        }
     }
 }
 
-export class RadialGradientNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
-        return base.animationElements.concat(base.descriptiveElements);
-    }
-
+export class LinearGradientNodeProcessor extends GradientNodeProcessor {
     get validAttributes() {
-        return base.conditionalProcessingAttributes
-                .concat(base.coreAttributes)
-                .concat(base.graphicalEventAttributes)
-                .concat(base.presentationAttributes)
-                .concat([ "class", "style", "externalResourcesRequired",
-                          "transform", "cx", "cy", "r"]);
+        return super.validAttributes.concat([ "x1", "y1", "x2", "y2" ]);
     }
 
-    processElement(elem, parent) {
-        var out = new Builtins.Ellipse();
-        super.processElement(elem, out);
-        CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));
-        CM.addYConstraint(out, "cy", this.getLength(elem, "cy"));
-        CM.addXYConstraint(out, "rx", this.getLength(elem, "rx"));
-        CM.addXYConstraint(out, "ry", this.getLength(elem, "ry"));
-        parent.add(out);
-        return out;
+    newGradient(elem) {
+        var x1 = this.getDecimal(elem, "x1", 0);
+        var y1 = this.getDecimal(elem, "y1", 0);
+        var x2 = this.getDecimal(elem, "x2", 0);
+        var y2 = this.getDecimal(elem, "y2", 0);
+        return new Core.Styles.LinearGradient(x1, y1, x2, y2);
+    }
+}
+
+export class RadialGradientNodeProcessor extends GradientNodeProcessor {
+    get validAttributes() {
+        return super.validAttributes.concat([ "cx", "cy", "r", "fx", "fy" ]);
+    }
+
+    newGradient(elem) {
+        var cx = this.getDecimal(elem, "cx", 0.5);
+        var cy = this.getDecimal(elem, "cy", 0.5);
+        var r = this.getDecimal(elem, "r", 0.5);
+        var fx = this.getDecimal(elem, "fx", cx);
+        var fy = this.getDecimal(elem, "fy", cy);
+        return new Core.Styles.RadialGradient(fx, fy, 0, cx, cy, r);
     }
 }

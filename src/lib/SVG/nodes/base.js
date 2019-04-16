@@ -147,14 +147,23 @@ export class NodeProcessor {
         }
     }
 
-    processTransformAttributes(elem, shape) {
-        var attrib = elem.getAttribute("transform");
-        if (attrib) {
-            var parser = new TransformParser(attrib);
+    processTransformAttributes(elem, shape, attribName) {
+        var attribName = attribName || "transform";
+        var attribValue = elem.getAttribute("transform");
+        if (attribValue) {
+            var parser = new TransformParser(attribValue);
             while (parser.hasNext()) {
                 var command = parser.next();
                 shape[command.name].apply(shape, command.args);
             }
         }
+    }
+
+    ensureAttribute(elem, attrib) {
+        var value = elem.getAttribute(attrib) || null;
+        if (value == null) {
+            throw new ("Element MUST have ID");
+        }
+        return value;
     }
 }

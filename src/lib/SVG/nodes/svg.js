@@ -41,6 +41,7 @@ export class SVGNodeProcessor extends base.NodeProcessor {
 
     processElement(elem, parent) {
         var out = new models.SVG();
+        if (parent != null) parent.add(out);
         var bounds = parent ? new Bounds() : this.configs.bounds.copy();
         var viewBox = null;
         var self = this;
