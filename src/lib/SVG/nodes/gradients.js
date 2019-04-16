@@ -44,3 +44,29 @@ export class LinearGradientNodeProcessor extends base.NodeProcessor {
         return out;
     }
 }
+
+export class RadialGradientNodeProcessor extends base.NodeProcessor {
+    get validChildren() {
+        return base.animationElements.concat(base.descriptiveElements);
+    }
+
+    get validAttributes() {
+        return base.conditionalProcessingAttributes
+                .concat(base.coreAttributes)
+                .concat(base.graphicalEventAttributes)
+                .concat(base.presentationAttributes)
+                .concat([ "class", "style", "externalResourcesRequired",
+                          "transform", "cx", "cy", "r"]);
+    }
+
+    processElement(elem, parent) {
+        var out = new Builtins.Ellipse();
+        super.processElement(elem, out);
+        CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));
+        CM.addYConstraint(out, "cy", this.getLength(elem, "cy"));
+        CM.addXYConstraint(out, "rx", this.getLength(elem, "rx"));
+        CM.addXYConstraint(out, "ry", this.getLength(elem, "ry"));
+        parent.add(out);
+        return out;
+    }
+}

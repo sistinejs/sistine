@@ -30,6 +30,8 @@ const elementProcessors = {
     "title": "TitleNodeProcessor",
     "desc": "DescNodeProcessor",
     "use": "UseNodeProcessor",
+    "linearGradient": "LinearGradientNodeProcessor",
+    "radialGradient": "RadialGradientNodeProcessor",
 }
 
 /**

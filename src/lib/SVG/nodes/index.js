@@ -10,6 +10,7 @@ import * as svg from "./svg"
 import * as defs from "./defs"
 import * as use from "./use"
 import * as desc from "./desc"
+import * as gradients from "./gradients"
 
 export const Nodes = {
     UseNodeProcessor: use.UseNodeProcessor,
@@ -25,5 +26,7 @@ export const Nodes = {
     RectNodeProcessor: rect.RectNodeProcessor,
     TitleNodeProcessor: desc.TitleNodeProcessor,
     DescNodeProcessor: desc.DescNodeProcessor,
+    LinearGradientNodeProcessor: gradients.LinearGradientNodeProcessor,
+    RadialGradientNodeProcessor: gradients.RadialGradientNodeProcessor,
 }
 

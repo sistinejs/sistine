@@ -77,6 +77,10 @@ function initDataTable() {
             loadSVG(selectedEntry);
         }
     } );
+    var params = Sistine.Utils.String.getUrlParams();
+    if ("q" in params) {
+        svgSamplesTable.columns(0).search(params["q"]);
+    }
 }
 
 function initSistineArea() {
