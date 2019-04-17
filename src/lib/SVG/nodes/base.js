@@ -178,7 +178,11 @@ export class NodeProcessor {
             var parser = new TransformParser(attribValue);
             while (parser.hasNext()) {
                 var command = parser.next();
-                shape[command.name].apply(shape, command.args);
+                if (command.name == "matrix") {
+                    shape.transform.apply(shape, command.args);
+                } else {
+                    shape[command.name].apply(shape, command.args);
+                }
             }
         }
     }

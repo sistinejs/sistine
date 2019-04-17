@@ -108,15 +108,15 @@ export class LinearGradient extends Gradient {
         var boundsX, boundsY, boundsW, boundsH;
         if (this._relativeToBounds || !shape.hasParent) {
             // relative to object bounds
-            boundsX = this._shapeX;
-            boundsY = this._shapeY;
+            boundsX = 0; // this._shapeX;
+            boundsY = 0; // this._shapeY;
             boundsW = this._shapeW;
             boundsH = this._shapeH;
         } else {
             // relative to object parent bounds?
             var parentBounds = shape.parent.boundingBox;
-            boundsX = parentBounds.x;
-            boundsY = parentBounds.y;
+            boundsX = 0; // parentBounds.x;
+            boundsY = 0; // parentBounds.y;
             boundsW = parentBounds.width;
             boundsH = parentBounds.height;
         }
