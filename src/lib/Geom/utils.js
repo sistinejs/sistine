@@ -14,6 +14,10 @@ var pow = Math.pow,
     PI = Math.PI;
 var PIx2 = Math.PI * 2.0;
 
+export function toRadians(degrees) {
+    return degrees * PI / 180.0
+}
+
 export function copysign(x, y) {
     var out = abs(x);
     if (y < 0) {

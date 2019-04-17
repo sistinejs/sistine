@@ -1,5 +1,7 @@
 import { Geom } from "../Geom/index"
 
+const toRadians = Geom.Utils.toRadians;
+
 function isDigit(ch) {
     return "0123456789".indexOf(ch) >= 0;
 }
@@ -379,13 +381,13 @@ export class TransformParser extends Iterator {
                 this._current = {'name': "scale", 'args': [sx, sy]};
             } else if (tokValue == "rotate") {
                 var theta = tokenizer.ensureNumber();
-                this._current = {'name': "rotate", 'args': [theta]};
+                this._current = {'name': "rotate", 'args': [toRadians(theta)]};
             } else if (tokValue == "skewx") {
                 var sx = tokenizer.ensureNumber();
-                this._current = {'name': "skew", 'args': [sx, 0]};
+                this._current = {'name': "skew", 'args': [toRadians(sx), 0]};
             } else if (tokValue == "skewy") {
                 var sy = tokenizer.ensureNumber();
-                this._current = {'name': "skew", 'args': [0, sy]};
+                this._current = {'name': "skew", 'args': [0, toRadians(sy)]};
             } else {
                 tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
             }

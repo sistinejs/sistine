@@ -34,9 +34,9 @@ export class PathNodeProcessor extends base.NodeProcessor {
 
     processElement(elem, parent) {
         var newPath = new Core.Path();
+        parent.add(newPath);
         super.processElement(elem, newPath);
         this.processPathDataAttributes(elem, newPath);
-        parent.add(newPath);
         return newPath;
     }
 

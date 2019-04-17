@@ -109,10 +109,10 @@ export class NodeProcessor {
      * Processing of different kinds of attributes.
      */
     processStyleAttributes(elem, shape) {
-        shape.fillStyle = elem.getAttribute("fill");
         shape.fillRule = elem.getAttribute("fill-rule");
         shape.fillOpacity = elem.getAttribute("fill-opacity")
-        shape.strokeStyle = elem.getAttribute("stroke");
+        shape.fillStyle = this.processUrl(shape, elem.getAttribute("fill"));
+        shape.strokeStyle = this.processUrl(shape, elem.getAttribute("stroke"));
         shape.lineWidth = elem.getAttribute("stroke-width");
         shape.lineCap = elem.getAttribute("stroke-linecap");
         shape.lineJoin = elem.getAttribute("stroke-linejoin");
@@ -121,6 +121,30 @@ export class NodeProcessor {
         shape.dashArray = elem.getAttribute("stroke-dasharray");
         shape.dashOffset = elem.getAttribute("stroke-dashoffset");
         return shape;
+    }
+
+    processUrl(shape, value) {
+        if (value == null) return value;
+        value = value.trim();
+        if (!value.startsWith("url(")) {
+            return value;
+        }
+
+        value = value.substring(4);
+        if (value.endsWith(")")) {
+            value = value.substring(0, value.length - 1);
+        }
+        // Look for a definition to use
+        var id = value;
+        if (!id.startsWith("#")) {
+            throw new Error("ID Must begin with #");
+        }
+        id = id.substring(1);
+        var target = shape.getDef(id);
+        if (target == null) {
+            throw new Error("Cannot find item referenced by : " + id);
+        }
+        return target;
     }
 
     processMetaAttributes(elem, shape) {

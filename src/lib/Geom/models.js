@@ -53,6 +53,7 @@ export class Length {
 }
 
 Length.parse = function(input) {
+    if (input.constructor.name == "Length") return input;
     var units = LengthTypeNumber;
     if ($.isNumeric(input)) {
         return new Length(parseFloat(input));

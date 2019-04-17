@@ -60,9 +60,9 @@ export class TextNodeProcessor extends TextChunkProcessor {
 
     processElement(elem, parent) {
         var text = new Core.Text();
+        parent.add(text);
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
-        parent.add(text);
     }
 }
 

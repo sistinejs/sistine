@@ -342,6 +342,14 @@ export class VirtualContext {
             this.ctx.strokeRect(x, y, w, h);
     }
 
+    createRadialGradient(x0, y0, r0, x1, y1, r1) {
+        return this.ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
+    }
+
+    createLinearGradient(x0, y0, x1, y1) {
+        return this.ctx.createLinearGradient(x0, y0, x1, y1);
+    }
+
     // Pass throughs
     clearRect(x, y, w, h) { this.ctx.clearRect(x, y, w, h); }
     beginPath() { this.ctx.beginPath(); }
