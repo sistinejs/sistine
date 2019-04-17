@@ -37,6 +37,7 @@ class GradientNodeProcessor extends base.NodeProcessor {
         var out = this.newGradient(elem);
         var id = this.ensureAttribute(elem, "id");
         var gradientUnits = elem.getAttribute("gradientUnits") || "objectBoundingBox";
+        out.relativeToBounds = (gradientUnits == "objectBoundingBox");
         this.processTransformAttributes(elem, out, "gradientTransform");
         parent.addDef(id, out);
 
@@ -59,8 +60,8 @@ class GradientNodeProcessor extends base.NodeProcessor {
 
     processStopNode(elem, gradient) {
         var offset = this.getDecimal(elem, "offset", 0);
-        var stopColor = elem.getAttribute(elem, "stop-color") || "black";
-        var stopOpacity = elem.getAttribute(elem, "stop-opacity");
+        var stopColor = elem.getAttribute("stop-color") || "black";
+        var stopOpacity = elem.getAttribute("stop-opacity");
         if (stopOpacity) {
             throw new Error("Not sure how to use stop opacity.");
         }
@@ -93,10 +94,10 @@ export class LinearGradientNodeProcessor extends GradientNodeProcessor {
     }
 
     newGradient(elem) {
-        var x1 = Length.parse(elem.getAttribute(elem, "x1") || "0%");
-        var y1 = Length.parse(elem.getAttribute(elem, "y1") || "0%");
-        var x2 = Length.parse(elem.getAttribute(elem, "x2") || "0%");
-        var y2 = Length.parse(elem.getAttribute(elem, "y2") || "0%");
+        var x1 = Length.parse(elem.getAttribute("x1") || "0%");
+        var y1 = Length.parse(elem.getAttribute("y1") || "0%");
+        var x2 = Length.parse(elem.getAttribute("x2") || "0%");
+        var y2 = Length.parse(elem.getAttribute("y2") || "0%");
         return new Core.Styles.LinearGradient(x1, y1, x2, y2);
     }
 }
@@ -107,11 +108,11 @@ export class RadialGradientNodeProcessor extends GradientNodeProcessor {
     }
 
     newGradient(elem) {
-        var cx = Length.parse(elem.getAttribute(elem, "cx") || "50%");
-        var cy = Length.parse(elem.getAttribute(elem, "cy") || "50%");
-        var r = Length.parse(elem.getAttribute(elem, "r") || "50%");
-        var fx = Length.parse(elem.getAttribute(elem, "fx") || cx);
-        var fy = Length.parse(elem.getAttribute(elem, "fy") || cy);
+        var cx = Length.parse(elem.getAttribute("cx") || "50%");
+        var cy = Length.parse(elem.getAttribute("cy") || "50%");
+        var r = Length.parse(elem.getAttribute("r") || "50%");
+        var fx = Length.parse(elem.getAttribute("fx") || cx);
+        var fy = Length.parse(elem.getAttribute("fy") || cy);
         return new Core.Styles.RadialGradient(fx, fy, 0, cx, cy, r);
     }
 }

@@ -20,7 +20,7 @@ export class Style {
 
     set relativeToBounds(value) {
         if (this._relativeToBounds != value) {
-            this._relativeToBounds != value;
+            this._relativeToBounds = value;
             this._realValue = null;
         }
     }
@@ -104,19 +104,19 @@ export class LinearGradient extends Gradient {
     }
 
     copy() {
-        var x0, y0, r0, x1, y1, r1;
+        var x0, y0, x1, y1;
         var boundsX, boundsY, boundsW, boundsH;
         if (this._relativeToBounds || !shape.hasParent) {
             // relative to object bounds
-            boundsX = 0; // this._shapeX;
-            boundsY = 0; // this._shapeY;
+            boundsX = this._shapeX;
+            boundsY = this._shapeY;
             boundsW = this._shapeW;
             boundsH = this._shapeH;
         } else {
             // relative to object parent bounds?
             var parentBounds = shape.parent.boundingBox;
-            boundsX = 0; // parentBounds.x;
-            boundsY = 0; // parentBounds.y;
+            boundsX = parentBounds.x;
+            boundsY = parentBounds.y;
             boundsW = parentBounds.width;
             boundsH = parentBounds.height;
         }

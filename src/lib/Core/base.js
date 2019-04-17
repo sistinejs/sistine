@@ -46,6 +46,8 @@ export class Element extends events.EventSource {
         var self = this;
     }
 
+    get hasParent() { return this._parent != null; }
+
     forEachChild(handler, self, mutable) {
         var children = this._children;
         if (mutable == true) {
