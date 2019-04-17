@@ -37,11 +37,11 @@ export class CircleNodeProcessor extends base.NodeProcessor {
 
     processElement(elem, parent) {
         var out = new Builtins.Circle();
+        parent.add(out);
         super.processElement(elem, out);
         CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));
         CM.addYConstraint(out, "cy", this.getLength(elem, "cy"));
         CM.addXYConstraint(out, "radius", this.getLength(elem, "r"));
-        parent.add(out);
         return out;
     }
 }

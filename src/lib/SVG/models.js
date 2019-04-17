@@ -43,7 +43,7 @@ export class SVG extends models.Group {
     }
 
     revertTransforms(ctx) {
-        if (this._viewBox && !this._bounds.isZeroSized) {
+        if (this._viewBox && !this._viewBox.isZeroSized) {
             ctx.restore(); 
         }
     }

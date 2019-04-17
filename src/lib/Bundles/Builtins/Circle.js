@@ -35,10 +35,7 @@ export class Circle extends models.Shape {
 
     _evalBoundingBox() {
         var r = this._radius;
-        return new geom.Bounds(this._cx.pixelValue - r, this._cy.pixelValue - r, r * 2, r * 2);
-        return new Geom.Models.Bounds(this._cx - r,
-                                      this._cy - r,
-                                      r * 2, r * 2);
+        return new geom.Bounds(this._cx - r, this._cy - r, r * 2, r * 2);
     }
     _setBounds(newBounds) {
         this.cx = newBounds.centerX;

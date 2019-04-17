@@ -10,10 +10,15 @@ var HitInfo = controller.HitInfo;
 export class Ellipse extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
-        this._cx = configs.cx || 0;
-        this._cy = configs.cy || 0;
-        this._rx = configs.rx || 0;
-        this._ry = configs.ry || 0;
+        this._created = false;
+        if (configs.cx && configs.cy) {
+            this._created = true;
+        } else {
+            this._cx = configs.cx || 0;
+            this._cy = configs.cy || 0;
+            this._rx = configs.rx || 0;
+            this._ry = configs.ry || 0;
+        }
     }
 
     get cx() { return this._cx; }
@@ -22,13 +27,14 @@ export class Ellipse extends models.Shape {
     set cy(value) { this._cy = value; }
 
     get rx() { return this._rx; }
-    get ry() { return this._ry; }
     set rx (value) {
         this._rx = value;
         if (this._rx < 0) {
             throw new Error("Radius X cannot be negative");
         }
     }
+
+    get ry() { return this._ry; }
     set ry (value) {
         this._ry = value;
         if (this._ry < 0) {
@@ -51,14 +57,8 @@ export class Ellipse extends models.Shape {
     }
 
     draw(ctx) {
-        var lBounds = this.boundingBox;
-        var x = lBounds.x;
-        var y = lBounds.y;
-        var w = lBounds.width;
-        var h = lBounds.height;
-
         ctx.beginPath();
-        Geom.Utils.pathEllipse(ctx, x, y, w, h);
+        ctx.ellipse(this._cx, this._cy, this._rx, this._ry, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
     }

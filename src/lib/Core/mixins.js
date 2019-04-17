@@ -52,14 +52,6 @@ export class Transformable extends base.Element {
         // since we need to map a point "back" to global form
         result.multiply(this._transform);
         return result;
-        /**
-        var cx = this._translation.x;
-        var cy = this._translation.y;
-        result.translate(cx, cy)
-              .rotate(- this._rotation)
-              .scale(1.0 / this._scaleFactor.x, 1.0 / this._scaleFactor.y)
-              .translate(-cx, -cy);
-        **/
     }
 
     /**
