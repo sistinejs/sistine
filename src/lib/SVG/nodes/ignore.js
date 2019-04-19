@@ -2,7 +2,7 @@
 
 import * as base from "./base"
 
-export class AudioNodeProcessor extends base.NodeProcessor {
+export class IgnoreNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return [];
     }

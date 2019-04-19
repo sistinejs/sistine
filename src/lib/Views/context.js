@@ -317,6 +317,11 @@ export class VirtualContext {
             if (LOG_CONTEXT) {
                 console.log("ctx.fill("+this.currentFrame.fillRule+")");
             }
+        } else {
+            this.ctx.fill();
+            if (LOG_CONTEXT) {
+                console.log("ctx.fill();");
+            }
         }
     }
 

@@ -154,10 +154,10 @@ export class NodeProcessor {
         shape.fillStyle = this.processUrl(shape, getAttributeOrStyle(elem, "fill", cssStyles, "fill"));
         shape.strokeStyle = this.processUrl(shape, getAttributeOrStyle(elem, "stroke", cssStyles, "stroke"));
         shape.lineWidth = this.processUrl(shape, getAttributeOrStyle(elem, "stroke-width", cssStyles, "stroke-width"));
-        shape.lineCap = elem.getAttribute("stroke-linecap");
-        shape.lineJoin = elem.getAttribute("stroke-linejoin");
+        shape.lineCap = getAttributeOrStyle(elem, "stroke-linecap", cssStyles, "stroke-linecap");
+        shape.lineJoin = getAttributeOrStyle(elem, "stroke-linejoin", cssStyles, "stroke-linejoin");
         shape.miterLimit = elem.getAttribute("stroke-miterlimit");
-        shape.strokeOpacity = elem.getAttribute("stroke-opacity");
+        shape.strokeOpacity = getAttributeOrStyle(elem, "stroke-opacity", cssStyles, "stroke-opacity");
         shape.dashArray = parseList(elem.getAttribute("stroke-dasharray"), ",").map(parseFloat);
         shape.dashOffset = elem.getAttribute("stroke-dashoffset");
         return shape;

@@ -32,7 +32,7 @@ const elementProcessors = {
     "use": "UseNodeProcessor",
     "linearGradient": "LinearGradientNodeProcessor",
     "radialGradient": "RadialGradientNodeProcessor",
-    "audio": "AudioNodeProcessor",
+    "audio": "IgnoreNodeProcessor",
 }
 
 /**
