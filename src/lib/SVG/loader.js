@@ -32,6 +32,7 @@ const elementProcessors = {
     "use": "UseNodeProcessor",
     "linearGradient": "LinearGradientNodeProcessor",
     "radialGradient": "RadialGradientNodeProcessor",
+    "audio": "AudioNodeProcessor",
 }
 
 /**
@@ -61,10 +62,18 @@ export class SVGLoader {
     processElement(root, parent) {
         // Find the right "converter" for the root object
         var processor = this.getProcessor(root.tagName);
-        return processor.processElement(root, parent);
+        if (processor == null) {
+            console.log("Cannot find processor for node: ", root.tagName);
+        } else {
+            return processor.processElement(root, parent);
+        }
     }
 
     getProcessor(name) {
+        if (name.startsWith("inkscape:") ||
+            name.startsWith("metadata") ||
+            name.startsWith("sodipodi:")) return null;
+
         var name = name.replace("svg:", "").trim();
         var procName = elementProcessors[name];
         var processorClass = Nodes[procName];

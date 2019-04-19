@@ -495,9 +495,9 @@ export class VirtualContext {
         this.ctx.miterLimit = value;
     }
 
-    set lineDash(value) {
+    setLineDash(value) {
         this.currentFrame.lineDash = value;
-        this.ctx.lineDash = value;
+        this.ctx.setLineDash(value);
     }
 
     set lineDashOffset(value) {

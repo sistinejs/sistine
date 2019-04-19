@@ -305,17 +305,25 @@ export class PathDataParser extends Iterator {
             } else if (currCommand.name == "quadCurve") {
                 var x1 = tokenizer.ensureNumber();
                 var y1 = tokenizer.ensureNumber();
-                var x2 = tokenizer.ensureNumber();
-                var y2 = tokenizer.ensureNumber();
-                args = [ x1, y1, x2, y2 ];
+                args = [ x1, y1 ];
+                if (!currCommand.isSmooth) {
+                    var x2 = tokenizer.ensureNumber();
+                    var y2 = tokenizer.ensureNumber();
+                    args.push(x2);
+                    args.push(y2);
+                }
             } else if (currCommand.name == "cubicCurve") {
                 var x1 = tokenizer.ensureNumber();
                 var y1 = tokenizer.ensureNumber();
                 var x2 = tokenizer.ensureNumber();
                 var y2 = tokenizer.ensureNumber();
-                var x3 = tokenizer.ensureNumber();
-                var y3 = tokenizer.ensureNumber();
-                args = [ x1, y1, x2, y2, x3, y3 ];
+                args = [ x1, y1, x2, y2 ];
+                if (!currCommand.isSmooth) {
+                    var x3 = tokenizer.ensureNumber();
+                    var y3 = tokenizer.ensureNumber();
+                    args.push(x3);
+                    args.push(y3);
+                }
             } else {
                 tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
             }

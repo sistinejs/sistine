@@ -96,6 +96,18 @@ function parseCSSStyles(value) {
     return out;
 }
 
+function parseList(value, delimiter) {
+    var out = [];
+    var values = (value || "").split(delimiter);
+    values.forEach(function(v) {
+        v = v.trim();
+        if (v.length > 0) {
+            out.push(v);
+        }
+    });
+    return out;
+}
+
 export class NodeProcessor {
     constructor(loader) {
         this.loader = loader;
@@ -146,7 +158,7 @@ export class NodeProcessor {
         shape.lineJoin = elem.getAttribute("stroke-linejoin");
         shape.miterLimit = elem.getAttribute("stroke-miterlimit");
         shape.strokeOpacity = elem.getAttribute("stroke-opacity");
-        shape.dashArray = elem.getAttribute("stroke-dasharray");
+        shape.dashArray = parseList(elem.getAttribute("stroke-dasharray"), ",").map(parseFloat);
         shape.dashOffset = elem.getAttribute("stroke-dashoffset");
         return shape;
     }

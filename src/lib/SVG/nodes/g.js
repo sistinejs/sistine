@@ -46,6 +46,8 @@ export class GNodeProcessor extends base.NodeProcessor {
         var self = this;
         forEachAttribute(elem, function(attrib, value) {
             if ([ "xmlns" ].indexOf(attrib) >= 0 ||
+                attrib.startsWith("sodipodi:") ||
+                attrib.startsWith("inkscape:") ||
                 self.validAttributes.indexOf(attrib) >= 0) {
                     // ignore list
                 console.log("Ingoring attribute: ", attrib, " = ", value);
