@@ -69,6 +69,33 @@ function getAttribute(elem, attrib) {
     return value;
 }
 
+function getAttributeOrStyle(elem, attribName, cssStyles, styleName) {
+    return elem.getAttribute(attribName) || cssStyles[styleName];
+}
+
+/**
+ * Processing of different kinds of attributes.
+ */
+function parseCSSStyles(value) {
+    var out = {};
+    if (value && value != null) {
+        var values = value.split(";");
+        values.forEach(function(elem) {
+            if (elem.trim().length > 0) {
+                var kvpair = elem.split(":");
+                if (kvpair.length >= 2) {
+                    var key = kvpair[0].trim();
+                    var value = kvpair[1].trim();
+                    if (key.length > 0) {
+                        out[key] = value;
+                    }
+                }
+            }
+        });
+    }
+    return out;
+}
+
 export class NodeProcessor {
     constructor(loader) {
         this.loader = loader;
@@ -109,11 +136,12 @@ export class NodeProcessor {
      * Processing of different kinds of attributes.
      */
     processStyleAttributes(elem, shape) {
-        shape.fillRule = elem.getAttribute("fill-rule");
-        shape.fillOpacity = elem.getAttribute("fill-opacity")
-        shape.fillStyle = this.processUrl(shape, elem.getAttribute("fill"));
-        shape.strokeStyle = this.processUrl(shape, elem.getAttribute("stroke"));
-        shape.lineWidth = elem.getAttribute("stroke-width");
+        var cssStyles = parseCSSStyles(elem.getAttribute("style"));
+        shape.fillRule = getAttributeOrStyle(elem, "fill-rule", cssStyles, "fill-rule");
+        shape.fillOpacity = getAttributeOrStyle(elem, "fill-opacity", cssStyles, "fill-opacity");
+        shape.fillStyle = this.processUrl(shape, getAttributeOrStyle(elem, "fill", cssStyles, "fill"));
+        shape.strokeStyle = this.processUrl(shape, getAttributeOrStyle(elem, "stroke", cssStyles, "stroke"));
+        shape.lineWidth = this.processUrl(shape, getAttributeOrStyle(elem, "stroke-width", cssStyles, "stroke-width"));
         shape.lineCap = elem.getAttribute("stroke-linecap");
         shape.lineJoin = elem.getAttribute("stroke-linejoin");
         shape.miterLimit = elem.getAttribute("stroke-miterlimit");

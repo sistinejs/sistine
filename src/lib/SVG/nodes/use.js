@@ -19,6 +19,7 @@ export class UseNodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem, parent) {
+        null.a = 3;
     }
 }
 
