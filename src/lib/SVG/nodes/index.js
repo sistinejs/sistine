@@ -1,5 +1,6 @@
 
 import * as text from "./text"
+import * as a from "./a"
 import * as path from "./path"
 import * as circle from "./circle"
 import * as ellipse from "./ellipse"
@@ -17,6 +18,7 @@ export const Nodes = {
     UseNodeProcessor: use.UseNodeProcessor,
     IgnoreNodeProcessor: ignore.IgnoreNodeProcessor,
     DefsNodeProcessor: defs.DefsNodeProcessor,
+    ANodeProcessor: a.ANodeProcessor,
     TextNodeProcessor: text.TextNodeProcessor,
     TSpanNodeProcessor: text.TSpanNodeProcessor,
     PathNodeProcessor: path.PathNodeProcessor,

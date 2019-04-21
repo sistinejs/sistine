@@ -26,6 +26,7 @@ const elementProcessors = {
     "line": "LineNodeProcessor",
     "path": "PathNodeProcessor",
     "text": "TextNodeProcessor",
+    "a": "ANodeProcessor",
     "tspan": "TSpanNodeProcessor",
     "title": "TitleNodeProcessor",
     "desc": "DescNodeProcessor",
