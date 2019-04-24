@@ -174,6 +174,11 @@ export class NodeProcessor {
         if (value.endsWith(")")) {
             value = value.substring(0, value.length - 1);
         }
+
+        return this.getRef(shape, value);
+    }
+
+    getRef(shape, value) {
         // Look for a definition to use
         var id = value;
         if (!id.startsWith("#")) {

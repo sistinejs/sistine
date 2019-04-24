@@ -1,5 +1,5 @@
 
-
+import { Core } from "../../Core/index"
 import * as base from "./base"
 
 export class UseNodeProcessor extends base.NodeProcessor {
@@ -19,7 +19,24 @@ export class UseNodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem, parent) {
-        null.a = 3;
+        var href = elem.getAttribute("xlink:href") || elem.getAttrib("href") || null;
+        if (href == null) {
+            throw new Error("Use needs a xlink:href attribute.");
+        }
+
+        // Get and clone the source pointed by href
+        var source = this.getRef(parent, href);
+        var sourceCopy = source.clone();
+
+        var out = new Core.Models.Group();
+
+        var bounds = parent ? new Bounds() : this.configs.bounds.copy();
+        out.setBounds(bounds);
+        parent.add(out);
+        this.processStyleAttributes(elem, out);
+        this.processBoundsAttributes(elem, bounds);
+        this.processTransformAttributes(elem, out);
+        this.processMetaAttributes(elem, out);
     }
 }
 

@@ -10,12 +10,14 @@ import * as g from "./g"
 import * as svg from "./svg"
 import * as defs from "./defs"
 import * as use from "./use"
+import * as symbol from "./symbol"
 import * as ignore from "./ignore"
 import * as desc from "./desc"
 import * as gradients from "./gradients"
 
 export const Nodes = {
     UseNodeProcessor: use.UseNodeProcessor,
+    SymbolNodeProcessor: symbol.UseNodeProcessor,
     IgnoreNodeProcessor: ignore.IgnoreNodeProcessor,
     DefsNodeProcessor: defs.DefsNodeProcessor,
     ANodeProcessor: a.ANodeProcessor,

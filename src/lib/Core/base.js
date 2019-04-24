@@ -10,6 +10,10 @@ export class Property {
         this.set(value);
     }
 
+    clone() {
+        return new Property(this.name, this.value);
+    }
+
     set(newValue, eventSource) {
         var oldValue = this.vaue;
         if (oldValue == newValue) 
@@ -44,6 +48,17 @@ export class Element extends events.EventSource {
         this._metadata = {};
         this._miscdata = {};
         var self = this;
+    }
+
+    newInstance() { return new this.constructor(); };
+
+    clone() {
+        var out = this.newInstance();
+        for (var i = 0;i < this.childCount;i++) {
+            var child = this.childAtIndex(i);
+            this.add(child.clone());
+        }
+        return out;
     }
 
     get hasParent() { return this._parent != null; }

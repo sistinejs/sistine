@@ -19,6 +19,14 @@ export class Circle extends models.Shape {
         }
     }
 
+    newInstance() {
+        var out = super.newInstance();
+        out._cx = this._cx;
+        out._cy = this._cy;
+        out._radius = this._radius;
+        return out;
+    }
+
     get controllerClass() { return Circle.Controller; }
 
     get cx() { return this._cx; }

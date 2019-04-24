@@ -31,9 +31,11 @@ const elementProcessors = {
     "title": "TitleNodeProcessor",
     "desc": "DescNodeProcessor",
     "use": "UseNodeProcessor",
+    "symbol": "SymbolNodeProcessor",
     "linearGradient": "LinearGradientNodeProcessor",
     "radialGradient": "RadialGradientNodeProcessor",
     "audio": "IgnoreNodeProcessor",
+    "script": "IgnoreNodeProcessor",
 }
 
 /**
@@ -43,7 +45,6 @@ export function loadFromURL(url, configs, callback) {
     url = url.trim();
     var loader = new SVGLoader(configs);
     $.get(url, function(data) {
-         // var svgDoc = $.processXML(data);
         var result = loader.processElement(data.rootElement, null);
         callback(result, data.rootElement);
     }).fail(function() {

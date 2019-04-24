@@ -18,6 +18,21 @@ export class Path extends models.Shape {
         this._currPoint = null;
     }
 
+    newInstance() {
+        var out = super.newInstance();
+        out._currPoint = this._currPoint == null ? null : this._currPoint.copy();
+        var last = null;
+        this._components.forEach(function(component) {
+            var c = component.clone();
+            out._components.push(c);
+            c.prev = last;
+            if (last != null)
+                last.next = c;
+            last = c;
+        });
+        return out;
+    }
+
     get currPoint() { return this._currPoint; }
 
     get controllerClass() { return Path.Controller; }
@@ -208,6 +223,10 @@ export class PathComponent {
         this._boundingBox = null;
     }
 
+    clone() {
+        return this.constructor();
+    }
+
     get boundingBox() {
         if (this._boundingBox == null) {
             this._boundingBox = this._evalBoundingBox();
@@ -252,6 +271,12 @@ export class MoveToComponent extends PathComponent {
         this._endPoint = new Geom.Models.Point(x, y);
     }
 
+    clone() {
+        var out = new this.constructor();
+        out._endPoint = this._endPoint.copy();
+        return out;
+    }
+
     _evalBoundingBox() {
         return new Geom.Models.Bounds(this._endPoint.x, this._endPoint.y, 0, 0);
     }
@@ -281,6 +306,12 @@ export class LineToComponent extends PathComponent {
     constructor(prev, x, y) {
         super(prev);
         this._endPoint = new Geom.Models.Point(x, y);
+    }
+
+    clone() {
+        var out = new this.constructor();
+        out._endPoint = this._endPoint.copy();
+        return out;
     }
 
     _evalBoundingBox() {
@@ -323,6 +354,13 @@ export class QuadraticToComponent extends PathComponent {
         super(prev);
         this.p1 = new Geom.Models.Point(x1, y1);
         this.p2 = new Geom.Models.Point(x2, y2);
+    }
+
+    clone() {
+        var out = new this.constructor();
+        out.p1 = this.p1.copy();
+        out.p2 = this.p2.copy();
+        return out;
     }
 
     _evalBoundingBox() {
@@ -380,6 +418,14 @@ export class BezierToComponent extends PathComponent {
         this.p1 = new Geom.Models.Point(x1, y1);
         this.p2 = new Geom.Models.Point(x2, y2);
         this.p3 = new Geom.Models.Point(x3, y3);
+    }
+
+    clone() {
+        var out = new this.constructor();
+        out.p1 = this.p1.copy();
+        out.p2 = this.p2.copy();
+        out.p3 = this.p3.copy();
+        return out;
     }
 
     draw(ctx) {
@@ -445,6 +491,17 @@ export class ArcComponent extends PathComponent {
         this._anticlockwise = anticlockwise;
     }
 
+    clone() {
+        var out = new this.constructor();
+        out._cx = this._cx;
+        out._cy = this._cy;
+        out._radius = this._radius;
+        out._startAngle = this._startAngle;
+        out._endAngle = this._endAngle;
+        out._anticlockwise = this._anticlockwise;
+        return out;
+    }
+
     draw(ctx) {
         ctx.arc(this._cx, this._cy, this._radius, this._startAngle, this._endAngle, this._anticlockwise);
     }
@@ -504,6 +561,19 @@ export class SVGArcToComponent extends PathComponent {
         this._shouldSweep = shouldSweep;
     }
 
+    clone() {
+        var out = new this.constructor();
+        out._rx = this._rx;
+        out._ry = this._ry;
+        out._rotation = this._rotation;
+        out._rotationPoint = this._rotationPoint;
+        out._center = this._center;
+        out._endPoint = this._endPoint;
+        out._isLargeArc = this._isLargeArc;
+        out._shouldSweep = this._shouldSweep;
+        return out;
+    }
+
     get startPoint() { return this.prev.endPoint; }
     get endPoint() { return this._endPoint; }
     get startAngle() { return this._startAngle; }
@@ -561,6 +631,21 @@ export class EllipticalArcComponent extends PathComponent {
         this._rotation = rotation;
         this._rotationPoint = new Geom.Models.Point();
         this.isAnticlockwise = anticlockwise || false;
+    }
+
+    clone() {
+        var out = new this.constructor();
+        out.rx = this.rx;
+        out.ry = this.ry;
+        out._center = this._center;
+        out._startPoint = this._startPoint;
+        out._endPoint = this._endPoint;
+        out._startAngle = this._startAngle;
+        out._endAngle = this._endAngle;
+        out._rotation = this._rotation;
+        out._rotationPoint = this._rotationPoint;
+        out.isAnticlockwise = this.isAnticlockwise;
+        return out;
     }
 
     get startPoint() { return this._startPoint; }

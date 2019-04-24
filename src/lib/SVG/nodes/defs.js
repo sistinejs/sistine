@@ -1,5 +1,6 @@
 
 import * as base from "./base"
+import { Utils } from "../../Utils/index"
 
 export class DefsNodeProcessor extends base.NodeProcessor {
     get validChildren() {
@@ -25,6 +26,12 @@ export class DefsNodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem, parent) {
+        var loader = this.loader;
+        Utils.DOM.forEachChild(elem, function(child, index) {
+            var item = loader.processElement(child, parent);
+            var id = child.getAttribute("id");
+            parent.addDef(id, item);
+        });
     }
 }
 

@@ -18,6 +18,12 @@ export class Transformable extends base.Element {
         this.markTransformed();
     }
 
+    newInstance() {
+        var out = super.newInstance();
+        out._transform = this._transform.copy();
+        return out;
+    }
+
     markTransformed() { 
         this.markUpdated();
         this._lastTransformed = Date.now(); 
@@ -143,6 +149,23 @@ export class Styleable extends Transformable {
         this._dashArray = new Property("dashArray", configs.dashArray);
         this._miterLimit = new Property("miterLimit", configs.miterLimit);
         this._strokeOpacity = new Property("strokeOpacity", configs.strokeOpacity);
+    }
+
+    newInstance() {
+        var out = super.newInstance();
+        out._fillStyle = this._fillStyle.clone();
+        out._fillRule = this._fillRule.clone();
+        out._fillOpacity = this._fillOpacity.clone();
+
+        out._strokeStyle = this._strokeStyle.clone();
+        out._lineWidth = this._lineWidth.clone();
+        out._lineJoin = this._lineJoin.clone();
+        out._lineCap = this._lineCap.clone();
+        out._dashOffset = this._dashOffset.clone();
+        out._dashArray = this._dashArray.clone();
+        out._miterLimit = this._miterLimit.clone();
+        out._strokeOpacity = this._strokeOpacity.clone();
+        return out;
     }
 
     // Observable Properties that will trigger change events
