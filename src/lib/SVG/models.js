@@ -34,7 +34,7 @@ export class SVG extends models.Group {
             // todo - consider aspect ratios
             var scaleX = this._bounds.width / this._viewBox.width;
             var scaleY = this._bounds.height / this._viewBox.height;
-            ctx.translate(this._viewBox.x, this._viewBox.y);
+            ctx.translate(-this._viewBox.x, -this._viewBox.y);
             ctx.scale(scaleX, scaleY);
 
             // clip too?
