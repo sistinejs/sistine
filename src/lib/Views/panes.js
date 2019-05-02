@@ -110,9 +110,11 @@ export class Pane {
         if (force || this.needsRepaint) {
             var ctx = this.virtualContext;
             this.clear(ctx);
+            var startTime = Date.now();
             ctx.save();
             this.draw(ctx);
             ctx.restore();
+            this.drawTime = Date.now() - startTime;
             this.needsRepaint = false;
         }
     }

@@ -7,6 +7,10 @@ export function clear() {
     LOG_LINES.splice(0, LOG_LINES.length);
 }
 
+export function show() {
+    console.log(LOG_LINES.join("\n"));
+}
+
 export function debug() {
     if (LOG_CONTEXT) {
         var line = "";
@@ -14,7 +18,6 @@ export function debug() {
             line += arguments[i];
         }
         LOG_LINES.push(line);
-        console.log(line);
     }
 }
 
@@ -29,7 +32,6 @@ export function logfunc(funcname) {
         }
         line += ");";
         LOG_LINES.push(line);
-        console.log(line);
     }
 }
 
