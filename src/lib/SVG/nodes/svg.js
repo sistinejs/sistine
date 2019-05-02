@@ -64,7 +64,7 @@ export class SVGNodeProcessor extends base.NodeProcessor {
                         attrib.startsWith("inkscape:") ||
                        self.validAttributes.indexOf(attrib) >= 0) {
                     // ignore list
-                console.log("Ingoring attribute: ", attrib, " = ", value);
+                console.log("Ignoring attribute: ", attrib, " = ", value);
             } else {
                 throw new Error("Cannot process attribute: " + attrib);
             }

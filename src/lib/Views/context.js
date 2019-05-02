@@ -311,7 +311,7 @@ export class VirtualContext {
             this.ctx.fill(this.currentFrame.fillRule);
             logging.logfunc("ctx.fill", this.currentFrame.fillRule);
         } else {
-            this.ctx.fill();
+            // this.ctx.fill();
             logging.logfunc("ctx.fill");
         }
     }
@@ -412,13 +412,13 @@ export class VirtualContext {
     set fillStyle(style) {
         this.currentFrame.fillStyle = style;
         this.ctx.fillStyle = style;
-        logging.debug("ctx.fillStyle = ", style);
+        logging.debug("ctx.fillStyle = ", style === "none" ? "null" : style);
     }
 
     set strokeStyle(style) {
         this.currentFrame.strokeStyle = style;
         this.ctx.strokeStyle = style;
-        logging.debug("ctx.strokeStyle = ", style);
+        logging.debug("ctx.strokeStyle = ", style === "none" ? "null" : style);
     }
 
     set fillOpacity(value) {
