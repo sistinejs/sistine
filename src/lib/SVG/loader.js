@@ -3,15 +3,15 @@ import { Core } from "../Core/index"
 import { Geom } from "../Geom/index"
 import { Utils } from "../Utils/index"
 import { Bundles } from "../Bundles/index"
-import * as parser from "./parser"
+import * as svgutils from "../Utils/svg"
 import * as models from "./models"
 import { Nodes } from "./nodes"
 
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
-const NumbersTokenizer = parser.NumbersTokenizer;
-const PathDataParser = parser.PathDataParser;
-const TransformParser = parser.TransformParser;
+const NumbersTokenizer = svgutils.NumbersTokenizer;
+const PathDataParser = svgutils.PathDataParser;
+const TransformParser = svgutils.TransformParser;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;

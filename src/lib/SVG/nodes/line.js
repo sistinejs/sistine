@@ -4,16 +4,12 @@ import { Core } from "../../Core/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import { Bundles } from "../../Bundles/index"
-import * as parser from "../parser"
 import * as layouts from "../layouts"
 import * as models from "../models"
 
 const CM = layouts.defaultCM;
 const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
-const NumbersTokenizer = parser.NumbersTokenizer;
-const PathDataParser = parser.PathDataParser;
-const TransformParser = parser.TransformParser;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;

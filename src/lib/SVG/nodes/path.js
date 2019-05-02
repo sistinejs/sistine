@@ -2,14 +2,11 @@
 import { Core } from "../../Core/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
-import * as parser from "../parser"
 import * as base from "./base"
 import * as layouts from "../layouts"
 
 const Bounds = Geom.Models.Bounds;
-const NumbersTokenizer = parser.NumbersTokenizer;
-const PathDataParser = parser.PathDataParser;
-const TransformParser = parser.TransformParser;
+const PathDataParser = Utils.SVG.PathDataParser;
 const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
@@ -53,9 +50,9 @@ export class PathNodeProcessor extends base.NodeProcessor {
             "cubicCurve": "bezierCurveTo",
         }
         if (!attrib) return ;
-        var parser = new PathDataParser(attrib);
-        while (parser.hasNext()) {
-            var command = parser.next();
+        var p = new PathDataParser(attrib);
+        while (p.hasNext()) {
+            var command = p.next();
             var func = funcs[command.name];
             shape[func].apply(shape, command.args);
         }

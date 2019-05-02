@@ -3,12 +3,8 @@ import * as base from "./base"
 import { Core } from "../../Core/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
-import * as parser from "../parser"
 import * as models from "../models"
 
-const NumbersTokenizer = parser.NumbersTokenizer;
-const PathDataParser = parser.PathDataParser;
-const TransformParser = parser.TransformParser;
 const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;

@@ -1,12 +1,11 @@
 
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
-import * as parser from "../parser"
 import * as models from "../models"
 
-const NumbersTokenizer = parser.NumbersTokenizer;
-const PathDataParser = parser.PathDataParser;
-const TransformParser = parser.TransformParser;
+const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
+const PathDataParser = Utils.SVG.PathDataParser;
+const TransformParser = Utils.SVG.TransformParser;
 const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
@@ -220,9 +219,9 @@ export class NodeProcessor {
         var attribName = attribName || "transform";
         var attribValue = elem.getAttribute("transform");
         if (attribValue) {
-            var parser = new TransformParser(attribValue);
-            while (parser.hasNext()) {
-                var command = parser.next();
+            var p = new TransformParser(attribValue);
+            while (p.hasNext()) {
+                var command = p.next();
                 if (command.name == "matrix") {
                     shape.transform.apply(shape, command.args);
                 } else {
