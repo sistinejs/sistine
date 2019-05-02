@@ -57,10 +57,11 @@ export class SVGNodeProcessor extends base.NodeProcessor {
             } else if (attrib.startsWith("xmlns:") ||
                         [ "xmlns", "baseprofile" ].indexOf(attrib) >= 0 ||
                         attrib.startsWith("sodipodi:") ||
-                        attrib.startsWith("inkscape:") ||
-                       self.validAttributes.indexOf(attrib) >= 0) {
+                        attrib.startsWith("inkscape:")) {
                     // ignore list
                 console.log("Ignoring attribute: ", attrib, " = ", value);
+            } else if (self.validAttributes.indexOf(attrib) >= 0) {
+                // Valid attribute, do nothing
             } else {
                 throw new Error("Cannot process attribute: " + attrib);
             }

@@ -43,9 +43,12 @@ const elementProcessors = {
  */
 export function loadFromURL(url, configs, callback) {
     url = url.trim();
+    var startTime = Date.now();
     var loader = new SVGLoader(configs);
     $.get(url, function(data) {
         var result = loader.processElement(data.rootElement, null);
+        result.loadTime = Date.now() - startTime;
+        console.log("Element loaded in: ", result.loadTime);
         callback(result, data.rootElement);
     }).fail(function() {
         console.log("Error parsing SVG: ", arguments);
