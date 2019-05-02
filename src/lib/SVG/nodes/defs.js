@@ -31,6 +31,7 @@ export class DefsNodeProcessor extends base.NodeProcessor {
             var item = loader.processElement(child, parent);
             var id = child.getAttribute("id");
             parent.addDef(id, item);
+            item.removeFromParent();
         });
     }
 }

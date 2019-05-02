@@ -1,11 +1,10 @@
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
+import * as logging from "../Utils/logging"
 
 const PROPERTY_STATE_NONE = 0;
 const PROPERTY_STATE_PRESENT = 1;
 const PROPERTY_STATE_INHERITED = 2;
-
-const LOG_CONTEXT = true;
 
 class AttribFrame {
     constructor(parent) {
@@ -294,9 +293,7 @@ export class VirtualContext {
     }
 
     save() {
-        if (LOG_CONTEXT) {
-            console.log("ctx.save();");
-        }
+        logging.debug("ctx.save();");
         this.currentFrame = new AttribFrame(this.currentFrame);
         this.ctx.save();
     }
@@ -305,157 +302,115 @@ export class VirtualContext {
         if (this.currentFrame.parent != null) {
             this.currentFrame = this.currentFrame.parent;
             this.ctx.restore();
-            if (LOG_CONTEXT) {
-                console.log("ctx.restore()");
-            }
+            logging.debug("ctx.restore()");
         }
     }
 
     fill() {
         if (this.currentFrame.fillStyle != null) {
             this.ctx.fill(this.currentFrame.fillRule);
-            if (LOG_CONTEXT) {
-                console.log("ctx.fill("+this.currentFrame.fillRule+")");
-            }
+            logging.debug("ctx.fill("+this.currentFrame.fillRule+")");
         } else {
             this.ctx.fill();
-            if (LOG_CONTEXT) {
-                console.log("ctx.fill();");
-            }
+            logging.debug("ctx.fill();");
         }
     }
 
     stroke() {
         if (this.currentFrame.strokeStyle != null) {
             this.ctx.stroke();
-            if (LOG_CONTEXT) {
-                console.log("ctx.stroke();");
-            }
+            logging.debug("ctx.stroke();");
         }
     }
 
     transform(a, b, c, d, e, f) {
         // this.currentFrame.transform.multiply(new geom.Transform(a, b, c, d, e, f));
         this.ctx.transform(a, b, c, d, e, f);
-        if (LOG_CONTEXT) {
-            console.log("ctx.transform(", [a, b, c, d, e, f].join(", "), ");");
-        }
+        logging.debug("ctx.transform(", [a, b, c, d, e, f].join(", "), ");");
     }
 
     setTransform(a, b, c, d, e, f) {
         this.currentFrame.transform.set(a, b, c, d, e, f);
         this.ctx.setTransform(a, b, c, d, e, f);
-        if (LOG_CONTEXT) {
-            console.log("ctx.setTransform(", [ a, b, c, d, e, f].join(", "), ");");
-        }
+        logging.debug("ctx.setTransform(", [ a, b, c, d, e, f].join(", "), ");");
     }
 
     scale(sx, sy) {
         this.currentFrame.transform.scale(sx, sy);
         this.ctx.scale(sx, sy);
-        if (LOG_CONTEXT) {
-            console.log("ctx.scale(", sx + ", " + sy, ");");
-        }
+        logging.debug("ctx.scale(", sx + ", " + sy, ");");
     }
 
     translate(tx, ty) {
         this.currentFrame.transform.translate(tx, ty);
         this.ctx.translate(tx, ty);
-        if (LOG_CONTEXT) {
-            console.log("ctx.translate(", tx + ", " + ty, ");");
-        }
+        logging.debug("ctx.translate(", tx + ", " + ty, ");");
     }
 
     fillRect(x, y, w, h) {
         if (this.currentFrame.fillStyle != null) {
             this.ctx.fillRect(x, y, w, h);
-            if (LOG_CONTEXT) {
-                console.log("ctx.fillRect(", [x, y, w, h].join(", "), ");");
-            }
+            logging.debug("ctx.fillRect(", [x, y, w, h].join(", "), ");");
         }
     }
     strokeRect(x, y, w, h) {
         if (this.currentFrame.strokeStyle != null) {
             this.ctx.strokeRect(x, y, w, h);
-            if (LOG_CONTEXT) {
-                console.log("ctx.strokeRect(", [x, y, w, h].join(", "), ");");
-            }
+            logging.debug("ctx.strokeRect(", [x, y, w, h].join(", "), ");");
         }
     }
 
     createRadialGradient(x0, y0, r0, x1, y1, r1) {
-        if (LOG_CONTEXT) {
-            console.log("ctx.createRadialGradient(", 
+        logging.debug("ctx.createRadialGradient(", 
                         [x0, y0, r0, x1, y1, r1].join(", "), ");");
-        }
         return this.ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
     }
 
     createLinearGradient(x0, y0, x1, y1) {
-        if (LOG_CONTEXT) {
-            console.log("ctx.createLinearGradient(", [x0, y0, x1, y1].join(", "), ");");
-        }
+        logging.debug("ctx.createLinearGradient(", [x0, y0, x1, y1].join(", "), ");");
         return this.ctx.createLinearGradient(x0, y0, x1, y1);
     }
 
     // Pass throughs
     clearRect(x, y, w, h) { 
         this.ctx.clearRect(x, y, w, h); 
-        if (LOG_CONTEXT) {
-            console.log("ctx.clearRect(", x, y, w, h, ");");
-        }
+        logging.debug("ctx.clearRect(", [x, y, w, h].join(", "), ");");
     }
     beginPath() { 
-        if (LOG_CONTEXT) {
-            console.log("ctx.beginPath();");
-        }
+        logging.debug("ctx.beginPath();");
         this.ctx.beginPath(); 
     }
     closePath() { 
-        if (LOG_CONTEXT) {
-            console.log("ctx.closePath();");
-        }
+        logging.debug("ctx.closePath();");
         this.ctx.closePath(); 
     }
     moveTo(x, y) { 
-        if (LOG_CONTEXT) {
-            console.log("ctx.moveTo(", x, y, ");");
-        }
+        logging.debug("ctx.moveTo(", x, y, ");");
         this.ctx.moveTo(x, y); 
     }
     lineTo(x, y) { 
-        if (LOG_CONTEXT) {
-            console.log("ctx.lineTo(", x, y, ");");
-        }
+        logging.debug("ctx.lineTo(", x, y, ");");
         this.ctx.lineTo(x, y); 
     }
     ellipse(x, y, rx, ry, theta, startAngle, endAngle, anticlockwise) {
-        if (LOG_CONTEXT) {
-            console.log("ctx.ellipse(",
+        logging.debug("ctx.ellipse(",
                          [ x, y, rx, ry, theta,
                          startAngle, endAngle, anticlockwise].join(", "), ");");
-        }
         this.ctx.ellipse(x, y, rx, ry, theta, startAngle, endAngle, anticlockwise);
     }
     arc(x, y, radius, startAngle, endAngle) {
-        if (LOG_CONTEXT) {
-            console.log("ctx.arc(", 
+        logging.debug("ctx.arc(", 
                         [ x, y, radius, startAngle, endAngle].join(", "), ");");
-        }
         this.ctx.arc(x, y, radius, startAngle, endAngle);
     }
     bezierCurveTo(x1, y1, x2, y2, x3, y3) {
-        if (LOG_CONTEXT) {
-            console.log("ctx.bezierCurveTo(", 
+        logging.debug("ctx.bezierCurveTo(", 
                             [x1, y1, x2, y2, x3, y3].join(", "), ");");
-        }
         this.ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
     }
     quadraticCurveTo(x1, y1, x2, y2) {
-        if (LOG_CONTEXT) {
-            console.log("ctx.quadraticCurveTo(", 
+        logging.debug("ctx.quadraticCurveTo(", 
                         [ x1, y1, x2, y2 ].join(", "), ");");
-        }
         this.ctx.quadraticCurveTo(x1, y1, x2, y2);
     }
 
