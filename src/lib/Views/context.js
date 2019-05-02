@@ -18,7 +18,7 @@ class AttribFrame {
             this._assignProperty("_fillOpacity", 1.0, PROPERTY_STATE_PRESENT);
             this._assignProperty("_fillRule", "nonzero", PROPERTY_STATE_PRESENT);
 
-            this._assignProperty("_strokeStyle", "#000000", PROPERTY_STATE_PRESENT);
+            this._assignProperty("_strokeStyle", null, PROPERTY_STATE_PRESENT);
             this._assignProperty("_strokeOpacity", 1.0, PROPERTY_STATE_PRESENT);
             this._assignProperty("_lineWidth", 1.0, PROPERTY_STATE_PRESENT);
             this._assignProperty("_lineCap", "butt", PROPERTY_STATE_PRESENT);
@@ -293,7 +293,7 @@ export class VirtualContext {
     }
 
     save() {
-        logging.debug("ctx.save();");
+        logging.logfunc("ctx.save");
         this.currentFrame = new AttribFrame(this.currentFrame);
         this.ctx.save();
     }
@@ -302,115 +302,110 @@ export class VirtualContext {
         if (this.currentFrame.parent != null) {
             this.currentFrame = this.currentFrame.parent;
             this.ctx.restore();
-            logging.debug("ctx.restore()");
+            logging.logfunc("ctx.restore");
         }
     }
 
     fill() {
         if (this.currentFrame.fillStyle != null) {
             this.ctx.fill(this.currentFrame.fillRule);
-            logging.debug("ctx.fill("+this.currentFrame.fillRule+")");
+            logging.logfunc("ctx.fill", this.currentFrame.fillRule);
         } else {
             this.ctx.fill();
-            logging.debug("ctx.fill();");
+            logging.logfunc("ctx.fill");
         }
     }
 
     stroke() {
         if (this.currentFrame.strokeStyle != null) {
             this.ctx.stroke();
-            logging.debug("ctx.stroke();");
+            logging.logfunc("ctx.stroke");
         }
     }
 
     transform(a, b, c, d, e, f) {
         // this.currentFrame.transform.multiply(new geom.Transform(a, b, c, d, e, f));
         this.ctx.transform(a, b, c, d, e, f);
-        logging.debug("ctx.transform(", [a, b, c, d, e, f].join(", "), ");");
+        logging.logfunc("ctx.transform", a, b, c, d, e, f);
     }
 
     setTransform(a, b, c, d, e, f) {
         this.currentFrame.transform.set(a, b, c, d, e, f);
         this.ctx.setTransform(a, b, c, d, e, f);
-        logging.debug("ctx.setTransform(", [ a, b, c, d, e, f].join(", "), ");");
+        logging.logfunc("ctx.setTransform", a, b, c, d, e, f);
     }
 
     scale(sx, sy) {
         this.currentFrame.transform.scale(sx, sy);
         this.ctx.scale(sx, sy);
-        logging.debug("ctx.scale(", sx + ", " + sy, ");");
+        logging.logfunc("ctx.scale", sx, sy);
     }
 
     translate(tx, ty) {
         this.currentFrame.transform.translate(tx, ty);
         this.ctx.translate(tx, ty);
-        logging.debug("ctx.translate(", tx + ", " + ty, ");");
+        logging.logfunc("ctx.translate", tx, ty);
     }
 
     fillRect(x, y, w, h) {
         if (this.currentFrame.fillStyle != null) {
             this.ctx.fillRect(x, y, w, h);
-            logging.debug("ctx.fillRect(", [x, y, w, h].join(", "), ");");
+            logging.logfunc("ctx.fillRect", x, y, w, h);
         }
     }
     strokeRect(x, y, w, h) {
         if (this.currentFrame.strokeStyle != null) {
             this.ctx.strokeRect(x, y, w, h);
-            logging.debug("ctx.strokeRect(", [x, y, w, h].join(", "), ");");
+            logging.logfunc("ctx.strokeRect", x, y, w, h);
         }
     }
 
     createRadialGradient(x0, y0, r0, x1, y1, r1) {
-        logging.debug("ctx.createRadialGradient(", 
-                        [x0, y0, r0, x1, y1, r1].join(", "), ");");
+        logging.logfunc("ctx.createRadialGradient", x0, y0, r0, x1, y1, r1);
         return this.ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
     }
 
     createLinearGradient(x0, y0, x1, y1) {
-        logging.debug("ctx.createLinearGradient(", [x0, y0, x1, y1].join(", "), ");");
+        logging.logfunc("ctx.createLinearGradient", x0, y0, x1, y1);
         return this.ctx.createLinearGradient(x0, y0, x1, y1);
     }
 
     // Pass throughs
     clearRect(x, y, w, h) { 
         this.ctx.clearRect(x, y, w, h); 
-        logging.debug("ctx.clearRect(", [x, y, w, h].join(", "), ");");
+        logging.logfunc("ctx.clearRect", x, y, w, h);
     }
     beginPath() { 
-        logging.debug("ctx.beginPath();");
+        logging.logfunc("ctx.beginPath");
         this.ctx.beginPath(); 
     }
     closePath() { 
-        logging.debug("ctx.closePath();");
+        logging.logfunc("ctx.closePath");
         this.ctx.closePath(); 
     }
     moveTo(x, y) { 
-        logging.debug("ctx.moveTo(", x, y, ");");
+        logging.logfunc("ctx.moveTo", x, y);
         this.ctx.moveTo(x, y); 
     }
     lineTo(x, y) { 
-        logging.debug("ctx.lineTo(", x, y, ");");
+        logging.logfunc("ctx.lineTo", x, y);
         this.ctx.lineTo(x, y); 
     }
     ellipse(x, y, rx, ry, theta, startAngle, endAngle, anticlockwise) {
-        logging.debug("ctx.ellipse(",
-                         [ x, y, rx, ry, theta,
-                         startAngle, endAngle, anticlockwise].join(", "), ");");
+        logging.logfunc("ctx.ellipse", x, y, rx, ry, theta,
+                         startAngle, endAngle, anticlockwise);
         this.ctx.ellipse(x, y, rx, ry, theta, startAngle, endAngle, anticlockwise);
     }
     arc(x, y, radius, startAngle, endAngle) {
-        logging.debug("ctx.arc(", 
-                        [ x, y, radius, startAngle, endAngle].join(", "), ");");
+        logging.logfunc("ctx.arc", x, y, radius, startAngle, endAngle);
         this.ctx.arc(x, y, radius, startAngle, endAngle);
     }
     bezierCurveTo(x1, y1, x2, y2, x3, y3) {
-        logging.debug("ctx.bezierCurveTo(", 
-                            [x1, y1, x2, y2, x3, y3].join(", "), ");");
+        logging.logfunc("ctx.bezierCurveTo", x1, y1, x2, y2, x3, y3);
         this.ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
     }
     quadraticCurveTo(x1, y1, x2, y2) {
-        logging.debug("ctx.quadraticCurveTo(", 
-                        [ x1, y1, x2, y2 ].join(", "), ");");
+        logging.logfunc("ctx.quadraticCurveTo", x1, y1, x2, y2);
         this.ctx.quadraticCurveTo(x1, y1, x2, y2);
     }
 
