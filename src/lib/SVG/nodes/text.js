@@ -5,6 +5,8 @@ import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import * as models from "../models"
 
+const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
+const TransformParser = Utils.SVG.TransformParser;
 const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
