@@ -310,9 +310,6 @@ export class VirtualContext {
         if (this.currentFrame.fillStyle != null) {
             this.ctx.fill(this.currentFrame.fillRule);
             logging.logfunc("ctx.fill", this.currentFrame.fillRule);
-        } else {
-            // this.ctx.fill();
-            logging.logfunc("ctx.fill");
         }
     }
 
