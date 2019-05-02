@@ -306,17 +306,26 @@ export class VirtualContext {
         }
     }
 
-    fill() {
+    fill(path) {
         if (this.currentFrame.fillStyle != null) {
-            this.ctx.fill(this.currentFrame.fillRule);
-            logging.logfunc("ctx.fill", this.currentFrame.fillRule);
+            var fillRule = this.currentFrame.fillRule || "nonzero";
+            if (path) {
+                this.ctx.fill(path, fillRule);
+            } else {
+                this.ctx.fill(fillRule);
+                logging.logfunc("ctx.fill", fillRule);
+            }
         }
     }
 
-    stroke() {
+    stroke(path) {
         if (this.currentFrame.strokeStyle != null) {
-            this.ctx.stroke();
-            logging.logfunc("ctx.stroke");
+            if (path) {
+                this.ctx.stroke(path);
+            } else {
+                this.ctx.stroke();
+                logging.logfunc("ctx.stroke");
+            }
         }
     }
 

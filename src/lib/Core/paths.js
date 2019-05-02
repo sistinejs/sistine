@@ -16,6 +16,9 @@ export class Path extends models.Shape {
         configs = configs || {};
         this._components = [];
         this._currPoint = null;
+
+        // Only do this if supported
+        this._path2D = new Path2D();
     }
 
     newInstance() {
@@ -103,13 +106,16 @@ export class Path extends models.Shape {
     moveTo(x, y, isRelative) { 
         var cp = this.setCurrentPoint(x, y, isRelative);
         this.addComponent(new MoveToComponent(this.currentComponent, cp.x, cp.y));
+        if (this._path2D) this._path2D.moveTo(cp.x, cp.y);
     }
     closePath() {
         this.addComponent(new CloseComponent(this.currentComponent));
+        if (this._path2D) this._path2D.closePath();
     }
     lineTo(x, y, isRelative) { 
         var cp = this.setCurrentPoint(x, y, isRelative);
         this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
+        if (this._path2D) this._path2D.lineTo(cp.x, cp.y);
     }
     hlineTo(x, isRelative) { 
         var cp = this._ensureCurrentPoint();
@@ -119,6 +125,7 @@ export class Path extends models.Shape {
             cp.x = x;
         }
         this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
+        if (this._path2D) this._path2D.lineTo(cp.x, cp.y);
     }
     vlineTo(y, isRelative) { 
         var cp = this._currPoint;
@@ -128,6 +135,7 @@ export class Path extends models.Shape {
             cp.y = y;
         }
         this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
+        if (this._path2D) this._path2D.lineTo(cp.x, cp.y);
     }
     quadCurveTo(cp1x, cp1y, x, y, isRelative, isSmooth) {
         if (isSmooth) {
@@ -146,6 +154,7 @@ export class Path extends models.Shape {
         }
         this._currPoint = new Geom.Models.Point(x2, y2);
         this.addComponent(new QuadraticToComponent(this.currentComponent, x1, y1, x2, y2));
+        if (this._path2D) this._path2D.quadraticCurveTo(x1, y1, x2, y2);
     }
     bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y, isRelative, isSmooth) {
         if (isSmooth) {
@@ -168,26 +177,41 @@ export class Path extends models.Shape {
         }
         this._currPoint = new Geom.Models.Point(x3, y3);
         this.addComponent(new BezierToComponent(this.currentComponent, x1, y1, x2, y2, x3, y3));
+        if (this._path2D) this._path2D.bezierCurveTo(x1, y1, x2, y2, x3, y3);
     }
     arc(x, y, radius, startAngle, endAngle, anticlockwise, isRelative) {
         this.addComponent(new ArcComponent(this.currentComponent, x, y, radius, startAngle, endAngle, anticlockwise));
+        if (this._path2D) this._path2D.arc(x, y, radius, startAngle, endAngle, anticlockwise);
     }
     arcTo(x1, y1, x2, y2, radius, isRelative) {
         this.addComponent(new ArcToComponent(this.currentComponent, this._cmdArcTo, x1, y1, x2, y2, radius));
+        if (this._path2D) this._path2D.arcTo(x1, y1, x2, y2, radius);
     }
     svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY, isRelative) {
         var cp = this.setCurrentPoint(endX, endY, isRelative);
-        this.addComponent(new SVGArcToComponent(this.currentComponent, rx, ry, rotation, isLargeArc, shouldSweep, cp.x, cp.y));
+        var comp = new SVGArcToComponent(this.currentComponent, rx, ry, rotation, isLargeArc, shouldSweep, cp.x, cp.y)
+        this.addComponent(comp);
+        if (this._path2D) {
+            comp.boundingBox;
+            this._path2D.ellipse(comp._center.x, comp._center.y,
+                        comp._rx, comp._ry, comp._rotation,
+                        comp.startAngle, comp.endAngle, comp._anticlockwise);
+        }
     }
 
     draw(ctx) {
         ctx.beginPath();
-        for (var i = 0;i < this._components.length;i++) {
-            var currComp = this._components[i];
-            currComp.draw(ctx);
+        if (this._path2D)  {
+            ctx.fill(this._path2D);
+            ctx.stroke(this._path2D);
+        } else {
+            for (var i = 0;i < this._components.length;i++) {
+                var currComp = this._components[i];
+                currComp.draw(ctx);
+            }
+            ctx.fill();
+            ctx.stroke();
         }
-        ctx.fill();
-        ctx.stroke();
         // Draw fornow till we figure out hit tests and bounding boxes
         // this.drawControls(ctx);
     }
