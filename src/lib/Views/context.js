@@ -412,76 +412,88 @@ export class VirtualContext {
     set fillStyle(style) {
         this.currentFrame.fillStyle = style;
         this.ctx.fillStyle = style;
+        logging.debug("ctx.fillStyle = ", style);
     }
 
     set strokeStyle(style) {
         this.currentFrame.strokeStyle = style;
         this.ctx.strokeStyle = style;
+        logging.debug("ctx.strokeStyle = ", style);
     }
 
     set fillOpacity(value) {
         this.currentFrame.fillOpacity = value;
         this.ctx.fillOpacity = value;
+        logging.debug("ctx.fillOpacity = ", value);
     }
 
     set fillRule(value) {
         this.currentFrame.fillRule = value;
-        this.ctx.fillRule = value;
     }
 
     set strokeOpacity(value) {
         this.currentFrame.strokeOpacity = value;
-        this.ctx.strokeOpacity = value;
+        // TODO: set the opacity in the original color or during stroking
     }
 
     set lineWidth(value) {
         this.currentFrame.lineWidth = value;
         this.ctx.lineWidth = value;
+        logging.debug("ctx.lineWidth = ", value);
     }
 
     set lineCap(value) {
         this.currentFrame.lineCap = value;
         this.ctx.lineCap = value;
+        logging.debug("ctx.lineCap = ", value);
     }
 
     set lineJoin(value) {
         this.currentFrame.lineJoin = value;
         this.ctx.lineJoin = value;
+        logging.debug("ctx.lineJoin = ", value);
     }
 
     set miterLimit(value) {
         this.currentFrame.miterLimit = value;
         this.ctx.miterLimit = value;
+        logging.debug("ctx.miterLimit = ", value);
     }
 
     setLineDash(value) {
         this.currentFrame.lineDash = value;
         this.ctx.setLineDash(value);
+        logging.logfunc("ctx.setLineDash", value);
     }
 
     set lineDashOffset(value) {
         this.currentFrame.lineDashOffset = value;
         this.ctx.lineDashOffset = value;
+        logging.debug("ctx.lineDashOffset = ", value);
     }
 
     set shadowOffsetX(value) {
         this.currentFrame.shadowOffsetX = value;
         this.ctx.shadowOffsetX = value;
+        logging.debug("ctx.shadowOffsetX = ", value);
     }
 
     set shadowOffsetY(value) {
         this.currentFrame.shadowOffsetY = value;
         this.ctx.shadowOffsetY = value;
+        logging.debug("ctx.shadowOffsetY = ", value);
     }
 
     set shadowBlur(value) {
         this.currentFrame.shadowBlur = value;
         this.ctx.shadowBlur = value;
+        logging.debug("ctx.shadowBlur = ", value);
     }
 
     set shadowColor(value) {
         this.currentFrame.shadowColor = value;
         this.ctx.shadowColor = value;
+        logging.debug("ctx.shadowColor = ", value);
     }
 
     set font(value) {

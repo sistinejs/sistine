@@ -242,7 +242,7 @@ export class Styleable extends Transformable {
             ctx.lineCap = this.lineCap.value;
         }
         if (this.lineWidth.value || !this.lineCap.inherit) {
-            ctx.lineWidth = this.lineWidth.value;
+            ctx.lineWidth = this.lineWidth.value.pixelValue;
         }
         if (this.dashOffset.value || !this.dashOffset.inherit) {
             ctx.dashOffset = this.dashOffset.value;
