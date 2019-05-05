@@ -330,7 +330,6 @@ export class PathDataParser extends Iterator {
                 tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
             }
             args.push(currCommand.isRelative);
-            args.push(currCommand.isSmooth);
             this._current = {'name': currCommand.name, 'args': args};
         }
         return this._current;

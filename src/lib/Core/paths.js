@@ -16,9 +16,8 @@ export class Path extends models.Shape {
         configs = configs || {};
         this._components = [];
         this._currPoint = null;
-
         // Only do this if supported
-        this._path2D = new Path2D();
+        this._path2D = null;
     }
 
     newInstance() {
@@ -103,19 +102,31 @@ export class Path extends models.Shape {
         return this._components[this._components.length - 1];
     }
 
+    get path2D() {
+        if (this._path2D == null) {
+            this._path2D = new Path2D();
+            if (this._path2D) {
+                for (var i = 0;i < this._components.length;i++) {
+                    var currComp = this._components[i];
+                    currComp.extendPath2D(this._path2D);
+                }
+            }
+        }
+        return this._path2D;
+    }
+
     moveTo(x, y, isRelative) { 
         var cp = this.setCurrentPoint(x, y, isRelative);
-        this.addComponent(new MoveToComponent(this.currentComponent, cp.x, cp.y));
-        if (this._path2D) this._path2D.moveTo(cp.x, cp.y);
+        var newComp = new MoveToComponent(this.currentComponent, cp.x, cp.y, isRelative);
+        this.addComponent(newComp);
     }
     closePath() {
         this.addComponent(new CloseComponent(this.currentComponent));
-        if (this._path2D) this._path2D.closePath();
     }
     lineTo(x, y, isRelative) { 
         var cp = this.setCurrentPoint(x, y, isRelative);
-        this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
-        if (this._path2D) this._path2D.lineTo(cp.x, cp.y);
+        var newComp = new LineToComponent(this.currentComponent, cp.x, cp.y, isRelative);
+        this.addComponent(newComp);
     }
     hlineTo(x, isRelative) { 
         var cp = this._ensureCurrentPoint();
@@ -124,8 +135,8 @@ export class Path extends models.Shape {
         } else {
             cp.x = x;
         }
-        this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
-        if (this._path2D) this._path2D.lineTo(cp.x, cp.y);
+        var newComp = new LineToComponent(this.currentComponent, cp.x, cp.y, isRelative);
+        this.addComponent(newComp);
     }
     vlineTo(y, isRelative) { 
         var cp = this._currPoint;
@@ -134,16 +145,13 @@ export class Path extends models.Shape {
         } else {
             cp.y = y;
         }
-        this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
-        if (this._path2D) this._path2D.lineTo(cp.x, cp.y);
+        var newComp = new LineToComponent(this.currentComponent, cp.x, cp.y, isRelative);
+        this.addComponent(newComp);
     }
     smoothQuadCurveTo(x, y, isRelative) {
         throw new Error("Smooth curves not yet implemented.");
     }
-    quadCurveTo(cp1x, cp1y, x, y, isRelative, isSmooth) {
-        if (isSmooth) {
-            throw new Error("Smooth curves not yet implemented.");
-        }
+    quadCurveTo(cp1x, cp1y, x, y, isRelative) {
         var cp = this._currPoint || new Geom.Models.Point();
         var x1 = cp1x;
         var y1 = cp1y;
@@ -156,13 +164,32 @@ export class Path extends models.Shape {
             y2 += cp.y;
         }
         this._currPoint = new Geom.Models.Point(x2, y2);
-        this.addComponent(new QuadraticToComponent(this.currentComponent, x1, y1, x2, y2));
-        if (this._path2D) this._path2D.quadraticCurveTo(x1, y1, x2, y2);
+        var newComp = new QuadraticToComponent(this.currentComponent,
+                                               x1, y1, x2, y2, isRelative);
+        this.addComponent(newComp);
     }
     smoothBezierCurveTo(cp2x, cp2y, x, y, isRelative) {
-        throw new Error("Smooth curves not yet implemented.");
+        var cp = this._currPoint || new Geom.Models.Point();
+        var last = this.currentComponent;
+        var x1 = cp.x, y1 = cp.y;
+        if (last != null && last.constructor.name == "BezierToComponent") {
+            // use the bezier's "second last" control point
+            x1 = last.p2.x;
+            y1 = last.p2.y;
+        }
+        var x2 = cp2x;
+        var y2 = cp2y;
+        var x3 = x;
+        var y3 = y;
+        if (isRelative) {
+            x2 += cp.x; y2 += cp.y;
+            x3 += cp.x; y3 += cp.y;
+        }
+        this._currPoint = new Geom.Models.Point(x3, y3);
+        var newComp = new BezierToComponent(this.currentComponent, x1, y1, x2, y2, x3, y3, isRelative);
+        this.addComponent(newComp);
     }
-    bezierCurveTo(cp2x, cp2y, x, y, isRelative) {
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y, isRelative) {
         var cp = this._currPoint || new Geom.Models.Point();
         var x1 = cp1x;
         var y1 = cp1y;
@@ -171,42 +198,32 @@ export class Path extends models.Shape {
         var x3 = x;
         var y3 = y;
         if (isRelative) {
-            x1 += cp.x;
-            y1 += cp.y;
-            x2 += cp.x;
-            y2 += cp.y;
-            x3 += cp.x;
-            y3 += cp.y;
+            x1 += cp.x; y1 += cp.y;
+            x2 += cp.x; y2 += cp.y;
+            x3 += cp.x; y3 += cp.y;
         }
         this._currPoint = new Geom.Models.Point(x3, y3);
-        this.addComponent(new BezierToComponent(this.currentComponent, x1, y1, x2, y2, x3, y3));
-        if (this._path2D) this._path2D.bezierCurveTo(x1, y1, x2, y2, x3, y3);
+        var newComp = new BezierToComponent(this.currentComponent, x1, y1, x2, y2, x3, y3, isRelative);
+        this.addComponent(newComp);
     }
     arc(x, y, radius, startAngle, endAngle, anticlockwise, isRelative) {
-        this.addComponent(new ArcComponent(this.currentComponent, x, y, radius, startAngle, endAngle, anticlockwise));
-        if (this._path2D) this._path2D.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+        this.addComponent(new ArcComponent(this.currentComponent, x, y, radius, startAngle, endAngle, anticlockwise, isRelative));
     }
     arcTo(x1, y1, x2, y2, radius, isRelative) {
-        this.addComponent(new ArcToComponent(this.currentComponent, this._cmdArcTo, x1, y1, x2, y2, radius));
-        if (this._path2D) this._path2D.arcTo(x1, y1, x2, y2, radius);
+        this.addComponent(new ArcToComponent(this.currentComponent, this._cmdArcTo, x1, y1, x2, y2, radius, isRelative));
     }
     svgArcTo(rx, ry, rotation, isLargeArc, shouldSweep, endX, endY, isRelative) {
         var cp = this.setCurrentPoint(endX, endY, isRelative);
-        var comp = new SVGArcToComponent(this.currentComponent, rx, ry, rotation, isLargeArc, shouldSweep, cp.x, cp.y)
+        var comp = new SVGArcToComponent(this.currentComponent, rx, ry, rotation, isLargeArc, shouldSweep, cp.x, cp.y, isRelative)
         this.addComponent(comp);
-        if (this._path2D) {
-            comp.boundingBox;
-            this._path2D.ellipse(comp._center.x, comp._center.y,
-                        comp._rx, comp._ry, comp._rotation,
-                        comp.startAngle, comp.endAngle, comp._anticlockwise);
-        }
     }
 
     draw(ctx) {
         ctx.beginPath();
-        if (this._path2D)  {
-            ctx.fill(this._path2D);
-            ctx.stroke(this._path2D);
+        var path2D = this.path2D;
+        if (path2D)  {
+            ctx.fill(path2D);
+            ctx.stroke(path2D);
         } else {
             for (var i = 0;i < this._components.length;i++) {
                 var currComp = this._components[i];
@@ -243,7 +260,8 @@ export class Path extends models.Shape {
  * like lines, arcs, quadratic beziers etc.
  */
 export class PathComponent {
-    constructor(prev) {
+    constructor(prev, isRelative) {
+        this.isRelative = isRelative || false;
         this.next = null;
         this.prev = prev || null;
         if (prev) prev.next = this;
@@ -285,6 +303,8 @@ export class CloseComponent extends PathComponent {
         return new Geom.Models.Bounds();
     }
 
+    extendPath2D(path2D) { path2D.closePath(); }
+
     get endPoint() {
         return this.prev ? this.prev.endPoint : null;
     }
@@ -293,8 +313,8 @@ export class CloseComponent extends PathComponent {
 }
 
 export class MoveToComponent extends PathComponent {
-    constructor(prev, x, y) {
-        super(prev);
+    constructor(prev, x, y, isRelative) {
+        super(prev, isRelative);
         this._endPoint = new Geom.Models.Point(x, y);
     }
 
@@ -303,6 +323,8 @@ export class MoveToComponent extends PathComponent {
         out._endPoint = this._endPoint.copy();
         return out;
     }
+
+    extendPath2D(path2D) { path2D.moveTo(this.endPoint.x, this.endPoint.y); }
 
     _evalBoundingBox() {
         return new Geom.Models.Bounds(this._endPoint.x, this._endPoint.y, 0, 0);
@@ -330,10 +352,12 @@ export class MoveToComponent extends PathComponent {
 }
 
 export class LineToComponent extends PathComponent {
-    constructor(prev, x, y) {
-        super(prev);
+    constructor(prev, x, y, isRelative) {
+        super(prev, isRelative);
         this._endPoint = new Geom.Models.Point(x, y);
     }
+
+    extendPath2D(path2D) { path2D.lineTo(this.endPoint.x, this.endPoint.y); }
 
     clone() {
         var out = new this.constructor();
@@ -377,10 +401,14 @@ export class LineToComponent extends PathComponent {
 }
 
 export class QuadraticToComponent extends PathComponent {
-    constructor(prev, x1, y1, x2, y2) {
-        super(prev);
+    constructor(prev, x1, y1, x2, y2, isRelative) {
+        super(prev, isRelative);
         this.p1 = new Geom.Models.Point(x1, y1);
         this.p2 = new Geom.Models.Point(x2, y2);
+    }
+
+    extendPath2D(path2D) {
+        path2D.quadraticCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
     }
 
     clone() {
@@ -440,8 +468,8 @@ export class QuadraticToComponent extends PathComponent {
 }
 
 export class BezierToComponent extends PathComponent {
-    constructor(prev, x1, y1, x2, y2, x3, y3) {
-        super(prev);
+    constructor(prev, x1, y1, x2, y2, x3, y3, isRelative) {
+        super(prev, isRelative);
         this.p1 = new Geom.Models.Point(x1, y1);
         this.p2 = new Geom.Models.Point(x2, y2);
         this.p3 = new Geom.Models.Point(x3, y3);
@@ -453,6 +481,10 @@ export class BezierToComponent extends PathComponent {
         out.p2 = this.p2.copy();
         out.p3 = this.p3.copy();
         return out;
+    }
+
+    extendPath2D(path2D) {
+        path2D.bezierCurveTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y, this.p3.x, this.p3.y);
     }
 
     draw(ctx) {
@@ -508,8 +540,8 @@ export class BezierToComponent extends PathComponent {
 }
 
 export class ArcComponent extends PathComponent {
-    constructor(prev, x, y, radius, startAngle, endAngle, anticlockwise) {
-        super(prev);
+    constructor(prev, cx, cy, radius, startAngle, endAngle, anticlockwise, isRelative) {
+        super(prev, isRelative);
         this._cx = cx;
         this._cy = cy;
         this._radius = radius;
@@ -529,16 +561,25 @@ export class ArcComponent extends PathComponent {
         return out;
     }
 
+    extendPath2D(path2D) {
+        path2D.arc(this.cx, this.cy, this.radius, this.startAngle, this.endAngle, this.anticlockwise);
+    }
+
     draw(ctx) {
         ctx.arc(this._cx, this._cy, this._radius, this._startAngle, this._endAngle, this._anticlockwise);
     }
 }
 
 export class ArcToComponent extends PathComponent {
-    constructor(prev, x1, y1, x2, y2, radius) {
-        super(prev);
+    constructor(prev, x1, y1, x2, y2, radius, isRelative) {
+        super(prev, isRelative);
         this.p1 = new Geom.Models.Point(x1, y1);
         this.p2 = new Geom.Models.Point(x2, y2);
+        this.radius = radius;
+    }
+
+    extendPath2D(path2D) {
+        path2D.arcTo(this.p1.x, this.p1.y, this.p2.x, this.p2.y, this.radius);
     }
 
     draw(ctx) {
@@ -576,8 +617,8 @@ export class ArcToComponent extends PathComponent {
  * An elliptical arc parametrized by endpoints as in an SVG path.
  */
 export class SVGArcToComponent extends PathComponent {
-    constructor(prev, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY) {
-        super(prev);
+    constructor(prev, rx, ry, rotation, isLargeArc, shouldSweep, endX, endY, isRelative) {
+        super(prev, isRelative);
         this._rx = rx;
         this._ry = ry;
         this._rotation = rotation;
@@ -605,6 +646,13 @@ export class SVGArcToComponent extends PathComponent {
     get endPoint() { return this._endPoint; }
     get startAngle() { return this._startAngle; }
     get endAngle() { return this._endAngle; }
+
+    extendPath2D(path2D) {
+        this.boundingBox;   // ensures missing pieces are evaluated
+        path2D.ellipse(this._center.x, this._center.y,
+                       this._rx, this._ry, this._rotation,
+                       this._startAngle, this._endAngle, this._anticlockwise);
+    }
 
     draw(ctx) {
         this.boundingBox;   // ensures missing pieces are evaluated
@@ -646,8 +694,8 @@ export class SVGArcToComponent extends PathComponent {
  * An elliptical arc parametrized by center points.
  */
 export class EllipticalArcComponent extends PathComponent {
-    constructor(prev, centerX, centerY, rx, ry, rotation, startAngle, endAngle, anticlockwise) {
-        super(prev);
+    constructor(prev, centerX, centerY, rx, ry, rotation, startAngle, endAngle, anticlockwise, isRelative) {
+        super(prev, isRelative);
         this.rx = rx;
         this.ry = ry;
         this._center = new Geom.Models.Point(centerX, centerY);
