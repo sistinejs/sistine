@@ -15,6 +15,7 @@ import * as symbol from "./symbol"
 import * as ignore from "./ignore"
 import * as desc from "./desc"
 import * as gradients from "./gradients"
+import * as pattern from "./pattern"
 
 export const Nodes = {
     UseNodeProcessor: use.UseNodeProcessor,
@@ -36,5 +37,6 @@ export const Nodes = {
     DescNodeProcessor: desc.DescNodeProcessor,
     LinearGradientNodeProcessor: gradients.LinearGradientNodeProcessor,
     RadialGradientNodeProcessor: gradients.RadialGradientNodeProcessor,
+    PatterntNodeProcessor: pattern.PatterntNodeProcessor,
 }
 

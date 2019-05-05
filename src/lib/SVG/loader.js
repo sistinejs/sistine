@@ -34,7 +34,9 @@ const elementProcessors = {
     "symbol": "SymbolNodeProcessor",
     "linearGradient": "LinearGradientNodeProcessor",
     "radialGradient": "RadialGradientNodeProcessor",
+    "pattern": "PatternNodeProcessor",
     "audio": "IgnoreNodeProcessor",
+    "filter": "IgnoreNodeProcessor",
     "script": "IgnoreNodeProcessor",
 }
 
