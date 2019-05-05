@@ -48,6 +48,8 @@ export class PathNodeProcessor extends base.NodeProcessor {
             "arcTo": "svgArcTo",
             "quadCurve": "quadCurveTo",
             "cubicCurve": "bezierCurveTo",
+            "smoothQuadCurve": "smoothQuadCurveTo",
+            "smoothCubicCurve": "smoothBezierCurveTo",
         }
         if (!attrib) return ;
         var p = new PathDataParser(attrib);

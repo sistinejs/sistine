@@ -25,12 +25,12 @@ export const PATH_COMMANDS = {
     'A': {command: 'A', name: "arcTo", isRelative: false},
     'q': {command: 'q', name: "quadCurve", isRelative: true},
     'Q': {command: 'Q', name: "quadCurve", isRelative: false},
-    't': {command: 't', name: "quadCurve", isRelative: true, isSmooth: true},
-    'T': {command: 'T', name: "quadCurve", isRelative: false, isSmooth: true},
+    't': {command: 't', name: "smoothQuadCurve", isRelative: true},
+    'T': {command: 'T', name: "smoothQuadCurve", isRelative: false},
     'c': {command: 'c', name: "cubicCurve", isRelative: true},
     'C': {command: 'C', name: "cubicCurve", isRelative: false},
-    's': {command: 's', name: "cubicCurve", isRelative: true, isSmooth: true},
-    'S': {command: 'S', name: "cubicCurve", isRelative: false, isSmooth: true},
+    's': {command: 's', name: "smoothCubicCurve", isRelative: true},
+    'S': {command: 'S', name: "smoothCubicCurve", isRelative: false},
 }
 
 class Token {
@@ -305,25 +305,27 @@ export class PathDataParser extends Iterator {
             } else if (currCommand.name == "quadCurve") {
                 var x1 = tokenizer.ensureNumber();
                 var y1 = tokenizer.ensureNumber();
+                var x2 = tokenizer.ensureNumber();
+                var y2 = tokenizer.ensureNumber();
+                args = [ x1, y1, x2, y2];
+            } else if (currCommand.name == "smoothQuadCurve") {
+                var x1 = tokenizer.ensureNumber();
+                var y1 = tokenizer.ensureNumber();
                 args = [ x1, y1 ];
-                if (!currCommand.isSmooth) {
-                    var x2 = tokenizer.ensureNumber();
-                    var y2 = tokenizer.ensureNumber();
-                    args.push(x2);
-                    args.push(y2);
-                }
             } else if (currCommand.name == "cubicCurve") {
                 var x1 = tokenizer.ensureNumber();
                 var y1 = tokenizer.ensureNumber();
                 var x2 = tokenizer.ensureNumber();
                 var y2 = tokenizer.ensureNumber();
+                var x3 = tokenizer.ensureNumber();
+                var y3 = tokenizer.ensureNumber();
+                args = [ x1, y1, x2, y2, x3, y3];
+            } else if (currCommand.name == "smoothCubicCurve") {
+                var x1 = tokenizer.ensureNumber();
+                var y1 = tokenizer.ensureNumber();
+                var x2 = tokenizer.ensureNumber();
+                var y2 = tokenizer.ensureNumber();
                 args = [ x1, y1, x2, y2 ];
-                if (!currCommand.isSmooth) {
-                    var x3 = tokenizer.ensureNumber();
-                    var y3 = tokenizer.ensureNumber();
-                    args.push(x3);
-                    args.push(y3);
-                }
             } else {
                 tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
             }

@@ -137,6 +137,9 @@ export class Path extends models.Shape {
         this.addComponent(new LineToComponent(this.currentComponent, cp.x, cp.y));
         if (this._path2D) this._path2D.lineTo(cp.x, cp.y);
     }
+    smoothQuadCurveTo(x, y, isRelative) {
+        throw new Error("Smooth curves not yet implemented.");
+    }
     quadCurveTo(cp1x, cp1y, x, y, isRelative, isSmooth) {
         if (isSmooth) {
             throw new Error("Smooth curves not yet implemented.");
@@ -156,10 +159,10 @@ export class Path extends models.Shape {
         this.addComponent(new QuadraticToComponent(this.currentComponent, x1, y1, x2, y2));
         if (this._path2D) this._path2D.quadraticCurveTo(x1, y1, x2, y2);
     }
-    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y, isRelative, isSmooth) {
-        if (isSmooth) {
-            throw new Error("Smooth curves not yet implemented.");
-        }
+    smoothBezierCurveTo(cp2x, cp2y, x, y, isRelative) {
+        throw new Error("Smooth curves not yet implemented.");
+    }
+    bezierCurveTo(cp2x, cp2y, x, y, isRelative) {
         var cp = this._currPoint || new Geom.Models.Point();
         var x1 = cp1x;
         var y1 = cp1y;
