@@ -38,6 +38,7 @@ const elementProcessors = {
     "audio": "IgnoreNodeProcessor",
     "filter": "IgnoreNodeProcessor",
     "script": "IgnoreNodeProcessor",
+    "SVGTestCase": "IgnoreNodeProcessor",
 }
 
 /**
