@@ -2,12 +2,11 @@
 import { Core } from "../Core/index"
 import { Geom } from "../Geom/index"
 import { Utils } from "../Utils/index"
-import { Bundles } from "../Bundles/index"
+import { Builtins } from "../Builtins/index"
 import * as svgutils from "../Utils/svg"
 import * as models from "./models"
 import { Nodes } from "./nodes"
 
-const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = svgutils.NumbersTokenizer;
 const PathDataParser = svgutils.PathDataParser;
@@ -21,6 +20,7 @@ const elementProcessors = {
     "svg": "SVGNodeProcessor",
     "g": "GNodeProcessor",
     "rect": "RectNodeProcessor",
+    "image": "ImageNodeProcessor",
     "circle": "CircleNodeProcessor",
     "ellipse": "EllipseNodeProcessor",
     "line": "LineNodeProcessor",

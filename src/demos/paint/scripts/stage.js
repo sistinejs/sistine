@@ -1,6 +1,6 @@
 
 var BasicShapes = Sistine.Bundles.BasicShapes;
-var BuiltinShapes = Sistine.Bundles.Builtins;
+var BuiltinShapes = Sistine.Builtins;
 
 shapeDefaults = {
     'strokeStyle': "black",

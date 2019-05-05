@@ -48,7 +48,7 @@
     cursor: ew-resize;
     top: 0px;
     bottom: 0px;
-    left: var(--svg-samples-div-width);
+    left: 50%;
     width: var(--split-bar-width);
     background-color: gray;
 }

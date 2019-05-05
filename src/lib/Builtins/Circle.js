@@ -1,8 +1,8 @@
 
-import * as geom from "../../Geom/models"
-import * as geomutils from "../../Geom/utils"
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
+import * as models from "../Core/models"
+import * as controller from "../Core/controller"
 
 const Length = geom.Length;
 

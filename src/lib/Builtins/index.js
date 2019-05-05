@@ -5,6 +5,7 @@ import * as Circle from "./Circle"
 import * as QuadCurve from "./QuadCurve"
 import * as CubicCurve from "./CubicCurve"
 import * as Rectangle from "./Rectangle"
+import * as Image from "./Image"
 import * as Ellipse from "./Ellipse"
 
 export const Builtins = {
@@ -13,6 +14,7 @@ export const Builtins = {
     "QuadCurve": QuadCurve.QuadCurve,
     "CubicCurve": CubicCurve.CubicCurve,
     "Rectangle": Rectangle.Rectangle,
+    "Image": Image.Image,
     "Ellipse": Ellipse.Ellipse,
     "Circle": Circle.Circle,
 }

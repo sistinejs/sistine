@@ -6,6 +6,7 @@ import * as circle from "./circle"
 import * as ellipse from "./ellipse"
 import * as line from "./line"
 import * as rect from "./rect"
+import * as image from "./image"
 import * as g from "./g"
 import * as svg from "./svg"
 import * as defs from "./defs"
@@ -30,6 +31,7 @@ export const Nodes = {
     CircleNodeProcessor: circle.CircleNodeProcessor,
     EllipseNodeProcessor: ellipse.EllipseNodeProcessor,
     RectNodeProcessor: rect.RectNodeProcessor,
+    ImageNodeProcessor: image.ImageNodeProcessor,
     TitleNodeProcessor: desc.TitleNodeProcessor,
     DescNodeProcessor: desc.DescNodeProcessor,
     LinearGradientNodeProcessor: gradients.LinearGradientNodeProcessor,

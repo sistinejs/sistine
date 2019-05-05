@@ -3,12 +3,11 @@ import * as base from "./base"
 import { Core } from "../../Core/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
-import { Bundles } from "../../Bundles/index"
+import { Builtins } from "../../Builtins/index"
 import * as layouts from "../layouts"
 import * as models from "../models"
 
 const CM = layouts.defaultCM;
-const Builtins = Bundles.Builtins;
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
 const PathDataParser = Utils.SVG.PathDataParser;

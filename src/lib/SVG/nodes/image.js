@@ -4,16 +4,17 @@ import { Core } from "../../Core/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import { Builtins } from "../../Builtins/index"
-import * as layouts from "../layouts"
 import * as models from "../models"
+import * as layouts from "../layouts"
 
 const CM = layouts.defaultCM;
 const Bounds = Geom.Models.Bounds;
+const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
-export class LineNodeProcessor extends base.NodeProcessor {
+export class ImageNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.animationElements.concat(base.descriptiveElements);
     }
@@ -23,21 +24,20 @@ export class LineNodeProcessor extends base.NodeProcessor {
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)
                 .concat(base.presentationAttributes)
-                .concat(["class", "style", "externalResourcesRequired",
-                          "transform",
-                         "x1", "y1", "x2", "y2" ])
+                .concat([ "class", "style", "externalResourcesRequired",
+                          "transform", "x", "y", "width", "height"]);
     }
 
     get hasStyles() { return true; }
     get hasTransforms() { return true; }
 
     processElement(elem, parent) {
-        var out = new Builtins.Line();
+        var out = new Builtins.Image();
         super.processElement(elem, out);
-        CM.addXConstraint(out, "x1", this.getLength(elem, "x1"));
-        CM.addYConstraint(out, "y1", this.getLength(elem, "y1"));
-        CM.addXConstraint(out, "x2", this.getLength(elem, "x2"));
-        CM.addYConstraint(out, "y2", this.getLength(elem, "y2"));
+        CM.addXConstraint(out, "x", this.getLength(elem, "x"));
+        CM.addYConstraint(out, "y", this.getLength(elem, "y"));
+        CM.addXConstraint(out, "width", this.getLength(elem, "width"));
+        CM.addYConstraint(out, "height", this.getLength(elem, "height"));
         parent.add(out);
         return out;
     }
