@@ -366,6 +366,16 @@ export class VirtualContext {
         }
     }
 
+    drawImage(img, sx, sy, sw, sh, x, y, w, h) {
+        if (x === undefined) {
+            this.ctx.drawImage(img, sx, sy, sw, sh);
+            logging.logfunc("ctx.drawImage", sx, sy, sw, sh);
+        } else {
+            this.ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+            logging.logfunc("ctx.drawImage", sx, sy, sw, sh, x, y, w, h);
+        }
+    }
+
     createRadialGradient(x0, y0, r0, x1, y1, r1) {
         logging.logfunc("ctx.createRadialGradient", x0, y0, r0, x1, y1, r1);
         return this.ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);

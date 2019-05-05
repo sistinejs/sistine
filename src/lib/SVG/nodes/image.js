@@ -32,7 +32,11 @@ export class ImageNodeProcessor extends base.NodeProcessor {
     get hasTransforms() { return true; }
 
     processElement(elem, parent) {
-        var out = new Builtins.Image();
+        var href = elem.getAttribute("xlink:href") || elem.getAttrib("href") || null;
+        if (href == null) {
+            throw new Error("Use needs a xlink:href attribute.");
+        }
+        var out = new Builtins.Image({ url: href });
         super.processElement(elem, out);
         CM.addXConstraint(out, "x", this.getLength(elem, "x"));
         CM.addYConstraint(out, "y", this.getLength(elem, "y"));

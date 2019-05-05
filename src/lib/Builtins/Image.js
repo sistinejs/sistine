@@ -10,13 +10,60 @@ var HitInfo = controller.HitInfo;
 export class Image extends models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
+        // see what the image source is
+        this._loaded = false;
+        this._image = null;
         this._x = configs._x || 0;
         this._y = configs._y || 0;
         this._width = configs._width || 0;
         this._height = configs._height || 0;
+        this._clipX = configs._clipX || null;
+        this._clipY = configs._clipY || null;
+        this._clipWidth = configs._clipWidth || null;
+        this._clipHeight = configs._clipHeight || null;
+
+        if (configs._image) {
+            this._image = configs._image || null;
+            this._loaded = true;
+        } else if (configs.element) {
+            this.loadElement(configs.element);
+        } else if (configs.url) {
+            this.loadFromUrl(configs.url);
+        }
     }
 
     get controllerClass() { return Image.Controller; }
+
+    /**
+     * Load the image from a url.
+     */
+    loadFromUrl(url, callback) {
+        this._loaded = false;
+        var self = this;
+        // create an image element and load this
+        $("<img/>")
+            .on('load', function() {
+                self._loaded = true;
+                self._image = this;
+                console.log("image loaded correctly");
+            }).on('error', function() {
+                null.a = 3;
+                console.log("error loading image");
+            }).attr("src", url);
+    }
+
+    /**
+     * Load the image from an ID in the document.
+     */
+    loadElement(id) {
+        var element = document.getElementById(id);
+        var tagname = element.tagName.toLowerCase();
+        this._loaded = false;
+        if (tagname == "img" || tagname == "canvas") {
+            this._loaded = true;
+            this._image = element;
+        }
+    }
 
     get x() { return this._x; }
     get y() { return this._y; }
@@ -39,6 +86,27 @@ export class Image extends models.Shape {
         }
     }
 
+    get clipX() { return this._clipX; }
+    get clipY() { return this._clipY; }
+    set clipX(value) { this._clipX = value; }
+    set clipY(value) { this._clipY = value; }
+
+    get clipWidth() { return this._clipWidth; }
+    set clipWidth (value) {
+        this._clipWidth = value;
+        if (this._clipWidth < 0) {
+            throw new Error("Width cannot be negative");
+        }
+    }
+
+    get clipHeight() { return this._clipHeight; }
+    set clipHeight (value) {
+        this._clipHeight = value;
+        if (this._clipHeight < 0) {
+            throw new Error("Height cannot be negative");
+        }
+    }
+
     _setBounds(newBounds) {
         this._x = newBounds.left;
         this._y = newBounds.top;
@@ -53,9 +121,16 @@ export class Image extends models.Shape {
     get className() { return "Image"; }
 
     draw(ctx) {
-        var lBounds = this.boundingBox;
-        ctx.fillRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
-        ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
+        if (this._loaded) {
+            if (this._clipX != null) {
+                ctx.drawImage(this._image, 
+                              this._clipX, this._clipY, this._clipWidth, this._clipHeight,
+                              this._x, this._y, this._width, this._height);
+            } else {
+                ctx.drawImage(this._image, 
+                              this._x, this._y, this._width, this._height);
+            }
+        }
     }
 }
 
