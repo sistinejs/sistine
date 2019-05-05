@@ -92,18 +92,6 @@ export class LinearGradient extends Gradient {
     }
 
     _createStyle(shape, ctx) {
-        var x0 = this._shapeX + (this.x0 * this._shapeW);
-        var y0 = this._shapeY + (this.y0 * this._shapeH);
-        var x1 = this._shapeX + (this.x1 * this._shapeW);
-        var y1 = this._shapeY + (this.y1 * this._shapeH);
-        var out = ctx.createLinearGradient(x0, y0, x1, y1);
-        this._stops.forEach(function(value) {
-            out.addColorStop(value[0], value[1]);
-        });
-        return out;
-    }
-
-    copy() {
         var x0, y0, x1, y1;
         var boundsX, boundsY, boundsW, boundsH;
         if (this._relativeToBounds || !shape.hasParent) {
@@ -124,10 +112,16 @@ export class LinearGradient extends Gradient {
         y0 = boundsY + (this.y0.isAbsolute ? this.y0.pixelValue : this.y0.value * boundsH);
         x1 = boundsX + (this.x1.isAbsolute ? this.x1.pixelValue : this.x1.value * boundsW);
         y1 = boundsY + (this.y1.isAbsolute ? this.y1.pixelValue : this.y1.value * boundsH);
-        var out = new LinearGradient(x0, y0, x1, y1);
+        var out = ctx.createLinearGradient(x0, y0, x1, y1);
         this._stops.forEach(function(value) {
             out.addColorStop(value[0], value[1]);
         });
+        return out;
+    }
+
+    copy() {
+        var out = new LinearGradient(this.x0, this.y0, this.x1, this.y1);
+        out._stops = this._stops.slice(0, this._stops.length);
         return out;
     }
 }

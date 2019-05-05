@@ -170,8 +170,9 @@ export class NodeProcessor {
         }
 
         value = value.substring(4);
-        if (value.endsWith(")")) {
-            value = value.substring(0, value.length - 1);
+        var cbIndex = value.indexOf(")");
+        if (cbIndex >= 0) {
+            value = value.substring(0, cbIndex);
         }
 
         return this.getRef(shape, value);
