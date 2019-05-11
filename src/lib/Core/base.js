@@ -122,6 +122,7 @@ export class Element extends events.EventSource {
                 element.validateBefore(event.name, event) != false) {
                 // remove from old parent - Important!
                 if (element.removeFromParent()) {
+                    if (!this._children) this._children = [];
                     this._children.push(element);
                     element._parent = this;
                     element.setScene(this.scene);

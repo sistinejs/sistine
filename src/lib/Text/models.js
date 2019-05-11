@@ -1,43 +1,58 @@
 
 
-import * as models from "./models"
+import { Core } from "../Core/index"
+import { Utils } from "../Utils/index"
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
-import * as Utils from "../Utils/index"
 
 const Arrays = Utils.Arrays;
 
 export const DEFAULT_CONTROL_SIZE = 5;
+export const CHUNK_TYPE_PLAIN = 0;
+export const CHUNK_TYPE_PATH = 1;
+export const CHUNK_TYPE_SPAN = 2;
 
 /**
- * Defines a block of text with certain parameters.
+ * Defines a block of text with certain parameters.  Each block should be 
+ * layoutable on its own but also can contain a hierarchy of other blocks.
  */
-class Block extends models.Shape {
+class Block extends Core.Models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
+        this._xCoords = configs.xCoords || [];
+        this._yCoords = configs.yCoords || [];
+        this._dxValues = configs.dxValues || [];
+        this._dyValues = configs.dyValues || [];
+        this._rotationValues = configs.rotationValues || [];
+        this._textLength = configs.textLength || 0;
+        this._text = configs.text || "";
+
+        // Are these required or can be computed on demand?
+        this._rootBlock = null;
+        this._parentBlock = null;
     }
-}
 
-/**
- * Holds information about the instance of a Text.  A piece of text is a tree 
- * of text content blocks, each with its own set of styleable properties.
- */
-export class Text extends models.Shape {
-    constructor(configs) {
-        super((configs = configs || {}));
-        this._xCoords = [];
-        this._yCoords = [];
-        this._dxValues = [];
-        this._dyValues = [];
-        this._rotationValues = [];
-        this._textLength = 0;
+    get hasChildren() {
+        return this._text.length == 0 && super.hasChildren;
+    }
+
+    get childCount() {
+        return this._text.length > 0 ? 0 : super.childCount;
+    } 
+
+    childAtIndex(i) {
+        return this._text.length > 0 ? null : super.childAtIndex(i);
     }
 
     add(element, index) {
-        if (typeof(element) === "string") {
-        } else if (element.constructor.name === "TextBlock") {
-        } else {
+        if (this._text.length > 0) {
+            throw new Error("Cannot add children to plain text blocks.");
         }
+        if (typeof(element) === "string") {
+            // Then add it as a plain text block
+            element = new Block({text: element});
+        }
+        return super.add(element, index);
     }
 
     addX(value, index) {
@@ -65,13 +80,23 @@ export class Text extends models.Shape {
         this.markTransformed();
         return this;
     }
+}
 
-    get controllerClass() { return TextController; }
+/**
+ * Holds information about the instance of a Text.  This block is the root block 
+ * of a piece of text to begin rendering at.
+ */
+export class Text extends Block {
+    constructor(configs) {
+        super((configs = configs || {}));
+    }
+
+    get controllerClass() { return Text.Controller; }
 
     draw(ctx) {
     }
 }
 
-Text.Controller = class TextController extends controller.ShapeController {
+Text.Controller = class TextController extends Core.Controller.ShapeController {
 }
 

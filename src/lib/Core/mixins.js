@@ -149,6 +149,11 @@ export class Styleable extends Transformable {
         this._dashArray = new Property("dashArray", configs.dashArray);
         this._miterLimit = new Property("miterLimit", configs.miterLimit);
         this._strokeOpacity = new Property("strokeOpacity", configs.strokeOpacity);
+
+        // handle text parameters
+        this._fontWeight = new Property("fontWeight", configs.fontWeight);
+        this._fontStyle = new Property("fontStyle", configs.fontStyle);
+        this._fontFamily = new Property("fontFamily", configs.fontFamily);
     }
 
     newInstance() {
@@ -217,6 +222,15 @@ export class Styleable extends Transformable {
 
     get fillRule() { return this._fillRule; }
     set fillRule(value) { this._fillRule.set(value); }
+
+    get fontFamily() { return this._fontFamily; }
+    set fontFamily(value) { this._fontFamily.set(value); }
+
+    get fontStyle() { return this._fontStyle; }
+    set fontStyle(value) { this._fontStyle.set(value); }
+
+    get fontWeight() { return this._fontWeight; }
+    set fontWeight(value) { this._fontWeight.set(value); }
 
     /**
      * Draws this shape on a given context.

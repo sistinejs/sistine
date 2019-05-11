@@ -6,6 +6,14 @@ import * as Utils from "../Utils/index"
  * Decides how text should be rendered.
  */
 class Layout {
+    constructor(configs) {
+    }
+
+    /**
+     * Returns the bounding box of the laid out text.
+     */
+    get boundingBox() {
+    }
 }
 
 /**
@@ -13,10 +21,8 @@ class Layout {
  * characters already in the text.
  */
 class PreformattedLayout extends Layout {
-    /**
-     * Returns the bounding box of the laid out text.
-     */
-    get boundingBox() {
+    constructor(configs) {
+        super();
     }
 }
 
@@ -38,7 +44,7 @@ class WrappedLayout extends Layout {
  * properties that apply to pre-formatted text apply to text on a path.
  * ```
  */
-class PathLayout extends Layout {
+class PathLayout extends PreformattedLayout {
 }
 
 class ShapedLayout extends Layout {

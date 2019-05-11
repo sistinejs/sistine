@@ -1,6 +1,6 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
+import { Text } from "../../Text/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import * as models from "../models"
@@ -12,7 +12,7 @@ const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
-class TextChunkProcessor extends base.NodeProcessor {
+class BlockProcessor extends base.NodeProcessor {
     processTextAttributes(elem, text) {
         new NumbersTokenizer(elem.getAttribute("x") || "")
             .all().forEach(function(token) {
@@ -38,7 +38,7 @@ class TextChunkProcessor extends base.NodeProcessor {
     }
 }
 
-export class TextNodeProcessor extends TextChunkProcessor {
+export class TextNodeProcessor extends BlockProcessor {
     get validChildren() {
         return base.animationElements
                 .concat(base.descriptiveElements)
@@ -57,14 +57,18 @@ export class TextNodeProcessor extends TextChunkProcessor {
     }
 
     processElement(elem, parent) {
-        var text = new Core.Text();
+        var text = new Text.Text();
         parent.add(text);
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
+        var loader = this.loader;
+        Utils.DOM.forEachChild(elem, function(child, index) {
+            loader.processElement(child, text);
+        });
     }
 }
 
-export class TSpanNodeProcessor extends TextChunkProcessor {
+export class TSpanNodeProcessor extends BlockProcessor {
     get validChildren() {
         return base.descriptiveElements
                 .concat(["a", "altGlyph", "animate", "animateColor",
@@ -82,7 +86,7 @@ export class TSpanNodeProcessor extends TextChunkProcessor {
     }
 
     processElement(elem, parent) {
-        var text = new Core.Text();
+        var text = new Text.Text();
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
         parent.add(text);
