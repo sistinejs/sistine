@@ -2,6 +2,10 @@
 var Point = Sistine.Geom.Models.Point;
 var Bounds = Sistine.Geom.Models.Bounds;
 
+var DATASET_URLS = {
+    'default': "/dir/src/demos/svgcmp/testsuites/samples/",
+    'svg1.1': "/dir/src/demos/svgcmp/testsuites/svg1.1/svg/"
+};
 var theStage = null;
 var theSVG = null;
 var svgSamplesTable = null;
@@ -52,11 +56,12 @@ function initDataTable() {
     svgSamplesTable = $("#svg_samples_table").DataTable({
         paging: false,
         order: [1, "asc"],
+        searching: false,
         select: {
             style: "single"
         },
         "ajax": {
-            "url": "/dir/src/demos/svgcmp/samples/", 
+            "url": "/dir/src/demos/svgcmp/testsuites/samples/", 
             "dataSrc": function ( json ) {
                 var entries = json.entries;
                 return entries.map(function(entry) {
@@ -79,8 +84,32 @@ function initDataTable() {
     } );
     var params = Sistine.Utils.String.getUrlParams();
     if ("q" in params) {
-        svgSamplesTable.columns(0).search(params["q"]);
+        $("#svg_filter").val(params["q"].trim());
     }
+    if ("dataset" in params) {
+        selectDataSet(params["dataset"])
+    }
+    $("#svg_samples_options").on("change", function(data) {
+        var dataset = $(this).find("option:selected").attr('value');
+        selectDataSet(dataset);
+    });
+    $("#svg_filter").on("change", applySearch);
+}
+
+function applySearch() {
+    var filter = $("#svg_filter").val().trim();
+    if (filter.length == 0) {
+        // clear it
+        svgSamplesTable.columns(0).search(filter);
+    } else {
+        svgSamplesTable.columns(0).search(filter);
+    }
+}
+
+function selectDataSet(dataset) {
+    dataset = dataset.trim();
+    url = DATASET_URLS[dataset];
+    svgSamplesTable.ajax.url(url).load(applySearch);
 }
 
 function initSistineArea() {

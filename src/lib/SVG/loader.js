@@ -38,6 +38,7 @@ const elementProcessors = {
     "audio": "IgnoreNodeProcessor",
     "filter": "IgnoreNodeProcessor",
     "script": "IgnoreNodeProcessor",
+    "font-face": "IgnoreNodeProcessor",
     "SVGTestCase": "IgnoreNodeProcessor",
 }
 
@@ -81,6 +82,8 @@ export class SVGLoader {
         if (name.startsWith("inkscape:") ||
             name.startsWith("metadata") ||
             name.startsWith("sodipodi:")) return null;
+        if (name.endsWith("SVGTestCase") ||
+            name.endsWith(":SVGTestCase")) return null;
 
         var name = name.replace("svg:", "").trim();
         var procName = elementProcessors[name];

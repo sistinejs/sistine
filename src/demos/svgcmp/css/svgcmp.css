@@ -18,10 +18,20 @@
 #footer_div {
     position: absolute;
     bottom: 0px;
-    left: 0px;
+    left: var(--svg-samples-div-width);
     right: 0px;
     height: var(--footer-height);
     border: solid 1px blue;
+}
+
+#svg_samples_options {
+    position: absolute;
+    bottom: 0;
+    left: 0px;
+    height: var(--footer-height);
+    width: var(--svg-samples-div-width);
+    border: solid 1px green;
+    overflow: scroll;
 }
 
 #svg_samples_div {
