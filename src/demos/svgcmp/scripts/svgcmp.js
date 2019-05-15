@@ -87,9 +87,11 @@ function initDataTable() {
         $("#svg_filter").val(params["q"].trim());
     }
     if ("dataset" in params) {
-        selectDataSet(params["dataset"])
+        var dataset = params["dataset"].trim();
+        $("#svg_samples_dataset").val(dataset);
+        selectDataSet(dataset)
     }
-    $("#svg_samples_options").on("change", function(data) {
+    $("#svg_samples_dataset").on("change", function(data) {
         var dataset = $(this).find("option:selected").attr('value');
         selectDataSet(dataset);
     });
