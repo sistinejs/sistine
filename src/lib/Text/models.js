@@ -16,7 +16,7 @@ export const CHUNK_TYPE_SPAN = 2;
  * Defines a block of text with certain parameters.  Each block should be 
  * layoutable on its own but also can contain a hierarchy of other blocks.
  */
-class Block extends Core.Models.Shape {
+export class Block extends Core.Models.Shape {
     constructor(configs) {
         super((configs = configs || {}));
         this._xCoords = configs.xCoords || [];

@@ -9,7 +9,7 @@ const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
 const TransformParser = Utils.SVG.TransformParser;
 const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;
-const forEachChild = Utils.DOM.forEachChild;
+const forEachNode = Utils.DOM.forEachNode;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
 class BlockProcessor extends base.NodeProcessor {
@@ -62,8 +62,32 @@ export class TextNodeProcessor extends BlockProcessor {
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
         var loader = this.loader;
-        Utils.DOM.forEachChild(elem, function(child, index) {
-            loader.processElement(child, text);
+        Utils.DOM.forEachNode(elem, function(child, index) {
+            var nodeType = child.nodeType;
+            if (nodeType == HTMLElement.COMMENT_NODE) 
+                return ;
+
+            if (nodeType == HTMLElement.ELEMENT_NODE) {
+                var tag = child.nodeName;
+                if (tag == "tspan") {
+                    var block = new Text.Block();
+                    text.add(block);
+                    loader.processElement(child, block);
+                } else if (tag == "tref") {
+                    // NOTSUPPORTED:
+                    return ;
+                } else {
+                    throw new Error("Unsupported child: ", node.tag);
+                    loader.processElement(child, text);
+                }
+            } else if (nodeType == HTMLElement.TEXT_NODE) {
+                var block = new Text.Block({
+                    text: child.nodeValue
+                });
+                text.add(block);
+            } else {
+                throw new Error("Invalid node type: ", nodeType);
+            }
         });
     }
 }

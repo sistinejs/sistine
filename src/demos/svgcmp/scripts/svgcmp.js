@@ -56,7 +56,6 @@ function initDataTable() {
     svgSamplesTable = $("#svg_samples_table").DataTable({
         paging: false,
         order: [1, "asc"],
-        searching: false,
         select: {
             style: "single"
         },
@@ -90,21 +89,25 @@ function initDataTable() {
         var dataset = params["dataset"].trim();
         $("#svg_samples_dataset").val(dataset);
         selectDataSet(dataset)
+    } else {
+        applySearch();
     }
     $("#svg_samples_dataset").on("change", function(data) {
         var dataset = $(this).find("option:selected").attr('value');
         selectDataSet(dataset);
     });
-    $("#svg_filter").on("change", applySearch);
+    $("#svg_filter").on("keyup", function() {
+        applySearch();
+    });
 }
 
 function applySearch() {
     var filter = $("#svg_filter").val().trim();
     if (filter.length == 0) {
         // clear it
-        svgSamplesTable.columns(0).search(filter);
+        svgSamplesTable.search(filter).draw();
     } else {
-        svgSamplesTable.columns(0).search(filter);
+        svgSamplesTable.search(filter).draw();
     }
 }
 

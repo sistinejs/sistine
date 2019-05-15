@@ -83,6 +83,16 @@ export function forEachChild(elem, visitor) {
     }
 }
 
+export function forEachNode(elem, visitor) {
+    var children = elem.childNodes;
+    var L = children.length;
+    for (var i = 0;i < L;i++) {
+        var child = children[i];
+        if (visitor(child, i) == false) 
+            return ;
+    }
+}
+
 export function forEachAttribute(elem, visitor) {
     var nodeNameMap = elem.attributes;
     for (var i = 0;i < nodeNameMap.length; i++) {
