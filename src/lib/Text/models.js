@@ -52,6 +52,9 @@ export class Block extends Core.Models.Shape {
             // Then add it as a plain text block
             element = new Block({text: element});
         }
+        if (element.constructor.name == "Block") {
+            element._rootBlock = this._rootBlock;
+        }
         return super.add(element, index);
     }
 
@@ -80,6 +83,10 @@ export class Block extends Core.Models.Shape {
         this.markTransformed();
         return this;
     }
+
+    _evalBoundingBox() {
+        return this._rootBlock.layout(false);
+    }
 }
 
 /**
@@ -89,14 +96,27 @@ export class Block extends Core.Models.Shape {
 export class Text extends Block {
     constructor(configs) {
         super((configs = configs || {}));
+        this._rootBlock = this;
+        this._layout = LayoutEngine();
     }
 
     get controllerClass() { return Text.Controller; }
 
     draw(ctx) {
+        this.layout(ctx, this, true);
+    }
+
+    /**
+     * Lays out the text on a given a context and also draws if the draw flag 
+     * is set to true.  
+     * Returns the bounding box of the laid out text.
+     */
+    layout(ctx, block, draw) {
     }
 }
 
 Text.Controller = class TextController extends Core.Controller.ShapeController {
 }
 
+class LayoutEngine {
+}
