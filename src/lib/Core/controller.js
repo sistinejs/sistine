@@ -2,8 +2,6 @@
 import * as events from "./events";
 import * as geom from "../Geom/models";
 
-/////////////// Controllers 
-
 export const HitType = {
     MOVE: 0,
     SIZE: 1,
@@ -20,31 +18,14 @@ export const HitType = {
     SIZE_NW: 7,
 }
 
-export class ControlPoint {
-    constructor(x, y, pointType, pointIndex, cursor, extraData) {
-        this.x = x;
-        this.y = y;
-        this.pointType = pointType || 0;
-        this.pointIndex = pointIndex || 0;
-        this.cursor = cursor || "auto";
-        this.extraData = extraData || null;
-    }
-}
-
-export class HitInfo {
-    constructor(shape, hitType, hitIndex, cursor, controlPoint) {
-        this.hitShape = shape;
-        this.controlPoint = controlPoint;
-        this.hitType = hitType || 0;
-        this.hitIndex = hitIndex || 0;
-        this.cursor = cursor;
-        this.controlPoint = controlPoint || null;
-    }
-}
-
 /**
- * ShapeControllers provide information needed to facilitate updates to a shape as 
- * well as in accepting events to make updates to shapes.
+ * Controllers are used to control, manage and manipulate shapes in ways that 
+ * Shapes are agnostic to.  For instance in a graphical application, shapes may 
+ * need to have their control points rendered so they may be transformed (moved, 
+ * rotated etc).   Controllers allow this behavior to be decoupled and 
+ * customized.
+ *
+ * @param {Shape} shape  The shape this controller instance is controlling.
  */
 export class ShapeController {
     constructor(shape) {
@@ -53,10 +34,16 @@ export class ShapeController {
         this._controlPoints = null;
     }
 
+    /**
+     * Return the shape being controlled.
+     */
     get shape() {
         return this._shape;
     }
 
+    /**
+     * Returns the control points of the shape being controlled.
+     */
     get controlPoints() {
         if (this._controlPoints == null || this.shape._lastTransformed > this._controlPointTS) {
             this._controlPoints = this._evalControlPoints();
@@ -64,6 +51,9 @@ export class ShapeController {
         return this._controlPoints;
     }
 
+    /**
+     * @private
+     */
     _evalControlPoints() {
         this._controlPointTS = Date.now();
         var lBounds = this.shape.boundingBox;
@@ -90,6 +80,9 @@ export class ShapeController {
 
     /**
      * Returns the "topmost" shape that can be hit at a given coordinate.
+     * @param {Coordinate}   gx  Global/Screen X coordinate of the hit point.
+     * @param {Coordinate}   gy  Global/Screen Y coordinate of the hit point.
+     * @returns {HitInfo} HitInfo containing the topmost shape at the given global coordinate along with control point info if any.
      */
     getHitInfo(gx, gy) {
         var newp = this.shape.globalTransform.apply(gx, gy, {});
@@ -107,6 +100,9 @@ export class ShapeController {
         return this._checkMoveHitInfo(x, y)
     }
 
+    /**
+     * @private
+     */
     _checkMoveHitInfo(x, y) {
         var boundingBox = this.shape.boundingBox;
         if (boundingBox.containsPoint(x, y)) {
@@ -184,3 +180,50 @@ export class ShapeController {
     }
 }
 
+/**
+ * Holds information about a particular ControlPoint on a shape.  A shape can have
+ * several control points that allow different kinds of manipulations on it (eg moving,
+ * scaling, shearing, rotation etc).
+ * 
+ * @param {Coord} x             X coordinate of the control point.
+ * @param {Coord} y             Y coordinate of the control point.
+ * @param {Object} pointType    Type of control point.  Shape specific enum.
+ * @param {int} pointIndex      Shape specific control point index.  Eg for SIZE type control 
+ *                              points, there may be 8 (South, SouthWest, North, East etc) and 
+ *                              the index could be used to indicate this particular one.
+ * @param {string} cursor       The cursor to be used for this ControlPoint when mouse hovers over it.
+ * @param {Object} extraData    Additional data specific to this control point and shape type.
+ */
+export class ControlPoint {
+    constructor(x, y, pointType, pointIndex, cursor, extraData) {
+        this.x = x;
+        this.y = y;
+        this.pointType = pointType || 0;
+        this.pointIndex = pointIndex || 0;
+        this.cursor = cursor || "auto";
+        this.extraData = extraData || null;
+    }
+}
+
+/**
+ * When a specific "hit" occurs (eg by a TouchDown event) on a particular shape, the HitInfo
+ * captures information such as which "part" of a shape this hit occurred on.
+ *
+ * @param {Shape} shape         The shape on which the hit occurred.
+ * @param {Enum} hitType        Type of hit.   Hit and application specific enum.  
+ *                              Most often this could simply controlPoint.pointType.
+ * @param {int} hitIndex        Should be same as controlPoint.pointIndex if a controlPoint was provided.
+ * @param {string} cursor       The cursor to be used for this HitInfo.  This is specifically 
+ *                              provided if a control point was *not* provided.
+ * @param {ControlPoint} controlPoint   The control point, if any, the hit occurred on.
+ */
+export class HitInfo {
+    constructor(shape, hitType, hitIndex, cursor, controlPoint) {
+        this.hitShape = shape;
+        this.controlPoint = controlPoint;
+        this.hitType = hitType || 0;
+        this.hitIndex = hitIndex || 0;
+        this.cursor = cursor;
+        this.controlPoint = controlPoint || null;
+    }
+}

@@ -1,11 +1,147 @@
 
 import * as counters from "./counters";
 
-export class EventHandler {
-    handleBefore(eventType, source, eventData) { }
-    handleOn(eventType, source, eventData) { }
+const StateIdCounter = new counters.Counter("StateIds");
+
+/**
+ * StateMachines allow declarative and stateful chaining of events.
+ */
+export class StateMachine {
+    constructor() {
+        this._states = {};
+        this._rootState = null;
+        this._currentState = null;
+    }
+
+    /**
+     * The starting/root state of the machine.
+     *
+     * @param {String} name  Name of the default/root state.
+     */
+    set rootState(name) {
+        this._rootState = this.getState(name);
+        if (this._currentState == null) {
+            this._currentState = this._rootState;
+        }
+    }
+
+    /**
+     * Exits the current state (if any) and enters a new state.
+     *
+     * @param {String}   state   Name of the new state to enter.
+     * @param {Object}   data    State specific data for the state handler to use for the new state.
+     */
+    enter(state, data) {
+        if (state == "") {
+            this._currentState = this._rootState;
+        } else {
+            this._currentState = this.getState(state);
+        }
+        if (this._currentState != null) {
+            this._currentState.enter(data);
+        }
+    }
+
+    /**
+     * Get the state by name.
+     *
+     * @param {String} name  Name of the state being queried.
+     * @returns {State} State object associated with the name.
+     */
+    getState(name) {
+        if (!(name in this._states)) {
+            throw Error("State '" + name + "' not yet registered.");
+        }
+        return this._states[name];
+    }
+
+    /**
+     * Register a new state in the state machine.
+     *
+     * @param {State} state  State being registered.  If another State with the same name exists, then a {DuplicateError} is thrown.
+     * @param {Bool} isRoot  Whether the new state is a root state.
+     */
+    registerState(state, isRoot) {
+        var name = state.name;
+        if (name in this._states) {
+            throw Error("State '" + name + "' already registered.");
+        }
+        this._states[name] = state;
+        if (isRoot || false) {
+            this.rootState = state.name;
+        }
+    }
+
+    /**
+     * Handles an event from the current state in the state machine possibly resulting in a state transition.
+     *
+     * @param {Object} eventType    Type of event being sent.
+     * @param {EventSource} source  The source generating the event.
+     * @param {Object} eventData    The event specific data.
+     */
+    handle(eventType, source, eventData) {
+        if (this._currentState == null) return ;
+
+        var nextState = this._currentState.handle(eventType, source, eventData);
+        if (nextState != null) {
+            if (nextState == "") {
+                this.enter(this._rootState.name);
+            } else {
+                this.enter(this.getState(nextState));
+            }
+        }
+    }
 }
 
+export class State {
+    constructor() {
+        this._id = StateIdCounter.next();
+    }
+
+    get name() { return this.constructor.name; }
+
+    get id() { return this._id; }
+
+    enter(data) { this.stateData = data; }
+}
+
+/**
+ * EventHandler interface.  EventHandling in Sistine follows a two phase paradigm.
+ * First the event is sent to all handlers for validation.  If any of the validators
+ * return false, the event is suppressed.  After all validations have been approved
+ * the changes backed by the event are applied and the event is "triggered" and handled
+ * by the handlers.  If any of the handlers now return false, the event handling is
+ * now suppressed.
+ */
+export class EventHandler {
+    /**
+     * Handler method called before an event is "committed".  This gives the handlers a 
+     * chance to process and validate the changes the event is being triggered for.
+     *
+     * @param {Object} eventType    Type of event being sent.
+     * @param {EventSource} source  The source generating the event.
+     * @param {Object} eventData    The event specific data.
+     *
+     * @returns {Bool} true if event is validated, false if validation failed and needs to be suppressed.
+     */
+    handleBefore(eventType, source, eventData) { return true; }
+
+    /**
+     * Handler method called after an event is "committed".  This serves more as a notification
+     * of a change but event hanling can still be suppressed if this method returns false.
+     *
+     * @param {Object} eventType    Type of event being sent.
+     * @param {EventSource} source  The source generating the event.
+     * @param {Object} eventData    The event specific data.
+     *
+     * @returns {Bool} true if event is validated, false if validation failed and needs to be suppressed.
+     */
+    handleOn(eventType, source, eventData) { return true; }
+}
+
+/**
+ * Super class of all Events.
+ */
 export class Event {
     constructor() {
         this._eventType = null ; // eventType;
@@ -13,20 +149,38 @@ export class Event {
         this._suppressed = false;
     }
 
+    /**
+     * Returns the creation timestamp of this event.
+     */
     get timeStamp() {
         return this._timeStamp;
     }
 
+    /**
+     * Suppresses this event.
+     */
     suppress() {
         this._suppressed = true;
     }
 
+    /**
+     * Returns the name of this event.
+     * @returns {String} Name of this event class.
+     */
     get name() { return this.constructor.name; }
 
+    /**
+     * Returns if the event was suppressed or not.
+     * @returns {Bool}
+     */
     get wasSuppressed() {
         return this._suppressed;
     }
 
+    /**
+     * Returns type of this event.
+     * @returns {Object}
+     */
     get eventType() {
         return this._eventType;
     }
@@ -206,86 +360,6 @@ export class EventHub {
             }
         }
         return true;
-    }
-}
-
-const StateIdCounter = new counters.Counter("StateIds");
-
-export class State {
-    constructor() {
-        this._id = StateIdCounter.next();
-    }
-
-    get name() { return this.constructor.name; }
-
-    get id() { return this._id; }
-
-    enter(data) { this.stateData = data; }
-}
-
-export class StateMachine {
-    constructor() {
-        this._states = {};
-        this._rootState = null;
-        this._currentState = null;
-    }
-
-    set rootState(name) {
-        this._rootState = this.getState(name);
-        if (this._currentState == null) {
-            this._currentState = this._rootState;
-        }
-    }
-
-    /**
-     * Exists the current state (if any) and enters a new state.
-     */
-    enter(state, data) {
-        if (state == "") {
-            this._currentState = this._rootState;
-        } else {
-            this._currentState = this.getState(state);
-        }
-        if (this._currentState != null) {
-            this._currentState.enter(data);
-        }
-    }
-
-    /**
-     * Get a new state given.
-     */
-    getState(name) {
-        if (!(name in this._states)) {
-            throw Error("State '" + name + "' not yet registered.");
-        }
-        return this._states[name];
-    }
-
-    /**
-     * Register a new state in the state machine.
-     */
-    registerState(state, isRoot) {
-        var name = state.name;
-        if (name in this._states) {
-            throw Error("State '" + name + "' already registered.");
-        }
-        this._states[name] = state;
-        if (isRoot || false) {
-            this.rootState = state.name;
-        }
-    }
-
-    handle(eventType, source, eventData) {
-        if (this._currentState == null) return ;
-
-        var nextState = this._currentState.handle(eventType, source, eventData);
-        if (nextState != null) {
-            if (nextState == "") {
-                this.enter(this._rootState.name);
-            } else {
-                this.enter(this.getState(nextState));
-            }
-        }
     }
 }
 

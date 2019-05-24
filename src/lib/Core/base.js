@@ -300,13 +300,11 @@ export class Element extends events.EventSource {
     /**
      * Changes the index of a given element within the parent.
      *
-     * @param {Element} element
-     *        The element to be moved around within the parent.
-     * @param {int} indexOrDelta
-     *        Denotes whether the element is to be moved to an absolute index or relative
-     *        to its current position.  This depends on the boolean `relative` parameter.
-     * @param {Bool} relative
-     *        Denotes if the indexOrDelta parameter is relative or absolute.
+     * @param {Element} element     The element to be moved around within the parent.
+     * @param {int} indexOrDelta    Denotes whether the element is to be moved to an 
+     *                              absolute index or relative to its current position.  
+     *                              This depends on the boolean `relative` parameter.
+     * @param {Bool} relative       Denotes if the indexOrDelta parameter is relative or absolute.
      */
     changeIndexTo(element, indexOrDelta, relative) {
         if (element.parent != this) return ;
