@@ -218,7 +218,11 @@ export class Element extends events.EventSource {
      * the parent as well as the element being added for more finegrained and efficient
      * filtering of events.
      *
-     * @returns {Bool} true if a element was successfully added false if the addition was blocked.
+     * @param {Element} element  The element to be added.
+     * @param {int}     index    Optional index where element is to be inserted.  If 
+     *                           omitted, the element is appended to the end of the child list.
+     *
+     * @returns {Bool} true if a element was successfully added false if the addition was blocked (via event handling).
      */
     add(element, index) {
         index = index || -1;
@@ -243,8 +247,13 @@ export class Element extends events.EventSource {
 
     /**
      * Removes an existing element from this group.
-     * Returns true if a element was successfully removed,
-     * false if the removal was blocked.
+     * As part of the removal, the {ElementRemoved} event is also fired for both
+     * the parent as well as the element being removed for more finegrained and efficient
+     * filtering of events.
+     *
+     * @param {Element} element  The element to be removed.
+     *
+     * @returns {Bool} true if a element was successfully removed, false if the removal was blocked (via event handling).
      */
     remove(element) {
         if (element.parent == this) {
@@ -266,6 +275,9 @@ export class Element extends events.EventSource {
         return false;
     }
 
+    /**
+     * Removes all child elements from this element.
+     */
     removeAll() {
         for (var i = 0;i < this._children.length;i++) {
             this._children[i].removeFromParent();
@@ -273,6 +285,9 @@ export class Element extends events.EventSource {
         this._children = [];
     }
 
+    /**
+     * Helper method to kick off the removal of an element from its parent.
+     */
     removeFromParent() {
         if (this.parent == null) return true;
         if (this.parent.remove(this)) {
@@ -283,9 +298,15 @@ export class Element extends events.EventSource {
     }
     
     /**
-     * Changes the index of a given element within the parent.  The indexOrDelta 
-     * parameter denotes whether a element is to be moved to an absolute index or 
-     * relative to its current position depending on the 'relative' parameter.
+     * Changes the index of a given element within the parent.
+     *
+     * @param {Element} element
+     *        The element to be moved around within the parent.
+     * @param {int} indexOrDelta
+     *        Denotes whether the element is to be moved to an absolute index or relative
+     *        to its current position.  This depends on the boolean `relative` parameter.
+     * @param {Bool} relative
+     *        Denotes if the indexOrDelta parameter is relative or absolute.
      */
     changeIndexTo(element, indexOrDelta, relative) {
         if (element.parent != this) return ;
@@ -315,16 +336,10 @@ export class Element extends events.EventSource {
     }
 
     /**
-     * Brings a child element forward by one level.
+     * Brings a child element forward by one.
      */
     bringForward(element) {
         return this.changeIndexTo(element, 1, true);
-
-        if (index >= 0 && index < this._children.length - 1) {
-            var temp = this._children[index];
-            this._children[index] = this._children[index + 1];
-            this._children[index + 1] = temp;
-        }
     }
 
     /**
@@ -332,12 +347,6 @@ export class Element extends events.EventSource {
      */
     sendBackward(element) {
         return this.changeIndexTo(element, -1, true);
-
-        if (index > 0) {
-            var temp = this._children[index];
-            this._children[index] = this._children[index - 1];
-            this._children[index - 1] = temp;
-        }
     }
 
     /**
@@ -345,13 +354,6 @@ export class Element extends events.EventSource {
      */
     bringToFront(element) {
         return this.changeIndexTo(element, this._children.length, false);
-
-        if (element.parent != this) return ;
-        var index = this._children.indexOf(element);
-        if (index >= 0 && index < this._children.length - 1) {
-            this._children.splice(index, 1);
-            this._children.push(element);
-        }
     }
 
     /**
@@ -359,10 +361,5 @@ export class Element extends events.EventSource {
      */
     sendToBack(element) {
         return this.changeIndexTo(element, 0, false);
-
-        if (index > 0) {
-            this._children.splice(index, 1);
-            this._children.splice(0, 0, element);
-        }
     }
 }
