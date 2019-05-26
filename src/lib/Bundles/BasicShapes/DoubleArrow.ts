@@ -14,8 +14,6 @@ export class DoubleArrow extends models.Shape {
         this._tipPullback = configs.tipPullback || 0.1;
     }
 
-    get controllerClass() { return DoubleArrow.Controller; }
-
     _evalBoundingBox() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);
@@ -60,7 +58,7 @@ export class DoubleArrow extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-DoubleArrow.Controller = class DoubleArrowController extends controller.ShapeController {
+export class DoubleArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

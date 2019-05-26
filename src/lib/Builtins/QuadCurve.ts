@@ -24,8 +24,6 @@ export class QuadCurve extends models.Shape {
         this.closed = configs.closed || false;
     }
 
-    get controllerClass() { return QuadCurve.Controller; }
-
     _setBounds(newBounds) {
         if (!this._created) {
             // creating by bounds
@@ -97,7 +95,7 @@ export class QuadCurve extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-QuadCurve.Controller = class QuadCurveController extends controller.ShapeController {
+export class QuadCurveController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

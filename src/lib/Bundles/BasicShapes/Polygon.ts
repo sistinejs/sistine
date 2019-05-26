@@ -13,8 +13,6 @@ export class Polygon extends models.Shape {
         this._edgePoints = [];
     }
 
-    get controllerClass() { return Polygon.Controller; }
-
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
@@ -65,7 +63,7 @@ export class Polygon extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Polygon.Controller = class PolygonController extends controller.ShapeController {
+export class PolygonController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

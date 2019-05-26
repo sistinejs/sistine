@@ -12,8 +12,6 @@ export class Triangle extends models.Shape {
         this._p2 = configs.p2 || null;
     }
 
-    get controllerClass() { return Triangle.Controller; }
-
     _setBounds(newBounds) {
         if (this._p0 == null) {
             this._p0 = new geom.Point(newBounds.centerX, newBounds.top);
@@ -60,7 +58,7 @@ export class Triangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Triangle.Controller = class TriangleController extends controller.ShapeController {
+export class TriangleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

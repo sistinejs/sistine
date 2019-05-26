@@ -13,8 +13,6 @@ export class Plus extends models.Shape {
         this._innerHeight = configs.innerHeight || 0.3;
     }
 
-    get controllerClass() { return Plus.Controller; }
-
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
@@ -64,7 +62,7 @@ export class Plus extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Plus.Controller = class PlusController extends controller.ShapeController {
+export class PlusController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

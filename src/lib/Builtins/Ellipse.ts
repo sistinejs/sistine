@@ -42,8 +42,6 @@ export class Ellipse extends models.Shape {
         }
     }
 
-    get controllerClass() { return Ellipse.Controller; }
-
     _evalBoundingBox() {
         return new Geom.Models.Bounds(this._cx - this._rx,
                                       this._cy - this._ry,
@@ -67,7 +65,7 @@ export class Ellipse extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Ellipse.Controller = class EllipseController extends controller.ShapeController {
+export class EllipseController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

@@ -21,8 +21,6 @@ export class Line extends models.Shape {
         }
     }
 
-    get controllerClass() { return Line.Controller; }
-
     _setBounds(newBounds) {
         this._x0 = newBounds.x0;
         this._y0 = newBounds.y0;
@@ -63,7 +61,7 @@ export class Line extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Line.Controller = class LineController extends controller.ShapeController {
+export class LineController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

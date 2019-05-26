@@ -5,6 +5,7 @@ import * as controller from "../Core/controller"
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
+var Bounds = Geom.Models.Bounds;
 
 export class Arc extends models.Shape {
     private created : boolean = false
@@ -28,9 +29,7 @@ export class Arc extends models.Shape {
         }
     }
 
-    get controllerClass() { return ArcController; }
-
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         if (!this.created) {
             // creating by bounds
             this.x0 = newBounds.left;

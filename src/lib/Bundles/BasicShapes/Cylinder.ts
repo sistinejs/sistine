@@ -12,8 +12,6 @@ export class Cylinder extends models.Shape {
         this._ellipseHeight = configs.ellipseHeight || 0.4;
     }
 
-    get controllerClass() { return Cylinder.Controller; }
-
     _evalBoundingBox() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);
@@ -60,7 +58,7 @@ export class Cylinder extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Cylinder.Controller = class CylinderController extends controller.ShapeController {
+export class CylinderController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

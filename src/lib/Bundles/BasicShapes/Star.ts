@@ -13,8 +13,6 @@ export class Star extends models.Shape {
         this._innerRadius = configs.innerRadius || null;
     }
 
-    get controllerClass() { return Star.Controller; }
-
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
@@ -79,7 +77,7 @@ export class Star extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Star.Controller = class StarController extends controller.ShapeController {
+export class StarController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

@@ -11,8 +11,6 @@ export class Square extends models.Shape {
         this._size = configs.size || 10;
     }
 
-    get controllerClass() { return Square.Controller; }
-
     canSetSize(newBounds) {
         newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);
         return true;
@@ -45,7 +43,7 @@ export class Square extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Square.Controller = class SquareController extends controller.ShapeController {
+export class SquareController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

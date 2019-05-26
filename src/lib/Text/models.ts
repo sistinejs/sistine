@@ -108,8 +108,6 @@ export class Text extends Block {
         this._layout = LayoutEngine();
     }
 
-    get controllerClass() { return Text.Controller; }
-
     draw(ctx) {
         this.layout(ctx, this, true);
     }
@@ -123,7 +121,7 @@ export class Text extends Block {
     }
 }
 
-Text.Controller = class TextController extends Core.Controller.ShapeController {
+export class TextController extends Core.Controller.ShapeController {
 }
 
 class LayoutEngine {

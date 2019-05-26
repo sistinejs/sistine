@@ -15,8 +15,6 @@ export class LeftArrow extends models.Shape {
         this._backDepth = configs.backDepth || 0;
     }
 
-    get controllerClass() { return LeftArrow.Controller; }
-
     _evalBoundingBox() {
         var left = Math.min(this._p1.x, this._p2.x);
         var top = Math.min(this._p1.y, this._p2.y);
@@ -62,7 +60,7 @@ export class LeftArrow extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-LeftArrow.Controller = class LeftArrowController extends controller.ShapeController {
+export class LeftArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

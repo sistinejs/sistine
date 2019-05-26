@@ -34,8 +34,6 @@ export class CubicCurve extends models.Shape {
         }
     }
 
-    get controllerClass() { return CubicCurve.Controller; }
-
     _setBounds(newBounds) {
         if (!this._created) {
             // creating by bounds
@@ -123,7 +121,7 @@ export class CubicCurve extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-CubicCurve.Controller = class CubicCurveController extends controller.ShapeController {
+export class CubicCurveController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

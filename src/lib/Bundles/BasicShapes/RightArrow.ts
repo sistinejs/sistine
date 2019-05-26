@@ -15,8 +15,6 @@ export class RightArrow extends models.Shape {
         this._backDepth = configs.backDepth || 0;
     }
 
-    get controllerClass() { return RightArrow.Controller; }
-
     _setBounds(newBounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
@@ -63,7 +61,7 @@ export class RightArrow extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-RightArrow.Controller = class RightArrowController extends controller.ShapeController {
+export class RightArrowController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

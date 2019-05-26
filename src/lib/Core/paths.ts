@@ -35,8 +35,6 @@ export class Path extends models.Shape {
         return out;
     }
 
-    get controllerClass() { return Path.Controller; }
-
     _setBounds(newBounds : geom.Bounds) {
         var oldBounds = this.boundingBox;
         var sx = newBounds.width / oldBounds.width;
@@ -784,7 +782,7 @@ export class EllipticalArcComponent extends PathComponent {
 }
 
 
-Path.Controller = class PathController extends controller.ShapeController {
+export class PathController extends controller.ShapeController {
     _evalControlPoints() {
         var ours = [];
         var path = this.shape;

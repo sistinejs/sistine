@@ -27,8 +27,6 @@ export class Circle extends models.Shape {
         return out;
     }
 
-    get controllerClass() { return Circle.Controller; }
-
     get cx() { return this._cx; }
     get cy() { return this._cy; }
     get radius() { return this._radius; }
@@ -75,7 +73,7 @@ export class Circle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Circle.Controller = class CircleController extends controller.ShapeController {
+export class CircleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

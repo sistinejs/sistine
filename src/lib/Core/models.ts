@@ -16,7 +16,7 @@ export class Shape extends mixins.Styleable {
     isVisible : boolean = true;
     private _scene : Nullable<Scene> = null;
     protected _boundingBox : Nullable<geom.Bounds> = null;
-    protected _controller : controller.ShapeController | null = null;
+    controller : controller.ShapeController | null = null;
 
     constructor(configs : any) {
         super((configs = configs || {}));
@@ -31,22 +31,6 @@ export class Shape extends mixins.Styleable {
 
     _evalBoundingBox() : geom.Bounds {
         throw new Error("Not implemented");
-    }
-
-    get controllerClass() : { new (shape : Shape) : controller.ShapeController } {
-        return controller.ShapeController;
-    }
-    get controller() : controller.ShapeController { 
-        if (this._controller == null) {
-            this._controller = new this.controllerClass(this);
-        }
-        return this._controller; 
-    }
-
-    set controller(c : controller.ShapeController) {
-        if (this._controller != c) {
-            this._controller = c;
-        }
     }
 
     get scene() : (Scene | null) { return this._scene; }

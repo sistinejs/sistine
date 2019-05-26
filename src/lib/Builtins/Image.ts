@@ -32,8 +32,6 @@ export class Image extends models.Shape {
         }
     }
 
-    get controllerClass() { return Image.Controller; }
-
     /**
      * Load the image from a url.
      */
@@ -137,7 +135,7 @@ export class Image extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Image.Controller = class ImageController extends controller.ShapeController {
+export class ImageController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }

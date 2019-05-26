@@ -18,8 +18,6 @@ export class Rectangle extends models.Shape {
         this._height = configs._height || 0;
     }
 
-    get controllerClass() { return Rectangle.Controller; }
-
     get x() { return this._x; }
     get y() { return this._y; }
     set x(value) { this._x = value; }
@@ -79,7 +77,7 @@ export class Rectangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Rectangle.Controller = class RectangleController extends controller.ShapeController {
+export class RectangleController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }
