@@ -8,6 +8,7 @@ const ElementCounter = new counters.Counter("ElementIDs");
  * Properties enable capturing some common behaviours for attributes 
  * on objects like inheritance from parents, default values, updated 
  * timestamps and change notifications.
+ *
  * @param {string}   name   Name of the property (used only for debugging).
  * @param {Value}    value  Value of the property.  If the value is undefined 
  *                          then it is marked as "to be inherited".
