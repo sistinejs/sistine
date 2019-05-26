@@ -8,7 +8,7 @@ function sanitizeConfigs(configs) {
 }
 
 export class LeftBlockArrow extends leftArrows.LeftArrow {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = sanitizeConfigs(configs)));
     }
 }

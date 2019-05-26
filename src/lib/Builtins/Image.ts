@@ -8,7 +8,7 @@ var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
 export class Image extends models.Shape {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         // see what the image source is
         this._loaded = false;

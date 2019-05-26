@@ -1,7 +1,7 @@
 
 import * as leftArrows from "./LeftArrow"
 
-function sanitizeConfigs(configs) {
+function sanitizeConfigs(configs : any) {
     configs = configs || {};
     configs.shaftWidth = 1.0;
     configs.backDepth = 0.2;
@@ -10,7 +10,7 @@ function sanitizeConfigs(configs) {
 }
 
 export class LeftChevron extends leftArrows.LeftArrow {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = sanitizeConfigs(configs)));
     }
 }

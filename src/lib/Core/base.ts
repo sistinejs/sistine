@@ -1,6 +1,8 @@
 import * as counters from "./counters";
 import * as events from "./events";
 
+type Int = number;
+type Nullable<T> = T | null;
 const ElementCounter = new counters.Counter("ElementIDs");
 
 /**
@@ -70,12 +72,13 @@ export class Property {
  * role in building and maintaining Scenes with hierarchical shapes.
  */
 export class Element extends events.EventSource {
+    protected _parent : Nullable<Element> = null;
+    private _uuid : Int = 0;
+    private _defs : any = {};
+    private _metadata : any = {};
     constructor() {
         super();
         this._uuid = ElementCounter.next();
-        this._parent = null;
-        this._defs = {};
-        this._metadata = {};
     }
 
     /**
@@ -203,12 +206,14 @@ export class Element extends events.EventSource {
     /**
      * Returns if the element has any children.
      */
-    get hasChildren() { return false; }
+    hasChildren() : boolean { return false; }
 
     /**
      * Returns the child count of this element.
      */
-    get childCount() { return 0; } 
+    childCount() : Int { return 0; }
+
+    childAtIndex(i : Int) : Nullable<Element> { return null; }
 
     /**
      * Returns the parent of this eleemnt.
@@ -227,7 +232,7 @@ export class Element extends events.EventSource {
      *
      * @returns {Bool} true if a element was successfully added false if the addition was blocked (via event handling).
      */
-    add(element, index) {
+    add(element : Element, index : Int) {
         index = index || -1;
         if (element.parent != this) {
             var event = new events.ElementAdded(this, element);
@@ -238,7 +243,6 @@ export class Element extends events.EventSource {
                     if (!this._children) this._children = [];
                     this._children.push(element);
                     element._parent = this;
-                    element.setScene(this.scene);
                     this.triggerOn(event.name, event);
                     element.triggerOn(event.name, event);
                     return true;

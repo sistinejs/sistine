@@ -5,7 +5,7 @@ import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
 export class Square extends models.Shape {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._p0 = configs.p0 || new geom.Point(0, 0);
         this._size = configs.size || 10;

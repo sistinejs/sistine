@@ -8,7 +8,7 @@ const Length = geom.Length;
 
 export class Circle extends models.Shape {
     private created : boolean = false;
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         if (configs.cx && configs.cy) {
             this.created = true;

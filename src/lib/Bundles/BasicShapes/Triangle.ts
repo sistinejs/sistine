@@ -5,7 +5,7 @@ import * as models from "../../Core/models"
 import * as controller from "../../Core/controller"
 
 export class Triangle extends models.Shape {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._p0 = configs.p0 || null;
         this._p1 = configs.p1 || null;

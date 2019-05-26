@@ -6,7 +6,7 @@ import * as styles from "./styles";
 const Property = base.Property;
 
 export class Transformable extends base.Element {
-    constructor(configs) {
+    constructor(configs : any) {
         super(configs);
         // Transform properties
         // What is the point of the global transform?

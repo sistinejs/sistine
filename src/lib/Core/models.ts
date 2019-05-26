@@ -6,57 +6,50 @@ import * as controller from "./controller";
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
+type Int = number;
+type Nullable<T> = T | null;
+
 /**
  * Holds information about the instance of a shape.
  */
 export class Shape extends mixins.Styleable {
-    isVisible : boolean
-    readonly scene : Scene = null;
+    isVisible : boolean = true;
+    private _scene : Nullable<Scene> = null;
+    protected _boundingBox : Nullable<geom.Bounds> = null;
+    protected _controller : controller.ShapeController | null = null;
 
-    constructor(configs) {
-        configs = configs || {};
-        super(configs);
-        this._boundingBox = null;
-
-        this.isVisible = true;
+    constructor(configs : any) {
+        super((configs = configs || {}));
     }
 
-    get boundingBox() : Bounds {
+    get boundingBox() : geom.Bounds {
         if (this._boundingBox == null) {
             this._boundingBox = this._evalBoundingBox();
         }
         return this._boundingBox;
     }
 
-    get controllerClass() : { new (shape : Shape) : controller.Controller } { return controller.ShapeController; }
-    get controller() : controller.Controller { 
+    _evalBoundingBox() : geom.Bounds {
+        throw new Error("Not implemented");
+    }
+
+    get controllerClass() : { new (shape : Shape) : controller.ShapeController } {
+        return controller.ShapeController;
+    }
+    get controller() : controller.ShapeController { 
         if (this._controller == null) {
             this._controller = new this.controllerClass(this);
         }
         return this._controller; 
     }
 
-    set controller(c : controller.Controller) {
+    set controller(c : controller.ShapeController) {
         if (this._controller != c) {
             this._controller = c;
         }
     }
 
-    setScene(s : Scene) : boolean {
-        if (this.scene != s) {
-            // unchain previous scene
-            this.markUpdated();
-            if (this.scene) {
-                this.eventHub.unchain(this.scene.eventHub);
-            }
-            this.scene = s;
-            if (this.scene) {
-                this.eventHub.chain(this.scene.eventHub);
-            }
-            return true;
-        }
-        return false;
-    }
+    get scene() : (Scene | null) { return this._scene; }
 
     /**
      * A easy wrapper to control shape dimensions by just setting its bounds.
@@ -72,26 +65,27 @@ export class Shape extends mixins.Styleable {
             this.triggerOn(event.name, event);
             return true;
         }
+        return false;
     }
     canSetBounds(newBounds: geom.Bounds) : boolean { return true; }
     _setBounds(newBounds : geom.Bounds) {
-        throw Error("Not Implemented for: ", this);
+        throw Error("Not Implemented");
     }
 
-    draw(ctx) { }
+    draw(ctx : any) { }
 
     /**
      * Returns true if this shape contains a particular coordinate, 
      * false otherwise.
      */
-    containsPoint(x, y) {
+    containsPoint(x : number, y : number) : boolean {
         var newp = this.globalTransform.apply(x, y, {});
         return this.boundingBox.containsPoint(newp.x, newp.y);
     }
 
-    _locationChanged(oldX, oldY) { }
-    _scaleChanged(oldW, oldH) { }
-    _rotationChanged(oldAngle) { }
+    _locationChanged(oldX : number, oldY : number) { }
+    _scaleChanged(oldW : number, oldH : number) { }
+    _rotationChanged(oldAngle : number) { }
 }
 
 /**
@@ -99,25 +93,18 @@ export class Shape extends mixins.Styleable {
  * can extend this to performing layouts etc on child chapes.
  */
 export class Group extends Shape {
-    constructor(configs) {
+    protected _children : Array<Element> = [];
+    protected _bounds : Nullable<geom.Bounds>;
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._bounds = configs.bounds || new geom.Bounds();
-        this._children = [];
     }
 
-    childAtIndex(i) { return this._children[i]; } 
-    get hasChildren() { return this._children.length > 0; } 
-    get childCount() { return this._children.length; } 
+    childAtIndex(i : Int) : Nullable<Element> { return this._children[i]; } 
+    hasChildren() : boolean { return this._children.length > 0; } 
+    childCount() : Int { return this._children.length; } 
 
-    setScene(s) {
-        if (!super.setScene(s)) return false;
-        for (var i = 0, L = this._children.length;i < L;i++) {
-            this._children[i].setScene(s);
-        }
-        return true;
-    }
-
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Nullable<geom.Bounds>) {
         this._bounds = newBounds == null ? null : newBounds.copy();
     }
 
@@ -140,7 +127,7 @@ export class Group extends Shape {
  * related operations as that is decoupled into the view entity.
  */
 export class Scene extends Group {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
     }
 }

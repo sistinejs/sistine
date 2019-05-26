@@ -17,7 +17,7 @@ export class CubicCurve extends models.Shape {
     readonly y2 : number = 0;
     readonly x3 : number = 0;
     readonly y3 : number = 0;
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this.closed = configs.closed || false;
         if (configs.x0 && configs.y0) {

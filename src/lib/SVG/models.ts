@@ -10,7 +10,7 @@ export const AlignMax = "max"
 export const AlignAny = "*"
 
 export class SVG extends models.Group {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._viewBox = configs.bounds || null;
         this._preserveAspectRatio = configs.preserveAspectRatio || false;

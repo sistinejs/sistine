@@ -8,6 +8,7 @@ import * as geomutils from "../Geom/utils"
 type Int = number;
 
 const Arrays = Utils.Arrays;
+const Element = Core.Models.Element;
 
 export const DEFAULT_CONTROL_SIZE = 5;
 export const CHUNK_TYPE_PLAIN = 0;
@@ -26,7 +27,9 @@ export class Block extends Core.Models.Shape {
     readonly rotationValues : Array<number> = [];
     readonly textLength : number = 0;
     readonly text : string = ""
-    constructor(configs) {
+    protected _rootBlock : Block | null = null;
+    protected _parentBlock : Block | null = null;
+    constructor(configs : any) {
         super((configs = configs || {}));
         this.xCoords = configs.xCoords || [];
         this.yCoords = configs.yCoords || [];
@@ -35,18 +38,14 @@ export class Block extends Core.Models.Shape {
         this.rotationValues = configs.rotationValues || [];
         this.textLength = configs.textLength || 0;
         this.text = configs.text || "";
-
-        // Are these required or can be computed on demand?
-        this._rootBlock = null;
-        this._parentBlock = null;
     }
 
-    get hasChildren() : boolean {
+    hasChildren() : boolean {
         return this.text.length == 0 && super.hasChildren();
     }
 
-    get childCount() : Int {
-        return this.text.length > 0 ? 0 : super.childCount;
+    childCount() : Int {
+        return this.text.length > 0 ? 0 : super.childCount();
     } 
 
     childAtIndex(i : Int) : Element {
@@ -88,13 +87,13 @@ export class Block extends Core.Models.Shape {
         return this;
     }
     addRotation(value : number, index : Int) {
-        Arrays.insert(this._rotationValues, value, index);
+        Arrays.insert(this.rotationValues, value, index);
         this.markTransformed();
         return this;
     }
 
     _evalBoundingBox() : geom.Bounds {
-        return this._rootBlock.layout(false);
+        return this._rootBlock == null ? new geom.Bounds() : this._rootBlock.layout(false);
     }
 }
 
@@ -103,7 +102,7 @@ export class Block extends Core.Models.Shape {
  * of a piece of text to begin rendering at.
  */
 export class Text extends Block {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._rootBlock = this;
         this._layout = LayoutEngine();

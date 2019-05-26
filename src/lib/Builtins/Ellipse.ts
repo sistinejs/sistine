@@ -8,7 +8,7 @@ var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
 export class Ellipse extends models.Shape {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._created = false;
         if (configs.cx && configs.cy) {

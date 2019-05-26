@@ -6,13 +6,14 @@ import * as Utils from "../Utils/index"
  * Decides how text should be rendered.
  */
 class Layout {
-    constructor(configs) {
+    constructor(configs : any) {
     }
 
     /**
      * Returns the bounding box of the laid out text.
      */
-    get boundingBox() {
+    get boundingBox() : geom.Bounds {
+        return new geom.Bounds();
     }
 }
 

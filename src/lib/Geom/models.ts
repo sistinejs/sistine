@@ -1,40 +1,46 @@
 
+type Int = number;
+type Nullable<T> = T | null;
+
 export const PixelsPerCM = 37.79527559055118;
 export const PixelsPerInch = 96;
 export const PointsPerPixel = 0.75;
 export const PixelsPerPica = 16;
 
-export const LengthTypeUnknown = 0;
-export const LengthTypeNumber = 1;
-export const LengthTypePercentage = 2;
-export const LengthTypeEMS = 3;
-export const LengthTypeEXS = 4;
-export const LengthTypePX = 5;
-export const LengthTypeCM = 6;
-export const LengthTypeMM = 7;
-export const LengthTypeIN = 8;
-export const LengthTypePT = 9;
-export const LengthTypePC = 10;
+export enum LengthType {
+    Unknown,
+    Number,
+    Percentage,
+    EMS,
+    EXS,
+    PX,
+    CM,
+    MM,
+    IN,
+    PT,
+    PC,
+};
 
 export class Length {
-    constructor(value, units) {
-        units = units || LengthTypeNumber;
-        this.value = value || 0;
+    value : number = 0
+    private _units : LengthType = LengthType.Unknown;
+    private _pixelValue : number = 0;
+    private _isAbsolute : boolean = false;
+    constructor(value : number, units : LengthType = LengthType.Number) {
         this._units = units;
-        this._pixelValue = 0;
-        this._isAbsolute = (units == LengthTypeNumber || units == LengthTypeEMS || units == LengthTypeEXS);
+        this._isAbsolute = (units == LengthType.Number || units == LengthType.EMS || units == LengthType.EXS);
 
-        if (units == LengthTypeNumber) {
+        if (units == LengthType.Number) {
             this._pixelValue = value;
-        } else if (units == LengthTypePX) {
+        } else if (units == LengthType.PX) {
             this._pixelValue = value;
-        } else if (units == LengthTypeCM) {
+        } else if (units == LengthType.CM) {
             this._pixelValue = value * PixelsPerCM;
-        } else if (units == LengthTypeIN) {
+        } else if (units == LengthType.IN) {
             this._pixelValue = value * PixelsPerInch;
-        } else if (units == LengthTypePT) {
+        } else if (units == LengthType.PT) {
             this._pixelValue = value / PointsPerPixel;
-        } else if (units == LengthTypePC) {
+        } else if (units == LengthType.PC) {
             this._pixelValue = value * PixelsPerPica;
         }
     }
@@ -50,50 +56,57 @@ export class Length {
     get pixelValue() {
         return this._pixelValue;
     }
-}
 
-Length.parse = function(input) {
-    if (input.constructor.name == "Length") return input;
-    var units = LengthTypeNumber;
-    if ($.isNumeric(input)) {
-        return new Length(parseFloat(input));
+    static parse(input : Length | string) : Length {
+        if (input instanceof Length) return input;
+        var units = LengthType.Number;
+        if ($.isNumeric(input)) {
+            return new Length(parseFloat(input));
+        }
+        input = input.trim();
+        if (input.endsWith("em")) {
+            units = LengthType.EMS;
+            input = input.substring(0, input.length - 2).trim();
+        } else if (input.endsWith("ex")) {
+            units = LengthType.EXS;
+            input = input.substring(0, input.length - 2).trim();
+        } else if (input.endsWith("px")) {
+            units = LengthType.PX;
+            input = input.substring(0, input.length - 2).trim();
+        } else if (input.endsWith("cm")) {
+            units = LengthType.CM;
+            input = input.substring(0, input.length - 2).trim();
+        } else if (input.endsWith("in")) {
+            units = LengthType.IN;
+            input = input.substring(0, input.length - 2).trim();
+        } else if (input.endsWith("pt")) {
+            units = LengthType.PT;
+            input = input.substring(0, input.length - 2).trim();
+        } else if (input.endsWith("pc")) {
+            units = LengthType.PC;
+            input = input.substring(0, input.length - 2).trim();
+        } else if (input.endsWith("%")) {
+            units = LengthType.Percentage;
+            input = input.substring(0, input.length - 1).trim();
+        }
+        
+        if (!$.isNumeric(input)) {
+            throw new Error("Invalid length value: " + input);
+        }
+        var value = parseFloat(input);
+        units = LengthType.Number;
+        return new Length(value, units);
     }
-    input = input.trim();
-    if (input.endsWith("em")) {
-        units = LengthTypeEMS;
-        input = input.substring(0, input.length - 2).trim();
-    } else if (input.endsWith("ex")) {
-        units = LengthTypeEXS;
-        input = input.substring(0, input.length - 2).trim();
-    } else if (input.endsWith("px")) {
-        units = LengthTypePX;
-        input = input.substring(0, input.length - 2).trim();
-    } else if (input.endsWith("cm")) {
-        units = LengthTypeCM;
-        input = input.substring(0, input.length - 2).trim();
-    } else if (input.endsWith("in")) {
-        units = LengthTypeIN;
-        input = input.substring(0, input.length - 2).trim();
-    } else if (input.endsWith("pt")) {
-        units = LengthTypePT;
-        input = input.substring(0, input.length - 2).trim();
-    } else if (input.endsWith("pc")) {
-        units = LengthTypePC;
-        input = input.substring(0, input.length - 2).trim();
-    } else if (input.endsWith("%")) {
-        units = LengthTypePercentage;
-        input = input.substring(0, input.length - 1).trim();
-    }
-    
-    if (!$.isNumeric(input)) {
-        throw new Error("Invalid length value: " + input);
-    }
-    var value = parseFloat(input);
-    units = LengthTypeNumber;
-    return new Length(value, units);
 }
 
 export class Transform {
+    timeStamp : number = 0;
+    a : number = 1;
+    b : number = 0;
+    c : number = 0;
+    d : number = 1;
+    e : number = 0;
+    f : number = 0;
     /**
      * Construct a 2D transform with 6 parameters forming the matrix:
      *              __       __
@@ -102,20 +115,22 @@ export class Transform {
      *              |  0 0 1  |
      *              --       --
      */
-    constructor(a, b, c, d, e, f) {
+    constructor(a : number = 1, b : number = 0, c : number = 0, d : number = 1,
+                e : number = 0, f : number = 0) {
         this.set(a,b,c,d,e,f);
     }
 
     /**
      * Resets the values of the transform matrix to the given values.
      */
-    set(a, b, c, d, e, f) {
-        this.a = a || 1;
-        this.b = b || 0;
-        this.c = c || 0;
-        this.d = d || 1;
-        this.e = e || 0;
-        this.f = f || 0;
+    set(a : number = 1, b : number = 0, c : number = 0, d : number = 1,
+        e : number = 0, f : number = 0) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
+        this.e = e;
+        this.f = f;
         this.timeStamp = Date.now();
     }
 
@@ -127,7 +142,7 @@ export class Transform {
     /**
      * Applies this transform to a point and returns the result.
      */
-    apply(x, y, result) {
+    apply(x : number, y : number, result? : Point) {
         result = result || new Point();
         result.x = this.a * x + this.c * y + this.e;
         result.y = this.b * x + this.d * y + this.f;
@@ -145,14 +160,14 @@ export class Transform {
      * Performs ( this * another ) and returns the result as a new Transform
      * or into the result Transform if it is provided.
      */
-    multiply(another, result) {
+    multiply(another : Transform, result? : Transform) {
         result = result || this;
         var a = this.a, A = another.a;
         var b = this.b, B = another.b;
-        var c = this.c, C = another.C;
-        var d = this.d, D = another.D;
-        var e = this.e, E = another.E;
-        var f = this.f, F = another.F;
+        var c = this.c, C = another.c;
+        var d = this.d, D = another.d;
+        var e = this.e, E = another.e;
+        var f = this.f, F = another.f;
         var na = a * A + c * B,   nc = a * C + c * D,    ne = a * E + c * F + e;
         var nb = b * A + d * B,   nd = b * C + d * D,    nf = b * E + d * F + f;
         result.set(na, nb, nc, nd, ne, nf);
@@ -162,10 +177,10 @@ export class Transform {
     /**
      * Applies a translation by an offset (tx,ty) onto this Transform.
      */
-    translate(E, F, result) {
+    translate(tx : number, ty : number, result? : Transform) {
         result = result || this;
-        var ne = this.a * E  + this.c * F + this.e;
-        var nf = this.b * E  + this.d * F + this.f;
+        var ne = this.a * tx  + this.c * ty + this.e;
+        var nf = this.b * tx  + this.d * ty + this.f;
         result.e = ne;
         result.f = nf;
         result.timeStamp = Date.now();
@@ -183,7 +198,7 @@ export class Transform {
      *    |  0   0  1  |
      *    --          --
      */
-    skew(sx, sy, result) {
+    skew(sx : number, sy : number, result? : Transform) {
         result = result || this;
         var a = this.a, A = 1;
         var b = this.b, B = sy;
@@ -197,7 +212,7 @@ export class Transform {
         return result;
     }
 
-    scale(sx, sy, result) {
+    scale(sx : number, sy : number, result? : Transform) {
         result = result || this;
         result.a = this.a * sx;
         result.d = this.d * sy;
@@ -208,7 +223,7 @@ export class Transform {
     /**
      * Apply a rotation by a given angle (in radians) onto this Transform.
      */
-    rotate(theta, result) {
+    rotate(theta : number, result? : Transform) {
         result = result || this;
         var costheta = Math.cos(theta);
         var sintheta = Math.sin(theta);
@@ -224,47 +239,51 @@ export class Transform {
 }
 
 export class Size {
-    constructor(w, h) {
-        this.width = w || 0;
-        this.height = h || 0;
+    width : number = 0;
+    height : number = 0;
+    constructor(w : number = 0, h : number = 0) {
+        this.width = w;
+        this.height = h;
     }
 }
 
 export class Point {
-    constructor(x, y) {
+    x : number = 0;
+    y : number = 0;
+    constructor(x : number = 0, y : number = 0) {
         this.set(x, y);
     }
 
-    isWithin(x, y, radius) {
+    isWithin(x : number, y : number, radius : number) {
         var cx = this.x;
         var cy = this.y;
         return x >= cx - radius && x <= cx + radius && y >= cy - radius && y <= cy + radius;
     }
 
-    set(x, y) {
-        this.x = x || 0;
-        this.y = y || 0;
+    set(x : number = 0, y : number = 0) {
+        this.x = x;
+        this.y = y;
     }
 
-    copy() {
+    copy() : Point {
         return new Point(this.x, this.y);
     }
 
-    scale(sx, sy, cx, cy, result) {
+    scale(sx : number, sy : number, cx : number, cy : number, result? : Point) : Point {
         result = result || this;
         result.x = ((this.x - cx) * sx);
         result.y = ((this.y - cy) * sy);
         return result;
     }
 
-    translate(tx, ty, result) {
+    translate(tx : number, ty : number, result? : Point) {
         result = result || this;
         result.x += tx;
         result.y += ty;
         return result;
     }
 
-    rotate(theta, result) {
+    rotate(theta : number, result? : Point) {
         result = result || this;
         var costheta = Math.cos(theta);
         var sintheta = Math.sin(theta);
@@ -275,7 +294,8 @@ export class Point {
         return result;
     }
 
-    transform(a, b, c, d, e, f, result) {
+    transform(a : number = 1, b : number = 0, c : number = 0, d : number = 1,
+              e : number = 0, f : number = 0, result? : Point) {
         result = result || this;
         var x = this.x;
         var y = this.y;
@@ -286,47 +306,51 @@ export class Point {
 }
 
 export class Bounds {
-    constructor(x, y, width, height) {
+    _x : number
+    _y : number
+    _width : number
+    _height : number
+    constructor(x : number = 0, y : number = 0, width : number = 0, height : number = 0) {
         this.set(x, y, width, height);
     }
 
-    set(x, y, width, height) {
-        this._x = x || 0;
-        this._y = y || 0;
-        this._width = width || 0;
-        this._height = height || 0;
+    set(x : number = 0, y : number = 0, width : number = 0, height : number = 0) {
+        this._x = x;
+        this._y = y;
+        this._width = width;
+        this._height = height;
     }
-    get innerRadius() { return Math.min(this._width, this._height) / 2.0; }
-    get x() { return this._x; }
-    get y() { return this._y; }
-    get x2() { return this._x + this._width; }
-    get y2() { return this._y + this._height; }
-    get width() { return this._width; }
-    get height() { return this._height; }
-    get left() { return this._width >= 0 ? this._x : this._x + this._width; }
-    get top() { return this._height >= 0 ? this._y : this._y + this._height; }
-    get right() { return this._width < 0 ? this._x : this._x + this._width; }
-    get bottom() { return this._height < 0 ? this._y : this._y + this._height; }
-    get centerX() { return this._x + (this._width / 2.0) };
-    get centerY() { return this._y + (this._height / 2.0) };
+    get innerRadius() : number { return Math.min(this._width, this._height) / 2.0; }
+    get x() : number { return this._x; }
+    get y() : number { return this._y; }
+    get x2() : number { return this._x + this._width; }
+    get y2() : number { return this._y + this._height; }
+    get width() : number { return this._width; }
+    get height() : number { return this._height; }
+    get left() : number { return this._width >= 0 ? this._x : this._x + this._width; }
+    get top() : number { return this._height >= 0 ? this._y : this._y + this._height; }
+    get right() : number { return this._width < 0 ? this._x : this._x + this._width; }
+    get bottom() : number { return this._height < 0 ? this._y : this._y + this._height; }
+    get centerX() : number { return this._x + (this._width / 2.0) };
+    get centerY() : number { return this._y + (this._height / 2.0) };
 
-    set x(value) { this._x = value; }
-    set y(value) { this._y = value; }
-    set centerX(value) { this._x = value - (this._width / 2.0); }
-    set centerY(value) { this._y = value - (this._height / 2.0); }
-    set width(value) { this._width = value; }
-    set height(value) { this._height = value; }
-    get isZeroSized() { return this._width === 0 || this._height === 0; }
+    set x(value : number) { this._x = value; }
+    set y(value : number) { this._y = value; }
+    set centerX(value : number) { this._x = value - (this._width / 2.0); }
+    set centerY(value : number) { this._y = value - (this._height / 2.0); }
+    set width(value : number) { this._width = value; }
+    set height(value : number) { this._height = value; }
+    get isZeroSized() : boolean { return this._width === 0 || this._height === 0; }
 
-    set left(value) { this._x = value; }
-    set top(value) { this._y = value; }
-    set right(value) { this._width = value - this._x; }
-    set bottom(value) { this._height = value - this._y; }
+    set left(value : number) { this._x = value; }
+    set top(value : number) { this._y = value; }
+    set right(value : number) { this._width = value - this._x; }
+    set bottom(value : number) { this._height = value - this._y; }
 
     /**
      * Extends this bounds by unioning the coordinates of this one with another bounds.
      */
-    union(another, result) {
+    union(another : Bounds, result? : Bounds) : Bounds {
         result = result || this;
         var newLeft = Math.min(this.left, another.left);
         var newTop = Math.min(this.top, another.top);
@@ -342,17 +366,17 @@ export class Bounds {
     /**
      * Clips this bounds by intersecting the coordinates of this one with another bounds.
      */
-    intersect(another, result) {
+    intersect(another : Bounds, result? : Bounds) : Bounds {
         result = result || this;
-        TBD();
+        throw new Error("Not yet implemented");
         return result;
     }
 
-    move(deltaX, deltaY) {
+    move(deltaX : number, deltaY : number) : Bounds {
         return new Bounds(this.left + deltaX, this.top + deltaY, this.width, this.height);
     }
 
-    copy() {
+    copy() : Bounds {
         return new Bounds(this.left, this.top, this.width, this.height);
     }
 
@@ -360,7 +384,7 @@ export class Bounds {
      * Returns true if this shape contains a particular coordinate,
      * false otherwise.
      */
-    containsPoint(x, y) {
+    containsPoint(x : number, y : number) : boolean {
         return  x >= this._x && x <= this.right &&
                 y >= this._y && y <= this.bottom;
     }
@@ -369,9 +393,8 @@ export class Bounds {
      * Returns true if this bounds instance intersects another
      * bounds instance, false otherwise.
      */
-    intersects(anotherBounds) {
+    intersects(anotherBounds : Nullable<Bounds>) : boolean {
         if (anotherBounds == null) return true;
         return true;
-        return this.bounds.intersects(anotherBounds);
     }
 }

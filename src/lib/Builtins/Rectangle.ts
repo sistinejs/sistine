@@ -8,7 +8,7 @@ var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
 export class Rectangle extends models.Shape {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._x = configs._x || 0;
         this._y = configs._y || 0;

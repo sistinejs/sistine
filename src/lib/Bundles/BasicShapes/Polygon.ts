@@ -5,7 +5,7 @@ import * as geom from "../../Geom/models"
 import * as geomutils from "../../Geom/utils"
 
 export class Polygon extends models.Shape {
-    constructor(configs) {
+    constructor(configs : any) {
         super((configs = configs || {}));
         this._p1 = configs.p1 || new geom.Point(0, 0);
         this._p2 = configs.p2 || new geom.Point(100, 100);
