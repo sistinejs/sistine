@@ -112,7 +112,7 @@ module.exports = (env, options) => {
     }
 
     var webpack_configs = {
-        entry: './src/index.js',
+        entry: './src/index.ts',
         output: output,
         module: {
             rules: [
@@ -176,6 +176,11 @@ module.exports = (env, options) => {
                     use: ['babel-loader']
                 },
                 {
+                    test: /\.ts$/,
+                    exclude: /node_modules/,
+                    use: ['ts-loader']
+                },
+                {
                     test: /\.scss$/,
                     use: [
                         'style-loader', 
@@ -194,7 +199,7 @@ module.exports = (env, options) => {
     };
     if (options.debug || options.dev) {
         webpack_configs.devtool = 'inline-source-map';
-        webpack_configs.resolve = { extensions: ['.js', '.jsx'] };
+        webpack_configs.resolve = { extensions: ['.js', '.jsx', '.ts', '.tsx'] };
         webpack_configs.devServer = {
             hot: true,
             before: function(app, server) {
