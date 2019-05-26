@@ -5,6 +5,8 @@ import { Utils } from "../Utils/index"
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
+type Int = number;
+
 const Arrays = Utils.Arrays;
 
 export const DEFAULT_CONTROL_SIZE = 5;
@@ -17,35 +19,42 @@ export const CHUNK_TYPE_SPAN = 2;
  * layoutable on its own but also can contain a hierarchy of other blocks.
  */
 export class Block extends Core.Models.Shape {
+    readonly xCoords : Array<number> = [];
+    readonly yCoords : Array<number> = [];
+    readonly dxValues : Array<number> = [];
+    readonly dyValues : Array<number> = [];
+    readonly rotationValues : Array<number> = [];
+    readonly textLength : number = 0;
+    readonly text : string = ""
     constructor(configs) {
         super((configs = configs || {}));
-        this._xCoords = configs.xCoords || [];
-        this._yCoords = configs.yCoords || [];
-        this._dxValues = configs.dxValues || [];
-        this._dyValues = configs.dyValues || [];
-        this._rotationValues = configs.rotationValues || [];
-        this._textLength = configs.textLength || 0;
-        this._text = configs.text || "";
+        this.xCoords = configs.xCoords || [];
+        this.yCoords = configs.yCoords || [];
+        this.dxValues = configs.dxValues || [];
+        this.dyValues = configs.dyValues || [];
+        this.rotationValues = configs.rotationValues || [];
+        this.textLength = configs.textLength || 0;
+        this.text = configs.text || "";
 
         // Are these required or can be computed on demand?
         this._rootBlock = null;
         this._parentBlock = null;
     }
 
-    get hasChildren() {
-        return this._text.length == 0 && super.hasChildren;
+    get hasChildren() : boolean {
+        return this.text.length == 0 && super.hasChildren();
     }
 
-    get childCount() {
-        return this._text.length > 0 ? 0 : super.childCount;
+    get childCount() : Int {
+        return this.text.length > 0 ? 0 : super.childCount;
     } 
 
-    childAtIndex(i) {
-        return this._text.length > 0 ? null : super.childAtIndex(i);
+    childAtIndex(i : Int) : Element {
+        return this.text.length > 0 ? null : super.childAtIndex(i);
     }
 
-    add(element, index) {
-        if (this._text.length > 0) {
+    add(element : string | Block, index? : Int) {
+        if (this.text.length > 0) {
             throw new Error("Cannot add children to plain text blocks.");
         }
         if (typeof(element) === "string") {
@@ -58,33 +67,33 @@ export class Block extends Core.Models.Shape {
         return super.add(element, index);
     }
 
-    addX(value, index) {
-        Arrays.insert(this._xCoords, value, index);
+    addX(value : number, index : Int) {
+        Arrays.insert(this.xCoords, value, index);
         this.markTransformed();
         return this;
     }
-    addY(value, index) {
-        Arrays.insert(this._yCoords, value, index);
+    addY(value : number, index : Int) {
+        Arrays.insert(this.yCoords, value, index);
         this.markTransformed();
         return this;
     }
-    addDX(value, index) {
-        Arrays.insert(this._dxValues, value, index);
+    addDX(value : number, index : Int) {
+        Arrays.insert(this.dxValues, value, index);
         this.markTransformed();
         return this;
     }
-    addDY(value, index) {
-        Arrays.insert(this._dyValues, value, index);
+    addDY(value : number, index : Int) {
+        Arrays.insert(this.dyValues, value, index);
         this.markTransformed();
         return this;
     }
-    addRotation(value, index) {
+    addRotation(value : number, index : Int) {
         Arrays.insert(this._rotationValues, value, index);
         this.markTransformed();
         return this;
     }
 
-    _evalBoundingBox() {
+    _evalBoundingBox() : geom.Bounds {
         return this._rootBlock.layout(false);
     }
 }

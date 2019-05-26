@@ -8,21 +8,29 @@ var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
 export class CubicCurve extends models.Shape {
+    private created : boolean = false;
+    readonly x0 : number = 0;
+    readonly y0 : number = 0;
+    readonly x1 : number = 0;
+    readonly y1 : number = 0;
+    readonly x2 : number = 0;
+    readonly y2 : number = 0;
+    readonly x3 : number = 0;
+    readonly y3 : number = 0;
     constructor(configs) {
         super((configs = configs || {}));
         this.closed = configs.closed || false;
-        this._created = false;
         if (configs.x0 && configs.y0) {
-            this._created = true;
+            this.created = true;
         } else {
-            this._x0 = configs.x0 || 0;
-            this._y0 = configs.y0 || 0;
-            this._x1 = configs.x1 || 0;
-            this._y1 = configs.y1 || 0;
-            this._x2 = configs.x2 || 0;
-            this._y2 = configs.y2 || 0;
-            this._x3 = configs.x3 || 0;
-            this._y3 = configs.y3 || 0;
+            this.x0 = configs.x0 || 0;
+            this.y0 = configs.y0 || 0;
+            this.x1 = configs.x1 || 0;
+            this.y1 = configs.y1 || 0;
+            this.x2 = configs.x2 || 0;
+            this.y2 = configs.y2 || 0;
+            this.x3 = configs.x3 || 0;
+            this.y3 = configs.y3 || 0;
         }
     }
 
@@ -32,28 +40,28 @@ export class CubicCurve extends models.Shape {
         if (!this._created) {
             // creating by bounds
             var w4 = newBounds.width * 0.25;
-            this._x0 = newBounds.left;
-            this._y0 = newBounds.bottom;
-            this._x1 = newBounds.left + w4;
-            this._y1 = newBounds.top;
-            this._x2 = newBounds.right - w4;
-            this._y2 = newBounds.bottom;
-            this._x3 = newBounds.right;
-            this._y3 = newBounds.top;
+            this.x0 = newBounds.left;
+            this.y0 = newBounds.bottom;
+            this.x1 = newBounds.left + w4;
+            this.y1 = newBounds.top;
+            this.x2 = newBounds.right - w4;
+            this.y2 = newBounds.bottom;
+            this.x3 = newBounds.right;
+            this.y3 = newBounds.top;
             this._created = true;
         } else {
             var oldBounds = this.boundingBox;
             var sx = newBounds.width / oldBounds.width;
             var sy = newBounds.height / oldBounds.height;
 
-            this._x0 = newBounds.x + ((this._x0 - oldBounds.x) * sx)
-            this._y0 = newBounds.y + ((this._y0 - oldBounds.y) * sy)
-            this._x1 = newBounds.x + ((this._x1 - oldBounds.x) * sx)
-            this._y1 = newBounds.y + ((this._y1 - oldBounds.y) * sy)
-            this._x2 = newBounds.x + ((this._x2 - oldBounds.x) * sx)
-            this._y2 = newBounds.y + ((this._y2 - oldBounds.y) * sy);
-            this._x3 = newBounds.x + ((this._x3 - oldBounds.x) * sx)
-            this._y3 = newBounds.y + ((this._y3 - oldBounds.y) * sy);
+            this.x0 = newBounds.x + ((this.x0 - oldBounds.x) * sx)
+            this.y0 = newBounds.y + ((this.y0 - oldBounds.y) * sy)
+            this.x1 = newBounds.x + ((this.x1 - oldBounds.x) * sx)
+            this.y1 = newBounds.y + ((this.y1 - oldBounds.y) * sy)
+            this.x2 = newBounds.x + ((this.x2 - oldBounds.x) * sx)
+            this.y2 = newBounds.y + ((this.y2 - oldBounds.y) * sy);
+            this.x3 = newBounds.x + ((this.x3 - oldBounds.x) * sx)
+            this.y3 = newBounds.y + ((this.y3 - oldBounds.y) * sy);
         }
     }
 
@@ -62,10 +70,10 @@ export class CubicCurve extends models.Shape {
             // shape hasnt been created yet
             return new Geom.Models.Bounds();
         }
-        var result = Geom.Utils.boundsOfCubicCurve(this._x0, this._y0,
-                                              this._x1, this._y1,
-                                              this._x2, this._y2,
-                                              this._x3, this._y3);
+        var result = Geom.Utils.boundsOfCubicCurve(this.x0, this.y0,
+                                              this.x1, this.y1,
+                                              this.x2, this.y2,
+                                              this.x3, this.y3);
         return new Geom.Models.Bounds(result.left, result.top,
                                       result.right - result.left,
                                       result.bottom - result.top);
@@ -76,8 +84,8 @@ export class CubicCurve extends models.Shape {
     draw(ctx) {
         super.drawControls(ctx);
         ctx.beginPath();
-        ctx.moveTo(this._x0, this._y0);
-        ctx.bezierCurveTo(this._x1, this._y1, this._x2, this._y2, this._x3, this._y3);
+        ctx.moveTo(this.x0, this.y0);
+        ctx.bezierCurveTo(this.x1, this.y1, this.x2, this.y2, this.x3, this.y3);
         if (this.closed) {
             ctx.closePath();
         }
@@ -91,22 +99,22 @@ export class CubicCurve extends models.Shape {
         ctx.cubicWidth = 2;
 
         ctx.beginPath();
-        ctx.arc(this._x0, this._y0, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this.x0, this.y0, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this._x1, this._y1, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this.x1, this.y1, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this._x2, this._y2, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this.x2, this.y2, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this._x3, this._y3, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this.x3, this.y3, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -123,10 +131,10 @@ CubicCurve.Controller = class CubicCurveController extends controller.ShapeContr
     _evalControlPoints() {
         var parents = super._evalControlPoints();
         var curve = this.shape;
-        var ours = [new ControlPoint(curve._x0, curve._y0, HitType.CONTROL, 0, "grab"),
-                    new ControlPoint(curve._x1, curve._y1, HitType.CONTROL, 1, "grab"),
-                    new ControlPoint(curve._x2, curve._y2, HitType.CONTROL, 2, "grab"),
-                    new ControlPoint(curve._x3, curve._y3, HitType.CONTROL, 3, "grab")]
+        var ours = [new ControlPoint(curve.x0, curve.y0, HitType.CONTROL, 0, "grab"),
+                    new ControlPoint(curve.x1, curve.y1, HitType.CONTROL, 1, "grab"),
+                    new ControlPoint(curve.x2, curve.y2, HitType.CONTROL, 2, "grab"),
+                    new ControlPoint(curve.x3, curve.y3, HitType.CONTROL, 3, "grab")]
         return ours.concat(parents);
     }
 
@@ -146,27 +154,27 @@ CubicCurve.Controller = class CubicCurveController extends controller.ShapeContr
         var deltaY = currY - downY;
         var cubic = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
-            cubic._x0 = savedInfo.downX0 + deltaX;
-            cubic._y0 = savedInfo.downY0 + deltaY;
-            cubic._x1 = savedInfo.downX1 + deltaX;
-            cubic._y1 = savedInfo.downY1 + deltaY;
-            cubic._x2 = savedInfo.downX2 + deltaX;
-            cubic._y2 = savedInfo.downY2 + deltaY;
-            cubic._x3 = savedInfo.downX3 + deltaX;
-            cubic._y3 = savedInfo.downY3 + deltaY;
+            cubic.x0 = savedInfo.downX0 + deltaX;
+            cubic.y0 = savedInfo.downY0 + deltaY;
+            cubic.x1 = savedInfo.downX1 + deltaX;
+            cubic.y1 = savedInfo.downY1 + deltaY;
+            cubic.x2 = savedInfo.downX2 + deltaX;
+            cubic.y2 = savedInfo.downY2 + deltaY;
+            cubic.x3 = savedInfo.downX3 + deltaX;
+            cubic.y3 = savedInfo.downY3 + deltaY;
         }
         else if (hitInfo.hitIndex == 0) {
-            cubic._x0 = savedInfo.downX0 + deltaX;
-            cubic._y0 = savedInfo.downY0 + deltaY;
+            cubic.x0 = savedInfo.downX0 + deltaX;
+            cubic.y0 = savedInfo.downY0 + deltaY;
         } else if (hitInfo.hitIndex == 1) {
-            cubic._x1 = savedInfo.downX1 + deltaX;
-            cubic._y1 = savedInfo.downY1 + deltaY;
+            cubic.x1 = savedInfo.downX1 + deltaX;
+            cubic.y1 = savedInfo.downY1 + deltaY;
         } else if (hitInfo.hitIndex == 2) {
-            cubic._x2 = savedInfo.downX2 + deltaX;
-            cubic._y2 = savedInfo.downY2 + deltaY;
+            cubic.x2 = savedInfo.downX2 + deltaX;
+            cubic.y2 = savedInfo.downY2 + deltaY;
         } else {
-            cubic._x3 = savedInfo.downX3 + deltaX;
-            cubic._y3 = savedInfo.downY3 + deltaY;
+            cubic.x3 = savedInfo.downX3 + deltaX;
+            cubic.y3 = savedInfo.downY3 + deltaY;
         }
         cubic._boundingBox = null;
         cubic.markTransformed();
@@ -174,14 +182,14 @@ CubicCurve.Controller = class CubicCurveController extends controller.ShapeContr
 
     snapshotFor(hitInfo) {
         var out = super.snapshotFor(hitInfo);
-        out.downX0 = this.shape._x0;
-        out.downY0 = this.shape._y0;
-        out.downX1 = this.shape._x1;
-        out.downY1 = this.shape._y1;
-        out.downX2 = this.shape._x2;
-        out.downY2 = this.shape._y2;
-        out.downX3 = this.shape._x3;
-        out.downY3 = this.shape._y3;
+        out.downX0 = this.shape.x0;
+        out.downY0 = this.shape.y0;
+        out.downX1 = this.shape.x1;
+        out.downY1 = this.shape.y1;
+        out.downX2 = this.shape.x2;
+        out.downY2 = this.shape.y2;
+        out.downX3 = this.shape.x3;
+        out.downY3 = this.shape.y3;
         return out;
     }
 }

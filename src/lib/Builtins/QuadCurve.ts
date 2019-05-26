@@ -78,17 +78,17 @@ export class QuadCurve extends models.Shape {
         ctx.lineWidth = 2;
 
         ctx.beginPath();
-        ctx.arc(this._x0, this._y0, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._x0, this._y0, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this._p1.x, this._p1.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._p1.x, this._p1.y, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this._p2.x, this._p2.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this._p2.x, this._p2.y, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }

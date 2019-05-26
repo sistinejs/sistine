@@ -19,7 +19,7 @@ import * as pattern from "./pattern"
 
 export const Nodes = {
     UseNodeProcessor: use.UseNodeProcessor,
-    SymbolNodeProcessor: symbol.UseNodeProcessor,
+    SymbolNodeProcessor: symbol.SymbolNodeProcessor,
     IgnoreNodeProcessor: ignore.IgnoreNodeProcessor,
     DefsNodeProcessor: defs.DefsNodeProcessor,
     ANodeProcessor: a.ANodeProcessor,
@@ -37,6 +37,6 @@ export const Nodes = {
     DescNodeProcessor: desc.DescNodeProcessor,
     LinearGradientNodeProcessor: gradients.LinearGradientNodeProcessor,
     RadialGradientNodeProcessor: gradients.RadialGradientNodeProcessor,
-    PatterntNodeProcessor: pattern.PatterntNodeProcessor,
+    PatterntNodeProcessor: pattern.PatternNodeProcessor,
 }
 

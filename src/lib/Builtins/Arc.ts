@@ -1,4 +1,3 @@
-
 import { Geom } from "../Geom/index"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
@@ -8,55 +7,61 @@ var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
 export class Arc extends models.Shape {
-    constructor(configs) {
+    private created : boolean = false
+    readonly x0 : number = 0;
+    readonly y0 : number = 0;
+    readonly x1 : number = 0;
+    readonly y1 : number = 0;
+    readonly x2 : number = 0;
+    readonly y2 : number = 0;
+    constructor(configs : any) {
         super((configs = configs || {}));
-        this._created = false;
         if (configs.x0 && configs.y0) {
-            this._created = true;
+            this.created = true;
         } else {
-            this._x0 = configs.x0 || 0;
-            this._y0 = configs.y0 || 0;
-            this._x1 = configs.x1 || 0;
-            this._y1 = configs.y1 || 0;
-            this._x2 = configs.x2 || 0;
-            this._y2 = configs.y2 || 0;
+            this.x0 = configs.x0 || 0;
+            this.y0 = configs.y0 || 0;
+            this.x1 = configs.x1 || 0;
+            this.y1 = configs.y1 || 0;
+            this.x2 = configs.x2 || 0;
+            this.y2 = configs.y2 || 0;
         }
     }
 
-    get controllerClass() { return Arc.Controller; }
+    get controllerClass() { return ArcController; }
 
     _setBounds(newBounds) {
-        if (!this._created) {
+        if (!this.created) {
             // creating by bounds
-            this._x0 = newBounds.left;
-            this._y0 = newBounds.bottom;
-            this._x1 = newBounds.centerX;
-            this._y1 = newBounds.top;
-            this._x2 = newBounds.right;
-            this._y2 = newBounds.bottom;
-            this._created = true;
+            this.x0 = newBounds.left;
+            this.y0 = newBounds.bottom;
+            this.x1 = newBounds.centerX;
+            this.y1 = newBounds.top;
+            this.x2 = newBounds.right;
+            this.y2 = newBounds.bottom;
+            this.created = true;
         } else {
             var oldBounds = this.boundingBox;
             var sx = newBounds.width / oldBounds.width;
             var sy = newBounds.height / oldBounds.height;
-            this._x0 = newBounds.x + ((this._x0 - oldBounds.x) * sx)
-            this._y0 = newBounds.y + ((this._y0 - oldBounds.y) * sy)
-            this._x1 = newBounds.x + ((this._x1 - oldBounds.x) * sx)
-            this._y1 = newBounds.y + ((this._y1 - oldBounds.y) * sy)
-            this._x2 = newBounds.x + ((this._x2 - oldBounds.x) * sx)
-            this._y2 = newBounds.y + ((this._y2 - oldBounds.y) * sy);
+            this.x0 = newBounds.x + ((this.x0 - oldBounds.x) * sx)
+            this.y0 = newBounds.y + ((this.y0 - oldBounds.y) * sy)
+            this.x1 = newBounds.x + ((this.x1 - oldBounds.x) * sx)
+            this.y1 = newBounds.y + ((this.y1 - oldBounds.y) * sy)
+            this.x2 = newBounds.x + ((this.x2 - oldBounds.x) * sx)
+            this.y2 = newBounds.y + ((this.y2 - oldBounds.y) * sy);
         }
     }
 
     _evalBoundingBox() {
-        if (!this._created) {
+        if (!this.created) {
             // shape hasnt been created yet
             return new Geom.Models.Bounds();
         }
-        var left = Math.min(this._x0, this._x1);
-        var top = Math.min(this._y0, this._y1);
-        var right = Math.max(this._x0, this._x1);
-        var bottom = Math.max(this._y0, this._y1);
+        var left = Math.min(this.x0, this.x1);
+        var top = Math.min(this.y0, this.y1);
+        var right = Math.max(this.x0, this.x1);
+        var bottom = Math.max(this.y0, this.y1);
         return new Geom.Models.Bounds(left, top, right - left, bottom - top);
     }
 
@@ -64,8 +69,8 @@ export class Arc extends models.Shape {
 
     draw(ctx) {
         ctx.beginPath();
-        ctx.moveTo(this._x0, this._y0);
-        ctx.arcTo(this._x1, this._y1);
+        ctx.moveTo(this.x0, this.y0);
+        ctx.arcTo(this.x1, this.y1);
         ctx.stroke();
     }
 
@@ -74,11 +79,11 @@ export class Arc extends models.Shape {
         ctx.strokeStyle = "black";
         ctx.arcWidth = 2;
         ctx.beginPath();
-        ctx.arc(this._x0, this._y0, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this.x0, this.y0, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(this._x1, this._y1, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(this.x1, this.y1, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -87,15 +92,15 @@ export class Arc extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-Arc.Controller = class ArcController extends controller.ShapeController {
+export class ArcController extends controller.ShapeController {
     constructor(shape) {
         super(shape);
     }
 
     _evalControlPoints() {
         var arc = this.shape;
-        return [new ControlPoint(arc._x0, arc._y0, HitType.CONTROL, 0, "grab"),
-                new ControlPoint(arc._x1, arc._y1, HitType.CONTROL, 1, "grab")]
+        return [new ControlPoint(arc.x0, arc.y0, HitType.CONTROL, 0, "grab"),
+                new ControlPoint(arc.x1, arc.y1, HitType.CONTROL, 1, "grab")]
     }
 
     _checkMoveHitInfo(x, y) {
@@ -111,22 +116,22 @@ Arc.Controller = class ArcController extends controller.ShapeController {
         var deltaY = currY - downY;
         var arc = this.shape;
         if (hitInfo.hitType == HitType.MOVE) {
-            arc._x0 = savedInfo.downX0 + deltaX;
-            arc._y0 = savedInfo.downY0 + deltaY;
-            arc._x1 = savedInfo.downX1 + deltaX;
-            arc._y1 = savedInfo.downY1 + deltaY;
-            arc._x2 = savedInfo.downX2 + deltaX;
-            arc._y2 = savedInfo.downY2 + deltaY;
+            arc.x0 = savedInfo.downX0 + deltaX;
+            arc.y0 = savedInfo.downY0 + deltaY;
+            arc.x1 = savedInfo.downX1 + deltaX;
+            arc.y1 = savedInfo.downY1 + deltaY;
+            arc.x2 = savedInfo.downX2 + deltaX;
+            arc.y2 = savedInfo.downY2 + deltaY;
         }
         else if (hitInfo.hitIndex == 0) {
-            arc._x0 = savedInfo.downX0 + deltaX;
-            arc._y0 = savedInfo.downY0 + deltaY;
+            arc.x0 = savedInfo.downX0 + deltaX;
+            arc.y0 = savedInfo.downY0 + deltaY;
         } else if (hitInfo.hitIndex == 1) {
-            arc._x1 = savedInfo.downX1 + deltaX;
-            arc._y1 = savedInfo.downY1 + deltaY;
+            arc.x1 = savedInfo.downX1 + deltaX;
+            arc.y1 = savedInfo.downY1 + deltaY;
         } else if (hitInfo.hitIndex == 2) {
-            arc._x2 = savedInfo.downX2 + deltaX;
-            arc._y2 = savedInfo.downY2 + deltaY;
+            arc.x2 = savedInfo.downX2 + deltaX;
+            arc.y2 = savedInfo.downY2 + deltaY;
         }
         arc._boundingBox = null;
         arc.markTransformed();
@@ -134,10 +139,10 @@ Arc.Controller = class ArcController extends controller.ShapeController {
 
     snapshotFor(hitInfo) {
         return {
-            downX0: this.shape._x0,
-            downY0: this.shape._y0,
-            downX1: this.shape._x1,
-            downY1: this.shape._y1,
+            downX0: this.shape.x0,
+            downY0: this.shape.y0,
+            downX1: this.shape.x1,
+            downY1: this.shape.y1,
         };
     }
 }

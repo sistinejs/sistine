@@ -21,7 +21,7 @@ export function debug() {
     }
 }
 
-export function logfunc(funcname) {
+export function logfunc(funcname : string) {
     if (LOG_FUNC) {
         var line = funcname + "(";
         for (var i = 1;i < arguments.length;i++) {

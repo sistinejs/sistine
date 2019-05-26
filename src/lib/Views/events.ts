@@ -2,6 +2,10 @@
 import * as events from "../Core/events";
 
 export class ViewPortChanged extends events.Event {
+    readonly oldOffsetX : number;
+    readonly oldOffsetY : number;
+    readonly newOffsetX : number;
+    readonly newOffsetY : number;
     constructor(oldOffsetX, oldOffsetY, newOffsetX, newOffsetY) {
         super();
         this.oldOffsetX = oldOffsetX;
@@ -12,7 +16,9 @@ export class ViewPortChanged extends events.Event {
 }
 
 export class ZoomChanged extends events.Event {
-    constructor(oldZoom, newZoom) {
+    oldZoom : number
+    newZoom : number
+    constructor(oldZoom : number, newZoom : number) {
         super();
         this.oldZoom = oldZoom;
         this.newZoom = newZoom;

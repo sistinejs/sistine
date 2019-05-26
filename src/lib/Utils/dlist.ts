@@ -1,17 +1,23 @@
 
-export class DList {
-    constructor() {
-        this._head = this._tail = null;
-        this._count = 0;
-    }
+type Int = number;
 
-    get head() { return this._head; } 
-    get tail() { return this._tail; } 
+interface DListNode<T> {
+    next? : DListNode<T> | null;
+    prev? : DListNode<T> | null;
+}
+
+export class DList<T> {
+    private _head : DListNode<T> | null = null;
+    private _tail : DListNode<T> | null = null;
+    private _count : Int = 0;
+
+    get head() { return this._head; }
+    get tail() { return this._tail; }
     get count() { return this._count; }
 
-    add(node) {
+    add(node : DListNode<T>) {
         node.next = node.prev = null;
-        if (this._head == null) {
+        if (this._head == null || this._tail == null) {
             this._head = this._tail = node;
         } else {
             this._tail.next = node;
@@ -22,7 +28,7 @@ export class DList {
         return this;
     }
 
-    remove(node) {
+    remove(node : DListNode<T>) {
         var prev = node.prev;
         var next = node.next;
     }

@@ -113,7 +113,7 @@ export class State {
  * by the handlers.  If any of the handlers now return false, the event handling is
  * now suppressed.
  */
-export class EventHandler {
+export interface EventHandler {
     /**
      * Handler method called before an event is "committed".  This gives the handlers a 
      * chance to process and validate the changes the event is being triggered for.
@@ -124,7 +124,7 @@ export class EventHandler {
      *
      * @returns {Bool} true if event is validated, false if validation failed and needs to be suppressed.
      */
-    handleBefore(eventType, source, eventData) { return true; }
+    handleBefore(eventType : string, source : EventSource, eventData : any) : boolean;
 
     /**
      * Handler method called after an event is "committed".  This serves more as a notification
@@ -136,7 +136,7 @@ export class EventHandler {
      *
      * @returns {Bool} true if event is validated, false if validation failed and needs to be suppressed.
      */
-    handleOn(eventType, source, eventData) { return true; }
+    handleOn(eventType : string, source : EventSource, eventData : any) : boolean;
 }
 
 /**

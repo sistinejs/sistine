@@ -5,10 +5,10 @@
  * characteristics. (say by location, by attribute type, by zIndex etc)
  */
 export class ShapeIndex {
+    defaultPane : string = "main"
     constructor(scene) {
         this._shapeIndexes = {};
         this._allShapes = [];
-        this.defaultPane = "main";
         this.scene = scene;
     }
 

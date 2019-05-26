@@ -6,23 +6,19 @@ import * as controller from "./controller";
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
-export const DEFAULT_CONTROL_SIZE = 5;
-
 /**
  * Holds information about the instance of a shape.
  */
 export class Shape extends mixins.Styleable {
     isVisible : boolean
-    controlRadius : number
+    readonly scene : Scene = null;
 
     constructor(configs) {
         configs = configs || {};
         super(configs);
-        this._scene = null;
         this._boundingBox = null;
 
         this.isVisible = true;
-        this.controlRadius = DEFAULT_CONTROL_SIZE;
     }
 
     get boundingBox() : Bounds {
@@ -32,8 +28,7 @@ export class Shape extends mixins.Styleable {
         return this._boundingBox;
     }
 
-    get scene() : Scene { return this._scene; } 
-    get controllerClass() { return controller.ShapeController; }
+    get controllerClass() : { new (shape : Shape) : controller.Controller } { return controller.ShapeController; }
     get controller() : controller.Controller { 
         if (this._controller == null) {
             this._controller = new this.controllerClass(this);
@@ -48,15 +43,15 @@ export class Shape extends mixins.Styleable {
     }
 
     setScene(s : Scene) : boolean {
-        if (this._scene != s) {
+        if (this.scene != s) {
             // unchain previous scene
             this.markUpdated();
-            if (this._scene) {
-                this.eventHub.unchain(this._scene.eventHub);
+            if (this.scene) {
+                this.eventHub.unchain(this.scene.eventHub);
             }
-            this._scene = s;
-            if (this._scene) {
-                this.eventHub.chain(this._scene.eventHub);
+            this.scene = s;
+            if (this.scene) {
+                this.eventHub.chain(this.scene.eventHub);
             }
             return true;
         }
@@ -84,50 +79,6 @@ export class Shape extends mixins.Styleable {
     }
 
     draw(ctx) { }
-
-    drawControls(ctx, options) {
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 0.5
-        var lBounds = this.boundingBox;
-        var l = lBounds.left;
-        var r = lBounds.right;
-        var t = lBounds.top;
-        var b = lBounds.bottom;
-        ctx.strokeRect(l, t, lBounds.width, lBounds.height);
-        ctx.fillStyle = "yellow";
-
-        var sizePoints = [
-            [l, t],
-            [(l + r) / 2, t],
-            [r, t],
-            [r, (t + b) / 2],
-            [r, b],
-            [(l + r) / 2, b],
-            [l, b],
-            [l, (t + b) / 2]
-        ]
-        for (var i = sizePoints.length - 1;i >= 0;i--) {
-            var px = sizePoints[i][0];
-            var py = sizePoints[i][1];
-            ctx.fillRect(px - this.controlRadius, py - this.controlRadius,
-                           this.controlRadius + this.controlRadius,
-                           this.controlRadius + this.controlRadius);
-            ctx.strokeRect(px - this.controlRadius, py - this.controlRadius,
-                           this.controlRadius + this.controlRadius,
-                           this.controlRadius + this.controlRadius);
-        }
-        // Draw the "rotation" control
-        ctx.beginPath();
-        geomutils.pathEllipse(ctx, lBounds.right + 50 - this.controlRadius, 
-                         lBounds.centerY - this.controlRadius, 
-                         this.controlRadius * 2, this.controlRadius * 2);
-        ctx.fillStyle = 'green';
-        ctx.fill();
-        ctx.moveTo(lBounds.right, lBounds.centerY);
-        ctx.lineTo(lBounds.right + 50, lBounds.centerY);
-        ctx.strokeStyle = 'blue';
-        ctx.stroke();
-    }
 
     /**
      * Returns true if this shape contains a particular coordinate, 

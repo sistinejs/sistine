@@ -5,7 +5,7 @@ import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
 export class StageState extends events.State {
-    constructor(stage) {
+    constructor(stage : Stage) {
         super();
         this.stage = stage;
         this.downPoints = [];

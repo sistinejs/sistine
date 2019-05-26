@@ -7,11 +7,11 @@ import * as controller from "../Core/controller"
 const Length = geom.Length;
 
 export class Circle extends models.Shape {
+    private created : boolean = false;
     constructor(configs) {
         super((configs = configs || {}));
-        this._created = false;
         if (configs.cx && configs.cy) {
-            this._created = true;
+            this.created = true;
         } else {
             this._cx = configs.cx || 0;
             this._cy = configs.cy || 0;

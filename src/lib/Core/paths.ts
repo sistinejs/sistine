@@ -245,7 +245,7 @@ export class Path extends models.Shape {
             for (var i = currComp.numControlPoints - 1;i >= 0;i--) {
                 var cpt = currComp.getControlPoint(i);
                 ctx.beginPath();
-                ctx.arc(cpt.x, cpt.y, models.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+                ctx.arc(cpt.x, cpt.y, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.stroke();
             }

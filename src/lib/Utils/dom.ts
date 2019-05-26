@@ -2,7 +2,7 @@
 const fontMetrics = {
 }
 
-export function getcssint(elem, attrib) {
+export function getcssint(elem, attrib : string) : int {
     return parseInt(elem.css(attrib).replace(/px/, ""));
 }
 

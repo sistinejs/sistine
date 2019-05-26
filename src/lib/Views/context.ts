@@ -287,6 +287,7 @@ class AttribFrame {
 }
 
 export class VirtualContext {
+    readonly currentFrame : AttribFrame = null
     constructor(ctx) {
         this.ctx = ctx;
         this.currentFrame = new AttribFrame();
@@ -329,7 +330,8 @@ export class VirtualContext {
         }
     }
 
-    transform(a, b, c, d, e, f) {
+    transform(a : number = 1, b : number = 0, c : number = 0, d : number = 1,
+              e : number = 0, f : number = 0) {
         // this.currentFrame.transform.multiply(new geom.Transform(a, b, c, d, e, f));
         this.ctx.transform(a, b, c, d, e, f);
         logging.logfunc("ctx.transform", a, b, c, d, e, f);

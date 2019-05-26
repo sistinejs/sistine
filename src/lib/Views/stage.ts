@@ -11,8 +11,8 @@ import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
 class TouchState {
-    constructor(maxPoints) {
-        maxPoints = maxPoints || 10;
+    readonly maxPoints : int;
+    constructor(maxPoints = 10) {
         this.maxPoints = maxPoints;
         this._active = [];
         this.downTimes = [];

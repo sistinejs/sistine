@@ -2,11 +2,11 @@ import { Geom } from "../Geom/index"
 
 const toRadians = Geom.Utils.toRadians;
 
-function isDigit(ch) {
+function isDigit(ch : string) : boolean {
     return "0123456789".indexOf(ch) >= 0;
 }
 
-function isIdentChar(ch) {
+function isIdentCharisDigit(ch : string) : boolean {
     return "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(ch) >= 0;
 }
 

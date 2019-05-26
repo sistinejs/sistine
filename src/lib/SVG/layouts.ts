@@ -5,14 +5,18 @@ const BoundsChanged = events.BoundsChanged;
 const ElementAdded = events.ElementAdded;
 const ElementRemoved = events.ElementRemoved;
 
-export class ConstraintManager extends events.EventHandler {
+export class ConstraintManager implements events.EventHandler {
     constructor() {
         super();
         this._allConstraints = {};
         this._parentTargetRefs= {};
     }
 
-    handleOn(eventType, source, event) {
+    handleBefore(eventType : string, source : events.EventSource, eventData : any) : boolean {
+        return true;
+    }
+
+    handleOn(eventType : string, source : events.EventSource, eventData : any) : boolean {
         if (eventType == ElementAdded.name) {
             this._addParentRef(event.parent, event.subject);
             this.refreshConstraints(event.subject);

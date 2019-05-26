@@ -13,7 +13,7 @@ const forEachNode = Utils.DOM.forEachNode;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
 class BlockProcessor extends base.NodeProcessor {
-    processTextAttributes(elem, text) {
+    processTextAttributes(elem : Element, text : string) {
         new NumbersTokenizer(elem.getAttribute("x") || "")
             .all().forEach(function(token) {
                 text.addX(token.value);
@@ -39,14 +39,14 @@ class BlockProcessor extends base.NodeProcessor {
 }
 
 export class TextNodeProcessor extends BlockProcessor {
-    get validChildren() {
+    get validChildren() : Array<string> {
         return base.animationElements
                 .concat(base.descriptiveElements)
                 .concat(base.textContentChildElements)
                 .concat(["a"]);
     }
 
-    get validAttributes() {
+    get validAttributes() : Array<string> {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

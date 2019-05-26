@@ -14,11 +14,11 @@ const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
-class PatternNodeProcessor extends base.NodeProcessor {
+export class PatternNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.descriptiveElements
                 .concat(base.animationElements)
-                .concat(base.paintServerElements)
+                // .concat(base.paintServerElements)
                 .concat(base.shapeElements)
                 .concat(base.structuralElements)
                 .concat(["a", "audio", "canvas", "clipPath", "filter",

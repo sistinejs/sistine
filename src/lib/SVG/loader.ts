@@ -45,11 +45,11 @@ const elementProcessors = {
 /**
  * Utilities to load shapes from a URL or an input stream.
  */
-export function loadFromURL(url, configs, callback) {
+ export function loadFromURL(url : string, configs : any, callback : (shape : models.SVG, element : any) => void) : void {
     url = url.trim();
     var startTime = Date.now();
     var loader = new SVGLoader(configs);
-    $.get(url, function(data) {
+    $.get(url, function(data : any) {
         var result = loader.processElement(data.rootElement, null);
         result.loadTime = Date.now() - startTime;
         console.log("Element loaded in: ", result.loadTime);
@@ -59,16 +59,18 @@ export function loadFromURL(url, configs, callback) {
     });
 }
 
-export function loadFromString(input, configs) {
+export function loadFromString(input : string, configs : any) : models.SVG {
+    return null;
 }
 
 export class SVGLoader {
-    constructor(configs) {
+    private configs : any = {}
+    constructor(configs : any) {
         this.configs = configs || {};
         configs.bounds = configs.bounds || new Bounds(50, 50, 100, 100);
     }
 
-    processElement(root, parent) {
+    processElement(root : any, parent : Core.Models.Element) {
         // Find the right "converter" for the root object
         var processor = this.getProcessor(root.tagName);
         if (processor == null) {
@@ -78,7 +80,7 @@ export class SVGLoader {
         }
     }
 
-    getProcessor(name) {
+    getProcessor(name : string) {
         if (name.startsWith("inkscape:") ||
             name.startsWith("metadata") ||
             name.startsWith("sodipodi:")) return null;

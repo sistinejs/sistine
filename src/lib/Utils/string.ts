@@ -6,7 +6,7 @@ export function concat(...strings){
 /**
  * Converts a hyphenated string into camelcase.
  */
-export function toCamelCase(hyphenated) {
+export function toCamelCase(hyphenated : string) : string {
     return hyphenated;
 }
 

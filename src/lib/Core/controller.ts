@@ -2,6 +2,8 @@
 import * as events from "./events";
 import * as geom from "../Geom/models";
 
+export const DEFAULT_CONTROL_SIZE = 5;
+
 export const HitType = {
     MOVE: 0,
     SIZE: 1,
@@ -28,10 +30,12 @@ export const HitType = {
  * @param {Shape} shape  The shape this controller instance is controlling.
  */
 export class ShapeController {
-    constructor(shape) {
+    controlRadius : number
+    constructor(shape : Shape) {
         this._shape = shape;
         this._controlPointTS = 0;
         this._controlPoints = null;
+        this.controlRadius = DEFAULT_CONTROL_SIZE;
     }
 
     /**
@@ -177,6 +181,50 @@ export class ShapeController {
                         (deltaX == 0 ? "Inf" : deltaY / deltaX), newAngle);
             shape.rotateTo(newAngle);
         }
+    }
+
+    drawControls(ctx, options) {
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 0.5
+        var lBounds = this.shape.boundingBox;
+        var l = lBounds.left;
+        var r = lBounds.right;
+        var t = lBounds.top;
+        var b = lBounds.bottom;
+        ctx.strokeRect(l, t, lBounds.width, lBounds.height);
+        ctx.fillStyle = "yellow";
+
+        var sizePoints = [
+            [l, t],
+            [(l + r) / 2, t],
+            [r, t],
+            [r, (t + b) / 2],
+            [r, b],
+            [(l + r) / 2, b],
+            [l, b],
+            [l, (t + b) / 2]
+        ]
+        for (var i = sizePoints.length - 1;i >= 0;i--) {
+            var px = sizePoints[i][0];
+            var py = sizePoints[i][1];
+            ctx.fillRect(px - this.controlRadius, py - this.controlRadius,
+                           this.controlRadius + this.controlRadius,
+                           this.controlRadius + this.controlRadius);
+            ctx.strokeRect(px - this.controlRadius, py - this.controlRadius,
+                           this.controlRadius + this.controlRadius,
+                           this.controlRadius + this.controlRadius);
+        }
+        // Draw the "rotation" control
+        ctx.beginPath();
+        geomutils.pathEllipse(ctx, lBounds.right + 50 - this.controlRadius, 
+                         lBounds.centerY - this.controlRadius, 
+                         this.controlRadius * 2, this.controlRadius * 2);
+        ctx.fillStyle = 'green';
+        ctx.fill();
+        ctx.moveTo(lBounds.right, lBounds.centerY);
+        ctx.lineTo(lBounds.right + 50, lBounds.centerY);
+        ctx.strokeStyle = 'blue';
+        ctx.stroke();
     }
 }
 

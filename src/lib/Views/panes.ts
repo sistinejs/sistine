@@ -11,18 +11,20 @@ import { getcssint } from "../Utils/dom"
  * refresh rates etc).
  */
 export class Pane {
+    readonly viewBounds : geom.Bounds = null;
+    readonly zoom : number = 1.0;
+    readonly divId : string = null;
     constructor(name, stage, canvasId, configs) {
         this._configs = configs || {};
         this._name = name;
         this._stage = stage;
         this._needsRepaint = true;
-        this._divId = stage.divId;
+        this.divId = stage.divId;
         this._parentDiv = $("#" + stage.divId);
         this._canvasId = canvasId;
         this._canvas = null;
-        this._zoom = 1.0;
         this._offset = new geom.Point();
-        this._viewBounds = new geom.Bounds();
+        this.viewBounds = new geom.Bounds();
         this._ensureCanvas();
         this._refCount = 1;
     }
@@ -39,13 +41,12 @@ export class Pane {
         return this;
     }
 
-    get zoom() { return this._zoom; }
-    setZoom(z) {
+    setZoom(z : number) {
         if (z < 0) z = 1;
         if (z > 10) z = 10;
-        if (this._zoom != z) {
-            this._zoom = z;
-            this._viewBoundsChanged();
+        if (this.zoom != z) {
+            this.zoom = z;
+            this.viewBoundsChanged();
         }
     }
 
@@ -53,7 +54,7 @@ export class Pane {
     setOffset(x, y) {
         if (this._offset.x != x || this._offset.y != y) {
             this._offset = new geom.Point(x, y);
-            this._viewBoundsChanged();
+            this.viewBoundsChanged();
         }
     }
 
@@ -78,7 +79,7 @@ export class Pane {
     release() { this._refCount -= 1; }
 
     get name() { return this._name; }
-    get divId() { return this._divId; }
+    get divId() { return this.divId; }
     get canvasId() { return this._canvasId; }
     get rawContext() { return this._rawContext; }
     get virtualContext() { return this._virtualContext; }
@@ -120,7 +121,7 @@ export class Pane {
     }
 
     _ensureCanvas() {
-        var divId = this._divId;
+        var divId = this.divId;
         this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
         this._parentDiv.append(this._canvas);
         this._rawContext = this._canvas[0].getContext("2d");
@@ -163,17 +164,16 @@ export class Pane {
         elem.width(finalWidth);
         elem[0].width = finalWidth;
         elem[0].height = finalHeight;
-        this._viewBoundsChanged();
+        this.viewBoundsChanged();
     }
 
-
-    _viewBoundsChanged() {
+    private viewBoundsChanged() {
         var p1 = this.toWorld(0, 0);
         var p2 = this.toWorld(this.width, this.height);
-        this._viewBounds.x = p1.x;
-        this._viewBounds.y = p1.y;
-        this._viewBounds.right = p2.x;
-        this._viewBounds.bottom = p2.y;
+        this.viewBounds.x = p1.x;
+        this.viewBounds.y = p1.y;
+        this.viewBounds.right = p2.x;
+        this.viewBounds.bottom = p2.y;
         // this.transformChanged = true;
         // if (this.transformChanged) {
             var ctx = this.virtualContext;
@@ -306,10 +306,10 @@ export class BGPane extends Pane {
         ctx.strokeStyle = this.lineColor;
 
         ctx.beginPath();
-        var startX = this._viewBounds.left;
+        var startX = this.viewBounds.left;
         var startY = this.offset.y;
-        var endX = this._viewBounds.right;
-        var endY = this._viewBounds.bottom;
+        var endX = this.viewBounds.right;
+        var endY = this.viewBounds.bottom;
         // Horiz lines
         for (var currY = 0; currY < endY; currY += space) {
             ctx.moveTo(startX, currY);
