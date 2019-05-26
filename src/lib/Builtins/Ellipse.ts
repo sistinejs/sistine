@@ -8,11 +8,11 @@ var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
 export class Ellipse extends models.Shape {
+    private created : boolean = false
     constructor(configs : any) {
         super((configs = configs || {}));
-        this._created = false;
         if (configs.cx && configs.cy) {
-            this._created = true;
+            this.created = true;
         } else {
             this._cx = configs.cx || 0;
             this._cy = configs.cy || 0;
@@ -65,8 +65,5 @@ export class Ellipse extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class EllipseController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class EllipseController extends controller.ShapeController<Ellipse> {
 }

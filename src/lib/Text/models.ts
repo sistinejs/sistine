@@ -6,9 +6,10 @@ import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
 type Int = number;
+type Nullable<T> = T | null;
 
 const Arrays = Utils.Arrays;
-const Element = Core.Models.Element;
+const Element = Core.Base.Element;
 
 export const DEFAULT_CONTROL_SIZE = 5;
 export const CHUNK_TYPE_PLAIN = 0;
@@ -48,7 +49,7 @@ export class Block extends Core.Models.Shape {
         return this.text.length > 0 ? 0 : super.childCount();
     } 
 
-    childAtIndex(i : Int) : Element {
+    childAtIndex(i : Int) : Nullable<Element> {
         return this.text.length > 0 ? null : super.childAtIndex(i);
     }
 
@@ -66,27 +67,27 @@ export class Block extends Core.Models.Shape {
         return super.add(element, index);
     }
 
-    addX(value : number, index : Int) {
+    addX(value : number, index : Int) : Block {
         Arrays.insert(this.xCoords, value, index);
         this.markTransformed();
         return this;
     }
-    addY(value : number, index : Int) {
+    addY(value : number, index : Int) : Block {
         Arrays.insert(this.yCoords, value, index);
         this.markTransformed();
         return this;
     }
-    addDX(value : number, index : Int) {
+    addDX(value : number, index : Int) : Block {
         Arrays.insert(this.dxValues, value, index);
         this.markTransformed();
         return this;
     }
-    addDY(value : number, index : Int) {
+    addDY(value : number, index : Int) : Block {
         Arrays.insert(this.dyValues, value, index);
         this.markTransformed();
         return this;
     }
-    addRotation(value : number, index : Int) {
+    addRotation(value : number, index : Int) : Block {
         Arrays.insert(this.rotationValues, value, index);
         this.markTransformed();
         return this;
@@ -121,7 +122,7 @@ export class Text extends Block {
     }
 }
 
-export class TextController extends Core.Controller.ShapeController {
+export class TextController extends Core.Controller.ShapeController<Text> {
 }
 
 class LayoutEngine {

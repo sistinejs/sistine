@@ -6,6 +6,8 @@ import * as controller from "./controller";
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
+type Element = base.Element;
+
 type Int = number;
 type Nullable<T> = T | null;
 
@@ -16,7 +18,7 @@ export class Shape extends mixins.Styleable {
     isVisible : boolean = true;
     private _scene : Nullable<Scene> = null;
     protected _boundingBox : Nullable<geom.Bounds> = null;
-    controller : controller.ShapeController | null = null;
+    controller : controller.ShapeController<this> | null = null;
 
     constructor(configs : any) {
         super((configs = configs || {}));
@@ -44,7 +46,6 @@ export class Shape extends mixins.Styleable {
             var event = new events.BoundsChanged(this, "bounds", oldBounds, newBounds);
             if (this.validateBefore(event.name, event) == false) return false;
             this._setBounds(newBounds);
-            this._boundingBox = null;
             this.markTransformed();
             this.triggerOn(event.name, event);
             return true;
@@ -54,6 +55,11 @@ export class Shape extends mixins.Styleable {
     canSetBounds(newBounds: geom.Bounds) : boolean { return true; }
     _setBounds(newBounds : geom.Bounds) {
         throw Error("Not Implemented");
+    }
+
+    markTransformed() {
+        this._boundingBox = null;
+        super.markTransformed();
     }
 
     draw(ctx : any) { }
@@ -77,7 +83,7 @@ export class Shape extends mixins.Styleable {
  * can extend this to performing layouts etc on child chapes.
  */
 export class Group extends Shape {
-    protected _children : Array<Element> = [];
+    protected _children : Array<Shape> = [];
     protected _bounds : Nullable<geom.Bounds>;
     constructor(configs : any) {
         super((configs = configs || {}));

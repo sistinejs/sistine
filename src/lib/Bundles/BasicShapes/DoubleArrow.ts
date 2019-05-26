@@ -58,8 +58,5 @@ export class DoubleArrow extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class DoubleArrowController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class DoubleArrowController extends controller.ShapeController<DoubleArrow> {
 }

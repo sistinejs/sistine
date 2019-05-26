@@ -77,8 +77,5 @@ export class Rectangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class RectangleController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class RectangleController extends controller.ShapeController<Rectangle> {
 }

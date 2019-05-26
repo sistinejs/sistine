@@ -57,8 +57,5 @@ export class RoundedRectangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-RoundedRectangle.Controller = class RoundedRectangleController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class RoundedRectangleController extends controller.ShapeController<RoundedRectangle> {
 }

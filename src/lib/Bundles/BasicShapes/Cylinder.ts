@@ -58,8 +58,5 @@ export class Cylinder extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class CylinderController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class CylinderController extends controller.ShapeController<Cylinder> {
 }

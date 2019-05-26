@@ -43,8 +43,5 @@ export class Square extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class SquareController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class SquareController extends controller.ShapeController<Square> {
 }

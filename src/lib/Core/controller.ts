@@ -29,26 +29,27 @@ export const HitType = {
  *
  * @param {Shape} shape  The shape this controller instance is controlling.
  */
-export class ShapeController {
+export class ShapeController<T extends Shape> {
     controlRadius : number
-    constructor(shape : Shape) {
+    private _shape : T
+    private _controlPointTS : number = 0
+    private _controlPoints : Array<ControlPoint> = [];
+    controlRadius : number = DEFAULT_CONTROL_SIZE;
+    constructor(shape : T) {
         this._shape = shape;
-        this._controlPointTS = 0;
-        this._controlPoints = null;
-        this.controlRadius = DEFAULT_CONTROL_SIZE;
     }
 
     /**
      * Return the shape being controlled.
      */
-    get shape() {
+    get shape() : T {
         return this._shape;
     }
 
     /**
      * Returns the control points of the shape being controlled.
      */
-    get controlPoints() {
+    get controlPoints() : Array<ControlPoint>{
         if (this._controlPoints == null || this.shape._lastTransformed > this._controlPointTS) {
             this._controlPoints = this._evalControlPoints();
         }
@@ -58,7 +59,7 @@ export class ShapeController {
     /**
      * @private
      */
-    _evalControlPoints() {
+    _evalControlPoints() : Array<ControlPoint> {
         this._controlPointTS = Date.now();
         var lBounds = this.shape.boundingBox;
         var controlRadius = this.shape.controlRadius;

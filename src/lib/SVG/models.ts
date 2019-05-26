@@ -52,8 +52,5 @@ export class SVG extends models.Group {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-SVG.Controller = class SVGController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class SVGController extends controller.ShapeController<SVG> {
 }

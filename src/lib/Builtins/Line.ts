@@ -8,11 +8,11 @@ var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
 
 export class Line extends models.Shape {
+    private created : boolean = false
     constructor(configs : any) {
         super((configs = configs || {}));
-        this._created = false;
         if (configs.x0 && configs.y0) {
-            this._created = true;
+            this.created = true;
         } else {
             this._x0 = configs.x0 || 0;
             this._y0 = configs.y0 || 0;
@@ -61,11 +61,7 @@ export class Line extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class LineController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
-
+export class LineController extends controller.ShapeController<Line> {
     _evalControlPoints() {
         var line = this.shape;
         return [new ControlPoint(line._x0, line._y0, HitType.CONTROL, 0, "grab"),

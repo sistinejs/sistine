@@ -58,8 +58,5 @@ export class Triangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class TriangleController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class TriangleController extends controller.ShapeController<Triangle> {
 }

@@ -77,8 +77,5 @@ export class Star extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class StarController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class StarController extends controller.ShapeController<Star> {
 }

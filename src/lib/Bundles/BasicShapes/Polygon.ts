@@ -63,8 +63,5 @@ export class Polygon extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class PolygonController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class PolygonController extends controller.ShapeController<Polygon> {
 }

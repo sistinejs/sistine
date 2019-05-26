@@ -60,8 +60,5 @@ export class LeftArrow extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class LeftArrowController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class LeftArrowController extends controller.ShapeController<LeftArrow> {
 }

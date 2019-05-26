@@ -135,8 +135,5 @@ export class Image extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class ImageController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class ImageController extends controller.ShapeController<Image> {
 }

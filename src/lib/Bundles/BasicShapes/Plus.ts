@@ -62,8 +62,5 @@ export class Plus extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class PlusController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class PlusController extends controller.ShapeController<Plus> {
 }

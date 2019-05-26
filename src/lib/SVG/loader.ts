@@ -7,6 +7,8 @@ import * as svgutils from "../Utils/svg"
 import * as models from "./models"
 import { Nodes } from "./nodes"
 
+type Nullable<T> = T | null;
+
 const Bounds = Geom.Models.Bounds;
 const NumbersTokenizer = svgutils.NumbersTokenizer;
 const PathDataParser = svgutils.PathDataParser;
@@ -59,7 +61,7 @@ const elementProcessors = {
     });
 }
 
-export function loadFromString(input : string, configs : any) : models.SVG {
+export function loadFromString(input : string, configs : any) : Nullable<models.SVG> {
     return null;
 }
 

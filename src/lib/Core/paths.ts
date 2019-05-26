@@ -782,7 +782,7 @@ export class EllipticalArcComponent extends PathComponent {
 }
 
 
-export class PathController extends controller.ShapeController {
+export class PathController extends controller.ShapeController<Path> {
     _evalControlPoints() {
         var ours = [];
         var path = this.shape;

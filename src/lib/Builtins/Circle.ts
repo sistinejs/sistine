@@ -73,8 +73,5 @@ export class Circle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class CircleController extends controller.ShapeController {
-    constructor(shape) {
-        super(shape);
-    }
+export class CircleController extends controller.ShapeController<Circle> {
 }
