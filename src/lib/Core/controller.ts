@@ -195,7 +195,13 @@ export class ShapeController {
  * @param {Object} extraData    Additional data specific to this control point and shape type.
  */
 export class ControlPoint {
-    constructor(x, y, pointType, pointIndex, cursor, extraData) {
+    x: number
+    y: number
+    pointType : int
+    pointIndex : int
+    cursor : string
+    extraData : any
+    constructor(x : number, y : number, pointType : int, pointIndex : int, cursor : string, extraData : any) {
         this.x = x;
         this.y = y;
         this.pointType = pointType || 0;

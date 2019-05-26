@@ -14,6 +14,8 @@ const ElementCounter = new counters.Counter("ElementIDs");
  *                          then it is marked as "to be inherited".
  */
 export class Property {
+    name : string
+    inherit : boolean
     constructor(name, value) {
         this.name = name;
         this.inherit = value === undefined;

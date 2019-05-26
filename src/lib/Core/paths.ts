@@ -6,23 +6,23 @@ import * as controller from "./controller"
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
 var HitInfo = controller.HitInfo;
+var Point = Geom.Models.Point;
 
 /**
  * A wrapper over a path.
  */
 export class Path extends models.Shape {
+    private components : Array<PathComponent> = []
+    readonly currPoint : Point = null
     constructor(configs) {
         super((configs = configs || {}));
-        configs = configs || {};
-        this._components = [];
-        this._currPoint = null;
         // Only do this if supported
         this._path2D = null;
     }
 
-    newInstance() {
-        var out = super.newInstance();
-        out._currPoint = this._currPoint == null ? null : this._currPoint.copy();
+    newInstance() : Path {
+        var out : Path = super.newInstance();
+        out.currPoint = this.currPoint == null ? null : this.currPoint.copy();
         var last = null;
         this._components.forEach(function(component) {
             var c = component.clone();
@@ -35,11 +35,9 @@ export class Path extends models.Shape {
         return out;
     }
 
-    get currPoint() { return this._currPoint; }
-
     get controllerClass() { return Path.Controller; }
 
-    _setBounds(newBounds) {
+    _setBounds(newBounds : geom.Bounds) {
         var oldBounds = this.boundingBox;
         var sx = newBounds.width / oldBounds.width;
         var sy = newBounds.height / oldBounds.height;
@@ -55,7 +53,7 @@ export class Path extends models.Shape {
         }
     }
 
-    _evalBoundingBox() {
+    _evalBoundingBox() : geom.Bounds {
         var out = new Geom.Models.Bounds();
         for (var i = 0;i < this._components.length;i++) {
             var currComp = this._components[i];
@@ -67,12 +65,12 @@ export class Path extends models.Shape {
     /**
      * Add a new path component at the end of the path.
      */
-    addComponent(component) {
+    addComponent(component : PathComponent) {
         this._components.push(component);
         this.markTransformed();
     }
 
-    get componentCount() {
+    get componentCount() : int {
         return this._components.length;
     }
 

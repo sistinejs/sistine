@@ -12,6 +12,9 @@ export const DEFAULT_CONTROL_SIZE = 5;
  * Holds information about the instance of a shape.
  */
 export class Shape extends mixins.Styleable {
+    isVisible : boolean
+    controlRadius : number
+
     constructor(configs) {
         configs = configs || {};
         super(configs);
@@ -22,29 +25,29 @@ export class Shape extends mixins.Styleable {
         this.controlRadius = DEFAULT_CONTROL_SIZE;
     }
 
-    get boundingBox() {
+    get boundingBox() : Bounds {
         if (this._boundingBox == null) {
             this._boundingBox = this._evalBoundingBox();
         }
         return this._boundingBox;
     }
 
-    get scene() { return this._scene; } 
+    get scene() : Scene { return this._scene; } 
     get controllerClass() { return controller.ShapeController; }
-    get controller() { 
+    get controller() : controller.Controller { 
         if (this._controller == null) {
             this._controller = new this.controllerClass(this);
         }
         return this._controller; 
     }
 
-    set controller(c) {
+    set controller(c : controller.Controller) {
         if (this._controller != c) {
             this._controller = c;
         }
     }
 
-    setScene(s) {
+    setScene(s : Scene) : boolean {
         if (this._scene != s) {
             // unchain previous scene
             this.markUpdated();
@@ -63,7 +66,7 @@ export class Shape extends mixins.Styleable {
     /**
      * A easy wrapper to control shape dimensions by just setting its bounds.
      */
-    setBounds(newBounds) {
+    setBounds(newBounds : geom.Bounds) : boolean {
         if (this.canSetBounds(newBounds)) {
             var oldBounds = this.boundingBox.copy();
             var event = new events.BoundsChanged(this, "bounds", oldBounds, newBounds);
@@ -75,8 +78,8 @@ export class Shape extends mixins.Styleable {
             return true;
         }
     }
-    canSetBounds(newBounds) { return true; }
-    _setBounds(newBounds) {
+    canSetBounds(newBounds: geom.Bounds) : boolean { return true; }
+    _setBounds(newBounds : geom.Bounds) {
         throw Error("Not Implemented for: ", this);
     }
 
