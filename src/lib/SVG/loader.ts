@@ -1,6 +1,6 @@
 
-import { Core } from "../Core/index"
-import { Geom } from "../Geom/index"
+import * as corebase from "../Core/base"
+import * as geom from "../Geom/models"
 import { Utils } from "../Utils/index"
 import { Builtins } from "../Builtins/index"
 import * as svgutils from "../Utils/svg"
@@ -9,15 +9,15 @@ import { Nodes } from "./nodes"
 
 type Nullable<T> = T | null;
 
-const Bounds = Geom.Models.Bounds;
+const Bounds = geom.Bounds;
 const NumbersTokenizer = svgutils.NumbersTokenizer;
 const PathDataParser = svgutils.PathDataParser;
 const TransformParser = svgutils.TransformParser;
-const Point = Geom.Models.Point;
+const Point = geom.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
-const elementProcessors = {
+let elementProcessors : { [key: string]: string } = {
     "defs": "DefsNodeProcessor",
     "svg": "SVGNodeProcessor",
     "g": "GNodeProcessor",
@@ -41,27 +41,28 @@ const elementProcessors = {
     "filter": "IgnoreNodeProcessor",
     "script": "IgnoreNodeProcessor",
     "font-face": "IgnoreNodeProcessor",
-    "SVGTestCase": "IgnoreNodeProcessor",
-}
+    "SVGTestCase": "IgnoreNodeProcessor"
+};
 
 /**
  * Utilities to load shapes from a URL or an input stream.
  */
- export function loadFromURL(url : string, configs : any, callback : (shape : models.SVG, element : any) => void) : void {
+ export function loadFromURL(url : string, configs : any,
+                             callback : (shape : Nullable<models.SVG>, element : HTMLElement) => void) : void {
     url = url.trim();
     var startTime = Date.now();
     var loader = new SVGLoader(configs);
     $.get(url, function(data : any) {
-        var result = loader.processElement(data.rootElement, null);
-        result.loadTime = Date.now() - startTime;
-        console.log("Element loaded in: ", result.loadTime);
+        var result = loader.processRootElement(data.rootElement);
+        var loadTime = Date.now() - startTime;
+        console.log("Element loaded in: ", loadTime);
         callback(result, data.rootElement);
     }).fail(function() {
         console.log("Error parsing SVG: ", arguments);
     });
 }
 
-export function loadFromString(input : string, configs : any) : Nullable<models.SVG> {
+export function loadFromString(input : string, configs : any = null) : Nullable<models.SVG> {
     return null;
 }
 
@@ -72,11 +73,16 @@ export class SVGLoader {
         configs.bounds = configs.bounds || new Bounds(50, 50, 100, 100);
     }
 
-    processElement(root : any, parent : Core.Models.Element) {
+    processRootElement(root : any) : Nullable<models.SVG> {
+        return null;
+    }
+
+    processElement(root : any, parent : Nullable<corebase.Element>) : Nullable<corebase.Element> {
         // Find the right "converter" for the root object
         var processor = this.getProcessor(root.tagName);
         if (processor == null) {
             console.log("Cannot find processor for node: ", root.tagName);
+            return null;
         } else {
             return processor.processElement(root, parent);
         }
@@ -90,26 +96,26 @@ export class SVGLoader {
             name.endsWith(":SVGTestCase")) return null;
 
         var name = name.replace("svg:", "").trim();
-        var procName = elementProcessors[name];
+        var procName = elementProcessors[name] as string;
         var processorClass = Nodes[procName];
         return new processorClass(this);
     }
 }
 
-function defaultZero(value) {
+function defaultZero(value : any) {
     return value || 0;
 }
 
-function ensurePositive(value) {
+function ensurePositive(value : any) {
     if (value < 0) {
-        throw new Error("Value must be positive: ", value);
+        throw new Error("Value must be positive: " + value);
     }
     return value;
 }
 
-function ensurePositiveLength(length) {
+function ensurePositiveLength(length : geom.Length) {
     if (length.value < 0) {
-        throw new Error("Value must be positive: ", length);
+        throw new Error("Value must be positive: " + length);
     }
     return length;
 }

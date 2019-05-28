@@ -3,7 +3,12 @@ import * as base from "./base"
 import { Text } from "../../Text/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
+import * as textmodels from "../../Text/models"
+import * as corebase from "../../Core/base"
 import * as models from "../models"
+
+type Int = number;
+type Nullable<T> = T | null;
 
 const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
 const TransformParser = Utils.SVG.TransformParser;
@@ -13,7 +18,7 @@ const forEachNode = Utils.DOM.forEachNode;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
 class BlockProcessor extends base.NodeProcessor {
-    processTextAttributes(elem : Element, text : string) {
+    processTextAttributes(elem : Element, text : textmodels.Block) {
         new NumbersTokenizer(elem.getAttribute("x") || "")
             .all().forEach(function(token) {
                 text.addX(token.value);
@@ -34,7 +39,7 @@ class BlockProcessor extends base.NodeProcessor {
             .all().forEach(function(token) {
                 text.addRotation(token.value);
              });
-        text.textLength = elem.getAttribute("textLength") || null;
+        // text.textLength = parseFloat(elem.getAttribute("textLength")) || -1;
     }
 }
 
@@ -56,18 +61,18 @@ export class TextNodeProcessor extends BlockProcessor {
                           "rotate", "textLength"]);
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<corebase.Element>) {
         var text = new Text.Text();
-        parent.add(text);
+        if (parent != null) parent.add(text);
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
         var loader = this.loader;
-        Utils.DOM.forEachNode(elem, function(child, index) {
+        Utils.DOM.forEachNode(elem, function(child : any, index : Int) {
             var nodeType = child.nodeType;
-            if (nodeType == HTMLElement.COMMENT_NODE) 
+            if (nodeType == 8) // HTMLElement.COMMENT_NODE) 
                 return ;
 
-            if (nodeType == HTMLElement.ELEMENT_NODE) {
+            if (nodeType == 1) { // HTMLElement.ELEMENT_NODE) {
                 var tag = child.nodeName;
                 if (tag == "tspan") {
                     var block = new Text.Block();
@@ -77,16 +82,16 @@ export class TextNodeProcessor extends BlockProcessor {
                     // NOTSUPPORTED:
                     return ;
                 } else {
-                    throw new Error("Unsupported child: ", node.tag);
+                    throw new Error("Unsupported child: " + tag);
                     loader.processElement(child, text);
                 }
-            } else if (nodeType == HTMLElement.TEXT_NODE) {
+            } else if (nodeType == 3) { // HTMLElement.TEXT_NODE) {
                 var block = new Text.Block({
                     text: child.nodeValue
                 });
                 text.add(block);
             } else {
-                throw new Error("Invalid node type: ", nodeType);
+                throw new Error("Invalid node type: " + nodeType);
             }
         });
     }
@@ -109,10 +114,10 @@ export class TSpanNodeProcessor extends BlockProcessor {
                          "rotate", "textLength"]);
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<corebase.Element>) {
         var text = new Text.Text();
+        if (parent != null) parent.add(text);
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
-        parent.add(text);
     }
 }

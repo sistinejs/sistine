@@ -232,8 +232,7 @@ export class Element extends events.EventSource {
      *
      * @returns {Bool} true if a element was successfully added false if the addition was blocked (via event handling).
      */
-    add(element : Element, index : Int) {
-        index = index || -1;
+    add(element : Element, index : Int = -1) : boolean {
         if (element.parent != this) {
             var event = new events.ElementAdded(this, element);
             if (this.validateBefore(event.name, event) != false &&

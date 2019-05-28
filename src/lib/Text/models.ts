@@ -2,6 +2,7 @@
 
 import { Core } from "../Core/index"
 import { Utils } from "../Utils/index"
+import * as corebase from "../Core/base"
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
@@ -9,7 +10,6 @@ type Int = number;
 type Nullable<T> = T | null;
 
 const Arrays = Utils.Arrays;
-const Element = Core.Base.Element;
 
 export const DEFAULT_CONTROL_SIZE = 5;
 export const CHUNK_TYPE_PLAIN = 0;
@@ -26,11 +26,11 @@ export class Block extends Core.Models.Shape {
     readonly dxValues : Array<number> = [];
     readonly dyValues : Array<number> = [];
     readonly rotationValues : Array<number> = [];
-    readonly textLength : number = 0;
-    readonly text : string = ""
-    protected _rootBlock : Block | null = null;
+    textLength : number = -1;
+    protected _text : string = ""
+    protected _rootBlock : Text | null = null;
     protected _parentBlock : Block | null = null;
-    constructor(configs : any) {
+    constructor(configs? : any) {
         super((configs = configs || {}));
         this.xCoords = configs.xCoords || [];
         this.yCoords = configs.yCoords || [];
@@ -49,52 +49,59 @@ export class Block extends Core.Models.Shape {
         return this.text.length > 0 ? 0 : super.childCount();
     } 
 
-    childAtIndex(i : Int) : Nullable<Element> {
+    childAtIndex(i : Int) : Nullable<corebase.Element> {
         return this.text.length > 0 ? null : super.childAtIndex(i);
     }
 
-    add(element : string | Block, index? : Int) {
+    add(element : corebase.Element | string | Block, index : Int = -1) : boolean {
         if (this.text.length > 0) {
             throw new Error("Cannot add children to plain text blocks.");
         }
+        var normalizedElement : corebase.Element;
         if (typeof(element) === "string") {
             // Then add it as a plain text block
-            element = new Block({text: element});
+            normalizedElement = new Block({text: element});
         }
-        if (element.constructor.name == "Block") {
-            element._rootBlock = this._rootBlock;
+        else {
+            normalizedElement = element as corebase.Element;
         }
-        return super.add(element, index);
+        if (normalizedElement instanceof Block) {
+            normalizedElement._rootBlock = this._rootBlock;
+        }
+        return super.add(normalizedElement, index);
     }
 
-    addX(value : number, index : Int) : Block {
+    addX(value : number, index : Int = -1) : Block {
         Arrays.insert(this.xCoords, value, index);
         this.markTransformed();
         return this;
     }
-    addY(value : number, index : Int) : Block {
+    addY(value : number, index : Int = -1) : Block {
         Arrays.insert(this.yCoords, value, index);
         this.markTransformed();
         return this;
     }
-    addDX(value : number, index : Int) : Block {
+    addDX(value : number, index : Int = -1) : Block {
         Arrays.insert(this.dxValues, value, index);
         this.markTransformed();
         return this;
     }
-    addDY(value : number, index : Int) : Block {
+    addDY(value : number, index : Int = -1) : Block {
         Arrays.insert(this.dyValues, value, index);
         this.markTransformed();
         return this;
     }
-    addRotation(value : number, index : Int) : Block {
+    addRotation(value : number, index : Int = -1) : Block {
         Arrays.insert(this.rotationValues, value, index);
         this.markTransformed();
         return this;
     }
 
+    get text() : string { return this._text; }
+    set text(t : string) { this._text = t; this.markTransformed(); }
+
     _evalBoundingBox() : geom.Bounds {
-        return this._rootBlock == null ? new geom.Bounds() : this._rootBlock.layout(false);
+        return this._rootBlock == null ? new geom.Bounds() : this._rootBlock.layout(null, this, false);
     }
 }
 
@@ -103,13 +110,13 @@ export class Block extends Core.Models.Shape {
  * of a piece of text to begin rendering at.
  */
 export class Text extends Block {
-    constructor(configs : any) {
+    private _layout : LayoutEngine = new LayoutEngine();
+    constructor(configs? : any) {
         super((configs = configs || {}));
         this._rootBlock = this;
-        this._layout = LayoutEngine();
     }
 
-    draw(ctx) {
+    draw(ctx : any) {
         this.layout(ctx, this, true);
     }
 
@@ -118,7 +125,8 @@ export class Text extends Block {
      * is set to true.  
      * Returns the bounding box of the laid out text.
      */
-    layout(ctx, block, draw) {
+    layout(ctx : any, block : Block, draw : boolean) : geom.Bounds {
+        return new geom.Bounds();
     }
 }
 

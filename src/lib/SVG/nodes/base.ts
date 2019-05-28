@@ -1,4 +1,5 @@
 
+import * as corebase from "../../Core/base"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import * as models from "../models"
@@ -108,6 +109,7 @@ function parseList(value, delimiter) {
 }
 
 export class NodeProcessor {
+    loader : any;
     constructor(loader) {
         this.loader = loader;
     }
@@ -119,11 +121,11 @@ export class NodeProcessor {
     get hasStyles() { return false; }
     get hasTransforms() { return false; }
 
-    get validChildren() {
+    get validChildren()  : Array<string> {
         return [];
     }
 
-    get validAttributes() {
+    get validAttributes() : Array<string> {
         return [];
     }
 
@@ -138,9 +140,10 @@ export class NodeProcessor {
         });
     }
 
-    processElement(elem, shape) {
+    processElement(elem : HTMLElement, shape : Nullable<corebase.Element>) : Nullable<corebase.Element> {
         if (this.hasStyles) this.processStyleAttributes(elem, shape);
         if (this.hasTransforms) this.processTransformAttributes(elem, shape);
+        return shape;
     }
 
     /**

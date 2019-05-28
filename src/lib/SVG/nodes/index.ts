@@ -16,8 +16,9 @@ import * as ignore from "./ignore"
 import * as desc from "./desc"
 import * as gradients from "./gradients"
 import * as pattern from "./pattern"
+import * as base from "./base"
 
-export const Nodes = {
+export const Nodes : { [key: string]: any } = {
     UseNodeProcessor: use.UseNodeProcessor,
     SymbolNodeProcessor: symbol.SymbolNodeProcessor,
     IgnoreNodeProcessor: ignore.IgnoreNodeProcessor,
