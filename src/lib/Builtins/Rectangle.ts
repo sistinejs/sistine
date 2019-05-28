@@ -1,13 +1,19 @@
 
-import { Geom } from "../Geom/index"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
-var ControlPoint = controller.ControlPoint;
-var HitType = controller.HitType;
-var HitInfo = controller.HitInfo;
+type Nullable<T> = T | null;
+let HitType = controller.HitType;
 
 export class Rectangle extends models.Shape {
+    private _x : number = 0;
+    private _y : number = 0;
+    private _rx : number = 0;
+    private _ry : number = 0;
+    private _width : number = 0;
+    private _height : number = 0;
     constructor(configs : any) {
         super((configs = configs || {}));
         this._x = configs._x || 0;
@@ -54,7 +60,7 @@ export class Rectangle extends models.Shape {
         }
     }
 
-    _setBounds(newBounds) {
+    _setBounds(newBounds : geom.Bounds) {
         this._x = newBounds.left;
         this._y = newBounds.top;
         this._width = newBounds.width;
@@ -62,12 +68,10 @@ export class Rectangle extends models.Shape {
     }
 
     _evalBoundingBox() {
-        return new Geom.Models.Bounds(this.x, this.y, this.width, this.height);
+        return new geom.Bounds(this.x, this.y, this.width, this.height);
     }
 
-    get className() { return "Rectangle"; }
-
-    draw(ctx) {
+    draw(ctx : any) {
         var lBounds = this.boundingBox;
         ctx.fillRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);
         ctx.strokeRect(lBounds.left, lBounds.top, lBounds.width, lBounds.height);

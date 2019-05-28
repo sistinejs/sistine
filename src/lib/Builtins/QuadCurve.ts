@@ -1,12 +1,10 @@
 
-import { Geom } from "../Geom/index"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
 type Nullable<T> = T | null;
-type ControlPoint = controller.ControlPoint;
-type Bounds = geom.Bounds;
-type HitInfo = controller.HitInfo;
 let HitType = controller.HitType;
 
 export class QuadCurve extends models.Shape {
@@ -17,8 +15,6 @@ export class QuadCurve extends models.Shape {
     private _y1 : number = 0;
     private _x2 : number = 0;
     private _y2 : number = 0;
-    private _x3 : number = 0;
-    private _y3 : number = 0;
     closed : boolean = false;
     constructor(configs : any) {
         super((configs = configs || {}));
@@ -48,7 +44,7 @@ export class QuadCurve extends models.Shape {
     set x2(value : number) { this._x2 = value; this.markTransformed(); }
     set y2(value : number) { this._y2 = value; this.markTransformed(); }
 
-    _setBounds(newBounds) {
+    _setBounds(newBounds : geom.Bounds) {
         if (!this.created) {
             // creating by bounds
             this._x0 = newBounds.left;
@@ -64,53 +60,31 @@ export class QuadCurve extends models.Shape {
             var sy = newBounds.height / oldBounds.height;
             this._x0 = newBounds.x + ((this._x0 - oldBounds.x) * sx)
             this._y0 = newBounds.y + ((this._y0 - oldBounds.y) * sy)
-            this._x1 = newBounds.x + ((this._p1.x - oldBounds.x) * sx)
-            this._y1 = newBounds.y + ((this._p1.y - oldBounds.y) * sy)
-            this._x2 = newBounds.x + ((this._p2.x - oldBounds.x) * sx)
-            this._y2 = newBounds.y + ((this._p2.y - oldBounds.y) * sy);
+            this._x1 = newBounds.x + ((this._x1 - oldBounds.x) * sx)
+            this._y1 = newBounds.y + ((this._y1 - oldBounds.y) * sy)
+            this._x2 = newBounds.x + ((this._x2 - oldBounds.x) * sx)
+            this._y2 = newBounds.y + ((this._y2 - oldBounds.y) * sy);
         }
     }
 
-    _evalBoundingBox() {
+    _evalBoundingBox() : geom.Bounds {
         if (!this.created) {
             // shape hasnt been created yet
-            return new Geom.Models.Bounds();
+            return new geom.Bounds();
         }
-        var result = Geom.Utils.boundsOfQuadCurve(this._x0, this._y0, this._p1.x, this._p1.y, this._p2.x, this._p2.y);
-        return new Geom.Models.Bounds(result.left, result.top,
-                                      result.right - result.left,
-                                      result.bottom - result.top);
+        var result = geomutils.boundsOfQuadCurve(this._x0, this._y0, this._x1, this._y1, this._x2, this._y2);
+        return new geom.Bounds(result.left, result.top,
+                               result.right - result.left,
+                               result.bottom - result.top);
     }
 
-    draw(ctx) {
+    draw(ctx : any) {
         ctx.beginPath();
         ctx.moveTo(this._x0, this._y0);
-        ctx.quadraticCurveTo(this._p1.x, this._p1.y, this._p2.x, this._p2.y);
+        ctx.quadraticCurveTo(this._x1, this._y1, this._x2, this._y2);
         if (this.closed) {
             ctx.closePath();
         }
-        ctx.fill();
-        ctx.stroke();
-    }
-
-    drawControls(ctx) {
-        super.drawControls(ctx);
-        ctx.fillStyle = "yellow";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 2;
-
-        ctx.beginPath();
-        ctx.arc(this._x0, this._y0, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(this._p1.x, this._p1.y, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(this._p2.x, this._p2.y, controllers.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -123,21 +97,45 @@ export class QuadCurveController extends controller.ShapeController<QuadCurve> {
     _evalControlPoints() {
         var parents = super._evalControlPoints();
         var curve = this.shape;
-        var ours = [new ControlPoint(curve.x0, curve.y0, HitType.CONTROL, 0, "grab"),
-                new ControlPoint(curve.x1, curve.y1, HitType.CONTROL, 1, "grab"),
-                new ControlPoint(curve.x2, curve.y2, HitType.CONTROL, 2, "grab")]
+        var ours = [new controller.ControlPoint(curve.x0, curve.y0, HitType.CONTROL, 0, "grab"),
+                    new controller.ControlPoint(curve.x1, curve.y1, HitType.CONTROL, 1, "grab"),
+                    new controller.ControlPoint(curve.x2, curve.y2, HitType.CONTROL, 2, "grab")]
         return ours.concat(parents);
     }
 
-    _checkMoveHitInfo(x, y) {
+    drawControls(ctx : any) {
+        var quad = this.shape;
+        super.drawControls(ctx);
+        ctx.fillStyle = "yellow";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.arc(quad.x0, quad.y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(quad.x1, quad.y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(quad.x2, quad.y2, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    _checkMoveHitInfo(x : number, y : number) {
         var boundingBox = this.shape.boundingBox;
         if (boundingBox.containsPoint(x, y)) {
-            return new HitInfo(this.shape, HitType.MOVE, 0, "move");
+            return new controller.HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
 
-    applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
+    applyHitChanges(hitInfo : controller.HitInfo, savedInfo : any,
+                    downX : number, downY : number, currX : number, currY : number) {
         console.log("Hit Info: ", hitInfo);
         if (hitInfo.hitType != HitType.CONTROL) {
             return super.applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY);
@@ -163,11 +161,10 @@ export class QuadCurveController extends controller.ShapeController<QuadCurve> {
             quad.x2 = savedInfo.downX2 + deltaX;
             quad.y2 = savedInfo.downY2 + deltaY;
         }
-        quad._boundingBox = null;
         quad.markTransformed();
     }
 
-    snapshotFor(hitInfo) {
+    snapshotFor(hitInfo : controller.HitInfo) : controller.HitInfoSnapshot {
         var out = super.snapshotFor(hitInfo);
         out.downX0 = this.shape.x0;
         out.downY0 = this.shape.y0;

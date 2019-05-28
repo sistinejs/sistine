@@ -1,17 +1,26 @@
 
-import { Geom } from "../Geom/index"
+import * as geom from "../Geom/models"
+import * as geomutils from "../Geom/utils"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
-var ControlPoint = controller.ControlPoint;
-var HitType = controller.HitType;
-var HitInfo = controller.HitInfo;
+type Nullable<T> = T | null;
+let HitType = controller.HitType;
 
 export class Image extends models.Shape {
+    private loaded : boolean = false;
+    private _image : any = null;
+    private _x : number = 0;
+    private _y : number = 0;
+    private _width : number = 0;
+    private _height : number = 0;
+    private _clipX : any = null;
+    private _clipY : any = null;
+    private _clipWidth : any = null;
+    private _clipHeight : any = null;
     constructor(configs : any) {
         super((configs = configs || {}));
         // see what the image source is
-        this._loaded = false;
         this._image = null;
         this._x = configs._x || 0;
         this._y = configs._y || 0;
@@ -24,7 +33,7 @@ export class Image extends models.Shape {
 
         if (configs._image) {
             this._image = configs._image || null;
-            this._loaded = true;
+            this.loaded = true;
         } else if (configs.element) {
             this.loadElement(configs.element);
         } else if (configs.url) {
@@ -35,17 +44,16 @@ export class Image extends models.Shape {
     /**
      * Load the image from a url.
      */
-    loadFromUrl(url, callback) {
-        this._loaded = false;
+    loadFromUrl(url : string, callback? : any) {
+        this.loaded = false;
         var self = this;
         // create an image element and load this
         $("<img/>")
             .on('load', function() {
-                self._loaded = true;
+                self.loaded = true;
                 self._image = this;
                 console.log("image loaded correctly");
             }).on('error', function() {
-                null.a = 3;
                 console.log("error loading image");
             }).attr("src", url);
     }
@@ -53,13 +61,15 @@ export class Image extends models.Shape {
     /**
      * Load the image from an ID in the document.
      */
-    loadElement(id) {
+    loadElement(id : string) {
         var element = document.getElementById(id);
-        var tagname = element.tagName.toLowerCase();
-        this._loaded = false;
-        if (tagname == "img" || tagname == "canvas") {
-            this._loaded = true;
-            this._image = element;
+        if (element != null) {
+            var tagname = element.tagName.toLowerCase();
+            this.loaded = false;
+            if (tagname == "img" || tagname == "canvas") {
+                this.loaded = true;
+                this._image = element;
+            }
         }
     }
 
@@ -105,7 +115,7 @@ export class Image extends models.Shape {
         }
     }
 
-    _setBounds(newBounds) {
+    _setBounds(newBounds : geom.Bounds) {
         this._x = newBounds.left;
         this._y = newBounds.top;
         this._width = newBounds.width;
@@ -113,13 +123,13 @@ export class Image extends models.Shape {
     }
 
     _evalBoundingBox() {
-        return new Geom.Models.Bounds(this.x, this.y, this.width, this.height);
+        return new geom.Bounds(this.x, this.y, this.width, this.height);
     }
 
     get className() { return "Image"; }
 
-    draw(ctx) {
-        if (this._loaded) {
+    draw(ctx : any) {
+        if (this.loaded) {
             if (this._clipX != null) {
                 ctx.drawImage(this._image, 
                               this._clipX, this._clipY, this._clipWidth, this._clipHeight,
