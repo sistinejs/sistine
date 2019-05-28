@@ -1,8 +1,18 @@
 
 import * as events from "./events";
 import * as geom from "../Geom/models";
+import * as geomutils from "../Geom/utils";
+import * as models from "./models";
 
+type Int = number
+type Nullable<T> = T | null;
+type Shape = models.Shape;
 export const DEFAULT_CONTROL_SIZE = 5;
+
+export interface HitInfoSnapshot {
+    boundingBox : geom.Bounds
+    [key : string] : any
+};
 
 export const HitType = {
     MOVE: 0,
@@ -30,7 +40,6 @@ export const HitType = {
  * @param {Shape} shape  The shape this controller instance is controlling.
  */
 export class ShapeController<T extends Shape> {
-    controlRadius : number
     private _shape : T
     private _controlPointTS : number = 0
     private _controlPoints : Array<ControlPoint> = [];
@@ -49,8 +58,8 @@ export class ShapeController<T extends Shape> {
     /**
      * Returns the control points of the shape being controlled.
      */
-    get controlPoints() : Array<ControlPoint>{
-        if (this._controlPoints == null || this.shape._lastTransformed > this._controlPointTS) {
+    get controlPoints() : Array<ControlPoint> {
+        if (this._controlPoints == null || this.shape.lastTransformed > this._controlPointTS) {
             this._controlPoints = this._evalControlPoints();
         }
         return this._controlPoints;
@@ -62,7 +71,7 @@ export class ShapeController<T extends Shape> {
     _evalControlPoints() : Array<ControlPoint> {
         this._controlPointTS = Date.now();
         var lBounds = this.shape.boundingBox;
-        var controlRadius = this.shape.controlRadius;
+        var controlRadius = this.controlRadius;
         var l = lBounds.left;
         var r = lBounds.right;
         var t = lBounds.top;
@@ -89,15 +98,15 @@ export class ShapeController<T extends Shape> {
      * @param {Coordinate}   gy  Global/Screen Y coordinate of the hit point.
      * @returns {HitInfo} HitInfo containing the topmost shape at the given global coordinate along with control point info if any.
      */
-    getHitInfo(gx, gy) {
-        var newp = this.shape.globalTransform.apply(gx, gy, {});
+    getHitInfo(gx : number, gy : number) {
+        var newp = this.shape.globalTransform.apply(gx, gy);
         var x = newp.x;
         var y = newp.y;
-        var controlRadius = this.shape.controlRadius;
+        var controlRadius = this.controlRadius;
         var controlPoints = this.controlPoints;
         for (var i = controlPoints.length - 1;i >= 0;i--) {
             var cp = controlPoints[i];
-            if (cp.point.isWithin(x, y, controlRadius)) {
+            if (cp.isWithin(x, y, controlRadius)) {
                 return new HitInfo(this.shape, cp.pointType, cp.pointIndex, cp.cursor, cp);
             }
         }
@@ -108,7 +117,7 @@ export class ShapeController<T extends Shape> {
     /**
      * @private
      */
-    _checkMoveHitInfo(x, y) {
+    _checkMoveHitInfo(x : number, y : number) {
         var boundingBox = this.shape.boundingBox;
         if (boundingBox.containsPoint(x, y)) {
             return new HitInfo(this.shape, HitType.MOVE, 0, "move");
@@ -116,15 +125,15 @@ export class ShapeController<T extends Shape> {
         return null;
     }
 
-    snapshotFor(hitInfo) {
-        return {'boundingBox': this.shape.boundingBox.copy(), rotation: this.shape.rotation};
+    snapshotFor(hitInfo : HitInfo) : HitInfoSnapshot {
+        return {'boundingBox': this.shape.boundingBox.copy(), rotation: 0}; // this.shape.rotation};
     }
 
-    applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
+    applyHitChanges(hitInfo : HitInfo, savedInfo : any, downX : number, downY : number, currX : number, currY : number) {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
         var shape = this.shape;
-        console.log("ShapeController.applyHitInfo: ", deltaX, deltaY, shape.isGroup);
+        console.log("ShapeController.applyHitInfo: ", deltaX, deltaY);
         if (hitInfo.hitType == HitType.MOVE) {
             shape.setBounds(savedInfo.boundingBox.move(deltaX, deltaY));
         } else if (hitInfo.hitType == HitType.SIZE) {
@@ -165,6 +174,9 @@ export class ShapeController<T extends Shape> {
             var centerY = hitInfo.hitShape.boundingBox.centerY;
             var deltaX = currX - centerX;
             var deltaY = currY - centerY;
+            // TODO: instead of finding "newAngle", find the "delta" in the angle
+            // and make this a rotate.
+            /*
             var newAngle = 0;
             if (deltaX == 0) {
                 if (deltaY > 0) {
@@ -181,10 +193,11 @@ export class ShapeController<T extends Shape> {
             console.log("Rotating: ", deltaX, deltaY,
                         (deltaX == 0 ? "Inf" : deltaY / deltaX), newAngle);
             shape.rotateTo(newAngle);
+            */
         }
     }
 
-    drawControls(ctx, options) {
+    drawControls(ctx : any, options : any = null) {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 0.5
         var lBounds = this.shape.boundingBox;
@@ -243,16 +256,13 @@ export class ShapeController<T extends Shape> {
  * @param {string} cursor       The cursor to be used for this ControlPoint when mouse hovers over it.
  * @param {Object} extraData    Additional data specific to this control point and shape type.
  */
-export class ControlPoint {
-    x: number
-    y: number
-    pointType : int
-    pointIndex : int
+export class ControlPoint extends geom.Point {
+    pointType : Int
+    pointIndex : Int
     cursor : string
     extraData : any
-    constructor(x : number, y : number, pointType : int, pointIndex : int, cursor : string, extraData : any) {
-        this.x = x;
-        this.y = y;
+    constructor(x : number, y : number, pointType : Int, pointIndex : Int, cursor : string, extraData : any = null) {
+        super(x, y);
         this.pointType = pointType || 0;
         this.pointIndex = pointIndex || 0;
         this.cursor = cursor || "auto";
@@ -273,7 +283,12 @@ export class ControlPoint {
  * @param {ControlPoint} controlPoint   The control point, if any, the hit occurred on.
  */
 export class HitInfo {
-    constructor(shape, hitType, hitIndex, cursor, controlPoint) {
+    hitShape : Shape
+    hitType : any
+    hitIndex : Int
+    cursor : string
+    controlPoint : Nullable<ControlPoint>
+    constructor(shape : Shape, hitType : any, hitIndex : Int, cursor : string, controlPoint : Nullable<ControlPoint> = null) {
         this.hitShape = shape;
         this.controlPoint = controlPoint;
         this.hitType = hitType || 0;

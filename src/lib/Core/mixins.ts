@@ -6,15 +6,16 @@ import * as styles from "./styles";
 const Property = base.Property;
 
 export class Transformable extends base.Element {
+    lastTransformed : number
+    protected _globalTransform : geom.Transform = new geom.Transform();
+    protected _globalInverseTransform : geom.Transform = new geom.Transform();
+    protected _transform : geom.Transform = new geom.Transform();
     constructor(configs : any) {
         super(configs);
         // Transform properties
         // What is the point of the global transform?
-        this._globalTransform = new geom.Transform();
-        this._globalInverseTransform = new geom.Transform();
 
         // Transforms on this shape
-        this._transform = new geom.Transform();
         this.markTransformed();
     }
 
@@ -26,7 +27,7 @@ export class Transformable extends base.Element {
 
     markTransformed() { 
         this.markUpdated();
-        this._lastTransformed = Date.now(); 
+        this.lastTransformed = Date.now(); 
     }
 
     /**
@@ -43,7 +44,7 @@ export class Transformable extends base.Element {
         if (this._parent != null) {
             var pt = this._parent.globalTransform;
             if (pt.timeStamp > gt.timeStamp ||
-                this._lastTransformed > gt.timeStamp) {
+                this.lastTransformed > gt.timeStamp) {
                 // updated ourselves
                 this._globalTransform = this._updateTransform(pt.copy());
             }
@@ -71,12 +72,12 @@ export class Transformable extends base.Element {
     /**
      * Transform's the shape by the given transform matrix.
      */
-    transform(t) {
+    transform(t : geom.Transform) {
         this._transform.multiply(t);
         this.markTransformed();
     }
 
-    translate(tx, ty) {
+    translate(tx : number, ty : number) : boolean {
         var event = new events.TransformChanged(this, "translate", [ tx, ty ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
@@ -85,7 +86,7 @@ export class Transformable extends base.Element {
         this.triggerOn(event.name, event);
         return true;
     }
-    scale(sx, sy) {
+    scale(sx : number, sy : number) : boolean {
         var event = new events.TransformChanged(this, "scale", [ sx, sy ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
@@ -94,7 +95,7 @@ export class Transformable extends base.Element {
         this.triggerOn(event.name, event);
         return true;
     }
-    rotate(theta) {
+    rotate(theta : number) : boolean {
         var event = new events.TransformChanged(this, "rotation", [ theta ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
@@ -103,7 +104,7 @@ export class Transformable extends base.Element {
         this.triggerOn(event.name, event);
         return true;
     }
-    skew(sx, sy) {
+    skew(sx : number, sy : number) : boolean {
         var event = new events.TransformChanged(this, "skew", this._transform, [ sx, sy ]);
         if (this.validateBefore(event.name, event) == false) return false;
         this._transform.skew(sx, sy);

@@ -2,7 +2,6 @@
 import * as mixins from "./mixins";
 import * as base from "./base";
 import * as events from "./events";
-import * as controller from "./controller";
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 
@@ -18,7 +17,7 @@ export class Shape extends mixins.Styleable {
     isVisible : boolean = true;
     private _scene : Nullable<Scene> = null;
     protected _boundingBox : Nullable<geom.Bounds> = null;
-    controller : controller.ShapeController<this> | null = null;
+        // controller : controller.ShapeController<this> | null = null;
 
     constructor(configs : any) {
         super((configs = configs || {}));
@@ -69,7 +68,7 @@ export class Shape extends mixins.Styleable {
      * false otherwise.
      */
     containsPoint(x : number, y : number) : boolean {
-        var newp = this.globalTransform.apply(x, y, {});
+        var newp = this.globalTransform.apply(x, y, {x: 0, y: 0});
         return this.boundingBox.containsPoint(newp.x, newp.y);
     }
 

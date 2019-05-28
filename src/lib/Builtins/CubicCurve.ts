@@ -5,7 +5,7 @@ import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
 type Nullable<T> = T | null;
-type ControlPoint = controller.ControlPoint;
+let ControlPoint = controller.ControlPoint;
 type Bounds = geom.Bounds;
 type HitInfo = controller.HitInfo;
 let HitType = controller.HitType;
@@ -114,20 +114,20 @@ export class CubicCurve extends models.Shape {
  * The controller responsible for handling updates and manipulations of the Shape.
  */
 export class CubicCurveController extends controller.ShapeController<CubicCurve> {
-    _evalControlPoints() : Array<ControlPoint> {
+    _evalControlPoints() : Array<controller.ControlPoint> {
         var parents = super._evalControlPoints();
         var curve = this.shape;
-        var ours = [new ControlPoint(curve.x0, curve.y0, HitType.CONTROL, 0, "grab"),
-                    new ControlPoint(curve.x1, curve.y1, HitType.CONTROL, 1, "grab"),
-                    new ControlPoint(curve.x2, curve.y2, HitType.CONTROL, 2, "grab"),
-                    new ControlPoint(curve.x3, curve.y3, HitType.CONTROL, 3, "grab")]
+        var ours = [new controller.ControlPoint(curve.x0, curve.y0, HitType.CONTROL, 0, "grab"),
+                    new controller.ControlPoint(curve.x1, curve.y1, HitType.CONTROL, 1, "grab"),
+                    new controller.ControlPoint(curve.x2, curve.y2, HitType.CONTROL, 2, "grab"),
+                    new controller.ControlPoint(curve.x3, curve.y3, HitType.CONTROL, 3, "grab")]
         return ours.concat(parents);
     }
 
     _checkMoveHitInfo(x : number, y : number) : Nullable<HitInfo> {
         var boundingBox = this.shape.boundingBox;
         if (boundingBox.containsPoint(x, y)) {
-            return new HitInfo(this.shape, HitType.MOVE, 0, "move");
+            return new controller.HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
@@ -167,7 +167,7 @@ export class CubicCurveController extends controller.ShapeController<CubicCurve>
         cubic.markTransformed();
     }
 
-    snapshotFor(hitInfo) {
+    snapshotFor(hitInfo : controller.HitInfo) : controller.HitInfoSnapshot {
         var out = super.snapshotFor(hitInfo);
         out.downX0 = this.shape.x0;
         out.downY0 = this.shape.y0;
@@ -182,27 +182,28 @@ export class CubicCurveController extends controller.ShapeController<CubicCurve>
 
     drawControls(ctx : any) {
         super.drawControls(ctx);
+        var shape = this.shape;
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
         ctx.cubicWidth = 2;
 
         ctx.beginPath();
-        ctx.arc(this.x0, this.y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(shape.x0, shape.y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this.x1, this.y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(shape.x1, shape.y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this.x2, this.y2, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(shape.x2, shape.y2, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(this.x3, this.y3, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(shape.x3, shape.y3, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }

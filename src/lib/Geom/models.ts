@@ -142,7 +142,7 @@ export class Transform {
     /**
      * Applies this transform to a point and returns the result.
      */
-    apply(x : number, y : number, result? : Point) {
+    apply(x : number, y : number, result? : {x: number, y: number}) {
         result = result || new Point();
         result.x = this.a * x + this.c * y + this.e;
         result.y = this.b * x + this.d * y + this.f;
@@ -367,9 +367,7 @@ export class Bounds {
      * Clips this bounds by intersecting the coordinates of this one with another bounds.
      */
     intersect(another : Bounds, result? : Bounds) : Bounds {
-        result = result || this;
         throw new Error("Not yet implemented");
-        return result;
     }
 
     move(deltaX : number, deltaY : number) : Bounds {
