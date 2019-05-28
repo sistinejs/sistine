@@ -8,6 +8,9 @@ const Length = geom.Length;
 
 export class Circle extends models.Shape {
     private created : boolean = false;
+    private _cx : number = 0;
+    private _cy : number = 0;
+    private _radius : number = 0;
     constructor(configs : any) {
         super((configs = configs || {}));
         if (configs.cx && configs.cy) {
@@ -30,39 +33,32 @@ export class Circle extends models.Shape {
     get cx() { return this._cx; }
     get cy() { return this._cy; }
     get radius() { return this._radius; }
-    set cx(value) { this._cx = parseFloat(value); }
-    set cy(value) { this._cy = parseFloat(value); }
+
+    set cx(value) { this._cx = value; this.markTransformed(); }
+    set cy(value) { this._cy = value; this.markTransformed(); }
     set radius(value) {
-        this._radius = parseFloat(value);
-        if (this._radius < 0) {
+        if (value < 0) {
             throw new Error("Radius cannot be negative");
         }
+        this._radius = value;
+        this.markTransformed(); 
     }
 
     _evalBoundingBox() {
         var r = this._radius;
         return new geom.Bounds(this._cx - r, this._cy - r, r * 2, r * 2);
     }
-    _setBounds(newBounds) {
+    _setBounds(newBounds : geom.Bounds) {
         this.cx = newBounds.centerX;
         this.cy = newBounds.centerY;
         this.radius = newBounds.innerRadius;
     }
-    canSetBounds(newBounds) {
+    canSetBounds(newBounds : geom.Bounds) : boolean {
         newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);
         return true;
     }
 
-    get className() { return "Circle"; }
-
-    get radius() { return this._radius; }
-
-    setSize(w, h, force) {
-        this.radius = Math.min(w, h);
-        return super.setSize(this._radius, this._radius, force);
-    }
-
-    draw(ctx) {
+    draw(ctx : any) {
         ctx.beginPath();
         ctx.arc(this._cx, this._cy, this._radius, 0, 2 * Math.PI);
         ctx.fill();

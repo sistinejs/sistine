@@ -1,11 +1,10 @@
-import { Geom } from "../Geom/index"
+import * as geom from "../Geom/models"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
 
 var ControlPoint = controller.ControlPoint;
 var HitType = controller.HitType;
-var HitInfo = controller.HitInfo;
-let Bounds = Geom.Models.Bounds;
+type Bounds = geom.Bounds;
 
 export class Arc extends models.Shape {
     private created : boolean = false
@@ -28,6 +27,19 @@ export class Arc extends models.Shape {
             this._y2 = configs.y2 || 0;
         }
     }
+
+    get x0() : number { return this.x0; }
+    get y0() : number { return this.y0; }
+    get x1() : number { return this.x1; }
+    get y1() : number { return this.y1; }
+    get x2() : number { return this.x2; }
+    get y2() : number { return this.y2; }
+    set x0(value : number) { this._x0 = value; this.markTransformed(); }
+    set y0(value : number) { this._y0 = value; this.markTransformed(); }
+    set x1(value : number) { this._x1 = value; this.markTransformed(); }
+    set y1(value : number) { this._y1 = value; this.markTransformed(); }
+    set x2(value : number) { this._x2 = value; this.markTransformed(); }
+    set y2(value : number) { this._y2 = value; this.markTransformed(); }
 
     _setBounds(newBounds : Bounds) {
         if (!this.created) {
@@ -55,13 +67,13 @@ export class Arc extends models.Shape {
     _evalBoundingBox() {
         if (!this.created) {
             // shape hasnt been created yet
-            return new Geom.Models.Bounds();
+            return new Bounds();
         }
         var left = Math.min(this._x0, this._x1);
         var top = Math.min(this._y0, this._y1);
         var right = Math.max(this._x0, this._x1);
         var bottom = Math.max(this._y0, this._y1);
-        return new Geom.Models.Bounds(left, top, right - left, bottom - top);
+        return new Bounds(left, top, right - left, bottom - top);
     }
 
     get className() { return "Arc"; };
@@ -88,15 +100,16 @@ export class ArcController extends controller.ShapeController<Arc> {
                 new ControlPoint(arc.x1, arc.y1, HitType.CONTROL, 1, "grab")]
     }
 
-    _checkMoveHitInfo(x, y) {
+    _checkMoveHitInfo(x : number, y : number) {
         var boundingBox = this.shape.boundingBox;
         if (boundingBox.containsPoint(x, y)) {
-            return new HitInfo(this.shape, HitType.MOVE, 0, "move");
+            return new controller.HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
 
-    applyHitChanges(hitInfo, savedInfo, downX, downY, currX, currY) {
+    applyHitChanges(hitInfo : controller.HitInfo, savedInfo : any,
+                    downX : number, downY : number, currX : number, currY : number) {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
         var arc = this.shape;
@@ -118,12 +131,12 @@ export class ArcController extends controller.ShapeController<Arc> {
             arc.x2 = savedInfo.downX2 + deltaX;
             arc.y2 = savedInfo.downY2 + deltaY;
         }
-        arc._boundingBox = null;
         arc.markTransformed();
     }
 
-    snapshotFor(hitInfo) {
+    snapshotFor(hitInfo : controller.HitInfo) : controller.HitInfoSnapshot {
         return {
+            'boundingBox': this.shape.boundingBox.copy(),
             downX0: this.shape.x0,
             downY0: this.shape.y0,
             downX1: this.shape.x1,
@@ -131,16 +144,17 @@ export class ArcController extends controller.ShapeController<Arc> {
         };
     }
 
-    drawControls(ctx) {
+    drawControls(ctx : any) {
+        let arc = this.shape;
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
         ctx.arcWidth = 2;
         ctx.beginPath();
-        ctx.arc(this._x0, this._y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(arc.x0, arc.y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(this._x1, this._y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(arc.x1, arc.y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }

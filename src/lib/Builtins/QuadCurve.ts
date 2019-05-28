@@ -41,16 +41,12 @@ export class QuadCurve extends models.Shape {
     get y1() : number { return this.y1; }
     get x2() : number { return this.x2; }
     get y2() : number { return this.y2; }
-    get x3() : number { return this.x3; }
-    get y3() : number { return this.y3; }
     set x0(value : number) { this._x0 = value; this.markTransformed(); }
     set y0(value : number) { this._y0 = value; this.markTransformed(); }
     set x1(value : number) { this._x1 = value; this.markTransformed(); }
     set y1(value : number) { this._y1 = value; this.markTransformed(); }
     set x2(value : number) { this._x2 = value; this.markTransformed(); }
     set y2(value : number) { this._y2 = value; this.markTransformed(); }
-    set x3(value : number) { this._x3 = value; this.markTransformed(); }
-    set y3(value : number) { this._y3 = value; this.markTransformed(); }
 
     _setBounds(newBounds) {
         if (!this.created) {
