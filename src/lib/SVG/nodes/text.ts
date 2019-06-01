@@ -8,6 +8,7 @@ import { Element } from "../../Core/base"
 import { PathDataParser, TransformParser, NumbersTokenizer } from "../../Utils/svg"
 import { Bounds, Length, Point } from "../../Geom/models"
 
+type Int = number
 type Nullable<T> = T | null;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
@@ -57,7 +58,7 @@ export class TextNodeProcessor extends BlockProcessor {
     }
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
-        var text = new Text.Text();
+        var text = new textmodels.Text();
         if (parent != null) parent.add(text);
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
@@ -70,7 +71,7 @@ export class TextNodeProcessor extends BlockProcessor {
             if (nodeType == 1) { // HTMLElement.ELEMENT_NODE) {
                 var tag = child.nodeName;
                 if (tag == "tspan") {
-                    var block = new Text.Block();
+                    var block = new textmodels.Block();
                     text.add(block);
                     loader.processElement(child, block);
                 } else if (tag == "tref") {
@@ -81,7 +82,7 @@ export class TextNodeProcessor extends BlockProcessor {
                     loader.processElement(child, text);
                 }
             } else if (nodeType == 3) { // HTMLElement.TEXT_NODE) {
-                var block = new Text.Block({
+                var block = new textmodels.Block({
                     text: child.nodeValue
                 });
                 text.add(block);
@@ -110,10 +111,11 @@ export class TSpanNodeProcessor extends BlockProcessor {
                          "rotate", "textLength"]);
     }
 
-    processElement(elem : HTMLElement, parent : Nullable<corebase.Element>) {
-        var text = new Text.Text();
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
+        var text = new textmodels.Text();
         if (parent != null) parent.add(text);
         this.processStyleAttributes(elem, text);
         this.processTextAttributes(elem, text);
+        return parent;
     }
 }
