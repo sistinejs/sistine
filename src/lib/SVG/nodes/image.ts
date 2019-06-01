@@ -31,7 +31,7 @@ export class ImageNodeProcessor extends base.NodeProcessor {
     get hasStyles() { return true; }
     get hasTransforms() { return true; }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var href = elem.getAttribute("xlink:href") || elem.getAttrib("href") || null;
         if (href == null) {
             throw new Error("Use needs a xlink:href attribute.");

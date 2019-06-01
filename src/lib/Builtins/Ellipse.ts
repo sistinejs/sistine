@@ -1,15 +1,14 @@
+import { Core } from "../Core"
+import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
+import { Bounds, Length } from "../Geom/models"
 
-import { Geom } from "../Geom/index"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
-
-var ControlPoint = controller.ControlPoint;
-var HitType = controller.HitType;
-var HitInfo = controller.HitInfo;
-
-export class Ellipse extends models.Shape {
+export class Ellipse extends Core.Models.Shape {
     private created : boolean = false
-    constructor(configs : any) {
+    private _cx : number = 0;
+    private _cy : number = 0;
+    private _rx : number = 0;
+    private _ry : number = 0;
+    constructor(configs? : any) {
         super((configs = configs || {}));
         if (configs.cx && configs.cy) {
             this.created = true;
@@ -42,19 +41,20 @@ export class Ellipse extends models.Shape {
         }
     }
 
-    _evalBoundingBox() {
-        return new Geom.Models.Bounds(this._cx - this._rx,
-                                      this._cy - this._ry,
-                                      top, this._rx * 2, this._ry * 2);
+    _evalBoundingBox() : Bounds {
+        return new Bounds(this._cx - this._rx,
+                          this._cy - this._ry,
+                          this._rx * 2,
+                          this._ry * 2);
     }
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         this.cx = newBounds.centerX;
         this.cy = newBounds.centerY;
         this.rx = newBounds.width / 2;
         this.ry = newBounds.height / 2;
     }
 
-    draw(ctx) {
+    draw(ctx : any) {
         ctx.beginPath();
         ctx.ellipse(this._cx, this._cy, this._rx, this._ry, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -65,5 +65,5 @@ export class Ellipse extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class EllipseController extends controller.ShapeController<Ellipse> {
+export class EllipseController extends ShapeController<Ellipse> {
 }

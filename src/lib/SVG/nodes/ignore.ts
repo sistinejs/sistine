@@ -11,8 +11,9 @@ export class IgnoreNodeProcessor extends base.NodeProcessor {
         return ["type", "xlink:href"];
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         // do nothing
+        return null;
     }
 }
 

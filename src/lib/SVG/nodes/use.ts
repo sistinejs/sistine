@@ -18,7 +18,7 @@ export class UseNodeProcessor extends base.NodeProcessor {
                          "transform", "x", "y", "width", "height", "xlink:href"])
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var href = elem.getAttribute("xlink:href") || elem.getAttrib("href") || null;
         if (href == null) {
             throw new Error("Use needs a xlink:href attribute.");
@@ -37,6 +37,7 @@ export class UseNodeProcessor extends base.NodeProcessor {
         this.processBoundsAttributes(elem, bounds);
         this.processTransformAttributes(elem, out);
         this.processMetaAttributes(elem, out);
+        return parent;
     }
 }
 

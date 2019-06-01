@@ -29,7 +29,7 @@ export class PathNodeProcessor extends base.NodeProcessor {
     get hasStyles() { return true; }
     get hasTransforms() { return true; }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var newPath = new Core.Path();
         parent.add(newPath);
         super.processElement(elem, newPath);

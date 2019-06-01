@@ -1,24 +1,19 @@
 
 import * as base from "./base"
-import { Text } from "../../Text/index"
-import { Geom } from "../../Geom/index"
-import { Utils } from "../../Utils/index"
+
 import * as textmodels from "../../Text/models"
-import * as corebase from "../../Core/base"
+import { Utils } from "../../Utils/index"
 import * as models from "../models"
+import { Element } from "../../Core/base"
+import { PathDataParser, TransformParser, NumbersTokenizer } from "../../Utils/svg"
+import { Bounds, Length, Point } from "../../Geom/models"
 
-type Int = number;
 type Nullable<T> = T | null;
-
-const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
-const TransformParser = Utils.SVG.TransformParser;
-const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
-const forEachNode = Utils.DOM.forEachNode;
+const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
 class BlockProcessor extends base.NodeProcessor {
-    processTextAttributes(elem : Element, text : textmodels.Block) {
+    processTextAttributes(elem : HTMLElement, text : textmodels.Block) {
         new NumbersTokenizer(elem.getAttribute("x") || "")
             .all().forEach(function(token) {
                 text.addX(token.value);
@@ -61,7 +56,7 @@ export class TextNodeProcessor extends BlockProcessor {
                           "rotate", "textLength"]);
     }
 
-    processElement(elem : HTMLElement, parent : Nullable<corebase.Element>) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var text = new Text.Text();
         if (parent != null) parent.add(text);
         this.processStyleAttributes(elem, text);
@@ -94,6 +89,7 @@ export class TextNodeProcessor extends BlockProcessor {
                 throw new Error("Invalid node type: " + nodeType);
             }
         });
+        return parent;
     }
 }
 

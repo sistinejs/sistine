@@ -34,7 +34,7 @@ export class GNodeProcessor extends base.NodeProcessor {
                 .concat([ "class", "style", "externalResourcesRequired", "transform" ]);
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var out = new Core.Models.Group();
         var bounds = parent ? new Bounds() : this.configs.bounds.copy();
         var viewBox = null;

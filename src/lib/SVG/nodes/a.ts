@@ -1,6 +1,8 @@
+import { Element } from "../../Core/base"
 
 import * as base from "./base"
 
+type Nullable<T> = T | null;
 export class ANodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.animationElements
@@ -23,8 +25,9 @@ export class ANodeProcessor extends base.NodeProcessor {
                          "transform", "xlink:href", "xlink:show", "xlink:actuate"])
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         this.processChildrenOf(elem, parent);
+        return null;
     }
 }
 

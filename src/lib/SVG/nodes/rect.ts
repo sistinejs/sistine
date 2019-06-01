@@ -6,7 +6,9 @@ import { Utils } from "../../Utils/index"
 import { Builtins } from "../../Builtins/index"
 import * as models from "../models"
 import * as layouts from "../layouts"
+import { Element } from "../../Core/base"
 
+type Nullable<T> = T | null;
 const CM = layouts.defaultCM;
 const Bounds = Geom.Models.Bounds;
 const Length = Geom.Models.Length;
@@ -32,7 +34,7 @@ export class RectNodeProcessor extends base.NodeProcessor {
     get hasStyles() { return true; }
     get hasTransforms() { return true; }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, shape : Nullable<Element>) : Nullable<Element> {
         var out = new Builtins.Rectangle();
         super.processElement(elem, out);
         CM.addXConstraint(out, "x", this.getLength(elem, "x"));

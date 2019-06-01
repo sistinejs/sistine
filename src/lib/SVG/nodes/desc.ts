@@ -10,7 +10,7 @@ export class TitleNodeProcessor extends base.NodeProcessor {
         return base.coreAttributes.concat([ "class", "style"]);
     }
 
-    processElement(elem, item) {
+    processElement(elem : HTMLElement, item: Nullable<Element>) : Nullable<Element> {
         item.addTitle(elem);
     }
 }
@@ -24,7 +24,7 @@ export class DescNodeProcessor extends base.NodeProcessor {
         return base.coreAttributes.concat([ "class", "style"]);
     }
 
-    processElement(elem, item) {
+    processElement(elem : HTMLElement, item: Nullable<Element>) : Nullable<Element> {
         item.addDescription(elem);
     }
 }

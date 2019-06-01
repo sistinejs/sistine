@@ -25,7 +25,7 @@ export class DefsNodeProcessor extends base.NodeProcessor {
                           "rotate", "textLength"]);
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, shape : Nullable<Element>) : Nullable<Element> {
         var loader = this.loader;
         Utils.DOM.forEachChild(elem, function(child, index) {
             var item = loader.processElement(child, parent);

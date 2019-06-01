@@ -35,7 +35,7 @@ export class SVGNodeProcessor extends base.NodeProcessor {
                           "contentStyleType", "version", "baseProfile" ])
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var out = new models.SVG();
         if (parent != null) parent.add(out);
         var bounds = parent ? new Bounds() : this.configs.bounds.copy();

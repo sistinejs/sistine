@@ -31,7 +31,7 @@ export class LineNodeProcessor extends base.NodeProcessor {
     get hasStyles() { return true; }
     get hasTransforms() { return true; }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var out = new Builtins.Line();
         super.processElement(elem, out);
         CM.addXConstraint(out, "x1", this.getLength(elem, "x1"));

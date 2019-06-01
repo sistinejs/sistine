@@ -1,17 +1,13 @@
+import { Core } from "../Core"
+import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
+import { Bounds, Length } from "../Geom/models"
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
-
-const Length = geom.Length;
-
-export class Circle extends models.Shape {
+export class Circle extends Core.Models.Shape {
     private created : boolean = false;
     private _cx : number = 0;
     private _cy : number = 0;
     private _radius : number = 0;
-    constructor(configs : any) {
+    constructor(configs : any = {}) {
         super((configs = configs || {}));
         if (configs.cx && configs.cy) {
             this.created = true;
@@ -46,14 +42,14 @@ export class Circle extends models.Shape {
 
     _evalBoundingBox() {
         var r = this._radius;
-        return new geom.Bounds(this._cx - r, this._cy - r, r * 2, r * 2);
+        return new Bounds(this._cx - r, this._cy - r, r * 2, r * 2);
     }
-    _setBounds(newBounds : geom.Bounds) {
+    _setBounds(newBounds : Bounds) {
         this.cx = newBounds.centerX;
         this.cy = newBounds.centerY;
         this.radius = newBounds.innerRadius;
     }
-    canSetBounds(newBounds : geom.Bounds) : boolean {
+    canSetBounds(newBounds : Bounds) : boolean {
         newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);
         return true;
     }
@@ -69,5 +65,5 @@ export class Circle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class CircleController extends controller.ShapeController<Circle> {
+export class CircleController extends ShapeController<Circle> {
 }

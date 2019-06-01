@@ -29,7 +29,7 @@ class GradientNodeProcessor extends base.NodeProcessor {
                           "spreadMethod", "xlink:href"])
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var out = this.newGradient(elem);
         var id = this.ensureAttribute(elem, "id");
         var gradientUnits = elem.getAttribute("gradientUnits") || "objectBoundingBox";

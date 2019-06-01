@@ -1,12 +1,8 @@
-import * as geom from "../Geom/models"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import { Core } from "../Core"
+import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
+import { Bounds } from "../Geom/models"
 
-var ControlPoint = controller.ControlPoint;
-var HitType = controller.HitType;
-type Bounds = geom.Bounds;
-
-export class Arc extends models.Shape {
+export class Arc extends Core.Models.Shape {
     private created : boolean = false
     private _x0 : number = 0;
     private _y0 : number = 0;
@@ -89,7 +85,7 @@ export class Arc extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class ArcController extends controller.ShapeController<Arc> {
+export class ArcController extends ShapeController<Arc> {
     constructor(shape : Arc) {
         super(shape);
     }
@@ -103,12 +99,12 @@ export class ArcController extends controller.ShapeController<Arc> {
     _checkMoveHitInfo(x : number, y : number) {
         var boundingBox = this.shape.boundingBox;
         if (boundingBox.containsPoint(x, y)) {
-            return new controller.HitInfo(this.shape, HitType.MOVE, 0, "move");
+            return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
 
-    applyHitChanges(hitInfo : controller.HitInfo, savedInfo : any,
+    applyHitChanges(hitInfo : HitInfo, savedInfo : any,
                     downX : number, downY : number, currX : number, currY : number) {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
@@ -134,7 +130,7 @@ export class ArcController extends controller.ShapeController<Arc> {
         arc.markTransformed();
     }
 
-    snapshotFor(hitInfo : controller.HitInfo) : controller.HitInfoSnapshot {
+    snapshotFor(hitInfo : HitInfo) : HitInfoSnapshot {
         return {
             'boundingBox': this.shape.boundingBox.copy(),
             downX0: this.shape.x0,
@@ -150,11 +146,11 @@ export class ArcController extends controller.ShapeController<Arc> {
         ctx.strokeStyle = "black";
         ctx.arcWidth = 2;
         ctx.beginPath();
-        ctx.arc(arc.x0, arc.y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(arc.x0, arc.y0, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(arc.x1, arc.y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(arc.x1, arc.y1, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }

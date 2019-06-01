@@ -22,8 +22,9 @@ export class SymbolNodeProcessor extends base.NodeProcessor {
                          "preserveAspectRatio", "viewBox" ]);
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         null.a = 3;
+        return null;
     }
 }
 

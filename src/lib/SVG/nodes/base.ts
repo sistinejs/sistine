@@ -1,14 +1,11 @@
 
-import * as corebase from "../../Core/base"
-import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import * as models from "../models"
+import { Element } from "../../Core/base"
+import { PathDataParser, TransformParser, NumbersTokenizer } from "../../Utils/svg"
+import { Bounds, Length, Point } from "../../Geom/models"
 
-const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
-const PathDataParser = Utils.SVG.PathDataParser;
-const TransformParser = Utils.SVG.TransformParser;
-const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
+type Nullable<T> = T | null;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
@@ -140,7 +137,7 @@ export class NodeProcessor {
         });
     }
 
-    processElement(elem : HTMLElement, shape : Nullable<corebase.Element>) : Nullable<corebase.Element> {
+    processElement(elem : HTMLElement, shape : Nullable<Element>) : Nullable<Element> {
         if (this.hasStyles) this.processStyleAttributes(elem, shape);
         if (this.hasTransforms) this.processTransformAttributes(elem, shape);
         return shape;

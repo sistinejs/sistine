@@ -34,8 +34,9 @@ export class PatternNodeProcessor extends base.NodeProcessor {
                           "patternUnits", "patternContentUnits", "patternTransform", "href"])
     }
 
-    processElement(elem, parent) {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         // TODO
+        return null;
     }
 }
 
