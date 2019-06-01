@@ -216,7 +216,7 @@ export class NodeProcessor {
         }
     }
 
-    processTransformAttributes(elem, shape, attribName) {
+    processTransformAttributes(elem : HTMLElement, shape : Nullable<Element>, attribName? : string) {
         var attribName = attribName || "transform";
         var attribValue = elem.getAttribute("transform");
         if (attribValue) {

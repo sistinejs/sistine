@@ -1,14 +1,13 @@
 
-import { Core } from "../../Core/index"
-import { Geom } from "../../Geom/index"
-import { Utils } from "../../Utils/index"
 import * as base from "./base"
-import * as layouts from "../layouts"
+import { Core } from "../../Core/index"
+import { Utils } from "../../Utils/index"
+import { Builtins } from "../../Builtins/index"
+import { Int, Nullable, Element } from "../../Core/base"
+import { NumbersTokenizer, PathDataParser, TransformParser } from "../../Utils/svg"
+import { Point, Length, Bounds } from "../../Geom/models"
+import { Path } from "../../Core/paths"
 
-const Bounds = Geom.Models.Bounds;
-const PathDataParser = Utils.SVG.PathDataParser;
-const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
@@ -30,15 +29,16 @@ export class PathNodeProcessor extends base.NodeProcessor {
     get hasTransforms() { return true; }
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
-        var newPath = new Core.Path();
-        parent.add(newPath);
+        var newPath = new Path();
+        if (parent != null) parent.add(newPath);
         super.processElement(elem, newPath);
         this.processPathDataAttributes(elem, newPath);
         return newPath;
     }
 
-    processPathDataAttributes(elem, shape) {
+    processPathDataAttributes(elem : HTMLElement, shape : Element) {
         var attrib = elem.getAttribute("d");
+        var path = shape as Path;
         var funcs = {
             "closePath": "closePath",
             "moveTo": "moveTo",
@@ -55,7 +55,7 @@ export class PathNodeProcessor extends base.NodeProcessor {
         var p = new PathDataParser(attrib);
         while (p.hasNext()) {
             var command = p.next();
-            var func = funcs[command.name];
+            var func = funcs[command.name] as string;
             shape[func].apply(shape, command.args);
         }
     }

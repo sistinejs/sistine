@@ -1,8 +1,9 @@
 import * as counters from "./counters";
 import * as events from "./events";
 
-type Int = number;
-type Nullable<T> = T | null;
+export type Int = number;
+export type Nullable<T> = T | null;
+export type Timestamp = number;
 const ElementCounter = new counters.Counter("ElementIDs");
 
 /**

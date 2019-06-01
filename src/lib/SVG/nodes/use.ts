@@ -1,6 +1,9 @@
 
 import { Core } from "../../Core/index"
+import { Element } from "../../Core/base"
 import * as base from "./base"
+type Int = number
+type Nullable<T> = T | null;
 
 export class UseNodeProcessor extends base.NodeProcessor {
     get validChildren() {
@@ -19,7 +22,7 @@ export class UseNodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
-        var href = elem.getAttribute("xlink:href") || elem.getAttrib("href") || null;
+        var href = elem.getAttribute("xlink:href") || elem.getAttribute("href") || null;
         if (href == null) {
             throw new Error("Use needs a xlink:href attribute.");
         }
@@ -32,7 +35,7 @@ export class UseNodeProcessor extends base.NodeProcessor {
 
         var bounds = parent ? new Bounds() : this.configs.bounds.copy();
         out.setBounds(bounds);
-        parent.add(out);
+        if (parent != null) parent.add(out);
         this.processStyleAttributes(elem, out);
         this.processBoundsAttributes(elem, bounds);
         this.processTransformAttributes(elem, out);

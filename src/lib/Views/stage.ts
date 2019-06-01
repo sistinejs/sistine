@@ -1,26 +1,30 @@
 
+import { Int, Nullable, Timestamp } from "../Core/base"
 import * as coreevents from "../Core/events";
 import * as events from "./events";
 import { Core } from "../Core";
 import * as panes from "./panes";
 import { ShapeIndex } from "./shapeindex";
-import * as handlers from "./handlers";
 import * as cursors from "./cursors";
 import { getcssint } from "../Utils/dom"
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
+import { Point, Bounds } from "../Geom/models"
 
 class TouchState {
-    readonly maxPoints : int;
+    readonly maxPoints : Int;
+    downTimes: Array<Number> = [];
+    downPoints: Array<Nullable<Point>> = [];
+    currTimes: Array<Number> = [];
+    currPoints: Array<Nullable<Point>> = [];
+    timeDeltas: Array<Number> = [];
+    isClick: Array<boolean> = [];
+    private _active : Array<boolean> = [];
+    // Max time before a down goes from a "click" to a "hold"
+    clickThresholdTime : number = 500;
+
     constructor(maxPoints = 10) {
         this.maxPoints = maxPoints;
-        this._active = [];
-        this.downTimes = [];
-        this.downPoints = [];
-        this.currTimes = [];
-        this.currPoints = [];
-        this.timeDeltas = [];
-        this.isClick = [];
         for (var i = 0;i < maxPoints;i++) {
             this._active.push(false);
             this.downTimes.push(0);
@@ -30,12 +34,9 @@ class TouchState {
             this.isClick.push(false);
             this.timeDeltas.push(0);
         }
-
-        // Max time before a down goes from a "click" to a "hold"
-        this.clickThresholdTime = 500;
     }
 
-    touchDown(index, x, y, timeStamp) {
+    touchDown(index : Int, x : number, y : number, timeStamp : Timestamp) {
         this.downPoints[index] = new geom.Point(x, y);
         this.currPoints[index].x = x;
         this.currPoints[index].y = y;

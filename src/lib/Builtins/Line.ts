@@ -13,7 +13,7 @@ export class Line extends models.Shape {
     private _y0 : number = 0;
     private _x1 : number = 0;
     private _y1 : number = 0;
-    constructor(configs : any) {
+    constructor(configs? : any) {
         super((configs = configs || {}));
         if (configs.x0 && configs.y0) {
             this.created = true;

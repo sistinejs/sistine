@@ -1,17 +1,18 @@
 
 import * as base from "./base"
 import { Core } from "../../Core/index"
-import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import { Builtins } from "../../Builtins/index"
 import * as layouts from "../layouts"
 import * as models from "../models"
+import { Int, Nullable, Element } from "../../Core/base"
+import { NumbersTokenizer, PathDataParser, TransformParser } from "../../Utils/svg"
+import { Point, Length, Bounds } from "../../Geom/models"
+import { defaultCM as CM } from "../layouts";
 
-const CM = layouts.defaultCM;
-const Bounds = Geom.Models.Bounds;
-const Point = Geom.Models.Point;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
+
 
 export class LineNodeProcessor extends base.NodeProcessor {
     get validChildren() {

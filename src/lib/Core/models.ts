@@ -84,7 +84,7 @@ export class Shape extends mixins.Styleable {
 export class Group extends Shape {
     protected _children : Array<Shape> = [];
     protected _bounds : Nullable<geom.Bounds>;
-    constructor(configs : any) {
+    constructor(configs? : any) {
         super((configs = configs || {}));
         this._bounds = configs.bounds || new geom.Bounds();
     }

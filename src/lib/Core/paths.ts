@@ -14,7 +14,7 @@ var Point = Geom.Models.Point;
 export class Path extends models.Shape {
     private components : Array<PathComponent> = []
     readonly currPoint : Point = null
-    constructor(configs : any) {
+    constructor(configs? : any) {
         super((configs = configs || {}));
         // Only do this if supported
         this._path2D = null;
