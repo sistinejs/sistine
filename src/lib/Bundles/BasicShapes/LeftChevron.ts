@@ -1,7 +1,7 @@
 
 import * as leftArrows from "./LeftArrow"
 
-function sanitizeConfigs(configs : any) {
+function sanitizeConfigs(configs? : any) {
     configs = configs || {};
     configs.shaftWidth = 1.0;
     configs.backDepth = 0.2;

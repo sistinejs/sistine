@@ -1,19 +1,21 @@
+import { Shape } from "../../Core/models"
+import { ShapeController } from "../../Core/controller"
+import { Point, Bounds } from "../../Geom/models"
 
-import * as geom from "../../Geom/models"
-import * as geomutils from "../../Geom/utils"
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
-
-export class Star extends models.Shape {
-    constructor(configs : any) {
+export class Star extends Shape {
+    _p1 : Point
+    _p2 : Point
+    _numSides : number
+    _innerRadius : number
+    constructor(configs? : any) {
         super((configs = configs || {}));
-        this._p1 = configs.p1 || new geom.Point(0, 0);
-        this._p2 = configs.p2 || new geom.Point(100, 100);
+        this._p1 = configs.p1 || new Point(0, 0);
+        this._p2 = configs.p2 || new Point(100, 100);
         this._numSides = Math.max(3, configs.numSides || 5);
         this._innerRadius = configs.innerRadius || null;
     }
 
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
     }
@@ -23,14 +25,7 @@ export class Star extends models.Shape {
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
         var bottom = Math.max(this._p1.y, this._p2.y);
-        return new geom.Bounds(left, top, right - left, bottom - top);
-    }
-
-    get className() { return "Star"; }
-
-    setSize(w, h, force) {
-        w = h = Math.min(w, h);
-        return super.setSize(w, h, force);
+        return new Bounds(left, top, right - left, bottom - top);
     }
 
     get numSides() {
@@ -41,7 +36,7 @@ export class Star extends models.Shape {
         return this._innerRadius || (this.boundingBox.innerRadius / 3.0);
     }
 
-    draw(ctx) {
+    draw(ctx : any) {
         var n = 2 * this._numSides;
         var theta = (Math.PI * 2.0) / n;
         var cx = this.boundingBox.centerX;
@@ -77,5 +72,5 @@ export class Star extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class StarController extends controller.ShapeController<Star> {
+export class StarController extends ShapeController<Star> {
 }

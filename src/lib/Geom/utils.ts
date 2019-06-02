@@ -1,25 +1,33 @@
 
-import * as models from "./models"
+import  { Point, Bounds } from "./models"
 
-var pow = Math.pow,
-    sqrt = Math.sqrt,
+var sqrt = Math.sqrt,
     min = Math.min,
     max = Math.max,
     abs = Math.abs,
     sin = Math.sin,
     cos = Math.cos,
-    asin = Math.asin,
     acos = Math.acos,
     tan = Math.tan,
+    atan = Math.atan,
     PI = Math.PI;
 var PIx2 = Math.PI * 2.0;
 
-export function toRadians(degrees) {
+export interface CurveBounds  {
+    left : number;
+    top : number;
+    right : number;
+    bottom : number;
+    points : Array<Point>;
+    tvalues : Array<number>;
+};
+
+export function toRadians(degrees : number) {
     return degrees * PI / 180.0
 }
 
-export function copysign(x, y) {
-    var out = abs(x);
+export function copysign(x : number, y : number) {
+    // var out = abs(x);
     if (y < 0) {
         return -x;
     } else {
@@ -27,7 +35,7 @@ export function copysign(x, y) {
     }
 }
 
-export function pathEllipse(ctx, x, y, w, h) {
+export function pathEllipse(ctx : any, x : number, y : number, w : number, h : number) {
     var kappa = .5522848,
         ox = (w / 2) * kappa, // control point offset horizontal
         oy = (h / 2) * kappa, // control point offset vertical
@@ -44,22 +52,22 @@ export function pathEllipse(ctx, x, y, w, h) {
     //ctx.closePath(); // not used correctly, see comments (use to close off open path)
 }
 
-export function pointOnCircle(R, theta, out) {
-    out = out || new models.Point();
+export function pointOnCircle(R : number, theta : number, out? : Point) {
+    out = out || new Point();
     out.x = R * cos(theta);
     out.y = R * sin(theta);
     return out;
 }
 
-export function pointOnRect(W, H, theta, out) {
-    out = out || new models.Point();
-    out.x = R * cos(theta);
-    out.y = R * sin(theta);
+export function pointOnRect(W : number, H : number, theta : number, out? : Point) {
+    out = out || new Point();
+    out.x = W * cos(theta);
+    out.y = H * sin(theta);
     return out;
 }
 
-export function pointOnEllipse(A, B, theta, out) {
-    out = out || new models.Point();
+export function pointOnEllipse(A : number, B : number, theta : number, out? : Point) {
+    out = out || new Point();
     while (theta > 2 * PI) theta -= (2 * PI);
     var epsilon = 0.0001;
     if (abs(theta) < epsilon) {
@@ -93,7 +101,7 @@ export function pointOnEllipse(A, B, theta, out) {
     return out;
 }
 
-export function boundsOfQuadCurve(x0, y0, x1, y1, x2, y2) {
+export function boundsOfQuadCurve(x0 : number, y0 : number, x1 : number, y1 : number, x2 : number, y2 : number) : CurveBounds {
     return boundsOfCubicCurve(x0, y0,
                               x0 + (2 * (x1 - x0) / 3.0),
                               y0 + (2 * (y1 - y0) / 3.0),
@@ -103,11 +111,12 @@ export function boundsOfQuadCurve(x0, y0, x1, y1, x2, y2) {
 }
 
 // SOURCE: https://stackoverflow.com/questions/2587751/an-algorithm-to-find-bounding-box-of-closed-bezier-curves
-export function boundsOfCubicCurve(x0, y0, x1, y1, x2, y2, x3, y3)
+export function boundsOfCubicCurve(x0 : number, y0 : number, x1 : number, y1 : number, 
+                                   x2 : number, y2 : number, x3 : number, y3 : number) : CurveBounds
 {
   var tvalues = new Array();
   var bounds = [new Array(), new Array()];
-  var points = new Array();
+  var points : Array<Point> = [];
 
   var a, b, c, t, t1, t2, b2ac, sqrtb2ac;
   for (var i = 0; i < 2; ++i)
@@ -168,22 +177,13 @@ export function boundsOfCubicCurve(x0, y0, x1, y1, x2, y2, x3, y3)
 
     y = (mt * mt * mt * y0) + (3 * mt * mt * t * y1) + (3 * mt * t * t * y2) + (t * t * t * y3);
     bounds[1][j] = y;
-    points[j] = {
-      X: x,
-      Y: y
-    };
+    points[j] = new Point(x, y);
   }
 
   tvalues[jlen] = 0;
   tvalues[jlen + 1] = 1;
-  points[jlen] = {
-    X: x0,
-    Y: y0
-  };
-  points[jlen + 1] = {
-    X: x3,
-    Y: y3
-  };
+  points[jlen] = new Point(x0, y0);
+  points[jlen + 1] = new Point(x3, y3);
   bounds[0][jlen] = x0;
   bounds[1][jlen] = y0;
   bounds[0][jlen + 1] = x3;
@@ -211,11 +211,11 @@ export function boundsOfCubicCurve(x0, y0, x1, y1, x2, y2, x3, y3)
  *
  * Source: https://www.w3.org/TR/SVG11/implnote.html#ArcConversionCenterToEndpoint
  */
-export function centerToEndpoints(cx, cy, rx, ry, phi, theta, deltaTheta) {
+export function centerToEndpoints(cx : number, cy : number, rx : number, ry : number, phi : number, theta : number, deltaTheta : number) : any {
     var sinphi = sin(phi);
     var cosphi = cos(phi);
-    var sintheta = sin(theta);
-    var costheta = cos(theta);
+    var sintheta1 = sin(theta);
+    var costheta1 = cos(theta);
     var sintheta2 = sin(theta + deltaTheta);
     var costheta2 = cos(theta + deltaTheta);
     return {
@@ -240,7 +240,8 @@ export function centerToEndpoints(cx, cy, rx, ry, phi, theta, deltaTheta) {
  *
  * Source: https://www.w3.org/TR/SVG11/implnote.html#ArcConversionEndpointToCenter
  */
-export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
+export function endpointsToCenter(x1 : number, y1 : number, rx : number, ry : number, phi : number,
+                                  fA : ( boolean | 0 | 1), fS : (boolean | 0 | 1), x2 : number, y2 : number) : any {
     var cx, cy, startAngle, deltaAngle, endAngle;
 
     if (rx < 0) {
@@ -334,7 +335,7 @@ export function endpointsToCenter(x1, y1, rx, ry, phi, fA, fS, x2, y2) {
 /**
  * Calculates the angle in radians between two vectors.
  */
-export function angleBetweenVectors(ux, uy, vx, vy) {
+export function angleBetweenVectors(ux : number, uy : number, vx : number, vy : number) : number {
     var  dot = ux * vx + uy * vy;
     var  mod = sqrt( ( ux * ux + uy * uy ) * ( vx * vx + vy * vy ) );
     var  rad = acos( dot / mod );
@@ -351,16 +352,17 @@ export function angleBetweenVectors(ux, uy, vx, vy) {
  *
  * Where tquot is the truncated (i.e., rounded towards zero) result of: numer/denom.
  */
-export function fmod(x, y) {
+export function fmod(x : number, y : number) : number {
     var r = x / y;
     return x - (y * Math.floor(r))
 }
 
-export function getAngle(bx, by) {
+export function getAngle(bx : number, by : number) : number {
     return fmod(PIx2 + (by > 0.0 ? 1.0 : -1.0) * acos(bx / sqrt(bx * bx + by * by)), PIx2);
 }
 
-export function ellipticalArcBounds(centerX, centerY, rx, ry, rotation, startAngle, endAngle, anticlockwise) {
+export function ellipticalArcBounds(_centerX : number, _centerY : number, rx : number, ry : number,
+                                    _rotation : number, _startAngle : number, _endAngle : number, _anticlockwise : boolean) : any {
   if (rx < 0.0)
     rx *= -1.0;
   if (ry < 0.0)
@@ -376,7 +378,7 @@ export function ellipticalArcBounds(centerX, centerY, rx, ry, rotation, startAng
   }
 }
 
-export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
+export function svgArcBounds(x1 : number, y1 : number, rx : number, ry : number, phi : number, largeArc : boolean, sweep : boolean, x2 : number, y2 : number) : any {
   if (rx < 0.0)
     rx *= -1.0;
   if (ry < 0.0)
@@ -453,7 +455,7 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
         var tmp = xmin; xmin = xmax; xmax = tmp;
         tmp = txmin; txmin = txmax; txmax = tmp;
     }
-    tmpY = cy + rx*cos(txmin)*sin(phi) + ry*sin(txmin)*cos(phi);
+    let tmpY = cy + rx*cos(txmin)*sin(phi) + ry*sin(txmin)*cos(phi);
     txmin = getAngle(xmin - cx, tmpY - cy);
     tmpY = cy + rx*cos(txmax)*sin(phi) + ry*sin(txmax)*cos(phi);
     txmax = getAngle(xmax - cx, tmpY - cy);
@@ -467,7 +469,7 @@ export function svgArcBounds(x1, y1, rx, ry, phi, largeArc, sweep, x2, y2) {
         var tmp = ymin; ymin = ymax; ymax = tmp;
         tmp = tymin; tymin = tymax; tymax = tmp;
     }
-    tmpX = cx + rx*cos(tymin)*cos(phi) - ry*sin(tymin)*sin(phi);
+    let tmpX = cx + rx*cos(tymin)*cos(phi) - ry*sin(tymin)*sin(phi);
     tymin = getAngle(tmpX - cx, ymin - cy);
     tmpX = cx + rx*cos(tymax)*cos(phi) - ry*sin(tymax)*sin(phi);
     tymax = getAngle(tmpX - cx, ymax - cy);

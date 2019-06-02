@@ -1,10 +1,11 @@
+import { Shape } from "../../Core/models"
+import { ShapeController } from "../../Core/controller"
+import { Point, Bounds } from "../../Geom/models"
 
-import * as geom from "../../Geom/models"
-import * as geomutils from "../../Geom/utils"
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
-
-export class Triangle extends models.Shape {
+export class Triangle extends Shape {
+    private _p0 : Point
+    private _p1 : Point
+    private _p2 : Point
     constructor(configs : any) {
         super((configs = configs || {}));
         this._p0 = configs.p0 || null;
@@ -12,11 +13,11 @@ export class Triangle extends models.Shape {
         this._p2 = configs.p2 || null;
     }
 
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         if (this._p0 == null) {
-            this._p0 = new geom.Point(newBounds.centerX, newBounds.top);
-            this._p1 = new geom.Point(newBounds.left, newBounds.bottom);
-            this._p2 = new geom.Point(newBounds.right, newBounds.bottom);
+            this._p0 = new Point(newBounds.centerX, newBounds.top);
+            this._p1 = new Point(newBounds.left, newBounds.bottom);
+            this._p2 = new Point(newBounds.right, newBounds.bottom);
         } else {
             var oldBounds = this.boundingBox;
             var sx = newBounds.width / oldBounds.width;
@@ -33,18 +34,16 @@ export class Triangle extends models.Shape {
     _evalBoundingBox() {
         if (this._p0 == null) {
             // shape hasnt been created yet
-            return new geom.Bounds();
+            return new Bounds();
         }
         var left = Math.min(this._p0.x, this._p1.x, this._p2.x);
         var top = Math.min(this._p0.y, this._p1.y, this._p2.y);
         var right = Math.max(this._p0.x, this._p1.x, this._p2.x);
         var bottom = Math.max(this._p0.y, this._p1.y, this._p2.y);
-        return new geom.Bounds(left, top, right - left, bottom - top);
+        return new Bounds(left, top, right - left, bottom - top);
     }
 
-    get className() { return "Triangle"; };
-
-    draw(ctx) {
+    draw(ctx : any) {
         ctx.beginPath();
         ctx.moveTo(this._p0.x, this._p0.y);
         ctx.lineTo(this._p1.x, this._p1.y);
@@ -58,5 +57,5 @@ export class Triangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class TriangleController extends controller.ShapeController<Triangle> {
+export class TriangleController extends ShapeController<Triangle> {
 }

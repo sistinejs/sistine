@@ -1,37 +1,31 @@
+import { Shape } from "../../Core/models"
+import { ShapeController } from "../../Core/controller"
+import { Point, Bounds } from "../../Geom/models"
 
-import * as geom from "../../Geom/models"
-import * as geomutils from "../../Geom/utils"
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
+export class Square extends Shape {
+    private _p0 : Point;
+    private _size : number;
 
-export class Square extends models.Shape {
-    constructor(configs : any) {
+    constructor(configs? : any) {
         super((configs = configs || {}));
-        this._p0 = configs.p0 || new geom.Point(0, 0);
+        this._p0 = configs.p0 || new Point(0, 0);
         this._size = configs.size || 10;
     }
 
-    canSetSize(newBounds) {
+    canSetSize(newBounds : Bounds) {
         newBounds.width = newBounds.height = Math.min(newBounds.width, newBounds.height);
         return true;
     }
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         this._p0.set(newBounds.left, newBounds.top);
         this._size = newBounds.width;
     }
 
     _evalBoundingBox() {
-        return new geom.Bounds(this._p0.x, this._p0.y, this._size, this._size);
+        return new Bounds(this._p0.x, this._p0.y, this._size, this._size);
     }
 
-    get className() { return "Square"; }
-
-    setSize(w, h, force) {
-        w = h = Math.min(w, h);
-        return super.setSize(w, h, force);
-    }
-
-    draw(ctx) {
+    draw(ctx : any) {
         var size = this._size;
         var left = this._p0.x;
         var top = this._p0.y;
@@ -43,5 +37,5 @@ export class Square extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class SquareController extends controller.ShapeController<Square> {
+export class SquareController extends ShapeController<Square> {
 }

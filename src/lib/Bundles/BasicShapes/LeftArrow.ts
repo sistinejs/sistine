@@ -1,14 +1,19 @@
 
-import * as geom from "../../Geom/models"
-import * as geomutils from "../../Geom/utils"
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
+import { Shape } from "../../Core/models"
+import { ShapeController } from "../../Core/controller"
+import { Point, Bounds } from "../../Geom/models"
 
-export class LeftArrow extends models.Shape {
-    constructor(configs : any) {
+export class LeftArrow extends Shape {
+    private _p1 : Point
+    private _p2 : Point
+    private _shaftWidth : number = 0.4;
+    private _tipLength : number = 0.4;
+    private _tipPullback : number = 0;
+    private _backDepth : number = 0;
+    constructor(configs? : any) {
         super((configs = configs || {}));
-        this._p1 = configs.p1 || new geom.Point(0, 0);
-        this._p2 = configs.p2 || new geom.Point(100, 100);
+        this._p1 = configs.p1 || new Point(0, 0);
+        this._p2 = configs.p2 || new Point(100, 100);
         this._shaftWidth = configs.shaftWidth || 0.4;
         this._tipLength = configs.tipLength || 0.4;
         this._tipPullback = configs.tipPullback || 0;
@@ -20,16 +25,16 @@ export class LeftArrow extends models.Shape {
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
         var bottom = Math.max(this._p1.y, this._p2.y);
-        return new geom.Bounds(left, top, right - left, bottom - top);
+        return new Bounds(left, top, right - left, bottom - top);
     }
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
     }
 
     get className() { return "LeftArrow"; };
 
-    draw(ctx) {
+    draw(ctx : any) {
         var lBounds = this.boundingBox;
         var x = lBounds.x;
         var y = lBounds.y;
@@ -60,5 +65,5 @@ export class LeftArrow extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class LeftArrowController extends controller.ShapeController<LeftArrow> {
+export class LeftArrowController extends ShapeController<LeftArrow> {
 }

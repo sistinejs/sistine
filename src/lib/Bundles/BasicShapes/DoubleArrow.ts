@@ -1,14 +1,18 @@
 
-import * as geom from "../../Geom/models"
-import * as geomutils from "../../Geom/utils"
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
+import { Shape } from "../../Core/models"
+import { ShapeController } from "../../Core/controller"
+import { Point, Bounds } from "../../Geom/models"
 
-export class DoubleArrow extends models.Shape {
-    constructor(configs : any) {
+export class DoubleArrow extends Shape {
+    private _p1 : Point
+    private _p2 : Point
+    private _shaftWidth : number
+    private _tipLength : number
+    private _tipPullback : number
+    constructor(configs? : any) {
         super((configs = configs || {}));
-        this._p1 = configs.p1 || new geom.Point(0, 0);
-        this._p2 = configs.p2 || new geom.Point(100, 100);
+        this._p1 = configs.p1 || new Point(0, 0);
+        this._p2 = configs.p2 || new Point(100, 100);
         this._shaftWidth = configs.shaftWidth || 0.3;
         this._tipLength = configs.tipLength || 0.3;
         this._tipPullback = configs.tipPullback || 0.1;
@@ -19,16 +23,16 @@ export class DoubleArrow extends models.Shape {
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
         var bottom = Math.max(this._p1.y, this._p2.y);
-        return new geom.Bounds(left, top, right - left, bottom - top);
+        return new Bounds(left, top, right - left, bottom - top);
     }
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
     }
 
     get className() { return "DoubleArrow"; };
 
-    draw(ctx) {
+    draw(ctx : any) {
         var lBounds = this.boundingBox;
         var x = lBounds.x;
         var y = lBounds.y;
@@ -58,5 +62,5 @@ export class DoubleArrow extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class DoubleArrowController extends controller.ShapeController<DoubleArrow> {
+export class DoubleArrowController extends ShapeController<DoubleArrow> {
 }

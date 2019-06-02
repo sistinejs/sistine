@@ -1,19 +1,22 @@
 
-import * as geom from "../../Geom/models"
-import * as geomutils from "../../Geom/utils"
-import * as models from "../../Core/models"
-import * as controller from "../../Core/controller"
+import { Shape } from "../../Core/models"
+import { ShapeController } from "../../Core/controller"
+import { Point, Bounds } from "../../Geom/models"
 
-export class Plus extends models.Shape {
-    constructor(configs : any) {
+export class Plus extends Shape {
+    private _p1 : Point
+    private _p2 : Point
+    private _innerWidth : number;
+    private _innerHeight : number;
+    constructor(configs? : any) {
         super((configs = configs || {}));
-        this._p1 = configs.p1 || new geom.Point(0, 0);
-        this._p2 = configs.p2 || new geom.Point(100, 100);
+        this._p1 = configs.p1 || new Point(0, 0);
+        this._p2 = configs.p2 || new Point(100, 100);
         this._innerWidth = configs.innerWidth || 0.3;
         this._innerHeight = configs.innerHeight || 0.3;
     }
 
-    _setBounds(newBounds) {
+    _setBounds(newBounds : Bounds) {
         this._p1.set(newBounds.left, newBounds.top);
         this._p2.set(newBounds.right, newBounds.bottom);
     }
@@ -23,7 +26,7 @@ export class Plus extends models.Shape {
         var top = Math.min(this._p1.y, this._p2.y);
         var right = Math.max(this._p1.x, this._p2.x);
         var bottom = Math.max(this._p1.y, this._p2.y);
-        return new geom.Bounds(left, top, right - left, bottom - top);
+        return new Bounds(left, top, right - left, bottom - top);
     }
 
     get className() { return "Plus"; }
@@ -31,7 +34,7 @@ export class Plus extends models.Shape {
     get innerWidth() { return this._innerWidth; }
     get innerHeight() { return this._innerHeight; }
 
-    draw(ctx) {
+    draw(ctx : any) {
         var lBounds = this.boundingBox;
         var x = lBounds.x;
         var y = lBounds.y;
@@ -62,5 +65,5 @@ export class Plus extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class PlusController extends controller.ShapeController<Plus> {
+export class PlusController extends ShapeController<Plus> {
 }
