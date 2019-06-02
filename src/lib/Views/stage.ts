@@ -73,7 +73,7 @@ export class Stage extends EventSource {
     private _editable : boolean = false;
     private _showBackground : boolean = false;
     private _zoom : number = 1.0;
-    private _offset : Point = new Point()
+    private _offset : Point = new Point();
     private _bounds : Bounds;
     private _viewBounds : Bounds;
     private _divId : string;

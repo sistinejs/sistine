@@ -5,14 +5,12 @@ import * as events from "./events";
 import * as controller from "./controller";
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
+import { Shape } from "./models"
 
 export class Selection extends events.EventSource {
-    constructor() {
-        super();
-        this._shapes = [];
-        this._shapesByUUID = {};
-        this.savedInfos = {};
-    }
+    private _shapes : Array<Shape> = [];
+    private _shapesByUUID : { [key : string] : Shape } = {};
+    private _savedInfos : { [key : string] : any } = {};
 
     get count() {
         return this._shapes.length;
@@ -26,7 +24,7 @@ export class Selection extends events.EventSource {
         return out;
     }
 
-    forEach(handler, self, mutable) {
+    forEach(handler : (shape : Shape, any) => boolean, self? : any, mutable : boolean = false) {
         var shapesByUUID = this._shapesByUUID;
         if (mutable == true) {
             shapesByUUID = Object.assign({}, shapesByUUID);
