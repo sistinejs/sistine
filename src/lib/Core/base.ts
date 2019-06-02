@@ -1,9 +1,6 @@
 import * as counters from "./counters";
 import { EventSource, PropertyChanged, ElementAdded, ElementRemoved, ElementIndexChanged } from "./events"
-
-export type Int = number;
-export type Nullable<T> = T | null;
-export type Timestamp = number;
+import { Int, Nullable, Timestamp } from "./types"
 
 const ElementCounter = new counters.Counter("ElementIDs");
 

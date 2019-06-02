@@ -1,6 +1,8 @@
 
 export class Counter {
-    constructor(name) {
+    _name : string;
+    _value : number = 0;
+    constructor(name : string) {
         this._name = name;
         this._value = 0;
     }
@@ -15,12 +17,13 @@ export class Counter {
 }
 
 export class NameIdMap {
-    constructor(name) {
+    _idCounter : Counter;
+    _idMap : any = {};
+    constructor(name : string) {
         this._idCounter = new Counter(name);
-        this._idMap = {};
     }
 
-    register(name) {
+    register(name : string) {
         if (!(name in this._idMap)) {
             this._idMap[name] = this._idCounter.next();
         }

@@ -1,12 +1,20 @@
 
 import * as counters from "./counters";
+import { Int, Nullable, Timestamp } from "./types"
+import { Shape } from "./models"
 
 const StateIdCounter = new counters.Counter("StateIds");
+
+export type EventType = any;
+export type EventCallback = (eventType : EventType, eventSource : EventSource, eventData : any) => boolean;
 
 /**
  * StateMachines allow declarative and stateful chaining of events.
  */
 export class StateMachine {
+    private _states : { [key : string] : State } = {};
+    private _rootState : Nullable<State> = null;
+    private _currentState : Nullable<State> = null;
     constructor() {
         this._states = {};
         this._rootState = null;
@@ -18,7 +26,7 @@ export class StateMachine {
      *
      * @param {String} name  Name of the default/root state.
      */
-    set rootState(name) {
+    set rootState(name : string) {
         this._rootState = this.getState(name);
         if (this._currentState == null) {
             this._currentState = this._rootState;
@@ -31,7 +39,7 @@ export class StateMachine {
      * @param {String}   state   Name of the new state to enter.
      * @param {Object}   data    State specific data for the state handler to use for the new state.
      */
-    enter(state, data) {
+    enter(state : string, data : any = null) {
         if (state == "") {
             this._currentState = this._rootState;
         } else {
@@ -48,7 +56,7 @@ export class StateMachine {
      * @param {String} name  Name of the state being queried.
      * @returns {State} State object associated with the name.
      */
-    getState(name) {
+    getState(name : string) : State {
         if (!(name in this._states)) {
             throw Error("State '" + name + "' not yet registered.");
         }
@@ -61,7 +69,7 @@ export class StateMachine {
      * @param {State} state  State being registered.  If another State with the same name exists, then a {DuplicateError} is thrown.
      * @param {Bool} isRoot  Whether the new state is a root state.
      */
-    registerState(state, isRoot) {
+    registerState(state : State, isRoot : boolean) {
         var name = state.name;
         if (name in this._states) {
             throw Error("State '" + name + "' already registered.");
@@ -79,21 +87,27 @@ export class StateMachine {
      * @param {EventSource} source  The source generating the event.
      * @param {Object} eventData    The event specific data.
      */
-    handle(eventType, source, eventData) {
+    handle(eventType : any, source : EventSource, eventData : any) {
         if (this._currentState == null) return ;
 
         var nextState = this._currentState.handle(eventType, source, eventData);
         if (nextState != null) {
             if (nextState == "") {
-                this.enter(this._rootState.name);
+                if (this._rootState != null) {
+                    this.enter(this._rootState.name);
+                } else {
+                    throw new Error("Root state has not been set");
+                }
             } else {
-                this.enter(this.getState(nextState));
+                this.enter(nextState);
             }
         }
     }
 }
 
 export class State {
+    stateData : any = null;
+    _id : Int
     constructor() {
         this._id = StateIdCounter.next();
     }
@@ -102,7 +116,10 @@ export class State {
 
     get id() { return this._id; }
 
-    enter(data) { this.stateData = data; }
+    enter(data : any) { this.stateData = data; }
+
+    handle(_eventType : any, _source : EventSource, _eventData : any) {
+    }
 }
 
 /**
@@ -143,11 +160,9 @@ export interface EventHandler {
  * Super class of all Events.
  */
 export class Event {
-    constructor() {
-        this._eventType = null ; // eventType;
-        this._timeStamp = Date.now();
-        this._suppressed = false;
-    }
+    private _eventType : any = null; // eventType;
+    private _timeStamp : Timestamp = Date.now();
+    private _suppressed : boolean = false;
 
     /**
      * Returns the creation timestamp of this event.
@@ -187,10 +202,8 @@ export class Event {
 }
 
 export class EventSource {
-    constructor() {
-        this._eventHub = new EventHub();
-        this._muted = false;
-    }
+    private _eventHub = new EventHub();
+    private _muted = false;
 
     get isMuted() { return this._muted; }
     mute() { this._muted = true; }
@@ -200,33 +213,33 @@ export class EventSource {
         return this._eventHub;
     }
 
-    addHandler(eventTypes, handler) {
+    addHandler(eventTypes : Array<EventType>, handler : EventHandler) {
         this._eventHub.addHandler(eventTypes, handler);
         return this;
     }
 
-    removeHandler(eventTypes, handler) {
+    removeHandler(eventTypes : Array<EventType>, handler : EventHandler) {
         this._eventHub.removeHandler(eventTypes, handler);
         return this;
     }
 
-    on(eventTypes, callback) {
+    on(eventTypes : Array<EventType>, callback : EventCallback) {
         this._eventHub.on(eventTypes, callback);
         return this;
     }
 
-    before(eventTypes, callback) {
+    before(eventTypes : Array<EventType>, callback : EventCallback) {
         this._eventHub.before(eventTypes, callback);
         return this;
     }
 
-    validateBefore(eventType, eventData) {
+    validateBefore(eventType : EventType, eventData : any) {
         if (this._muted) return true;
         var source = this;
         return this._eventHub.validateBefore(eventType, source, eventData) != false;
     }
 
-    triggerOn(eventType, eventData) {
+    triggerOn(eventType : EventType, eventData : any) {
         if (this._muted) return true;
         var source = this;
         return this._eventHub.triggerOn(eventType, source, eventData) != false;
@@ -234,59 +247,54 @@ export class EventSource {
 }
 
 export class EventHub {
-    constructor(next) {
-        this._onCallbacks = {};
-        this._beforeCallbacks = {};
-        this._handlers = {};
-        this._next = [];
+    private _onCallbacks : { [key : string] : Array<EventCallback> } = {};
+    private _beforeCallbacks : { [key : string] : Array<EventCallback> } = {};
+    private _handlers : { [key : string] : Array<EventHandler> } = {};
+    private _next : Array<EventHub> = [];
+    constructor(next : Nullable<EventHub> = null) {
         if (next != null) {
             this._next.push(next);
         }
     }
 
-    chain(another) {
-        if (another != null) {
-            if (this._next.findIndex(function(value) { return value == another; }) < 0) {
-                this._next.push(another);
-            }
+    chain(another : EventHub) {
+        if (this._next.findIndex(function(value) { return value == another; }) < 0) {
+            this._next.push(another);
         }
     }
 
-    unchain(another) {
-        if (another != null) {
-            var index = this._next.findIndex(function(value) { return value == another; });
-            if (index >= 0) {
-                this._next.splice(index, 1);
-            }
+    unchain(another : EventHub) {
+        var index = this._next.findIndex(function(value) { return value == another; });
+        if (index >= 0) {
+            this._next.splice(index, 1);
         }
     }
 
-    before(eventTypes, callback) {
+    before(eventTypes : Array<EventType>, callback : EventCallback) {
         return this._addHandler(eventTypes, this._beforeCallbacks, callback);
     }
 
-    on(eventTypes, callback) {
+    on(eventTypes : Array<EventType>, callback : EventCallback) {
         return this._addHandler(eventTypes, this._onCallbacks, callback);
     }
 
-    removeBefore(eventTypes, callback) {
+    removeBeforeon(eventTypes : Array<EventType>, callback : EventCallback) {
         return this._removeHandler(eventTypes, this._beforeCallbacks, callback);
     }
 
-    removeOn(eventTypes, callback) {
+    removeOn(eventTypes : Array<EventType>, callback : EventCallback) {
         return this._removeHandler(eventTypes, this._onCallbacks, callback);
     }
 
-    addHandler(eventTypes, handler) {
+    addHandler(eventTypes : Array<EventType>, handler : EventHandler) {
         return this._addHandler(eventTypes, this._handlers, handler);
     }
 
-    removeHandler(eventTypes, handler) {
+    removeHandler(eventTypes : Array<EventType>, handler : EventHandler) {
         return this._removeHandler(eventTypes, this._handlers, handler);
     }
 
-    _addHandler(eventTypes, handlerlist, handler) {
-        eventTypes = eventTypes.split(",");
+    _addHandler<T>(eventTypes : Array<EventType>, handlerlist : { [ key : string ] : Array<T> }, handler : T) {
         eventTypes.forEach(function(eventType) {
             eventType = eventType.trim();
             handlerlist[eventType] = handlerlist[eventType] || [];
@@ -295,8 +303,7 @@ export class EventHub {
         return this;
     }
 
-    _removeHandler(eventTypes, handlerlist, handler) {
-        eventTypes = eventTypes.split(",");
+    _removeHandler<T>(eventTypes : Array<EventType>, handlerlist : { [ key : string ] : Array<T> }, handler : T) {
         eventTypes.forEach(function(eventType) {
             eventType = eventType.trim();
             var evHandlers = handlerlist[eventType] || [];
@@ -314,7 +321,7 @@ export class EventHub {
      * This is called after a particular change has been approved to notify that 
      * a change has indeed gone through.
      */
-    validateBefore(eventType, source, eventData) {
+    validateBefore(eventType : EventType, source : EventSource, eventData : any) {
         if (this._trigger(eventType, source, eventData, this._beforeCallbacks) == false) {
             return false;
         }
@@ -331,7 +338,7 @@ export class EventHub {
         }
         return true;
     }
-    triggerOn(eventType, source, eventData) {
+    triggerOn(eventType : EventType, source : EventSource, eventData : any) {
         if (this._trigger(eventType, source, eventData, this._onCallbacks) == false) {
             return false;
         }
@@ -351,10 +358,11 @@ export class EventHub {
         return true;
     }
 
-    _trigger(eventType, source, eventData, callbacks) {
-        callbacks = callbacks[eventType] || [];
-        for (var i = 0, L = callbacks.length;i < L;i++) {
-            var callback = callbacks[i];
+    _trigger(eventType : EventType, source : EventSource, eventData : any,
+             callbacks : { [key:string] : Array<EventCallback>}) : boolean {
+        var evtCallbacks = callbacks[eventType] || [];
+        for (var i = 0, L = evtCallbacks.length;i < L;i++) {
+            var callback = evtCallbacks[i];
             if (callback(eventType, source, eventData) == false) {
                 return false;
             }
@@ -364,7 +372,11 @@ export class EventHub {
 }
 
 export class TransformChanged extends Event {
-    constructor(source, command, oldValue, newValue) {
+    source : any;
+    command : string;
+    oldValue : any;
+    newValue : any;
+    constructor(source : any, command : string, oldValue : any, newValue : any) {
         super();
         this.source = source;
         this.command = command;
@@ -375,17 +387,23 @@ export class TransformChanged extends Event {
 }
 
 export class BoundsChanged extends Event {
-    constructor(source, property, oldValue, newValue) {
+    source : any;
+    oldValue : any;
+    newValue : any;
+    constructor(source : any, oldValue : any, newValue : any) {
         super();
         this.source = source;
-        this.property = property;
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
 }
 
 export class PropertyChanged extends Event {
-    constructor(source, property, oldValue, newValue) {
+    source : any;
+    property : string;
+    oldValue : any;
+    newValue : any;
+    constructor(source : any, property : string, oldValue : any, newValue : any) {
         super();
         this.source = source;
         this.property = property;
@@ -395,7 +413,9 @@ export class PropertyChanged extends Event {
 }
 
 export class ElementAdded extends Event {
-    constructor(parent, subject) {
+    parent : Element
+    subject : Element
+    constructor(parent : Element, subject : Element) {
         super();
         this.parent = parent;
         this.subject = subject;
@@ -403,7 +423,9 @@ export class ElementAdded extends Event {
 }
 
 export class ElementRemoved extends Event {
-    constructor(parent, subject) {
+    parent : Element
+    subject : Element
+    constructor(parent : Element, subject : Element) {
         super();
         this.parent = parent;
         this.subject = subject;
@@ -411,7 +433,10 @@ export class ElementRemoved extends Event {
 }
 
 export class ElementIndexChanged extends Event {
-    constructor(subject, oldIndex, newIndex) {
+    subject : Element
+    oldIndex : Int
+    newIndex : Int
+    constructor(subject : Element, oldIndex : Int, newIndex : Int) {
         super();
         this.subject = subject;
         this.oldIndex = oldIndex;
@@ -422,7 +447,9 @@ export class ElementIndexChanged extends Event {
 }
 
 export class ShapesSelected extends Event {
-    constructor(selection, shapes) {
+    selection : Selection
+    shapes : Array<Shape>
+    constructor(selection : Selection, shapes : Array<Shape>) {
         super();
         this.selection = selection;
         this.shapes = shapes;
@@ -432,7 +459,9 @@ export class ShapesSelected extends Event {
 }
 
 export class ShapesUnselected extends Event {
-    constructor(selection, shapes) {
+    selection : Selection
+    shapes : Array<Shape>
+    constructor(selection : Selection, shapes : Array<Shape>) {
         super();
         this.selection = selection;
         this.shapes = shapes;

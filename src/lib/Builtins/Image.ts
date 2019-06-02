@@ -1,13 +1,10 @@
+import { Shape } from "../Core/models"
+import { ShapeController, ControlPoint, HitInfo, HitType, HitInfoSnapshot, DEFAULT_CONTROL_SIZE } from "../Core/controller"
+import { Point, Bounds } from "../Geom/models"
+import { boundsOfCubicCurve } from "../Geom/utils"
+import { Nullable } from "../Core/types"
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
-import Nullable from "../Core/types"
-
-let HitType = controller.HitType;
-
-export class Image extends models.Shape {
+export class Image extends Shape {
     private loaded : boolean = false;
     private _image : any = null;
     private _x : number = 0;
@@ -115,7 +112,7 @@ export class Image extends models.Shape {
         }
     }
 
-    _setBounds(newBounds : geom.Bounds) {
+    _setBounds(newBounds : Bounds) {
         this._x = newBounds.left;
         this._y = newBounds.top;
         this._width = newBounds.width;
@@ -123,7 +120,7 @@ export class Image extends models.Shape {
     }
 
     _evalBoundingBox() {
-        return new geom.Bounds(this.x, this.y, this.width, this.height);
+        return new Bounds(this.x, this.y, this.width, this.height);
     }
 
     get className() { return "Image"; }
@@ -145,5 +142,5 @@ export class Image extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class ImageController extends controller.ShapeController<Image> {
+export class ImageController extends ShapeController<Image> {
 }

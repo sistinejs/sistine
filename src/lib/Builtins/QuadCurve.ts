@@ -1,13 +1,10 @@
+import { Shape } from "../Core/models"
+import { ShapeController, ControlPoint, HitInfo, HitType, HitInfoSnapshot, DEFAULT_CONTROL_SIZE } from "../Core/controller"
+import { Point, Bounds } from "../Geom/models"
+import { boundsOfQuadCurve } from "../Geom/utils"
+import { Nullable } from "../Core/types"
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
-import Nullable from "../Core/types"
-
-let HitType = controller.HitType;
-
-export class QuadCurve extends models.Shape {
+export class QuadCurve extends Shape {
     private created : boolean = false
     private _x0 : number = 0;
     private _y0 : number = 0;
@@ -44,7 +41,7 @@ export class QuadCurve extends models.Shape {
     set x2(value : number) { this._x2 = value; this.markTransformed(); }
     set y2(value : number) { this._y2 = value; this.markTransformed(); }
 
-    _setBounds(newBounds : geom.Bounds) {
+    _setBounds(newBounds : Bounds) {
         if (!this.created) {
             // creating by bounds
             this._x0 = newBounds.left;
@@ -67,13 +64,13 @@ export class QuadCurve extends models.Shape {
         }
     }
 
-    _evalBoundingBox() : geom.Bounds {
+    _evalBoundingBox() : Bounds {
         if (!this.created) {
             // shape hasnt been created yet
-            return new geom.Bounds();
+            return new Bounds();
         }
-        var result = geomutils.boundsOfQuadCurve(this._x0, this._y0, this._x1, this._y1, this._x2, this._y2);
-        return new geom.Bounds(result.left, result.top,
+        var result = boundsOfQuadCurve(this._x0, this._y0, this._x1, this._y1, this._x2, this._y2);
+        return new Bounds(result.left, result.top,
                                result.right - result.left,
                                result.bottom - result.top);
     }
@@ -93,13 +90,13 @@ export class QuadCurve extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class QuadCurveController extends controller.ShapeController<QuadCurve> {
+export class QuadCurveController extends ShapeController<QuadCurve> {
     _evalControlPoints() {
         var parents = super._evalControlPoints();
         var curve = this.shape;
-        var ours = [new controller.ControlPoint(curve.x0, curve.y0, HitType.CONTROL, 0, "grab"),
-                    new controller.ControlPoint(curve.x1, curve.y1, HitType.CONTROL, 1, "grab"),
-                    new controller.ControlPoint(curve.x2, curve.y2, HitType.CONTROL, 2, "grab")]
+        var ours = [new ControlPoint(curve.x0, curve.y0, HitType.CONTROL, 0, "grab"),
+                    new ControlPoint(curve.x1, curve.y1, HitType.CONTROL, 1, "grab"),
+                    new ControlPoint(curve.x2, curve.y2, HitType.CONTROL, 2, "grab")]
         return ours.concat(parents);
     }
 
@@ -111,17 +108,17 @@ export class QuadCurveController extends controller.ShapeController<QuadCurve> {
         ctx.lineWidth = 2;
 
         ctx.beginPath();
-        ctx.arc(quad.x0, quad.y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(quad.x0, quad.y0, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(quad.x1, quad.y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(quad.x1, quad.y1, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(quad.x2, quad.y2, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(quad.x2, quad.y2, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -129,12 +126,12 @@ export class QuadCurveController extends controller.ShapeController<QuadCurve> {
     _checkMoveHitInfo(x : number, y : number) {
         var boundingBox = this.shape.boundingBox;
         if (boundingBox.containsPoint(x, y)) {
-            return new controller.HitInfo(this.shape, HitType.MOVE, 0, "move");
+            return new HitInfo(this.shape, HitType.MOVE, 0, "move");
         }
         return null;
     }
 
-    applyHitChanges(hitInfo : controller.HitInfo, savedInfo : any,
+    applyHitChanges(hitInfo : HitInfo, savedInfo : any,
                     downX : number, downY : number, currX : number, currY : number) {
         console.log("Hit Info: ", hitInfo);
         if (hitInfo.hitType != HitType.CONTROL) {
@@ -164,7 +161,7 @@ export class QuadCurveController extends controller.ShapeController<QuadCurve> {
         quad.markTransformed();
     }
 
-    snapshotFor(hitInfo : controller.HitInfo) : controller.HitInfoSnapshot {
+    snapshotFor(hitInfo : HitInfo) : HitInfoSnapshot {
         var out = super.snapshotFor(hitInfo);
         out.downX0 = this.shape.x0;
         out.downY0 = this.shape.y0;

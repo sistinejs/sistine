@@ -1,13 +1,10 @@
+import { Shape } from "../Core/models"
+import { ShapeController, ControlPoint, HitInfo, HitType, HitInfoSnapshot, DEFAULT_CONTROL_SIZE } from "../Core/controller"
+import { Point, Bounds } from "../Geom/models"
+import { boundsOfQuadCurve } from "../Geom/utils"
+import { Nullable } from "../Core/types"
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
-import Nullable from "../Core/types"
-
-let HitType = controller.HitType;
-
-export class Rectangle extends models.Shape {
+export class Rectangle extends Shape {
     private _x : number = 0;
     private _y : number = 0;
     private _rx : number = 0;
@@ -60,7 +57,7 @@ export class Rectangle extends models.Shape {
         }
     }
 
-    _setBounds(newBounds : geom.Bounds) {
+    _setBounds(newBounds : Bounds) {
         this._x = newBounds.left;
         this._y = newBounds.top;
         this._width = newBounds.width;
@@ -68,7 +65,7 @@ export class Rectangle extends models.Shape {
     }
 
     _evalBoundingBox() {
-        return new geom.Bounds(this.x, this.y, this.width, this.height);
+        return new Bounds(this.x, this.y, this.width, this.height);
     }
 
     draw(ctx : any) {
@@ -81,5 +78,5 @@ export class Rectangle extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class RectangleController extends controller.ShapeController<Rectangle> {
+export class RectangleController extends ShapeController<Rectangle> {
 }
