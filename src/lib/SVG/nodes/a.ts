@@ -2,7 +2,8 @@ import { Element } from "../../Core/base"
 
 import * as base from "./base"
 
-type Nullable<T> = T | null;
+import { Int, Nullable } from "../Core/types"
+
 export class ANodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.animationElements

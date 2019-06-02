@@ -2,8 +2,7 @@
 import { Core } from "../../Core/index"
 import { Element } from "../../Core/base"
 import * as base from "./base"
-type Int = number
-type Nullable<T> = T | null;
+import { Int, Nullable } from "../../Core/types"
 
 export class UseNodeProcessor extends base.NodeProcessor {
     get validChildren() {

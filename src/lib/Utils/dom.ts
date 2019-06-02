@@ -1,12 +1,14 @@
 
-const fontMetrics = {
+import { Int } from "../Core/types"
+
+const fontMetrics : { [key : string] : any } = {
 }
 
-export function getcssint(elem, attrib : string) : int {
+export function getcssint(elem : JQuery<HTMLElement>, attrib : string) : Int {
     return parseInt(elem.css(attrib).replace(/px/, ""));
 }
 
-export function getFontMetrics(fontFamily, fontSize) {
+export function getFontMetrics(fontFamily : string, fontSize : Int) : any {
     if (!(fontFamily in fontMetrics)) {
         fontMetrics[fontFamily] = {};
     }
@@ -25,7 +27,7 @@ export function getFontMetrics(fontFamily, fontSize) {
     return familyMetrics[fontSize];
 }
 
-export function centerElem(elem, axis) {
+export function centerElem(elem : JQuery<HTMLElement>, axis : string) {
     var parent = elem.parent();
     var horiz_padding = getcssint(elem, "padding-left") +
                         getcssint(elem, "padding-right") +
@@ -39,19 +41,19 @@ export function centerElem(elem, axis) {
                         getcssint(elem, "margin-bottom") +
                         getcssint(parent, "border-top") +
                         getcssint(parent, "border-bottom");
-    var finalHeight = parent.height() - vert_padding;
-    var finalWidth = parent.width() - horiz_padding;
+    var finalHeight : number = (parent.height() as number) - vert_padding;
+    var finalWidth : number = (parent.width() as number) - horiz_padding;
     if (axis == "x") {
-        elem.css("left", (finalWidth - elem.width()) / 2);
+        elem.css("left", (finalWidth - (elem.width() as number)) / 2);
     } else if (axis == "y") {
-        elem.css("top", (finalHeight - elem.height()) / 2);
+        elem.css("top", (finalHeight - (elem.height() as number)) / 2);
     } else {
-        elem.css("left", (finalWidth - elem.width()) / 2);
-        elem.css("top", (finalHeight - elem.height()) / 2);
+        elem.css("left", (finalWidth - (elem.width() as number)) / 2);
+        elem.css("top", (finalHeight - (elem.height() as number)) / 2);
     }
 }
 
-export function fillChildComponent(elem) {
+export function fillChildComponent(elem : JQuery<HTMLElement>) {
     var parent = elem.parent();
     var horiz_padding = getcssint(elem, "padding-left") +
                         getcssint(elem, "padding-right") +
@@ -65,15 +67,13 @@ export function fillChildComponent(elem) {
                         getcssint(elem, "margin-bottom") +
                         getcssint(parent, "border-top") +
                         getcssint(parent, "border-bottom");
-    var finalHeight = parent.height() - vert_padding;
-    var finalWidth = parent.width() - horiz_padding;
+    var finalHeight = (parent.height() as number) - vert_padding;
+    var finalWidth = (parent.width() as number) - horiz_padding;
     elem.height(finalHeight);
     elem.width(finalWidth);
-    elem[0].width = finalWidth;
-    elem[0].height = finalHeight;
 }
 
-export function forEachChild(elem, visitor) {
+export function forEachChild(elem : HTMLElement, visitor : (child : Element, index : Int) => boolean) {
     var children = elem.children;
     var L = children.length;
     for (var i = 0;i < L;i++) {
@@ -83,7 +83,7 @@ export function forEachChild(elem, visitor) {
     }
 }
 
-export function forEachNode(elem, visitor) {
+export function forEachNode(elem : HTMLElement, visitor : (child : ChildNode, index : Int) => boolean) {
     var children = elem.childNodes;
     var L = children.length;
     for (var i = 0;i < L;i++) {
@@ -93,7 +93,7 @@ export function forEachNode(elem, visitor) {
     }
 }
 
-export function forEachAttribute(elem, visitor) {
+export function forEachAttribute(elem : HTMLElement, visitor : (name : string, value : any) => boolean) {
     var nodeNameMap = elem.attributes;
     for (var i = 0;i < nodeNameMap.length; i++) {
         var attrib = nodeNameMap[i];

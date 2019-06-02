@@ -1,5 +1,6 @@
 
 import * as geom from "../Geom/models"
+import { Stage } from "./stage"
 import * as geomutils from "../Geom/utils"
 import { VirtualContext } from "./context"
 import { getcssint } from "../Utils/dom"
@@ -13,8 +14,13 @@ import { getcssint } from "../Utils/dom"
 export class Pane {
     readonly viewBounds : geom.Bounds = null;
     readonly zoom : number = 1.0;
-    readonly divId : string = null;
-    constructor(name, stage, canvasId, configs) {
+    drawTime : Timestamp = 0;
+    protected _configs : any;
+    protected _name : string;
+    protected _stage : Stage;
+    protected _refCount = 1;
+    protected _needsRepaint : boolean;
+    constructor(name : String, stage : Stage, canvasId : string, configs? : any) {
         this._configs = configs || {};
         this._name = name;
         this._stage = stage;
@@ -26,7 +32,6 @@ export class Pane {
         this._offset = new geom.Point();
         this.viewBounds = new geom.Bounds();
         this._ensureCanvas();
-        this._refCount = 1;
     }
 
     get(name) {
@@ -61,14 +66,14 @@ export class Pane {
     /**
      * Converts world coordinates to screen coordinates.
      */
-    toScreen(x, y, result) {
+    toScreen(x : number, y : number, result? : Point) : Point  {
         result = result || new geom.Point(x, y);
         result.x = this.zoom * (x - this.offset.x);
         result.y = this.zoom * (y - this.offset.y);
         return result;
     }
 
-    toWorld(x, y, result) {
+    toWorld(x : number, y : number, result? : Point) : Point  {
         result = result || new geom.Point(x, y);
         result.x = (x / this.zoom) + this.offset.x;
         result.y = (y / this.zoom) + this.offset.y;
@@ -76,7 +81,12 @@ export class Pane {
     }
 
     acquire() { this._refCount += 1; }
-    release() { this._refCount -= 1; }
+    release() {
+        if (this._refCount > 0) {
+            this._refCount -= 1;
+        }
+        return this._refCount <= 0;
+    }
 
     get name() { return this._name; }
     get divId() { return this.divId; }
@@ -107,7 +117,7 @@ export class Pane {
         }
     }
 
-    paint(force) {
+    paint(force = false) {
         if (force || this.needsRepaint) {
             var ctx = this.virtualContext;
             this.clear(ctx);

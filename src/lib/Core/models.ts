@@ -4,11 +4,9 @@ import * as base from "./base";
 import * as events from "./events";
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
+import { Int, Nullable } from "../Core/types"
 
 type Element = base.Element;
-
-type Int = number;
-type Nullable<T> = T | null;
 
 /**
  * Holds information about the instance of a shape.
@@ -82,7 +80,6 @@ export class Shape extends mixins.Styleable {
  * can extend this to performing layouts etc on child chapes.
  */
 export class Group extends Shape {
-    protected _children : Array<Shape> = [];
     protected _bounds : Nullable<geom.Bounds>;
     constructor(configs? : any) {
         super((configs = configs || {}));
@@ -116,8 +113,8 @@ export class Group extends Shape {
  * related operations as that is decoupled into the view entity.
  */
 export class Scene extends Group {
-    constructor(configs : any) {
-        super((configs = configs || {}));
+    constructor(configs? : any) {
+        super(configs);
     }
 }
 

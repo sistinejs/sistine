@@ -6,6 +6,7 @@ import { Utils } from "../../Utils/index"
 import { Bundles } from "../../Bundles/index"
 import * as models from "../models"
 import * as layouts from "../layouts"
+import { Int, Nullable } from "../../Core/types"
 
 const CM = layouts.defaultCM;
 const Bounds = Geom.Models.Bounds;

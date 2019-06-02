@@ -1,23 +1,23 @@
 
 import { Int, Nullable, Timestamp } from "../Core/base"
-import * as coreevents from "../Core/events";
+import { Shape, Scene } from "../Core/models"
+import { Selection } from "../Core/selection"
+import { StateMachine, EventSource } from "../Core/events";
 import * as events from "./events";
-import { Core } from "../Core";
-import * as panes from "./panes";
+import { Pane, BGPane, ShapesPane } from "./panes"
 import { ShapeIndex } from "./shapeindex";
 import * as cursors from "./cursors";
-import { getcssint } from "../Utils/dom"
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
 import { Point, Bounds } from "../Geom/models"
+
+type JQEventHandler = (event : JQuery.Event) => void;
 
 class TouchState {
     readonly maxPoints : Int;
-    downTimes: Array<Number> = [];
+    downTimes: Array<Nullable<Timestamp>> = [];
     downPoints: Array<Nullable<Point>> = [];
-    currTimes: Array<Number> = [];
-    currPoints: Array<Nullable<Point>> = [];
-    timeDeltas: Array<Number> = [];
+    currTimes: Array<Timestamp> = [];
+    currPoints: Array<Point> = [];
+    timeDeltas: Array<number> = [];
     isClick: Array<boolean> = [];
     private _active : Array<boolean> = [];
     // Max time before a down goes from a "click" to a "hold"
@@ -30,14 +30,14 @@ class TouchState {
             this.downTimes.push(0);
             this.downPoints.push(null);
             this.currTimes.push(0);
-            this.currPoints.push(new geom.Point());
+            this.currPoints.push(new Point());
             this.isClick.push(false);
             this.timeDeltas.push(0);
         }
     }
 
     touchDown(index : Int, x : number, y : number, timeStamp : Timestamp) {
-        this.downPoints[index] = new geom.Point(x, y);
+        this.downPoints[index] = new Point(x, y);
         this.currPoints[index].x = x;
         this.currPoints[index].y = y;
         this.currTimes[index] = timeStamp;
@@ -45,12 +45,18 @@ class TouchState {
         this._active[index] = true;
     }
 
-    touchUp(index, x, y, timeStamp) {
+    touchUp(index : Int, x : number, y : number, timeStamp : Timestamp) {
         this._active[index] = false;
         this.currPoints[index].x = x;
         this.currPoints[index].y = y;
         this.currTimes[index] = timeStamp;
-        this.timeDeltas[index] = this.currTimes[index] - this.downTimes[index];
+        var downTime = this.downTimes[index];
+        if (downTime != null) {
+            this.timeDeltas[index] = this.currTimes[index] - downTime;
+        }
+        else {
+            this.timeDeltas[index] = 0;
+        }
         this.isClick[index] = this.timeDeltas[index] <= this.clickThresholdTime;
         this.downTimes[index] = null;
         this.downPoints[index] = null;
@@ -62,8 +68,26 @@ class TouchState {
  * As far as possible this does not perform any view related operations as 
  * that is decoupled into the view entity.
  */
-export class Stage extends coreevents.EventSource {
-    constructor(divId, scene, configs) {
+export class Stage extends EventSource {
+    // By default stages are not editable
+    private _editable : boolean = false;
+    private _showBackground : boolean = false;
+    private _zoom : number = 1.0;
+    private _offset : Point = new Point()
+    private _bounds : Bounds;
+    private _viewBounds : Bounds;
+    private _divId : string;
+    private _parentDiv : JQuery<HTMLElement>;
+    private _shapeIndex : ShapeIndex;
+    private _scene : Scene;
+    private _panes : Array<Pane> = [];
+    private _mainPane : Pane;
+    eventMachine : StateMachine;
+    private cursorMap : any;
+    touchState : TouchState = new TouchState();
+    selection : Selection = new Selection();
+    animFrameId : number = 0;
+    constructor(divId : string, scene : Scene, configs? : any) {
         super();
         configs = configs || {};
         configs.x = configs.x || 0;
@@ -71,18 +95,12 @@ export class Stage extends coreevents.EventSource {
         configs.width = configs.width || 1000;
         configs.height = configs.height || 1000;
 
-        // By default stages are not editable
-        this._editable = false;
-        this._showBackground = false;
-
         // The boundaries of the "Stage"
-        this._bounds = new geom.Bounds(configs);
-        this._zoom = 1.0;
-        this._offset = new geom.Point()
+        this._bounds = new Bounds(configs);
 
         this._divId = divId;
         this._parentDiv = $("#" + divId);
-        this.scene = scene || new Core.Models.Scene();
+        this.scene = scene || new Scene();
         this._shapeIndex = new ShapeIndex(this._scene);
 
         // Track mouse/touch drag events
@@ -92,14 +110,13 @@ export class Stage extends coreevents.EventSource {
         this._mainPane = this.acquirePane("main");
 
         // Information regarding Selections
-        this.selection = new Core.Selection();
         var self = this;
-        this.selection.on("ShapesSelected", function(eventType, source, event) {
-            event.shapes.forEach(function(shape) {
+        this.selection.on("ShapesSelected", function(_eventType : string, _source : EventSource, event : any) {
+            event.shapes.forEach(function(shape : Shape) {
                 self.setShapePane(shape, "edit");
             });
-        }).on("ShapesUnselected", function(eventType, source, event) {
-            event.shapes.forEach(function(shape) {
+        }).on("ShapesUnselected", function(_eventType : string, _source : EventSource, event : any) {
+            event.shapes.forEach(function(shape : Shape) {
                 self.setShapePane(shape, "main");
             });
         });
@@ -107,7 +124,6 @@ export class Stage extends coreevents.EventSource {
         this.cursorMap = Object.assign({}, cursors.DefaultCursorMap);
 
         // Setup event state machines for push based event handling
-        this.touchState = new TouchState();
         this._setupEventMachine();
 
         // Kick off the repaint loop
@@ -119,18 +135,18 @@ export class Stage extends coreevents.EventSource {
         if (this._scene != s) {
             this._scene = s
             var self = this;
-            s.on("ElementAdded, ElementRemoved", function(eventType, source, event) {
+            s.on("ElementAdded, ElementRemoved", function(_eventType : string, _source : EventSource, event : any) {
                 if (!event.subject.pane) {
                     self.setShapePane(event.subject, "main");
                 }
                 self.paneNeedsRepaint(event.subject.pane);
-            }).on("PropertyChanged", function(eventType, source, event) {
+            }).on("PropertyChanged", function(_eventType : string, _source : EventSource, event : any) {
                 self.paneNeedsRepaint(event.source.pane)
             });
         }
     }
 
-    set cursor(c) {
+    set cursor(c : string) {
         c = c || "auto";
         if (c in this.cursorMap) {
             c = this.cursorMap[c];
@@ -139,14 +155,14 @@ export class Stage extends coreevents.EventSource {
     }
 
     get zoom() { return this._zoom; }
-    setZoom(z) {
+    setZoom(z : number) {
         if (z < 0) z = 1;
         if (z > 10) z = 10;
         if (this._zoom != z) {
             var event = new events.ZoomChanged(this._zoom, z);
             if (this.validateBefore("ZoomChanged", event) != false) {
                 this._zoom = z;
-                this._panes.forEach(function(pane, index) {
+                this._panes.forEach(function(pane : Pane, _index : Int) {
                     pane.setZoom(z);
                 });
                 this.triggerOn("ZoomChanged", event);
@@ -155,12 +171,12 @@ export class Stage extends coreevents.EventSource {
     }
 
     get offset() { return this._offset; }
-    setOffset(x, y) {
+    setOffset(x : number, y : number) {
         if (this._offset.x != x || this._offset.y != y) {
             var event = new events.ViewPortChanged(this._offset.x, this._offset.y, x, y);
             if (this.validateBefore("ViewPortChanged", event) != false) {
-                this._offset = new geom.Point(x, y);
-                this._panes.forEach(function(pane, index) {
+                this._offset = new Point(x, y);
+                this._panes.forEach(function(pane, _index) {
                     pane.setOffset(x, y);
                 });
                 this.triggerOn("ViewPortChanged", event);
@@ -180,7 +196,7 @@ export class Stage extends coreevents.EventSource {
         if (this._showBackground != show) {
             this._showBackground = show;
             if (show) {
-                this.acquirePane("bg", panes.BGPane);
+                this.acquirePane("bg", BGPane);
             } else {
                 this.releasePane("bg");
             }
@@ -197,8 +213,7 @@ export class Stage extends coreevents.EventSource {
         }
     }
 
-    acquirePane(name, PaneClass) {
-        PaneClass = PaneClass || panes.ShapesPane;
+    acquirePane(name : string, PaneClass : new (name : string, stage : any, canvasId : string, configs? : any) => Pane = ShapesPane) {
         var pane = this.getPane(name);
         if (pane == null) {
             pane = new PaneClass(name, this, name + "pane_" + this.divId);
@@ -210,7 +225,7 @@ export class Stage extends coreevents.EventSource {
         return pane;
     }
 
-    releasePane(name) {
+    releasePane(name : string) {
         for (var i = this._panes.length;i >= 0;i--) {
             var pane = this._panes[i];
             if (pane.name == name) {
@@ -223,7 +238,7 @@ export class Stage extends coreevents.EventSource {
         }
     }
 
-    getPane(name) {
+    getPane(name : string) {
         for (var i = this._panes.length - 1; i >= 0;i--)  {
             if (this._panes[i].name == name) {
                 return this._panes[i];
@@ -236,20 +251,19 @@ export class Stage extends coreevents.EventSource {
         return this._panes.length;
     }
 
-    indexOfPane(pane) {
+    indexOfPane(pane : Pane) {
         for (var i = this._panes.length;i >= 0;i--) {
             if (this._panes[i] == pane) return i;
         }
         return -1;
     }
 
-    movePane(pane, newIndex) {
+    movePane(pane : Pane, newIndex : Int) {
         var currIndex = this.indexOfPane(pane);
         if (newIndex < 0) newIndex = this._panes.length;
         if (currIndex >= 0 && currIndex != newIndex) {
             this._panes.splice(currIndex, 1);
             this._panes.splice(newIndex, 0, pane);
-            var elem = pane.element.detach();
             if (newIndex >= this.element.children().length) {
                 this.element.append(pane.element);
             } else {
@@ -272,9 +286,6 @@ export class Stage extends coreevents.EventSource {
     get parentDiv() { return this._parentDiv; }
     get viewBounds() { return this._viewBounds; }
 
-    set tabIndex(value) {
-        this.element.attr("tabindex", 1);
-    }
     focus() { this.element.focus(); }
     blur() { this.element.blur(); }
 
@@ -292,7 +303,7 @@ export class Stage extends coreevents.EventSource {
         });
     }
 
-    setShapePane(shape, pane) {
+    setShapePane(shape : Shape, pane : string) {
         if (shape.pane != pane) {
             this.paneNeedsRepaint(shape.pane);
             this.shapeIndex.setPane(shape, pane);
@@ -300,8 +311,7 @@ export class Stage extends coreevents.EventSource {
         }
     }
 
-    paneNeedsRepaint(name) {
-        name = name || null;
+    paneNeedsRepaint(name : Nullable<string> = null) {
         if (name == null) {
             // all panes
             for (var i = 0;i < this._panes.length;i++) {
@@ -316,7 +326,7 @@ export class Stage extends coreevents.EventSource {
 
     _setupEventMachine() {
         var self = this;
-        var machine = new coreevents.StateMachine();
+        var machine = new StateMachine();
         self.eventMachine = machine;
         self.element.on("keydown", function(event) {
             machine.handle("keydown", self, event);
@@ -354,25 +364,24 @@ export class Stage extends coreevents.EventSource {
 
     // Subscribtion based event handling for more custom handling 
     // if needed.
-    keypress(handler) { return this._setupHandler(this.element, "keypress", handler); }
-    keyup(handler) { return this._setupHandler(this.element, "keyup", handler); }
-    keydown(handler) { return this._setupHandler(this.element, "keydown", handler); }
+    keypress(handler : JQEventHandler) { return this._setupHandler(this.element, "keypress", handler); }
+    keyup(handler : JQEventHandler) { return this._setupHandler(this.element, "keyup", handler); }
+    keydown(handler : JQEventHandler) { return this._setupHandler(this.element, "keydown", handler); }
 
-    click(handler) { return this._setupHandler(this.element, "click", handler); }
-    mouseover(handler) { return this._setupHandler(this.element, "mouseover", handler); }
-    mouseout(handler) { return this._setupHandler(this.element, "mouseout", handler); }
-    mouseenter(handler) { return this._setupHandler(this.element, "mouseenter", handler); }
-    mouseleave(handler) { return this._setupHandler(this.element, "mouseleave", handler); }
-    mousedown(handler) { return this._setupHandler(this.element, "mousedown", handler); }
-    mouseup(handler) { return this._setupHandler(this.element, "mouseup", handler); }
-    mousemove(handler) { return this._setupHandler(this.element, "mousemove", handler); }
-    contextmenu(handler) { return this._setupHandler(this.element, "contextmenu", handler); }
-    scroll(handler) { return this._setupHandler(this.element, "scroll", handler); }
+    click(handler : JQEventHandler) { return this._setupHandler(this.element, "click", handler); }
+    mouseover(handler : JQEventHandler) { return this._setupHandler(this.element, "mouseover", handler); }
+    mouseout(handler : JQEventHandler) { return this._setupHandler(this.element, "mouseout", handler); }
+    mouseenter(handler : JQEventHandler) { return this._setupHandler(this.element, "mouseenter", handler); }
+    mouseleave(handler : JQEventHandler) { return this._setupHandler(this.element, "mouseleave", handler); }
+    mousedown(handler : JQEventHandler) { return this._setupHandler(this.element, "mousedown", handler); }
+    mouseup(handler : JQEventHandler) { return this._setupHandler(this.element, "mouseup", handler); }
+    mousemove(handler : JQEventHandler) { return this._setupHandler(this.element, "mousemove", handler); }
+    contextmenu(handler : JQEventHandler) { return this._setupHandler(this.element, "contextmenu", handler); }
+    scroll(handler : JQEventHandler) { return this._setupHandler(this.element, "scroll", handler); }
 
-    _setupHandler(element, method, handler) {
-        var source = this;
-        element[method](function(event) {
-            event.theSource = source;
+    _setupHandler(element : JQuery<HTMLElement>, methodName : string, handler : JQEventHandler) {
+        var method : (handler : JQEventHandler) => void = element[methodName] as (handler : JQEventHandler) => void;
+        method(function(event : JQuery.Event) {
             handler(event);
         });
         return this;

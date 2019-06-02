@@ -7,8 +7,7 @@ import { Builtins } from "../../Builtins/index"
 import * as models from "../models"
 import * as layouts from "../layouts"
 import { Element } from "../../Core/base"
-
-type Nullable<T> = T | null;
+import { Int, Nullable } from "../Core/types"
 const CM = layouts.defaultCM;
 const Bounds = Geom.Models.Bounds;
 const Length = Geom.Models.Length;

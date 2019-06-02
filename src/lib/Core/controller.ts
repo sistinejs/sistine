@@ -3,9 +3,8 @@ import * as events from "./events";
 import * as geom from "../Geom/models";
 import * as geomutils from "../Geom/utils";
 import * as models from "./models";
+import { Int, Nullable } from "../Core/types"
 
-type Int = number
-type Nullable<T> = T | null;
 type Shape = models.Shape;
 export const DEFAULT_CONTROL_SIZE = 5;
 

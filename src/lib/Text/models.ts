@@ -5,9 +5,7 @@ import { Utils } from "../Utils/index"
 import * as corebase from "../Core/base"
 import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
-
-type Int = number;
-type Nullable<T> = T | null;
+import { Int, Nullable } from "../Core/types"
 
 const Arrays = Utils.Arrays;
 

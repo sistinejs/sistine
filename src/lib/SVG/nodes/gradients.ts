@@ -1,24 +1,20 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
 import { Geom } from "../../Geom/index"
-import { Utils } from "../../Utils/index"
-import { Bundles } from "../../Bundles/index"
-import * as models from "../models"
-import * as layouts from "../layouts"
+import { Element } from "../../Core/base"
+import { Int, Nullable } from "../../Core/types"
+import { Gradient, LinearGradient, RadialGradient } from "../../Core/styles"
+import { forEachChild } from "../../Utils/dom";
 
-const CM = layouts.defaultCM;
-const Bounds = Geom.Models.Bounds;
 const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
 
-class GradientNodeProcessor extends base.NodeProcessor {
+abstract class GradientNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.descriptiveElements
                 .concat(["animate", "animateTransform", "set", "stop"]);
     }
+
+    abstract newGradient(elem : HTMLElement) : Gradient;
 
     get validAttributes() {
         return base.coreAttributes
@@ -35,26 +31,27 @@ class GradientNodeProcessor extends base.NodeProcessor {
         var gradientUnits = elem.getAttribute("gradientUnits") || "objectBoundingBox";
         out.relativeToBounds = (gradientUnits == "objectBoundingBox");
         this.processTransformAttributes(elem, out, "gradientTransform");
-        parent.addDef(id, out);
+        if (parent != null) parent.addDef(id, out);
 
         var self = this;
-        forEachChild(elem, function(child, index) {
+        forEachChild(elem, function(child : HTMLElement, index : Int) {
             if (child.tagName == "set") {
-                throw new Error("Cannot process elem: ", child.tagName);
+                throw new Error("Cannot process elem: " + child.tagName);
             } else if (child.tagName == "stop") {
                 self.processStopNode(child, out);
             } else if (child.tagName == "animate") {
-                throw new Error("Cannot process elem: ", child.tagName);
+                throw new Error("Cannot process elem: " + child.tagName);
             } else if (child.tagName == "animateTransform") {
-                throw new Error("Cannot process elem: ", child.tagName);
+                throw new Error("Cannot process elem: " + child.tagName);
             } else {
-                throw new Error("Cannot process elem: ", child.tagName);
+                throw new Error("Cannot process elem: " + child.tagName);
             }
+            return true;
         });
         return out;
     }
 
-    processStopNode(elem, gradient) {
+    processStopNode(elem : HTMLElement, gradient : Gradient) {
         var offset = this.getDecimal(elem, "offset", 0);
         var stopColor = elem.getAttribute("stop-color") || "black";
         var stopOpacity = elem.getAttribute("stop-opacity");
@@ -63,13 +60,13 @@ class GradientNodeProcessor extends base.NodeProcessor {
         }
         gradient.addStop(offset, stopColor);
 
-        forEachChild(elem, function(child, index) {
+        forEachChild(elem, function(child : HTMLElement, _index : Int) {
             if (child.tagName == "set") {
-                throw new Error("Cannot process elem: ", child.tagName);
+                throw new Error("Cannot process elem: " + child.tagName);
             } else if (child.tagName == "animate") {
-                throw new Error("Cannot process elem: ", child.tagName);
+                throw new Error("Cannot process elem: " + child.tagName);
             } else if (child.tagName == "animateColor") {
-                throw new Error("Cannot process elem: ", child.tagName);
+                throw new Error("Cannot process elem: " + child.tagName);
             }
         });
     }
@@ -89,12 +86,12 @@ export class LinearGradientNodeProcessor extends GradientNodeProcessor {
         return super.validAttributes.concat([ "x1", "y1", "x2", "y2" ]);
     }
 
-    newGradient(elem) {
+    newGradient(elem : HTMLElement) : Gradient {
         var x1 = Length.parse(elem.getAttribute("x1") || "0%");
         var y1 = Length.parse(elem.getAttribute("y1") || "0%");
         var x2 = Length.parse(elem.getAttribute("x2") || "0%");
         var y2 = Length.parse(elem.getAttribute("y2") || "0%");
-        return new Core.Styles.LinearGradient(x1, y1, x2, y2);
+        return new LinearGradient(x1, y1, x2, y2);
     }
 }
 
@@ -103,12 +100,12 @@ export class RadialGradientNodeProcessor extends GradientNodeProcessor {
         return super.validAttributes.concat([ "cx", "cy", "r", "fx", "fy" ]);
     }
 
-    newGradient(elem) {
+    newGradient(elem : HTMLElement) : Gradient {
         var cx = Length.parse(elem.getAttribute("cx") || "50%");
         var cy = Length.parse(elem.getAttribute("cy") || "50%");
         var r = Length.parse(elem.getAttribute("r") || "50%");
         var fx = Length.parse(elem.getAttribute("fx") || cx);
         var fy = Length.parse(elem.getAttribute("fy") || cy);
-        return new Core.Styles.RadialGradient(fx, fy, 0, cx, cy, r);
+        return new RadialGradient(fx, fy, 0, cx, cy, r);
     }
 }

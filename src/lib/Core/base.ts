@@ -1,9 +1,10 @@
 import * as counters from "./counters";
-import * as events from "./events";
+import { EventSource, PropertyChanged, ElementAdded, ElementRemoved, ElementIndexChanged } from "./events"
 
 export type Int = number;
 export type Nullable<T> = T | null;
 export type Timestamp = number;
+
 const ElementCounter = new counters.Counter("ElementIDs");
 
 /**
@@ -19,7 +20,9 @@ const ElementCounter = new counters.Counter("ElementIDs");
 export class Property {
     name : string
     inherit : boolean
-    constructor(name, value) {
+    value : any
+    private _lastUpdated : Timestamp;
+    constructor(name : string, value : any) {
         this.name = name;
         this.inherit = value === undefined;
         this.set(value);
@@ -41,13 +44,13 @@ export class Property {
      *
      * @returns {Bool}          true if the change was applied, false if change rejected by the eventSource's validation.
      */
-    set(newValue, eventSource) {
-        var oldValue = this.vaue;
+    set(newValue : any, eventSource? : EventSource) {
+        var oldValue = this.value;
         if (oldValue == newValue) 
             return null;
         var event = null;
         if (eventSource) {
-            event = new events.PropertyChanged(this, property, oldValue, newValue);
+            event = new PropertyChanged(this, this.name, oldValue, newValue);
             if (eventSource.validateBefore(event.name, event) == false)
                 return false;
         }
@@ -56,7 +59,7 @@ export class Property {
         this.inherit = newValue === undefined;
 
         this.markUpdated();
-        if (eventSource) 
+        if (eventSource && event != null) 
             eventSource.triggerOn(event.name, event);
         return true;
     }
@@ -64,7 +67,7 @@ export class Property {
     /**
      * Sets the property's updated time stamp to now.
      */
-    markUpdated() { this.lastUpdated = Date.now(); }
+    markUpdated() { this._lastUpdated = Date.now(); }
 }
 
 /**
@@ -72,10 +75,12 @@ export class Property {
  * for instances, to have meta data and (ofcourse) child elements.  Elements play a key
  * role in building and maintaining Scenes with hierarchical shapes.
  */
-export class Element extends events.EventSource {
+export class Element extends EventSource {
     protected _parent : Nullable<Element> = null;
     private _uuid : Int = 0;
     private _defs : any = {};
+    protected _children : Array<Element> = [];
+    private _lastUpdated : Timestamp = Date.now();
     private _metadata : any = {};
     constructor() {
         super();
@@ -86,18 +91,18 @@ export class Element extends events.EventSource {
      * Returns a new instance of this element when cloning it.
      * @return {Element} 
      */
-    newInstance() { return new this.constructor(); };
+    newInstance() : this { return this.constructor(); };
 
     /**
      * Performs a shallow copy of this element by creating a new instance of it
      * and copying over the children.
      * @return {Element} 
      */
-    clone() {
+    clone() : this {
         var out = this.newInstance();
-        for (var i = 0;i < this.childCount;i++) {
+        for (var i = 0;i < this.childCount();i++) {
             var child = this.childAtIndex(i);
-            this.add(child.clone());
+            if (child != null) this.add(child.clone());
         }
         return out;
     }
@@ -122,12 +127,13 @@ export class Element extends events.EventSource {
      *          If mutable is true, then modifications of the children is allowed.  This is done by
      *          making a copy of the child elements before looping over them.
      */
-    forEachChild(handler, caller, mutable) {
+    forEachChild(handler : (elem : Element, index : Int, caller: any) => boolean,
+                 caller : any = null, mutable : boolean = false) {
         var children = this._children;
         if (mutable == true) {
             children = children.slice(0, children.length);
         }
-        for (var index in children) {
+        for (var L = children.length, index = 0;index < L; index++) {
             var child = children[index];
             if (handler(child, index, caller) == false)
                 break;
@@ -137,13 +143,14 @@ export class Element extends events.EventSource {
     /**
      * Makes the value of a particular property inherited.
      */
-    inherit(property) {
+    inherit(property : string) {
     }
 
     /**
      * Tells if a given property is inherited or not.
      */
-    isInherited(property) {
+    isInherited(property : string) : boolean {
+        return false;
     }
 
     /**
@@ -159,7 +166,7 @@ export class Element extends events.EventSource {
      *
      * @returns {Object} Value of the key if it exists, null otherwise.
      */
-    getMetaData(key) { return this._metadata[key] || null; }
+    getMetaData(key : string) : any { return this._metadata[key] || null; }
 
     /**
      * Sets a particular metadata entry.
@@ -169,7 +176,7 @@ export class Element extends events.EventSource {
      *
      * @returns {TypeOf<this>} This instance.
      */
-    setMetaData(key, value) { this._metadata[key] = value; return this; }
+    setMetaData(key : string, value : any) : this { this._metadata[key] = value; return this; }
 
     /**
      * Add a definition for a particular ID.  Definitions allow entries to
@@ -180,7 +187,7 @@ export class Element extends events.EventSource {
      * @param {Object}   value   Value of the entry being defined.
      * @returns {TypeOf<this>}   This instance.
      */
-    addDef(id, value) { this._defs[id] = value; return this; }
+    addDef(id : string, value : any) : this { this._defs[id] = value; return this; }
 
     /**
      * Returns the definition for a particular ID.  
@@ -190,7 +197,7 @@ export class Element extends events.EventSource {
      * @param {String}  id  ID of the definition to be looked up.
      * @returns {Object}  Value of the definition within the closest ancestor, null if no entry found.
      */
-    getDef(id) { 
+    getDef(id : string) : any { 
         if (id in this._defs) {
             return this._defs[id];
         } else if (this._parent != null) {
@@ -235,7 +242,7 @@ export class Element extends events.EventSource {
      */
     add(element : Element, index : Int = -1) : boolean {
         if (element.parent != this) {
-            var event = new events.ElementAdded(this, element);
+            var event = new ElementAdded(this, element);
             if (this.validateBefore(event.name, event) != false &&
                 element.validateBefore(event.name, event) != false) {
                 // remove from old parent - Important!
@@ -262,18 +269,18 @@ export class Element extends events.EventSource {
      *
      * @returns {Bool} true if a element was successfully removed, false if the removal was blocked (via event handling).
      */
-    remove(element) {
+    remove(element : Element) {
         if (element.parent == this) {
-            var parentEvent = new events.ElementRemoved(this, element);
-            var childEvent = new events.ElementRemoved(element, this);
-            if (this.validateBefore(event.name, event) != false &&
-                element.validateBefore(event.name, event) != false) {
+            var parentEvent = new ElementRemoved(this, element);
+            var childEvent = new ElementRemoved(element, this);
+            if (this.validateBefore(parentEvent.name, event) != false &&
+                element.validateBefore(parentEvent.name, event) != false) {
                 for (var i = 0;i < this._children.length;i++) {
                     if (this._children[i] == element) {
                         this._children.splice(i, 1);
                         element._parent = null;
-                        this.triggerOn(event.name, event);
-                        element.triggerOn(event.name, event);
+                        this.triggerOn(parentEvent.name, event);
+                        element.triggerOn(parentEvent.name, event);
                         return true;
                     }
                 }
@@ -313,11 +320,12 @@ export class Element extends events.EventSource {
      *                              This depends on the boolean `relative` parameter.
      * @param {Bool} relative       Denotes if the indexOrDelta parameter is relative or absolute.
      */
-    changeIndexTo(element, indexOrDelta, relative) {
+    changeIndexTo(element : Element, indexOrDelta : Int, relative : boolean) {
         if (element.parent != this) return ;
 
+        var index = this._children.indexOf(element);
         var newIndex = indexOrDelta;
-        if (relative || false) {
+        if (relative) {
             newIndex = index + indexOrDelta;
         }
 
@@ -326,11 +334,10 @@ export class Element extends events.EventSource {
         if (newIndex >= this._children.length)
             newIndex = this._children.length - 1;
 
-        var index = this._children.indexOf(element);
         if (newIndex == index) {
             return ;
         }
-        var event = new events.ElementIndexChanged(element, index, newIndex);
+        var event = new ElementIndexChanged(element, index, newIndex);
         if (this.validateBefore(event.name, event) != false &&
             element.validateBefore(event.name, event) != false) {
             this._children.splice(index, 1);
@@ -343,28 +350,28 @@ export class Element extends events.EventSource {
     /**
      * Brings a child element forward by one.
      */
-    bringForward(element) {
+    bringForward(element : Element) {
         return this.changeIndexTo(element, 1, true);
     }
 
     /**
      * Sends a child element backward by one index.
      */
-    sendBackward(element) {
+    sendBackward(element : Element) {
         return this.changeIndexTo(element, -1, true);
     }
 
     /**
      * Brings a child element to the front of the child stack.
      */
-    bringToFront(element) {
+    bringToFront(element : Element) {
         return this.changeIndexTo(element, this._children.length, false);
     }
 
     /**
      * Sends a child element to the back of the child stack.
      */
-    sendToBack(element) {
+    sendToBack(element : Element) {
         return this.changeIndexTo(element, 0, false);
     }
 }

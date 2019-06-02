@@ -3,8 +3,8 @@ import { Geom } from "../Geom/index"
 import * as geom from "../Geom/models"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
+import Nullable from "../Core/types"
 
-type Nullable<T> = T | null;
 let ControlPoint = controller.ControlPoint;
 type Bounds = geom.Bounds;
 type HitInfo = controller.HitInfo;

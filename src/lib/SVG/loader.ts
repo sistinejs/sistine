@@ -6,8 +6,7 @@ import { Builtins } from "../Builtins/index"
 import * as svgutils from "../Utils/svg"
 import * as models from "./models"
 import { Nodes } from "./nodes"
-
-type Nullable<T> = T | null;
+import { Int, Nullable } from "../Core/types"
 
 const Bounds = geom.Bounds;
 const NumbersTokenizer = svgutils.NumbersTokenizer;

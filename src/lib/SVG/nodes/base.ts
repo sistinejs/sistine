@@ -4,8 +4,8 @@ import * as models from "../models"
 import { Element } from "../../Core/base"
 import { PathDataParser, TransformParser, NumbersTokenizer } from "../../Utils/svg"
 import { Bounds, Length, Point } from "../../Geom/models"
+import { Int, Nullable } from "../Core/types"
 
-type Nullable<T> = T | null;
 const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 

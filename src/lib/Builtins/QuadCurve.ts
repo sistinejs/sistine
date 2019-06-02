@@ -3,8 +3,8 @@ import * as geom from "../Geom/models"
 import * as geomutils from "../Geom/utils"
 import * as models from "../Core/models"
 import * as controller from "../Core/controller"
+import Nullable from "../Core/types"
 
-type Nullable<T> = T | null;
 let HitType = controller.HitType;
 
 export class QuadCurve extends models.Shape {

@@ -2,6 +2,8 @@
 
 import * as base from "./base"
 
+import { Int, Nullable } from "../../Core/types"
+
 export class IgnoreNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return [];

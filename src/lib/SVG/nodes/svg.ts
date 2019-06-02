@@ -3,6 +3,7 @@ import * as base from "./base"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import * as models from "../models"
+import { Int, Nullable } from "../../Core/types"
 
 const Length = Geom.Models.Length;
 const Point = Geom.Models.Point;

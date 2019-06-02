@@ -1,6 +1,8 @@
 
 import * as base from "./base"
 
+import { Int, Nullable } from "../../Core/types"
+
 export class SymbolNodeProcessor extends base.NodeProcessor {
     get validChildren() {
         return base.animationElements

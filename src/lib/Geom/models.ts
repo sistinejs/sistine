@@ -1,6 +1,5 @@
 
-type Int = number;
-type Nullable<T> = T | null;
+import { Int, Nullable } from "../Core/types"
 
 export const PixelsPerCM = 37.79527559055118;
 export const PixelsPerInch = 96;

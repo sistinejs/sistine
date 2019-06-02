@@ -4,6 +4,7 @@ import { Core } from "../../Core/index"
 import { Geom } from "../../Geom/index"
 import { Utils } from "../../Utils/index"
 import * as models from "../models"
+import { Int, Nullable } from "../../Core/types"
 
 const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
 const PathDataParser = Utils.SVG.PathDataParser;
