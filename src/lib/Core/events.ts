@@ -1,12 +1,12 @@
 
 import * as counters from "./counters";
-import { Int, Nullable, Timestamp } from "./types"
+import { Int, Nullable, Timestamp, Undefined } from "./types"
 import { Shape } from "./models"
 
 const StateIdCounter = new counters.Counter("StateIds");
 
 export type EventType = any;
-export type EventCallback = (eventType : EventType, eventSource : EventSource, eventData : any) => boolean;
+export type EventCallback = (eventType : EventType, eventSource : EventSource, eventData : any) => Undefined<boolean>;
 
 /**
  * StateMachines allow declarative and stateful chaining of events.

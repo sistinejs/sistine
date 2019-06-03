@@ -3,7 +3,7 @@ import { Event, EventSource } from "./events";
 import { Element } from "./base"
 import { Shape, Group } from "./models"
 import { HitInfo } from "./controller"
-import { Int, Nullable } from "./types"
+import { Int, Nullable, Undefined } from "./types"
 
 export class Selection extends EventSource {
     private _shapes : Array<Shape> = [];
@@ -24,14 +24,14 @@ export class Selection extends EventSource {
         return out;
     }
 
-    forEach<T>(handler : (shape : Shape, caller? : T | undefined) => boolean | undefined, self? : T, mutable : boolean = false) {
+    forEach<T>(handler : (shape : Shape, caller : Nullable<T>) => Undefined<boolean>, self? : T, mutable : boolean = false) {
         var shapesByUUID = this._shapesByUUID;
         if (mutable == true) {
             shapesByUUID = Object.assign({}, shapesByUUID);
         }
         for (var shapeId in shapesByUUID) {
             var shape = shapesByUUID[shapeId];
-            if (handler(shape, self) == false)
+            if (handler(shape, self || null) === false)
                 break;
         }
     }

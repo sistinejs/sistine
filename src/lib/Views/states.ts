@@ -1,5 +1,5 @@
 
-import { State } from "../Core/events"
+import { State, EventType, EventSource } from "../Core/events"
 import { Int, Nullable } from "../Core/types"
 import { Stage } from "./stage"
 import { Pane, BGPane } from "./panes"
@@ -22,7 +22,7 @@ export class StageState extends State {
 
     detach() { this.stage.releasePane("main"); }
 
-    handle(eventType : string, source : EventSource, event : JQueryEventObject) {
+    handle(eventType : EventType , source : EventSource, event : JQueryEventObject) {
         if (eventType == "mousedown") {
             return this._onMouseDown(eventType, source, event);
         } else if (eventType == "mouseup") {
@@ -185,6 +185,7 @@ export class ViewPortZoomingState extends StageState {
 export class DefaultState extends StageState {
     private _editPane : Pane;
     selectingMultiple = false;
+    downHitInfo : any = null;
     constructor(stage : Stage) {
         super(stage);
         this._editPane = this.stage.acquirePane("edit");
@@ -215,18 +216,22 @@ export class DefaultState extends StageState {
         if (event.key == "ArrowLeft") {
             this.stage.selection.forEach(function(shape) {
                 shape.move(-1, 0);
+                return true;
             });
         } else if (event.key == "ArrowUp") {
             this.stage.selection.forEach(function(shape) {
                 shape.move(0, -1);
+                return true;
             });
         } else if (event.key == "ArrowDown") {
             this.stage.selection.forEach(function(shape) {
                 shape.move(0, 1);
+                return true;
             });
         } else if (event.key == "ArrowRight") {
             this.stage.selection.forEach(function(shape) {
                 shape.move(1, 0);
+                return true;
             });
         } else {
             return super._onKeyDown(eventType, source, event);
@@ -246,8 +251,9 @@ export class DefaultState extends StageState {
         this.selectingMultiple = this._selectingMultipleShapes(event);
         // See if first any existing items in our selection can handle this "down"
         var hitShape = null;
-        selection.forEach(function(shape, self) {
-            var currHitInfo = shape.controller.getHitInfo(currPoint.x, currPoint.y);
+        selection.forEach<DefaultState>(function(shape, self) {
+            var controller = shape.controller;
+            var currHitInfo = controller.getHitInfo(currPoint.x, currPoint.y);
             if (currHitInfo != null) {
                 self.stage.cursor = currHitInfo.cursor;
                 hitShape = shape;
@@ -282,7 +288,8 @@ export class DefaultState extends StageState {
 
         // Mouse is not primed for "creating" an object
         selection.forEach(function(shape, self) {
-            var currHitInfo = shape.controller.getHitInfo(currPoint.x, currPoint.y);
+            var controller = shape.controller;
+            var currHitInfo = controller.getHitInfo(currPoint.x, currPoint.y);
             if (currHitInfo != null) {
                 self.stage.cursor = currHitInfo.cursor;
                 return false;
@@ -346,12 +353,12 @@ export class CreatingShapeState extends StageState {
         var shapeForCreation = this.stateData;
         var downPoint = this.downPoints[0];
         this.stage.selection.clear();
-        shapeForCreation.setBounds(new geom.Bounds(downPoint.x, downPoint.y, 1, 1));
+        shapeForCreation.setBounds(new Bounds(downPoint.x, downPoint.y, 1, 1));
         this.stage.shapeIndex.setPane(shapeForCreation, "edit");
         this.stage.scene.add(shapeForCreation);
     }
 
-    _onMouseMove(eventType, source, event) { 
+    _onMouseMove(eventType : string, source : any, event : JQueryEventObject) {
         super._onMouseMove(eventType, source, event);
         var stage = this.stage;
         var selection = stage.selection;
@@ -370,10 +377,12 @@ export class CreatingShapeState extends StageState {
         }
     }
 
-    _onMouseOver(eventType, source, event) { this.stage.cursor = "crosshair"; }
-    _onMouseEntered(eventType, source, event) { return this._onMouseOver(eventType, source, event); }
+    _onMouseOver(eventType : string, source : any, event : JQueryEventObject) { this.stage.cursor = "crosshair"; }
+    _onMouseEntered(eventType : string, source : any, event : JQueryEventObject) {
+        return this._onMouseOver(eventType, source, event);
+    }
 
-    _onMouseUp(eventType, source, event) {
+    _onMouseUp(eventType : string, source : any, event : JQueryEventObject) {
         super._onMouseUp(eventType, source, event);
 
         // only add a new shape once!

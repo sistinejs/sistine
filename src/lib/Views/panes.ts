@@ -1,6 +1,6 @@
 
 import { Shape } from "../Core/models"
-import { Timestamp } from "../Core/types"
+import { Nullable, Timestamp } from "../Core/types"
 import { Stage } from "./stage"
 import { VirtualContext } from "./context"
 import { getcssint } from "../Utils/dom"
@@ -79,8 +79,8 @@ export class Pane {
         return result;
     }
 
-    toWorld(x : number, y : number, result? : Point) : Point  {
-        result = result || new Point(x, y);
+    toWorld(x : number, y : number, result : Nullable<Point> = null) : Point  {
+        if (result == null) result = new Point(x, y);
         result.x = (x / this.zoom) + this.offset.x;
         result.y = (y / this.zoom) + this.offset.y;
         return result;
