@@ -371,21 +371,6 @@ export class EventHub {
     }
 }
 
-export class TransformChanged extends Event {
-    source : any;
-    command : string;
-    oldValue : any;
-    newValue : any;
-    constructor(source : any, command : string, oldValue : any, newValue : any) {
-        super();
-        this.source = source;
-        this.command = command;
-        this.oldValue = oldValue;
-        this.newValue = newValue;
-    }
-    get klass() { return TransformChanged; }
-}
-
 export class BoundsChanged extends Event {
     source : any;
     oldValue : any;
@@ -412,60 +397,3 @@ export class PropertyChanged extends Event {
     }
 }
 
-export class ElementAdded extends Event {
-    parent : Element
-    subject : Element
-    constructor(parent : Element, subject : Element) {
-        super();
-        this.parent = parent;
-        this.subject = subject;
-    }
-}
-
-export class ElementRemoved extends Event {
-    parent : Element
-    subject : Element
-    constructor(parent : Element, subject : Element) {
-        super();
-        this.parent = parent;
-        this.subject = subject;
-    }
-}
-
-export class ElementIndexChanged extends Event {
-    subject : Element
-    oldIndex : Int
-    newIndex : Int
-    constructor(subject : Element, oldIndex : Int, newIndex : Int) {
-        super();
-        this.subject = subject;
-        this.oldIndex = oldIndex;
-        this.newIndex = newIndex;
-    }
-
-    get name() { return "ElementIndexChanged"; }
-}
-
-export class ShapesSelected extends Event {
-    selection : Selection
-    shapes : Array<Shape>
-    constructor(selection : Selection, shapes : Array<Shape>) {
-        super();
-        this.selection = selection;
-        this.shapes = shapes;
-    }
-
-    get name() { return "ShapesSelected"; }
-}
-
-export class ShapesUnselected extends Event {
-    selection : Selection
-    shapes : Array<Shape>
-    constructor(selection : Selection, shapes : Array<Shape>) {
-        super();
-        this.selection = selection;
-        this.shapes = shapes;
-    }
-
-    get name() { return "ShapesUnselected"; }
-}

@@ -56,7 +56,7 @@ export class Length {
         return this._pixelValue;
     }
 
-    static parse(input : Length | string) : Length {
+    static parse(input : Length | string | number) : Length {
         if (input instanceof Length) return input;
         var units = LengthType.Number;
         if ($.isNumeric(input)) {

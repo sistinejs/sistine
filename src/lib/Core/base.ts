@@ -1,5 +1,5 @@
 import * as counters from "./counters";
-import { EventSource, PropertyChanged, ElementAdded, ElementRemoved, ElementIndexChanged } from "./events"
+import { Event, EventSource, PropertyChanged } from "./events"
 import { Int, Nullable, Timestamp } from "./types"
 
 const ElementCounter = new counters.Counter("ElementIDs");
@@ -14,14 +14,14 @@ const ElementCounter = new counters.Counter("ElementIDs");
  * @param {Value}    value  Value of the property.  If the value is undefined 
  *                          then it is marked as "to be inherited".
  */
-export class Property {
+export class Property<T> {
     name : string
     inherit : boolean
-    value : any
-    private _lastUpdated : Timestamp;
-    constructor(name : string, value : any) {
+    value : Nullable<T>
+    protected _lastUpdated : Timestamp;
+    constructor(name : string, value? : Nullable<T>) {
         this.name = name;
-        this.inherit = value === undefined;
+        this.inherit = value === undefined || value === null;
         this.set(value);
     }
 
@@ -30,18 +30,18 @@ export class Property {
      * @returns  {Property}     A shallow copy of this property with the same name, 
      *                          value and inherit flags.
      */
-    clone() {
+    clone() : Property<T> {
         return new Property(this.name, this.value);
     }
 
     /**
      * Sets the value of the property and also in the process notifies listeners (if any) of changes.
-     * @param   {value}         newValue    The new value to set this property to.
-     * @param   {EventSource}   eventSource The event source, if any, on which to notify listeners of changes.
+     * @param       newValue    The new value to set this property to.
+     * @param       eventSource The event hub, if any, on which to notify listeners of changes.
      *
-     * @returns {Bool}          true if the change was applied, false if change rejected by the eventSource's validation.
+     * @returns     true if the change was applied, false if change rejected by the eventSource's validation.
      */
-    set(newValue : any, eventSource? : EventSource) {
+    set(newValue : Nullable<T>, eventSource? : EventSource) {
         var oldValue = this.value;
         if (oldValue == newValue) 
             return null;
@@ -77,7 +77,7 @@ export class Element extends EventSource {
     private _uuid : Int = 0;
     private _defs : any = {};
     protected _children : Array<Element> = [];
-    private _lastUpdated : Timestamp = Date.now();
+    protected _lastUpdated : Timestamp = Date.now();
     private _metadata : any = {};
     constructor() {
         super();
@@ -371,4 +371,38 @@ export class Element extends EventSource {
     sendToBack(element : Element) {
         return this.changeIndexTo(element, 0, false);
     }
+}
+
+export class ElementAdded extends Event {
+    parent : Element
+    subject : Element
+    constructor(parent : Element, subject : Element) {
+        super();
+        this.parent = parent;
+        this.subject = subject;
+    }
+}
+
+export class ElementRemoved extends Event {
+    parent : Element
+    subject : Element
+    constructor(parent : Element, subject : Element) {
+        super();
+        this.parent = parent;
+        this.subject = subject;
+    }
+}
+
+export class ElementIndexChanged extends Event {
+    subject : Element
+    oldIndex : Int
+    newIndex : Int
+    constructor(subject : Element, oldIndex : Int, newIndex : Int) {
+        super();
+        this.subject = subject;
+        this.oldIndex = oldIndex;
+        this.newIndex = newIndex;
+    }
+
+    get name() { return "ElementIndexChanged"; }
 }

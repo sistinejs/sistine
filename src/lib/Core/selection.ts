@@ -1,30 +1,30 @@
 
-import * as mixins from "./mixins";
-import * as base from "./base";
-import * as events from "./events";
-import * as controller from "./controller";
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import { Shape } from "./models"
+import { Event, EventSource } from "./events";
+import { Element } from "./base"
+import { Shape, Group } from "./models"
+import { HitInfo } from "./controller"
+import { Int, Nullable } from "./types"
 
-export class Selection extends events.EventSource {
+export class Selection extends EventSource {
     private _shapes : Array<Shape> = [];
     private _shapesByUUID : { [key : string] : Shape } = {};
     private _savedInfos : { [key : string] : any } = {};
+    private _count = 0;
 
     get count() {
         return this._shapes.length;
     }
 
     get allShapes() {
-        var out = [];
-        this.forEach(function(shape) {
+        var out : Array<Shape> = [];
+        this.forEach(function(shape : Shape) {
             out.push(shape);
+            return true;
         });
         return out;
     }
 
-    forEach(handler : (shape : Shape, any) => boolean, self? : any, mutable : boolean = false) {
+    forEach<T>(handler : (shape : Shape, caller? : T | undefined) => boolean | undefined, self? : T, mutable : boolean = false) {
         var shapesByUUID = this._shapesByUUID;
         if (mutable == true) {
             shapesByUUID = Object.assign({}, shapesByUUID);
@@ -36,55 +36,56 @@ export class Selection extends events.EventSource {
         }
     }
 
-    contains(shape) {
-        return shape._uuid in this._shapesByUUID;
+    contains(shape : Shape) : boolean {
+        return shape.uuid in this._shapesByUUID;
     }
     
-    get(index) {
+    get(index : Int) {
         return this._shapes[index];
     }
 
-    add(shape) {
-        var event = new events.ShapesSelected(this, [shape]);
+    add(shape : Shape) {
+        var event = new ShapesSelected(this, [shape]);
         if (this.validateBefore("ShapesSelected", event) != false) {
-            if ( ! (shape._uuid in this._shapesByUUID)) {
+            if ( ! (shape.uuid in this._shapesByUUID)) {
                 this._shapes.push(shape);
             }
-            this._shapesByUUID[shape._uuid] = shape;
-            this.savedInfos[shape._uuid] = shape.controller.snapshotFor();
+            this._shapesByUUID[shape.uuid] = shape;
+            this._savedInfos[shape.uuid] = shape.controller.snapshotFor();
             this.triggerOn("ShapesSelected", event);
         }
     }
 
-    remove(shape) {
-        var event = new events.ShapesUnselected(this, [shape]);
-        if (this.validateBefore("ShapesUnselected", event) != false) {
-            if ( shape._uuid in this._shapesByUUID ) {
+    remove(shape : Shape) {
+        var event = new ShapesUnselected(this, [shape]);
+        if (this.validateBefore(event.name, event) != false) {
+            if ( shape.uuid in this._shapesByUUID ) {
                 for (var i = 0;i < this._shapes.length;i++) {
-                    if (this._shapes[i]._uuid == shape._uuid) {
+                    if (this._shapes[i].uuid == shape.uuid) {
                         this._shapes.splice(i, 1);
                         break ;
                     }
                 }
             }
-            delete this._shapesByUUID[shape._uuid];
-            delete this.savedInfos[shape._uuid];
+            delete this._shapesByUUID[shape.uuid];
+            delete this._savedInfos[shape.uuid];
             this.triggerOn("ShapesUnselected", event);
         }
     }
 
-    checkpointShapes(hitInfo) {
+    checkpointShapes(hitInfo : HitInfo) {
         // Updated the save info for all selected shapes
-        this.forEach(function(shape, self) {
-            self.savedInfos[shape._uuid] = shape.controller.snapshotFor(hitInfo);
+        this.forEach<Selection>(function(shape : Shape, self : Selection) {
+            self._savedInfos[shape.uuid] = shape.controller.snapshotFor(hitInfo);
+            return true;
         }, this);
     }
 
-    getSavedInfo(shape) {
-        return this.savedInfos[shape._uuid];
+    getSavedInfo(shape : Shape) {
+        return this._savedInfos[shape.uuid];
     }
 
-    toggleMembership(shape) {
+    toggleMembership(shape : Shape) {
         if (shape == null) return false;
         if (this.contains(shape)) {
             this.remove(shape);
@@ -96,9 +97,9 @@ export class Selection extends events.EventSource {
     }
 
     clear() {
-        var event = new events.ShapesUnselected(this, this.allShapes);
+        var event = new ShapesUnselected(this, this.allShapes);
         this.triggerOn("ShapesUnselected", event);
-        this.savedInfos = {};
+        this._savedInfos = {};
         this._shapes = [];
         this._shapesByUUID = {};
         this._count = 0;
@@ -108,8 +109,10 @@ export class Selection extends events.EventSource {
      * Brings the selected shapes forward by one level within their parents.
      */
     bringForward() {
-        this.forEach(function(shape) {
-            shape.parent.bringForward(shape);
+        this.forEach(function(shape : Shape) {
+            if (shape.parent != null) 
+                shape.parent.bringForward(shape);
+            return true;
         });
     }
 
@@ -117,8 +120,10 @@ export class Selection extends events.EventSource {
      * Sends the selected shapes backward by one level within their parents.
      */
     sendBackward() {
-        this.forEach(function(shape) {
-            shape.parent.sendBackward(shape);
+        this.forEach(function(shape : Shape) {
+            if (shape.parent != null) 
+                shape.parent.sendBackward(shape);
+            return true;
         });
     }
 
@@ -126,8 +131,10 @@ export class Selection extends events.EventSource {
      * Brings the selected shapes to the front of the stack within their parents.
      */
     bringToFront() {
-        this.forEach(function(shape) {
-            shape.parent.bringToFront(shape);
+        this.forEach(function(shape : Shape) {
+            if (shape.parent != null) 
+                shape.parent.bringToFront(shape);
+            return true;
         });
     }
 
@@ -135,8 +142,10 @@ export class Selection extends events.EventSource {
      * Sends the selected shapes to the back of the stack within their parents.
      */
     sendToBack() {
-        this.forEach(function(shape) {
-            shape.parent.sendToBack(shape);
+        this.forEach(function(shape : Shape) {
+            if (shape.parent != null) 
+                shape.parent.sendToBack(shape);
+            return true;
         });
     }
 
@@ -152,11 +161,11 @@ export class Selection extends events.EventSource {
         // level under the same parent so same as above and OK.
         // But if different shapes have different parents then only
         // those shapes that share a parent can be grouped together.
-        var groups = {};
-        this.forEach(function(shape) {
-            var parId = shape.parent;
-            if (parId) {
-                parId = shape.parent._uuid;
+        var groups : any = {};
+        this.forEach(function(shape : Shape) {
+            var parId = 0;
+            if (shape.parent != null) {
+                parId = shape.parent.uuid;
             }
             if (! (parId in groups)) {
                 groups[parId] = {
@@ -167,6 +176,7 @@ export class Selection extends events.EventSource {
             }
             groups[parId].shapes.push(shape);
             groups[parId].boundingBox.union(shape.boundingBox);
+            return true;
         });
 
         this.clear();
@@ -176,11 +186,10 @@ export class Selection extends events.EventSource {
             var currParent = currGroup.parent;
             // Here create a new shape group if we have atleast 2 shapes
             if (currGroup.shapes.length > 1)  {
-                var newParent = new models.Group();
+                var newParent = new Group();
                 currParent.add(newParent);
-                newParent.setLocation(currBounds.x, currBounds.y);
-                newParent.setSize(currBounds.width, currBounds.height);
-                currGroup.shapes.forEach(function(child, index) {
+                newParent.setBounds(currBounds);
+                currGroup.shapes.forEach(function(child : Shape, _index : Int) {
                     newParent.add(child);
                     child.setLocation(child.boundingBox.x - currBounds.x, child.boundingBox.y - currBounds.y);
                 });
@@ -195,19 +204,25 @@ export class Selection extends events.EventSource {
      */
     ungroup() {
         var selection = this;
-        this.forEach(function(shape, self) {
-            if (shape.isGroup) {
+        this.forEach(function(shape : Shape, self : Selection) {
+            if (shape instanceof Group) {
                 selection.remove(shape);
                 var newParent = shape.parent;
                 var lBounds = shape.boundingBox;
-                shape.forEachChild(function(child, index, self) {
-                    newParent.add(child);
-                    child.setLocation(lBounds.x + child.boundingBox.x,
-                                      lBounds.y + child.boundingBox.y);
-                    selection.add(child);
+                shape.forEachChild(function(child : Element, index : Int, self : any) {
+                    if (newParent != null)
+                        newParent.add(child);
+                    if (child instanceof Shape) {
+                        child.setLocation(lBounds.x + child.boundingBox.x,
+                                          lBounds.y + child.boundingBox.y);
+                        selection.add(child);
+                    }
+                    return true;
                 }, this, true);
-                newParent.remove(shape);
+                if (newParent != null)
+                    newParent.remove(shape);
             }
+            return true;
         }, this, true);
     }
 
@@ -224,7 +239,7 @@ export class Selection extends events.EventSource {
      * so that it can be pasted later.   The "cut" parameter also dictates whether the
      * selected shapes are to be removed from the Scene model too.
      */
-    copyToClipboard(cut) {
+    copyToClipboard(_cut : boolean) {
     }
 
     /**
@@ -232,4 +247,28 @@ export class Selection extends events.EventSource {
      */
     pasteFromClipboard() {
     }
+}
+
+export class ShapesSelected extends Event {
+    selection : Selection
+    shapes : Array<Shape>
+    constructor(selection : Selection, shapes : Array<Shape>) {
+        super();
+        this.selection = selection;
+        this.shapes = shapes;
+    }
+
+    get name() { return "ShapesSelected"; }
+}
+
+export class ShapesUnselected extends Event {
+    selection : Selection
+    shapes : Array<Shape>
+    constructor(selection : Selection, shapes : Array<Shape>) {
+        super();
+        this.selection = selection;
+        this.shapes = shapes;
+    }
+
+    get name() { return "ShapesUnselected"; }
 }

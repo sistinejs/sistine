@@ -40,7 +40,7 @@ export class Shape extends mixins.Styleable {
     setBounds(newBounds : geom.Bounds) : boolean {
         if (this.canSetBounds(newBounds)) {
             var oldBounds = this.boundingBox.copy();
-            var event = new events.BoundsChanged(this, "bounds", oldBounds, newBounds);
+            var event = new events.BoundsChanged(this, oldBounds, newBounds);
             if (this.validateBefore(event.name, event) == false) return false;
             this._setBounds(newBounds);
             this.markTransformed();

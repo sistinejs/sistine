@@ -1,22 +1,20 @@
 
-import * as events from "../Core/events"
+import { EventHandler, BoundsChanged, EventType, EventSource } from "../Core/events"
+import { ElementAdded, ElementRemoved } from "../Core/base"
 
-const BoundsChanged = events.BoundsChanged;
-const ElementAdded = events.ElementAdded;
-const ElementRemoved = events.ElementRemoved;
-
-export class ConstraintManager implements events.EventHandler {
+export class ConstraintManager implements EventHandler {
+    private _allConstraints : any = {};
+    private _parentTargetRefs : any = {};
     constructor() {
-        super();
         this._allConstraints = {};
         this._parentTargetRefs= {};
     }
 
-    handleBefore(eventType : string, source : events.EventSource, eventData : any) : boolean {
+    handleBefore(eventType : EventType, source : EventSource, eventData : any) : boolean {
         return true;
     }
 
-    handleOn(eventType : string, source : events.EventSource, eventData : any) : boolean {
+    handleOn(eventType : EventType, source : EventSource, eventData : any) : boolean {
         if (eventType == ElementAdded.name) {
             this._addParentRef(event.parent, event.subject);
             this.refreshConstraints(event.subject);

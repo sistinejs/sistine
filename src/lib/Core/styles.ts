@@ -1,9 +1,16 @@
 
-import * as geom from "../Geom/models"
-
-const Length = geom.Length;
+import { Int, Nullable} from "./types"
+import { Shape } from "./models"
+import { Length } from "../Geom/models"
 
 export class Style {
+    protected _realValue : any = null;
+    protected _context : any = null;
+    protected _relativeToBounds = true;
+    protected _shapeX : Nullable<number>
+    protected _shapeY : Nullable<number>
+    protected _shapeW : Nullable<number>
+    protected _shapeH : Nullable<number>
     constructor() {
         this._realValue = null;
         this._context = null;
@@ -18,14 +25,14 @@ export class Style {
         return this._relativeToBounds;
     }
 
-    set relativeToBounds(value) {
+    set relativeToBounds(value : boolean) {
         if (this._relativeToBounds != value) {
             this._relativeToBounds = value;
             this._realValue = null;
         }
     }
 
-    forContext(shape, ctx) {
+    forContext(shape : Shape, ctx : any) {
         if (this._hasChanged(shape, ctx)) {
             this._shapeX = shape.boundingBox.x;
             this._shapeY = shape.boundingBox.y;
@@ -37,41 +44,47 @@ export class Style {
         return this._realValue;
     }
 
-    apply(shape, property, ctx) {
+    apply(shape : Shape, property : string, ctx : any) {
         ctx[property] = this.forContext(shape, ctx);
     }
 
-    _hasChanged(shape, ctx) {
+    _hasChanged(shape : Shape, ctx : any) {
         return this._realValue == null || this._context != ctx ||
                 shape.boundingBox.x != this._shapeX ||
                 shape.boundingBox.y != this._shapeY ||
                 shape.boundingBox.width != this._shapeW ||
                 shape.boundingBox.height != this._shapeH;
     }
+
+    _createStyle(shape : Shape, ctx : any) : any {
+        return null;
+    }
 }
 
 export class Literal extends Style {
-    constructor(value) {
+    private _value : any;
+    constructor(value : any) {
         super();
         this._value = value;
     }
 
-    _createStyle(shape, ctx) {
+    _createStyle(shape : Shape, ctx : any) : any {
         return this._value;
     }
 
     copy() {
-        return Literal(this._value);
+        return new Literal(this._value);
     }
 }
 
 export class Gradient extends Style {
+    protected _stops : any = [];
     constructor() {
         super();
         this._stops = [];
     }
 
-    addStop(stop, color, index) {
+    addStop(stop : number, color : any, index : Int) {
         index = index || -1;
         if (index < 0) {
             this._stops.push([stop, color]);
@@ -83,7 +96,11 @@ export class Gradient extends Style {
 }
 
 export class LinearGradient extends Gradient {
-    constructor(x0, y0, x1, y1) {
+    x0 : Length
+    y0 : Length
+    x1 : Length
+    y1 : Length
+    constructor(x0 : number | Length, y0 : number | Length, x1 : number | Length, y1 : number | Length) {
         super();
         this.x0 = Length.parse(x0);
         this.y0 = Length.parse(y0);
@@ -91,18 +108,18 @@ export class LinearGradient extends Gradient {
         this.y1 = Length.parse(y1);
     }
 
-    _createStyle(shape, ctx) {
+    _createStyle(shape : Shape, ctx : any) {
         var x0, y0, x1, y1;
-        var boundsX, boundsY, boundsW, boundsH;
-        if (this._relativeToBounds || !shape.hasParent) {
+        var boundsX = 0, boundsY = 0, boundsW = 0, boundsH = 0;
+        if (this._relativeToBounds || !shape.hasParent || shape.parent == null) {
             // relative to object bounds
-            boundsX = this._shapeX;
-            boundsY = this._shapeY;
-            boundsW = this._shapeW;
-            boundsH = this._shapeH;
+            boundsX = this._shapeX as number;
+            boundsY = this._shapeY as number;
+            boundsW = this._shapeW as number;
+            boundsH = this._shapeH as number;
         } else {
             // relative to object parent bounds?
-            var parentBounds = shape.parent.boundingBox;
+            var parentBounds = (shape.parent as Shape).boundingBox;
             boundsX = parentBounds.x;
             boundsY = parentBounds.y;
             boundsW = parentBounds.width;
@@ -113,7 +130,7 @@ export class LinearGradient extends Gradient {
         x1 = boundsX + (this.x1.isAbsolute ? this.x1.pixelValue : this.x1.value * boundsW);
         y1 = boundsY + (this.y1.isAbsolute ? this.y1.pixelValue : this.y1.value * boundsH);
         var out = ctx.createLinearGradient(x0, y0, x1, y1);
-        this._stops.forEach(function(value) {
+        this._stops.forEach(function(value : [any, any]) {
             out.addColorStop(value[0], value[1]);
         });
         return out;
@@ -127,7 +144,14 @@ export class LinearGradient extends Gradient {
 }
 
 export class RadialGradient extends Gradient {
-    constructor(x0, y0, r0, x1, y1, r1) {
+    x0 : Length
+    y0 : Length
+    r0 : Length
+    x1 : Length
+    y1 : Length
+    r1 : Length
+    constructor(x0 : number | Length, y0 : number | Length, r0 : number | Length,
+                x1 : number | Length, y1 : number | Length, r1 : number | Length) {
         super();
         this.x0 = Length.parse(x0);
         this.y0 = Length.parse(y0);
@@ -137,18 +161,18 @@ export class RadialGradient extends Gradient {
         this.r1 = Length.parse(r1);
     }
 
-    _createStyle(shape, ctx) {
+    _createStyle(shape : Shape, ctx : any) {
         var x0, y0, r0, x1, y1, r1;
         var boundsX, boundsY, boundsW, boundsH;
         if (this._relativeToBounds || !shape.hasParent) {
             // relative to object bounds
-            boundsX = this._shapeX;
-            boundsY = this._shapeY;
-            boundsW = this._shapeW;
-            boundsH = this._shapeH;
+            boundsX = this._shapeX as number;
+            boundsY = this._shapeY as number;
+            boundsW = this._shapeW as number;
+            boundsH = this._shapeH as number;
         } else {
             // relative to object parent bounds?
-            var parentBounds = shape.parent.boundingBox;
+            var parentBounds = (shape.parent as Shape).boundingBox;
             boundsX = parentBounds.x;
             boundsY = parentBounds.y;
             boundsW = parentBounds.width;
@@ -161,7 +185,7 @@ export class RadialGradient extends Gradient {
         y1 = boundsY + (this.y1.isAbsolute ? this.y1.pixelValue : this.y1.value * boundsH);
         r1 = (this.r1.isAbsolute ? this.r1.pixelValue : this.r1.value * boundsW);
         var out = ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
-        this._stops.forEach(function(value) {
+        this._stops.forEach(function(value : [any,any]) {
             out.addColorStop(value[0], value[1]);
         });
         return out;
@@ -176,21 +200,24 @@ export class RadialGradient extends Gradient {
 }
 
 export class Pattern extends Style {
-    constructor(elementOrId, repeatType) {
+    _elementOrId : HTMLElement | string;
+    _repeatType : string
+    constructor(elementOrId : HTMLElement | string, repeatType : string) {
         super();
         this._elementOrId = elementOrId;
         this._repeatType = repeatType;
     }
 
-    get element() {
-        var out = this.elementOrId;
+    get element() : Nullable<HTMLElement> {
+        var out = this._elementOrId;
         if (typeof out === "string") {
-            out = document.getElementById(out);
+            return document.getElementById(out);
+        } else {
+            return out as HTMLElement;
         }
-        return out;
     }
 
-    _createStyle(shape, ctx) {
+    _createStyle(shape : Shape, ctx : any) {
         return ctx.createPattern(this.element, this._repeatType)
     }
 }

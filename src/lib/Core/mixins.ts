@@ -1,17 +1,16 @@
-import * as base from "./base"
-import * as geom from "../Geom/models"
-import * as events from "./events";
-import * as styles from "./styles";
+import { Property, Element } from "./base"
+import { Length, Transform } from "../Geom/models"
+import { Event } from "./events";
+import { Literal, Style } from "./styles"
+import { Int, Nullable } from "./types"
 
-const Property = base.Property;
-
-export class Transformable extends base.Element {
+export class Transformable extends Element {
     lastTransformed : number
-    protected _globalTransform : geom.Transform = new geom.Transform();
-    protected _globalInverseTransform : geom.Transform = new geom.Transform();
-    protected _transform : geom.Transform = new geom.Transform();
-    constructor(configs : any) {
-        super(configs);
+    protected _globalTransform : Transform = new Transform();
+    protected _globalInverseTransform : Transform = new Transform();
+    protected _transform : Transform = new Transform();
+    constructor() {
+        super();
         // Transform properties
         // What is the point of the global transform?
 
@@ -19,7 +18,7 @@ export class Transformable extends base.Element {
         this.markTransformed();
     }
 
-    newInstance() {
+    newInstance() : this {
         var out = super.newInstance();
         out._transform = this._transform.copy();
         return out;
@@ -53,8 +52,8 @@ export class Transformable extends base.Element {
         }
         return this._globalTransform;
     }
-    _updateTransform(result) {
-        result = result || new geom.Transform();
+    _updateTransform(result? : Transform) {
+        result = result || new Transform();
         // Notice we are doing "invserse transforms here"
         // since we need to map a point "back" to global form
         result.multiply(this._transform);
@@ -64,7 +63,7 @@ export class Transformable extends base.Element {
     /**
      * Sets the shape's current transform matrix.
      */
-    setTransform(t) {
+    setTransform(t : Transform) {
         this._transform = t.copy();
         this.markTransformed();
     }
@@ -72,13 +71,13 @@ export class Transformable extends base.Element {
     /**
      * Transform's the shape by the given transform matrix.
      */
-    transform(t : geom.Transform) {
+    transform(t : Transform) {
         this._transform.multiply(t);
         this.markTransformed();
     }
 
     translate(tx : number, ty : number) : boolean {
-        var event = new events.TransformChanged(this, "translate", [ tx, ty ]);
+        var event = new TransformChanged(this, "translate", null, [ tx, ty ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
         this._transform.translate(tx, ty);
@@ -87,7 +86,7 @@ export class Transformable extends base.Element {
         return true;
     }
     scale(sx : number, sy : number) : boolean {
-        var event = new events.TransformChanged(this, "scale", [ sx, sy ]);
+        var event = new TransformChanged(this, "scale", null, [ sx, sy ]);
 
         if (this.validateBefore(event.name, event) == false) return false;
         this._transform.scale(sx, sy);
@@ -96,7 +95,7 @@ export class Transformable extends base.Element {
         return true;
     }
     rotate(theta : number) : boolean {
-        var event = new events.TransformChanged(this, "rotation", [ theta ]);
+        var event = new TransformChanged(this, "rotation", null, theta);
 
         if (this.validateBefore(event.name, event) == false) return false;
         this._transform.rotate(theta);
@@ -105,7 +104,7 @@ export class Transformable extends base.Element {
         return true;
     }
     skew(sx : number, sy : number) : boolean {
-        var event = new events.TransformChanged(this, "skew", this._transform, [ sx, sy ]);
+        var event = new TransformChanged(this, "skew", null, [ sx, sy ]);
         if (this.validateBefore(event.name, event) == false) return false;
         this._transform.skew(sx, sy);
         this.markTransformed();
@@ -113,7 +112,7 @@ export class Transformable extends base.Element {
         return true;
     }
 
-    applyTransforms(ctx) {
+    applyTransforms(ctx : any) {
         if (!this._transform.isIdentity) {
             ctx.save(); 
             ctx.transform(this._transform.a,
@@ -125,7 +124,7 @@ export class Transformable extends base.Element {
         }
     }
 
-    revertTransforms(ctx) {
+    revertTransforms(ctx : any) {
         if (!this._transform.isIdentity) {
             ctx.restore(); 
         }
@@ -133,8 +132,27 @@ export class Transformable extends base.Element {
 }
 
 export class Styleable extends Transformable {
-    constructor(configs) {
-        super(configs);
+    private zIndex = 0;
+
+    private _fillStyle : Property<Style>;
+    private _fillRule : Property<string>;
+    private _fillOpacity : Property<number>;
+
+    private _strokeStyle : Property<Style>;
+    private _lineWidth : Property<Length>;
+    private _lineJoin : Property<string>;
+    private _lineCap : Property<string>;
+    private _dashOffset : Property<number>;
+    private _dashArray : Property<Array<number>>;
+    private _miterLimit : Property<number>
+    private _strokeOpacity : Property<number>
+
+        // handle text parameters
+    private _fontWeight : Property<number>
+    private _fontStyle : Property<string>
+    private _fontFamily : Property<string>
+    constructor(configs? : any) {
+        super();
         // Observable properties
         this.zIndex = configs.zIndex;
 
@@ -157,7 +175,7 @@ export class Styleable extends Transformable {
         this._fontFamily = new Property("fontFamily", configs.fontFamily);
     }
 
-    newInstance() {
+    newInstance() : this {
         var out = super.newInstance();
         out._fillStyle = this._fillStyle.clone();
         out._fillRule = this._fillRule.clone();
@@ -175,96 +193,119 @@ export class Styleable extends Transformable {
     }
 
     // Observable Properties that will trigger change events
-    get lineWidth() { return this._lineWidth; }
-    set lineWidth(value) {
+    get lineWidth() : Nullable<Length> { return this._lineWidth.value; }
+    setLineWidth(value? : number | string | Length) {
         if (value) {
-            this._lineWidth.set(geom.Length.parse(value));
+            this._lineWidth.set(Length.parse(value));
         } else {
-            this._lineWidth.set(value);
+            this._lineWidth.set(null);
         }
     }
 
-    get lineJoin() { return this._lineJoin; }
-    set lineJoin(value) { this._lineJoin.set(value); }
+    get lineJoin() : Nullable<string> { return this._lineJoin.value; }
+    set lineJoin(value : Nullable<string>) { this._lineJoin.set(value); }
 
-    get lineCap() { return this._lineCap; }
-    set lineCap(value) { this._lineCap.set(value); }
+    get lineCap() : Nullable<string> { return this._lineCap.value; }
+    set lineCap(value : Nullable<string>) { this._lineCap.set(value); }
 
-    get miterLimit() { return this._miterLimit; }
-    set miterLimit(value) { this._miterLimit.set(value); }
+    get miterLimit() : Nullable<number> { return this._miterLimit.value; }
+    set miterLimit(value : Nullable<number>) { this._miterLimit.set(value); }
 
-    get strokeOpacity() { return this._strokeOpacity; }
-    set strokeOpacity(value) { this._strokeOpacity.set(value); }
+    get strokeOpacity() : Nullable<number> { return this._strokeOpacity.value; }
+    set strokeOpacity(value : Nullable<number>) { this._strokeOpacity.set(value); }
 
-    get dashOffset() { return this._dashOffset; }
-    set dashOffset(value) { this._dashOffset.set(value); }
+    get dashOffset() : Nullable<number> { return this._dashOffset.value; }
+    set dashOffset(value : Nullable<number>) { this._dashOffset.set(value); }
 
-    get dashArray() { return this._dashArray; }
-    set dashArray(value) { this._dashArray.set(value); }
+    get dashArray() : Nullable<Array<number>> { return this._dashArray.value; }
+    set dashArray(value : Nullable<Array<number>>) { this._dashArray.set(value); }
 
-    get strokeStyle() { return this._strokeStyle; }
-    set strokeStyle(value) {
+    get strokeStyle() : Nullable<Style> { return this._strokeStyle.value; }
+    setStrokeStyle(value : string | Style) {
+        var theStyle : Style;
         if (value != null && typeof value === "string") {
-            value = new styles.Literal(value);
+            theStyle = new Literal(value);
+        } else {
+            theStyle = value;
         }
-        this._strokeStyle.set(value);
+        this._strokeStyle.set(theStyle);
+        return this;
     }
 
-    get fillStyle() { return this._fillStyle; }
-    set fillStyle(value) {
+    get fillStyle() : Nullable<Style> { return this._fillStyle.value; }
+    setFillStyle(value : string | Style) {
+        var theStyle : Style;
         if (value != null && typeof value === "string") {
-            value = new styles.Literal(value);
+            theStyle = new Literal(value);
+        } else {
+            theStyle = value;
         }
-        this._fillStyle.set(value);
+        this._fillStyle.set(theStyle);
+        return this;
     }
 
-    get fillOpacity() { return this._fillOpacity; }
-    set fillOpacity(value) { this._fillOpacity.set(value); }
+    get fillOpacity() : Nullable<number> { return this._fillOpacity.value; }
+    set fillOpacity(value : Nullable<number>) { this._fillOpacity.set(value); }
 
-    get fillRule() { return this._fillRule; }
-    set fillRule(value) { this._fillRule.set(value); }
+    get fillRule() : Nullable<string> { return this._fillRule.value; }
+    set fillRule(value : Nullable<string>) { this._fillRule.set(value); }
 
-    get fontFamily() { return this._fontFamily; }
-    set fontFamily(value) { this._fontFamily.set(value); }
+    get fontFamily() : Nullable<string> { return this._fontFamily.value; }
+    set fontFamily(value : Nullable<string>) { this._fontFamily.set(value); }
 
-    get fontStyle() { return this._fontStyle; }
-    set fontStyle(value) { this._fontStyle.set(value); }
+    get fontStyle() : Nullable<string> { return this._fontStyle.value; }
+    set fontStyle(value : Nullable<string>) { this._fontStyle.set(value); }
 
-    get fontWeight() { return this._fontWeight; }
-    set fontWeight(value) { this._fontWeight.set(value); }
+    get fontWeight() : Nullable<number> { return this._fontWeight.value; }
+    set fontWeight(value : Nullable<number>) { this._fontWeight.set(value); }
 
     /**
      * Draws this shape on a given context.
      */
-    applyStyles(ctx, options) {
+    applyStyles(ctx : any, options : any) {
         ctx.save();
-        if (this.fillStyle.value && !this.fillStyle.inherit) {
-            this.fillStyle.value.apply(this, "fillStyle", ctx);
+        if (this._fillStyle.value != null && !this._fillStyle.inherit) {
+            this._fillStyle.value.apply(this, "fillStyle", ctx);
         }
-        if (this.strokeStyle.value && !this.strokeStyle.inherit) {
-            this.strokeStyle.value.apply(this, "strokeStyle", ctx);
+        if (this._strokeStyle.value != null && !this._strokeStyle.inherit) {
+            this._strokeStyle.value.apply(this, "strokeStyle", ctx);
         }
-        if (this.fillRule.value || !this.fillRule.inherit) {
-            ctx.fillRule = this.fillRule.value;
+        if (this._fillRule.value != null && !this._fillRule.inherit) {
+            ctx.fillRule = this._fillRule.value;
         }
-        if (this.dashArray.value && !this.dashArray.inherit) {
-            ctx.setLineDash(this.dashArray.value);
+        if (this._dashArray.value != null && !this._dashArray.inherit) {
+            ctx.setLineDash(this._dashArray.value);
         }
-        if (this.lineJoin.value || !this.lineJoin.inherit) {
-            ctx.lineJoin = this.lineJoin.value;
+        if (this._lineJoin.value || !this._lineJoin.inherit) {
+            ctx.lineJoin = this._lineJoin.value;
         }
-        if (this.lineCap.value || !this.lineCap.inherit) {
-            ctx.lineCap = this.lineCap.value;
+        if (this._lineCap.value || !this._lineCap.inherit) {
+            ctx.lineCap = this._lineCap.value;
         }
-        if (this.lineWidth.value) {
-            ctx.lineWidth = this.lineWidth.value.pixelValue;
+        if (this._lineWidth.value != null) {
+            ctx.lineWidth = this._lineWidth.value.pixelValue;
         }
-        if (this.dashOffset.value || !this.dashOffset.inherit) {
-            ctx.dashOffset = this.dashOffset.value;
+        if (this._dashOffset.value != null || !this._dashOffset.inherit) {
+            ctx.dashOffset = this._dashOffset.value;
         }
     }
 
-    revertStyles(ctx) {
+    revertStyles(ctx : any) {
         ctx.restore();
     }
+}
+
+export class TransformChanged extends Event {
+    source : any;
+    command : string;
+    oldValue : any;
+    newValue : any;
+    constructor(source : any, command : string, oldValue : any, newValue : any) {
+        super();
+        this.source = source;
+        this.command = command;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+    get klass() { return TransformChanged; }
 }
