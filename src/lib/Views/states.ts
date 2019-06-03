@@ -1,6 +1,7 @@
 
 import { State, EventType, EventSource } from "../Core/events"
 import { Int, Nullable } from "../Core/types"
+import { Shape } from "../Core/models"
 import { Stage } from "./stage"
 import { Pane, BGPane } from "./panes"
 import { Point } from "../Geom/models"
@@ -250,8 +251,8 @@ export class DefaultState extends StageState {
 
         this.selectingMultiple = this._selectingMultipleShapes(event);
         // See if first any existing items in our selection can handle this "down"
-        var hitShape = null;
-        selection.forEach<DefaultState>(function(shape, self) {
+        var hitShape : Nullable<Shape> = null;
+        selection.forEach<DefaultState>(function(shape, self : DefaultState) {
             var controller = shape.controller;
             var currHitInfo = controller.getHitInfo(currPoint.x, currPoint.y);
             if (currHitInfo != null) {
@@ -261,10 +262,10 @@ export class DefaultState extends StageState {
             }
         }, this);
 
-        if (hitShape == null) {
+        if (hitShape == null && downPoint != null) {
             hitShape = shapeIndex.getShapeAt(downPoint.x, downPoint.y);
         }
-        if (hitShape == null) {
+        if (hitShape == null || downPoint == null) {
             selection.clear();
         } else {
             this.downHitInfo = hitShape.controller.getHitInfo(downPoint.x, downPoint.y);
@@ -287,7 +288,7 @@ export class DefaultState extends StageState {
         var downPoint = this.downPoints[0];
 
         // Mouse is not primed for "creating" an object
-        selection.forEach(function(shape, self) {
+        selection.forEach(function(shape, self : DefaultState) {
             var controller = shape.controller;
             var currHitInfo = controller.getHitInfo(currPoint.x, currPoint.y);
             if (currHitInfo != null) {
@@ -349,11 +350,11 @@ export class CreatingShapeState extends StageState {
 
     _onMouseDown(eventType : string, source : any, event : JQueryEventObject) {
         super._onMouseDown(eventType, source, event);
-        var shapeIndex = this.stage.shapeIndex;
         var shapeForCreation = this.stateData;
         var downPoint = this.downPoints[0];
         this.stage.selection.clear();
-        shapeForCreation.setBounds(new Bounds(downPoint.x, downPoint.y, 1, 1));
+        if (downPoint != null)
+            shapeForCreation.setBounds(new Bounds(downPoint.x, downPoint.y, 1, 1));
         this.stage.shapeIndex.setPane(shapeForCreation, "edit");
         this.stage.scene.add(shapeForCreation);
     }
@@ -372,7 +373,7 @@ export class CreatingShapeState extends StageState {
             var minY = Math.min(downPoint.y, currPoint.y);
             var maxX = Math.max(downPoint.x, currPoint.x);
             var maxY = Math.max(downPoint.y, currPoint.y);
-            shapeForCreation.setBounds(new geom.Bounds(minX, minY, maxX - minX, maxY - minY));
+            shapeForCreation.setBounds(new Bounds(minX, minY, maxX - minX, maxY - minY));
             stage.paneNeedsRepaint("edit");
         }
     }

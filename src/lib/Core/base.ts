@@ -1,6 +1,6 @@
 import * as counters from "./counters";
 import { Event, EventSource, PropertyChanged } from "./events"
-import { Int, Nullable, Timestamp } from "./types"
+import { Int, Nullable, Timestamp, Undefined } from "./types"
 
 const ElementCounter = new counters.Counter("ElementIDs");
 
@@ -124,7 +124,7 @@ export class Element extends EventSource {
      *          If mutable is true, then modifications of the children is allowed.  This is done by
      *          making a copy of the child elements before looping over them.
      */
-    forEachChild(handler : (elem : Element, index : Int, caller: any) => boolean,
+    forEachChild(handler : (elem : Element, index : Int, caller: any) => Undefined<boolean>,
                  caller : any = null, mutable : boolean = false) {
         var children = this._children;
         if (mutable == true) {

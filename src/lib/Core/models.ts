@@ -12,6 +12,7 @@ type Element = base.Element;
  * Holds information about the instance of a shape.
  */
 export class Shape extends mixins.Styleable {
+    pane : string = "main"
     isVisible : boolean = true;
     private _scene : Nullable<Scene> = null;
         // controller : controller.ShapeController<this> | null = null;

@@ -99,6 +99,7 @@ export class Pane {
     get canvasId() { return this._canvasId; }
     get rawContext() { return this._rawContext; }
     get virtualContext() { return this._virtualContext; }
+    get context() { return this._virtualContext; }
     get element() { return this._canvas as JQuery<HTMLElement>; }
 
     /**

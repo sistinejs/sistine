@@ -1,4 +1,5 @@
 
+import { Element } from "../Core/base"
 import { Int, Nullable, Undefined } from "../Core/types"
 import { Shape, Scene } from "../Core/models"
 import { EventSource, EventType } from "../Core/events"
@@ -35,12 +36,12 @@ export class ShapeIndex {
         }
     }
 
-    setPane(shape : Shape, pane : Pane) {
+    setPane(shape : Shape, pane : string) {
         if (shape != null && shape.pane != pane) {
             shape.pane = pane;
         }
-        shape.forEachChild(function(child, index, self) : Undefined<boolean> {
-            self.setPane(child, pane);
+        shape.forEachChild(function(child : Element, index : Int, self : any) {
+            self.setPane(child as Shape, pane);
         }, this);
     }
 
@@ -122,12 +123,14 @@ export class ShapeIndex {
     /**
      * Given a coordinate (x,y) returns the topmost shape that contains this point.
      */
-    getShapeAt(x: number, y: number, root: Shape) {
+    getShapeAt(x: number, y: number, root?: Nullable<Shape>) {
         root = root || this._scene;
-        for (var i = 0;i < root.childCount();i++) {
-            var shape = root.childAtIndex(i);
-            if ((shape as Shape).containsPoint(x, y)) {
-                return shape;
+        if (root != null) {
+            for (var i = 0;i < root.childCount();i++) {
+                var shape = root.childAtIndex(i);
+                if ((shape as Shape).containsPoint(x, y)) {
+                    return shape;
+                }
             }
         }
         return null;
