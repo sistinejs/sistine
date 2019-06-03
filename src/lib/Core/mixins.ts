@@ -1,5 +1,5 @@
 import { Property, Element } from "./base"
-import { Length, Transform } from "../Geom/models"
+import { Length, Transform, Bounds } from "../Geom/models"
 import { Event } from "./events";
 import { Literal, Style } from "./styles"
 import { Int, Nullable } from "./types"
@@ -9,6 +9,8 @@ export class Transformable extends Element {
     protected _globalTransform : Transform = new Transform();
     protected _globalInverseTransform : Transform = new Transform();
     protected _transform : Transform = new Transform();
+    protected _boundingBox : Nullable<Bounds> = null;
+
     constructor() {
         super();
         // Transform properties
@@ -24,9 +26,21 @@ export class Transformable extends Element {
         return out;
     }
 
-    markTransformed() { 
-        this.markUpdated();
+    get boundingBox() : Bounds {
+        if (this._boundingBox == null) {
+            this._boundingBox = this._evalBoundingBox();
+        }
+        return this._boundingBox;
+    }
+
+    _evalBoundingBox() : Bounds {
+        throw new Error("Not implemented");
+    }
+
+    markTransformed() {
+        this._boundingBox = null;
         this.lastTransformed = Date.now(); 
+        this.markUpdated();
     }
 
     /**
@@ -41,7 +55,7 @@ export class Transformable extends Element {
     get globalTransform() {
         var gt = this._globalTransform;
         if (this._parent != null) {
-            var pt = this._parent.globalTransform;
+            var pt = (this._parent as Transformable).globalTransform;
             if (pt.timeStamp > gt.timeStamp ||
                 this.lastTransformed > gt.timeStamp) {
                 // updated ourselves

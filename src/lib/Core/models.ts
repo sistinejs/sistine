@@ -14,22 +14,10 @@ type Element = base.Element;
 export class Shape extends mixins.Styleable {
     isVisible : boolean = true;
     private _scene : Nullable<Scene> = null;
-    protected _boundingBox : Nullable<geom.Bounds> = null;
         // controller : controller.ShapeController<this> | null = null;
 
     constructor(configs : any) {
         super((configs = configs || {}));
-    }
-
-    get boundingBox() : geom.Bounds {
-        if (this._boundingBox == null) {
-            this._boundingBox = this._evalBoundingBox();
-        }
-        return this._boundingBox;
-    }
-
-    _evalBoundingBox() : geom.Bounds {
-        throw new Error("Not implemented");
     }
 
     get scene() : (Scene | null) { return this._scene; }
@@ -52,11 +40,6 @@ export class Shape extends mixins.Styleable {
     canSetBounds(newBounds: geom.Bounds) : boolean { return true; }
     _setBounds(newBounds : geom.Bounds) {
         throw Error("Not Implemented");
-    }
-
-    markTransformed() {
-        this._boundingBox = null;
-        super.markTransformed();
     }
 
     draw(ctx : any) { }
@@ -100,7 +83,7 @@ export class Group extends Shape {
         } else {
             var out = new geom.Bounds(0, 0, 0, 0);
             for (var i = 0;i < this._children.length;i++) {
-                out.union(this._children[i].boundingBox);
+                out.union((this._children[i] as Shape).boundingBox);
             }
             return out;
         }

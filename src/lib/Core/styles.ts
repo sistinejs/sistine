@@ -1,6 +1,7 @@
 
 import { Int, Nullable} from "./types"
 import { Shape } from "./models"
+import { Styleable } from "./mixins"
 import { Length } from "../Geom/models"
 
 export class Style {
@@ -32,7 +33,7 @@ export class Style {
         }
     }
 
-    forContext(shape : Shape, ctx : any) {
+    forContext(shape : Styleable, ctx : any) {
         if (this._hasChanged(shape, ctx)) {
             this._shapeX = shape.boundingBox.x;
             this._shapeY = shape.boundingBox.y;
@@ -44,11 +45,11 @@ export class Style {
         return this._realValue;
     }
 
-    apply(shape : Shape, property : string, ctx : any) {
+    apply(shape : Styleable, property : string, ctx : any) {
         ctx[property] = this.forContext(shape, ctx);
     }
 
-    _hasChanged(shape : Shape, ctx : any) {
+    _hasChanged(shape : Styleable, ctx : any) {
         return this._realValue == null || this._context != ctx ||
                 shape.boundingBox.x != this._shapeX ||
                 shape.boundingBox.y != this._shapeY ||
