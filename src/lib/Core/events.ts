@@ -213,22 +213,22 @@ export class EventSource {
         return this._eventHub;
     }
 
-    addHandler(eventTypes : Array<EventType>, handler : EventHandler) {
+    addHandler(eventTypes : Array<EventType> | string, handler : EventHandler) {
         this._eventHub.addHandler(eventTypes, handler);
         return this;
     }
 
-    removeHandler(eventTypes : Array<EventType>, handler : EventHandler) {
+    removeHandler(eventTypes : Array<EventType> | string, handler : EventHandler) {
         this._eventHub.removeHandler(eventTypes, handler);
         return this;
     }
 
-    on(eventTypes : Array<EventType>, callback : EventCallback) {
+    on(eventTypes : Array<EventType> | string, callback : EventCallback) {
         this._eventHub.on(eventTypes, callback);
         return this;
     }
 
-    before(eventTypes : Array<EventType>, callback : EventCallback) {
+    before(eventTypes : Array<EventType> | string, callback : EventCallback) {
         this._eventHub.before(eventTypes, callback);
         return this;
     }
@@ -270,31 +270,34 @@ export class EventHub {
         }
     }
 
-    before(eventTypes : Array<EventType>, callback : EventCallback) {
+    before(eventTypes : Array<EventType> | string, callback : EventCallback) {
         return this._addHandler(eventTypes, this._beforeCallbacks, callback);
     }
 
-    on(eventTypes : Array<EventType>, callback : EventCallback) {
+    on(eventTypes : Array<EventType> | string, callback : EventCallback) {
         return this._addHandler(eventTypes, this._onCallbacks, callback);
     }
 
-    removeBeforeon(eventTypes : Array<EventType>, callback : EventCallback) {
+    removeBeforeon(eventTypes : Array<EventType> | string, callback : EventCallback) {
         return this._removeHandler(eventTypes, this._beforeCallbacks, callback);
     }
 
-    removeOn(eventTypes : Array<EventType>, callback : EventCallback) {
+    removeOn(eventTypes : Array<EventType> | string, callback : EventCallback) {
         return this._removeHandler(eventTypes, this._onCallbacks, callback);
     }
 
-    addHandler(eventTypes : Array<EventType>, handler : EventHandler) {
+    addHandler(eventTypes : Array<EventType> | string, handler : EventHandler) {
         return this._addHandler(eventTypes, this._handlers, handler);
     }
 
-    removeHandler(eventTypes : Array<EventType>, handler : EventHandler) {
+    removeHandler(eventTypes : Array<EventType> | string, handler : EventHandler) {
         return this._removeHandler(eventTypes, this._handlers, handler);
     }
 
-    _addHandler<T>(eventTypes : Array<EventType>, handlerlist : { [ key : string ] : Array<T> }, handler : T) {
+    _addHandler<T>(eventTypes : Array<EventType> | string, handlerlist : { [ key : string ] : Array<T> }, handler : T) {
+        if (typeof eventTypes === "string") {
+            eventTypes = (eventTypes as string).split(",").map(function(v) { return v.trim(); });
+        }
         eventTypes.forEach(function(eventType) {
             eventType = eventType.trim();
             handlerlist[eventType] = handlerlist[eventType] || [];
@@ -303,7 +306,10 @@ export class EventHub {
         return this;
     }
 
-    _removeHandler<T>(eventTypes : Array<EventType>, handlerlist : { [ key : string ] : Array<T> }, handler : T) {
+    _removeHandler<T>(eventTypes : Array<EventType> | string, handlerlist : { [ key : string ] : Array<T> }, handler : T) {
+        if (typeof eventTypes === "string") {
+            eventTypes = (eventTypes as string).split(",").map(function(v) { return v.trim(); });
+        }
         eventTypes.forEach(function(eventType) {
             eventType = eventType.trim();
             var evHandlers = handlerlist[eventType] || [];

@@ -1,8 +1,8 @@
 
-import { Int, Nullable, Timestamp } from "../Core/base"
+import { Int, Nullable, Timestamp } from "../Core/types"
 import { Shape, Scene } from "../Core/models"
 import { Selection } from "../Core/selection"
-import { StateMachine, EventSource } from "../Core/events";
+import { StateMachine, EventType, EventSource } from "../Core/events";
 import * as events from "./events";
 import { Pane, BGPane, ShapesPane } from "./panes"
 import { ShapeIndex } from "./shapeindex";
@@ -111,14 +111,18 @@ export class Stage extends EventSource {
 
         // Information regarding Selections
         var self = this;
-        this.selection.on("ShapesSelected", function(_eventType : string, _source : EventSource, event : any) {
+        this.selection.on("ShapesSelected", function(_eventType : EventType, _source : EventSource, event : any) {
             event.shapes.forEach(function(shape : Shape) {
                 self.setShapePane(shape, "edit");
+                return true;
             });
-        }).on("ShapesUnselected", function(_eventType : string, _source : EventSource, event : any) {
+            return true;
+        }).on("ShapesUnselected", function(_eventType : EventType, _source : EventSource, event : any) {
             event.shapes.forEach(function(shape : Shape) {
                 self.setShapePane(shape, "main");
+                return true;
             });
+            return true;
         });
 
         this.cursorMap = Object.assign({}, cursors.DefaultCursorMap);
@@ -135,13 +139,15 @@ export class Stage extends EventSource {
         if (this._scene != s) {
             this._scene = s
             var self = this;
-            s.on("ElementAdded, ElementRemoved", function(_eventType : string, _source : EventSource, event : any) {
+            s.on("ElementAdded, ElementRemoved", function(_eventType : EventType, _source : EventSource, event : any) {
                 if (!event.subject.pane) {
                     self.setShapePane(event.subject, "main");
                 }
                 self.paneNeedsRepaint(event.subject.pane);
-            }).on("PropertyChanged", function(_eventType : string, _source : EventSource, event : any) {
+                return true;
+            }).on("PropertyChanged", function(_eventType : EventType, _source : EventSource, event : any) {
                 self.paneNeedsRepaint(event.source.pane)
+                return true;
             });
         }
     }
@@ -304,10 +310,11 @@ export class Stage extends EventSource {
     }
 
     setShapePane(shape : Shape, pane : string) {
-        if (shape.pane != pane) {
-            this.paneNeedsRepaint(shape.pane);
+        var shapesPane = shape.pane;
+        if (shapesPane != pane) {
+            this.paneNeedsRepaint(shapesPane);
             this.shapeIndex.setPane(shape, pane);
-            this.paneNeedsRepaint(shape.pane);
+            this.paneNeedsRepaint(shapesPane);
         }
     }
 
@@ -380,7 +387,7 @@ export class Stage extends EventSource {
     scroll(handler : JQEventHandler) { return this._setupHandler(this.element, "scroll", handler); }
 
     _setupHandler(element : JQuery<HTMLElement>, methodName : string, handler : JQEventHandler) {
-        var method : (handler : JQEventHandler) => void = element[methodName] as (handler : JQEventHandler) => void;
+        var method = (element as any)[methodName] as (handler : JQEventHandler) => void;
         method(function(event : JQuery.Event) {
             handler(event);
         });
