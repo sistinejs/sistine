@@ -276,7 +276,7 @@ export class Styleable extends Transformable {
     /**
      * Draws this shape on a given context.
      */
-    applyStyles(ctx : any, options : any) {
+    applyStyles(ctx : any, options : any = null) {
         ctx.save();
         if (this._fillStyle.value != null && !this._fillStyle.inherit) {
             this._fillStyle.value.apply(this, "fillStyle", ctx);

@@ -1,9 +1,10 @@
 
-import * as geom from "../Geom/models"
+import { Shape } from "../Core/models"
+import { Timestamp } from "../Core/types"
 import { Stage } from "./stage"
-import * as geomutils from "../Geom/utils"
 import { VirtualContext } from "./context"
 import { getcssint } from "../Utils/dom"
+import { Point, Bounds } from "../Geom/models"
 
 /**
  * A Pane is a wrapper over our drawing element/context.   Shapes can be drawn at 
@@ -12,33 +13,38 @@ import { getcssint } from "../Utils/dom"
  * refresh rates etc).
  */
 export class Pane {
-    readonly viewBounds : geom.Bounds = null;
-    readonly zoom : number = 1.0;
+    readonly viewBounds : Bounds = new Bounds();
+    zoom : number = 1.0;
     drawTime : Timestamp = 0;
     protected _configs : any;
     protected _name : string;
     protected _stage : Stage;
     protected _refCount = 1;
-    protected _needsRepaint : boolean;
-    constructor(name : String, stage : Stage, canvasId : string, configs? : any) {
+    protected _offset : Point = new Point();
+    protected _needsRepaint : boolean = true;
+    protected _divId : string;
+    protected _canvasId : string;
+    protected _parentDiv : JQuery<HTMLElement>;
+    protected _canvas : JQuery<HTMLElement>;
+    protected _rawContext : any;
+    protected _virtualContext : VirtualContext;
+
+    constructor(name : string, stage : Stage, canvasId : string, configs? : any) {
         this._configs = configs || {};
         this._name = name;
         this._stage = stage;
-        this._needsRepaint = true;
-        this.divId = stage.divId;
         this._parentDiv = $("#" + stage.divId);
         this._canvasId = canvasId;
-        this._canvas = null;
-        this._offset = new geom.Point();
-        this.viewBounds = new geom.Bounds();
         this._ensureCanvas();
     }
 
-    get(name) {
+    draw(_ctx : any) { }
+
+    get(name : string) : any {
         return this._configs[name];
     }
 
-    set(property, newValue, force) {
+    set(property : any, newValue : any, _force : boolean = false) {
         var oldValue = this._configs[property];
         if (oldValue != newValue) {
             this._configs[property] = newValue;
@@ -56,9 +62,9 @@ export class Pane {
     }
 
     get offset() { return this._offset; }
-    setOffset(x, y) {
+    setOffset(x: number, y: number) {
         if (this._offset.x != x || this._offset.y != y) {
-            this._offset = new geom.Point(x, y);
+            this._offset = new Point(x, y);
             this.viewBoundsChanged();
         }
     }
@@ -67,14 +73,14 @@ export class Pane {
      * Converts world coordinates to screen coordinates.
      */
     toScreen(x : number, y : number, result? : Point) : Point  {
-        result = result || new geom.Point(x, y);
+        result = result || new Point(x, y);
         result.x = this.zoom * (x - this.offset.x);
         result.y = this.zoom * (y - this.offset.y);
         return result;
     }
 
     toWorld(x : number, y : number, result? : Point) : Point  {
-        result = result || new geom.Point(x, y);
+        result = result || new Point(x, y);
         result.x = (x / this.zoom) + this.offset.x;
         result.y = (y / this.zoom) + this.offset.y;
         return result;
@@ -89,11 +95,11 @@ export class Pane {
     }
 
     get name() { return this._name; }
-    get divId() { return this.divId; }
+    get divId() { return this._stage.divId; }
     get canvasId() { return this._canvasId; }
     get rawContext() { return this._rawContext; }
     get virtualContext() { return this._virtualContext; }
-    get element() { return this._canvas; }
+    get element() { return this._canvas as JQuery<HTMLElement>; }
 
     /**
      * Removes this canvas and cleans ourselves up.
@@ -105,7 +111,7 @@ export class Pane {
     /**
      * Clears the pane completely.
      */
-    clear(ctx) {
+    clear(ctx : any) {
         var p1 = this.toWorld(0, 0);
         var p2 = this.toWorld(this.width, this.height);
         var fillStyle = this.get("fillStyle");
@@ -134,7 +140,7 @@ export class Pane {
         var divId = this.divId;
         this._canvas = $("<canvas style='position: absolute' id = '" + this._canvasId + "'/>");
         this._parentDiv.append(this._canvas);
-        this._rawContext = this._canvas[0].getContext("2d");
+        this._rawContext = (this._canvas[0] as HTMLCanvasElement).getContext("2d");
         this._virtualContext = new VirtualContext(this._rawContext);
         this.layout();
     }
@@ -150,8 +156,8 @@ export class Pane {
         this._needsRepaint = n;
     }
 
-    get width() { return this._canvas.width(); }
-    get height() { return this._canvas.height(); }
+    get width() { return this._canvas.width() as number; }
+    get height() { return this._canvas.height() as number; }
 
     layout() {
         var $parent = this._parentDiv;
@@ -168,8 +174,8 @@ export class Pane {
                             getcssint(elem, "margin-bottom") +
                             getcssint($parent, "border-top") +
                             getcssint($parent, "border-bottom");
-        var finalHeight = $parent.height() - vert_padding;
-        var finalWidth = $parent.width() - horiz_padding;
+        var finalHeight = ($parent.height() as number) - vert_padding;
+        var finalWidth = ($parent.width()  as number) - horiz_padding;
         elem.height(finalHeight);
         elem.width(finalWidth);
         elem[0].width = finalWidth;
@@ -197,7 +203,7 @@ export class Pane {
 }
 
 export class ShapesPane extends Pane {
-    constructor(name, stage, canvasId) {
+    constructor(name : string, stage : Stage, canvasId : string) {
         super(name, stage, canvasId);
     }
 
@@ -231,14 +237,13 @@ export class ShapesPane extends Pane {
     * This can be achieved by simply tree walking the scene graph if the entire
     * graph is to be drawn otherwise we need better indexing.
     */
-    draw(ctx) {
-        var pane = this;
+    draw(ctx : any) {
         var stage = this._stage;
         var scene = stage.scene;
-        this.drawShape(ctx, scene, stage, this.viewPort);
+        this.drawShape(ctx, scene, stage, this.viewBounds);
     }
 
-    drawShape(ctx, shape, stage, clipBounds) {
+    drawShape(ctx : any, shape : Shape, stage : Stage, clipBounds : Bounds) {
         // TODO: Update clip boundingBox as necessary
         if (!shape.isVisible) return;
         var belongsToPane = shape.pane == this.name;
@@ -256,8 +261,9 @@ export class ShapesPane extends Pane {
             // ctx.translate(cx, cy);
             // ctx.rotate((Math.PI * shape.get("angle")) / 180.0);
             ctx.translate(shape.boundingBox.x - cx, shape.boundingBox.y - cy);
-            shape.forEachChild(function(child, index, self) {
+            shape.forEachChild(function(child, _index, self) {
                 self.drawShape(ctx, child, stage, clipBounds);
+                return true;
             }, this);
             ctx.translate(cx - shape.boundingBox.x, cy - shape.boundingBox.y);
             // ctx.restore();
@@ -265,26 +271,28 @@ export class ShapesPane extends Pane {
         shape.revertStyles(ctx);
         shape.revertTransforms(ctx);
         if (belongsToPane && stage.selection.contains(shape)) {
-            shape.drawControls(ctx);
+            shape.controller.drawControls(ctx);
         }
         // if (belongsToPane && stage.selection.contains(shape)) shape.drawControls(ctx);
     }
 
-    _ensureParentTransform(ctx, shape) {
+    _ensureParentTransform(ctx : any, shape : Shape) {
         if (shape) {
-            this._ensureParentTransform(ctx, shape.parent);
-            var angle = shape.get("angle");
+            this._ensureParentTransform(ctx, shape.parent as Shape);
+            var angle = shape.get("angle") as number;
             var cx = shape.boundingBox.centerX;
             var cy = shape.boundingBox.centerY;
             ctx.translate(cx, cy);
-            ctx.rotate((Math.PI * shape.get("angle")) / 180.0);
+            ctx.rotate((Math.PI * angle) / 180.0);
             ctx.translate(shape.boundingBox.x - cx, shape.boundingBox.y - cy);
         }
     }
 }
 
 export class BGPane extends Pane {
-    constructor(name, stage, canvasId, configs) {
+    private _lineSpacing = 50;
+    private _lineColor = "darkGray";
+    constructor(name : string, stage : Stage, canvasId : string, configs? : any) {
         super(name, stage, canvasId, configs);
         // Space between ruler lines on the background
         this._lineSpacing = 50;
@@ -307,11 +315,8 @@ export class BGPane extends Pane {
         }
     }
 
-    draw(ctx) {
+    draw(_ctx : any) {
         var ctx = this.virtualContext;
-        var width = this.width;
-        var height = this.height;
-        var zoom = this.zoom;
         var space = this.lineSpacing;
         ctx.strokeStyle = this.lineColor;
 

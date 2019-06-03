@@ -362,7 +362,7 @@ export class VirtualContext {
         }
     }
 
-    fill(path : any) {
+    fill(path? : any) {
         if (this.currentFrame.fillStyle != null) {
             var fillRule = this.currentFrame.fillRule || "nonzero";
             if (path) {
@@ -374,7 +374,7 @@ export class VirtualContext {
         }
     }
 
-    stroke(path : any) {
+    stroke(path? : any) {
         if (this.currentFrame.strokeStyle != null) {
             if (path) {
                 this.ctx.stroke(path);
