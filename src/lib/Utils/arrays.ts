@@ -1,5 +1,5 @@
 
-type Int = number
+import { Int } from "../Core/types"
 
 // export `concat` function which joins strings by space
 export function insert<T>(array : Array<T>, value : T, index : Int = -1) : Array<T>{

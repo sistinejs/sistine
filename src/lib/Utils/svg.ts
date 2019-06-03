@@ -1,6 +1,6 @@
 import { Geom } from "../Geom/index"
-
-const toRadians = Geom.Utils.toRadians;
+import { toRadians } from "../Geom/utils"
+import { Int } from "../Core/types"
 
 function isDigit(ch : string) : boolean {
     return "0123456789".indexOf(ch) >= 0;
@@ -34,8 +34,12 @@ export const PATH_COMMANDS = {
 }
 
 class Token {
-    constructor(type, value, line, column) {
-        this.type = type;
+    type : any;
+    value : any;
+    line : Int;
+    column : Int;
+    constructor(toktype : any, value : any, line : Int, column : Int) {
+        this.type = toktype;
         this.value = value;
         this.line = line;
         this.column = column;
@@ -65,10 +69,18 @@ class Iterator {
         this.peek();
         return this._current != null;
     }
+
+    peek() { return null; }
 }
 
 export class Tokenizer extends Iterator {
-    constructor(input) {
+    private _input : string
+    private _pos : Int
+    private L : Int
+    private _current : any = null;
+    private _currCol : Int = 0;
+    private _currLine : Int = 0;
+    constructor(input : string) {
         super();
         this._input = input;
         this._pos = 0;

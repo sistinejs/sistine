@@ -1,5 +1,5 @@
 
-type Int = number;
+import { Int } from "../Core/types"
 
 interface DListNode<T> {
     next? : DListNode<T> | null;
