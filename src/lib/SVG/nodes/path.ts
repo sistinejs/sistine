@@ -1,15 +1,12 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
-import { Utils } from "../../Utils/index"
-import { Builtins } from "../../Builtins/index"
-import { Int, Nullable, Element } from "../../Core/base"
-import { NumbersTokenizer, PathDataParser, TransformParser } from "../../Utils/svg"
-import { Point, Length, Bounds } from "../../Geom/models"
 import { Path } from "../../Core/paths"
+import * as layouts from "../layouts"
+import { Nullable } from "../../Core/types"
+import { Element } from "../../Core/base"
+import { PathDataParser } from "../../Utils/svg"
 
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
+const CM = layouts.defaultCM;
 
 export class PathNodeProcessor extends base.NodeProcessor {
     get validChildren() {
@@ -54,8 +51,12 @@ export class PathNodeProcessor extends base.NodeProcessor {
         if (!attrib) return ;
         var p = new PathDataParser(attrib);
         while (p.hasNext()) {
-            var command = p.next();
-            var func = funcs[command.name] as string;
+            var command : any = p.next();
+            if (command == null) break;
+            if (!(command.name in funcs)) {
+                throw new Error("Invalid path function: " + command.name);
+            }
+            var func = (funcs as any)[command.name] as string;
             shape[func].apply(shape, command.args);
         }
     }

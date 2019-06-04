@@ -1,4 +1,6 @@
-
+import { Length } from "../Geom/models"
+import { Int, Nullable, Undefined } from "../Core/types"
+import { Shape } from "../Core/models"
 import { EventHandler, BoundsChanged, EventType, EventSource } from "../Core/events"
 import { ElementAdded, ElementRemoved } from "../Core/base"
 
@@ -10,11 +12,11 @@ export class ConstraintManager implements EventHandler {
         this._parentTargetRefs= {};
     }
 
-    handleBefore(eventType : EventType, source : EventSource, eventData : any) : boolean {
+    handleBefore(_eventType : EventType, _source : EventSource, _eventData : any) : Undefined<boolean> {
         return true;
     }
 
-    handleOn(eventType : EventType, source : EventSource, eventData : any) : boolean {
+    handleOn(eventType : EventType, source : EventSource, event : any) : Undefined<boolean> {
         if (eventType == ElementAdded.name) {
             this._addParentRef(event.parent, event.subject);
             this.refreshConstraints(event.subject);
@@ -29,20 +31,21 @@ export class ConstraintManager implements EventHandler {
     /**
      * Refreshes the constraints of a particular target shape.
      */
-    refreshConstraints(target) {
-        if (target.hasParent) {
+    refreshConstraints(target : Shape) {
+        if (target.parent != null) {
             var attribs = this._allConstraints[target.uuid] || {};
-            var parent = target.parent;
-            var width = parent.width;
-            var height = parent.height;
-            for (var attrib in atribs) {
+            var parent = target.parent as Shape;
+            var width = parent.boundingBox.width;
+            var height = parent.boundingBox.height;
+            for (var key in attribs) {
+                var attrib : any = attribs[key];
                 if (attrib.dimension == 1) {
-                    target[attrib] = attrib.value * width;
+                    target.set(key, attrib.value * width);
                 } else if (attrib.dimension == 2) {
-                    target[attrib] = attrib.value * height;
+                    target.set(key, attrib.value * height);
                 } else {
                     var lsquared = width * width + height * height;
-                    target[attrib] = Math.sqrt(lsquared / 2.0);
+                    target.set(key , Math.sqrt(lsquared / 2.0));
                 }
             }
         }
@@ -52,7 +55,7 @@ export class ConstraintManager implements EventHandler {
      * Returns true if a particular target shape has any constraints on 
      * any of its attributes.
      */
-    hasConstraints(target) {
+    hasConstraints(target : Shape) {
         if (!(target.uuid in this._allConstraints)) {
             this._allConstraints[target.uuid] = {};
         }
@@ -60,25 +63,25 @@ export class ConstraintManager implements EventHandler {
         return Object.keys(constraintMap).length > 0;
     }
 
-    addXConstraint(target, attrib, length) {
-        return this.addConstraint(target, attrib, length, 1);
+    addXConstraint(target : Shape, attrib : string, length : Nullable<Length> = null) {
+        return this.addConstraint(target, attrib, 1, length);
     }
 
-    addYConstraint(target, attrib, length) {
-        return this.addConstraint(target, attrib, length, 2);
+    addYConstraint(target : Shape, attrib : string, length : Nullable<Length> = null) {
+        return this.addConstraint(target, attrib, 2, length);
     }
 
-    addXYConstraint(target, attrib, length) {
-        return this.addConstraint(target, attrib, length, 3);
+    addXYConstraint(target : Shape, attrib : string, length : Nullable<Length> = null) {
+        return this.addConstraint(target, attrib, 3, length);
     }
 
-    addConstraint(target, attrib, length, dimension) {
+    addConstraint(target : Shape, attrib : string, dimension : Int, length : Nullable<Length> = null) {
         // Remove this constraint if it already exists
         this.removeConstraints(target, attrib);
 
-        if (length && length != null) {
+        if (length != null) {
             if (length.isAbsolute) {
-                target[attrib] = length.pixelValue;
+                target.set(attrib, length.pixelValue);
             } else {
                 this._addConstraint(target, attrib, {
                     value: length.value / 100.0,
@@ -91,9 +94,9 @@ export class ConstraintManager implements EventHandler {
     /**
      * Removes constraints on a particular target shape or one of its attribute.
      */
-    removeConstraints(target, attrib) {
+    removeConstraints(target : Shape, attrib : string) {
         if (target.uuid in this._allConstraints) {
-            var attribs = {};
+            var attribs : any = {};
             if (attrib && attrib != null) {
                 attribs[attrib] = true;
             } else {
@@ -107,23 +110,25 @@ export class ConstraintManager implements EventHandler {
             // if there are on constraints then we can remove the Added,Removed 
             // listeners as well as parent's
             if (!this.hasConstraints(target)) {
-                this._removeParentRef(target.parent, target);
+                if (target.parent != null)
+                    this._removeParentRef(target.parent as Shape, target);
                 target.removeHandler(ElementAdded.name, this);
                 target.removeHandler(ElementRemoved.name, this);
             }
         }
     }
 
-    _addConstraint(target, attrib, value) {
+    _addConstraint(target : Shape, attrib : string, value : any) {
         if (!this.hasConstraints(target)) {
             target.addHandler(ElementAdded.name, this);
             target.addHandler(ElementRemoved.name, this);
-            this._addParentRef(target.parent, target);
+            if (target.parent != null)
+                this._addParentRef(target.parent as Shape, target);
         }
         this._allConstraints[target.uuid][attrib] = value;
     }
 
-    _removeParentRef(parent, target) {
+    _removeParentRef(parent : Shape, target : Shape) {
         if (parent == null) return ;
         var childSet = this._parentTargetRefs[parent.uuid] || {};
         delete childSet[target.uuid];
@@ -132,7 +137,7 @@ export class ConstraintManager implements EventHandler {
         }
     }
 
-    _addParentRef(parent, target) {
+    _addParentRef(parent : Shape, target : Shape) {
         if (parent == null) return ;
         if (!(parent.uuid in this._parentTargetRefs)) {
             this._parentTargetRefs[parent.uuid] = {};

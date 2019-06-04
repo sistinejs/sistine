@@ -1,8 +1,8 @@
-import { Core } from "../Core"
+import { Shape } from "../Core/models"
 import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
 import { Bounds, Length } from "../Geom/models"
 
-export class Ellipse extends Core.Models.Shape {
+export class Ellipse extends Shape {
     private created : boolean = false
     private _cx : number = 0;
     private _cy : number = 0;

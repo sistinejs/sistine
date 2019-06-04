@@ -2,7 +2,7 @@ import { Core } from "../Core"
 import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
 import { Bounds, Length } from "../Geom/models"
 
-export class Circle extends Core.Models.Shape {
+export class Circle extends Shape {
     private created : boolean = false;
     private _cx : number = 0;
     private _cy : number = 0;

@@ -1,17 +1,11 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
-import { Utils } from "../../Utils/index"
-import { Builtins } from "../../Builtins/index"
+import { Circle } from "../../Builtins/Circle"
 import * as layouts from "../layouts"
-import * as models from "../models"
-import { Int, Nullable, Element } from "../../Core/base"
-import { NumbersTokenizer, PathDataParser, TransformParser } from "../../Utils/svg"
-import { Point, Length, Bounds } from "../../Geom/models"
+import { Nullable } from "../../Core/types"
+import { Element } from "../../Core/base"
 
 const CM = layouts.defaultCM;
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export class CircleNodeProcessor extends base.NodeProcessor {
     get validChildren() {
@@ -31,7 +25,7 @@ export class CircleNodeProcessor extends base.NodeProcessor {
     get hasTransforms() { return true; }
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
-        var out = new Builtins.Circle();
+        var out = new Circle();
         if (parent != null) parent.add(out);
         super.processElement(elem, out);
         CM.addXConstraint(out, "cx", this.getLength(elem, "cx"));

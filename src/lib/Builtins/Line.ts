@@ -1,13 +1,9 @@
 
-import * as geom from "../Geom/models"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import { Shape } from "../Core/models"
+import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
+import { Bounds, Length } from "../Geom/models"
 
-var ControlPoint = controller.ControlPoint;
-var HitType = controller.HitType;
-var HitInfo = controller.HitInfo;
-
-export class Line extends models.Shape {
+export class Line extends Shape {
     private created : boolean = false
     private _x0 : number = 0;
     private _y0 : number = 0;
@@ -34,7 +30,7 @@ export class Line extends models.Shape {
     set x1(value : number) { this._x1 = value; this.markTransformed(); }
     set y1(value : number) { this._y1 = value; this.markTransformed(); }
 
-    _setBounds(newBounds : geom.Bounds) {
+    _setBounds(newBounds : Bounds) {
         this._x0 = newBounds.x;
         this._y0 = newBounds.y;
         this._x1 = newBounds.x2;
@@ -46,7 +42,7 @@ export class Line extends models.Shape {
         var right = Math.max(this._x0, this._x1);
         var top = Math.min(this._y0, this._y1);
         var bottom = Math.max(this._y0, this._y1);
-        return new geom.Bounds(left, top, right - left, bottom - top);
+        return new Bounds(left, top, right - left, bottom - top);
     }
 
     draw(ctx : any) {
@@ -60,7 +56,7 @@ export class Line extends models.Shape {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class LineController extends controller.ShapeController<Line> {
+export class LineController extends ShapeController<Line> {
     _evalControlPoints() {
         var line = this.shape;
         return [new ControlPoint(line.x0, line.y0, HitType.CONTROL, 0, "grab"),
@@ -73,11 +69,11 @@ export class LineController extends controller.ShapeController<Line> {
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(line.x0, line.y0, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(line.x0, line.y0, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(line.x1, line.y1, controller.DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
+        ctx.arc(line.x1, line.y1, DEFAULT_CONTROL_SIZE, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
@@ -90,7 +86,7 @@ export class LineController extends controller.ShapeController<Line> {
         return null;
     }
 
-    applyHitChanges(hitInfo : controller.HitInfo, savedInfo : any,
+    applyHitChanges(hitInfo : HitInfo, savedInfo : any,
                     downX : number, downY : number, currX : number, currY : number) {
         var deltaX = currX - downX;
         var deltaY = currY - downY;
@@ -111,7 +107,7 @@ export class LineController extends controller.ShapeController<Line> {
         line.markTransformed();
     }
 
-    snapshotFor(hitInfo : controller.HitInfo) : controller.HitInfoSnapshot {
+    snapshotFor(hitInfo : HitInfo) : HitInfoSnapshot {
         var out = super.snapshotFor(hitInfo);
         out.downX0 = this.shape.x0;
         out.downY0 = this.shape.y0;

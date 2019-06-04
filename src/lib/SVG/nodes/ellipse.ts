@@ -1,20 +1,11 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
-import { Geom } from "../../Geom/index"
-import { Utils } from "../../Utils/index"
 import { Builtins } from "../../Builtins/index"
-import * as models from "../models"
 import * as layouts from "../layouts"
+import { Nullable } from "../../Core/types"
 import { Element } from "../../Core/base"
-import { Int, Nullable } from "../Core/types"
 
 const CM = layouts.defaultCM;
-const Bounds = Geom.Models.Bounds;
-const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export class EllipseNodeProcessor extends base.NodeProcessor {
     get validChildren() {

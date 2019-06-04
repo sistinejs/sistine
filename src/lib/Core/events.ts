@@ -141,7 +141,7 @@ export interface EventHandler {
      *
      * @returns {Bool} true if event is validated, false if validation failed and needs to be suppressed.
      */
-    handleBefore(eventType : string, source : EventSource, eventData : any) : boolean;
+    handleBefore(eventType : string, source : EventSource, eventData : any) : Undefined<boolean>;
 
     /**
      * Handler method called after an event is "committed".  This serves more as a notification
@@ -153,7 +153,7 @@ export interface EventHandler {
      *
      * @returns {Bool} true if event is validated, false if validation failed and needs to be suppressed.
      */
-    handleOn(eventType : string, source : EventSource, eventData : any) : boolean;
+    handleOn(eventType : string, source : EventSource, eventData : any) : Undefined<boolean>;
 }
 
 /**
