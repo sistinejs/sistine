@@ -1,23 +1,28 @@
 
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
-import * as models from "../Core/models"
-import * as controller from "../Core/controller"
+import { Point, Bounds } from "../Geom/models"
+import { Shape, Group } from "../Core/models"
+import { ShapeController } from "../Core/controller"
 
-export const AlignMin = "min"
-export const AlignMid = "mid"
-export const AlignMax = "max"
-export const AlignAny = "*"
+enum Alignment {
+    Mid = "mid",
+    Min = "min",
+    Max = "max",
+    Any = "*"
+}
 
-export class SVG extends models.Group {
-    constructor(configs : any) {
+export class SVG extends Group {
+    private _viewBox : Bounds
+    private _preserveAspectRatio = false;
+    private _xAlign : Alignment
+    private _yAlign : Alignment
+    private _meetOrSlice : string;
+    constructor(configs? : any) {
         super((configs = configs || {}));
         this._viewBox = configs.bounds || null;
         this._preserveAspectRatio = configs.preserveAspectRatio || false;
-        this._xAlign = (configs.xalign || AlignMid).toLowerCase();
-        this._yAlign = (configs.yalign || AlignMid).toLowerCase();
+        this._xAlign = (configs.xalign.toLowerCase() as Alignment || Alignment.Mid)
+        this._yAlign = (configs.yalign.toLowerCase() as Alignment || Alignment.Mid)
         this._meetOrSlice = configs.meetOrSlice || "meet";
-        this._controller = new SVG.Controller(this);
     }
 
     get viewBox() { return this._viewBox; } 
@@ -26,23 +31,24 @@ export class SVG extends models.Group {
         this.markTransformed();
     }
 
-    applyTransforms(ctx) {
+    applyTransforms(ctx : any) {
         // Apply scale and the cropping
-        ctx.translate(this._bounds.x, this._bounds.y);
+        var boundingBox = this.boundingBox;
+        ctx.translate(boundingBox.x, boundingBox.y);
         if (this._viewBox && !this._viewBox.isZeroSized) {
             ctx.save(); 
             // todo - consider aspect ratios
-            var scaleX = this._bounds.width / this._viewBox.width;
-            var scaleY = this._bounds.height / this._viewBox.height;
+            var scaleX = boundingBox.width / this._viewBox.width;
+            var scaleY = boundingBox.height / this._viewBox.height;
             ctx.scale(scaleX, scaleY);
             ctx.translate(-this._viewBox.x, -this._viewBox.y);
 
             // clip too?
         }
-        ctx.translate(-this._bounds.x, -this._bounds.y);
+        ctx.translate(-boundingBox.x, -boundingBox.y);
     }
 
-    revertTransforms(ctx) {
+    revertTransforms(ctx : any) {
         if (this._viewBox && !this._viewBox.isZeroSized) {
             ctx.restore(); 
         }
@@ -52,5 +58,5 @@ export class SVG extends models.Group {
 /**
  * The controller responsible for handling updates and manipulations of the Shape.
  */
-export class SVGController extends controller.ShapeController<SVG> {
+export class SVGController extends ShapeController<SVG> {
 }

@@ -11,7 +11,7 @@ export class Rectangle extends Shape {
     private _ry : number = 0;
     private _width : number = 0;
     private _height : number = 0;
-    constructor(configs : any) {
+    constructor(configs? : any) {
         super((configs = configs || {}));
         this._x = configs._x || 0;
         this._y = configs._y || 0;

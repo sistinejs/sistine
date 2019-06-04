@@ -1,4 +1,5 @@
-import { Core } from "../Core"
+
+import { Shape } from "../Core/models"
 import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
 import { Bounds, Length } from "../Geom/models"
 
