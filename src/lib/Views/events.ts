@@ -6,7 +6,7 @@ export class ViewPortChanged extends events.Event {
     readonly oldOffsetY : number;
     readonly newOffsetX : number;
     readonly newOffsetY : number;
-    constructor(oldOffsetX, oldOffsetY, newOffsetX, newOffsetY) {
+    constructor(oldOffsetX : number, oldOffsetY : number, newOffsetX : number, newOffsetY : number) {
         super();
         this.oldOffsetX = oldOffsetX;
         this.oldOffsetY = oldOffsetY;
