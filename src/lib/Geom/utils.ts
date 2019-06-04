@@ -253,7 +253,7 @@ export function endpointsToCenter(x1 : number, y1 : number, rx : number, ry : nu
 
     // F.6.6: Step 1 - ensure radii are non-zero so treat as non zero
     if (rx == 0.0 || ry == 0.0) { // invalid arguments
-        return outputObj = { /* cx, cy, startAngle, deltaAngle */
+        return { /* cx, cy, startAngle, deltaAngle */
             cx: (x1 + x2) / 2.0,
             cy: (y1 + y2) / 2.0,
             startAngle: 0,
@@ -368,6 +368,8 @@ export function ellipticalArcBounds(_centerX : number, _centerY : number, rx : n
   if (ry < 0.0)
     ry *= -1.0;
 
+  throw new Error("Not implemented");
+/*
   if (rx == 0.0 || ry == 0.0) {
       return {
         xmin: (x1 < x2 ? x1 : x2),
@@ -376,6 +378,7 @@ export function ellipticalArcBounds(_centerX : number, _centerY : number, rx : n
         ymax: (y1 > y2 ? y1 : y2),
       };
   }
+*/
 }
 
 export function svgArcBounds(x1 : number, y1 : number, rx : number, ry : number, phi : number, largeArc : boolean, sweep : boolean, x2 : number, y2 : number) : any {

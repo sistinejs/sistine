@@ -1,5 +1,5 @@
 
-import { Int, Nullable } from "../Core/types"
+import { Nullable } from "../Core/types"
 
 export const PixelsPerCM = 37.79527559055118;
 export const PixelsPerInch = 96;
@@ -60,9 +60,9 @@ export class Length {
         if (input instanceof Length) return input;
         var units = LengthType.Number;
         if ($.isNumeric(input)) {
-            return new Length(parseFloat(input));
+            return new Length(parseFloat(input as string));
         }
-        input = input.trim();
+        input = (input as string).trim();
         if (input.endsWith("em")) {
             units = LengthType.EMS;
             input = input.substring(0, input.length - 2).trim();
