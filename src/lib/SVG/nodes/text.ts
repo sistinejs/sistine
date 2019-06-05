@@ -3,36 +3,36 @@ import * as base from "./base"
 
 import * as textmodels from "../../Text/models"
 import { Utils } from "../../Utils/index"
-import * as models from "../models"
 import { Element } from "../../Core/base"
-import { PathDataParser, TransformParser, NumbersTokenizer } from "../../Utils/svg"
-import { Bounds, Length, Point } from "../../Geom/models"
-import { Int, Nullable } from "../Core/types"
-
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
+import { NumbersTokenizer } from "../../Utils/svg"
+import { Int, Nullable } from "../../Core/types"
 
 class BlockProcessor extends base.NodeProcessor {
     processTextAttributes(elem : HTMLElement, text : textmodels.Block) {
         new NumbersTokenizer(elem.getAttribute("x") || "")
             .all().forEach(function(token) {
-                text.addX(token.value);
+                if (token != null)
+                    text.addX(token.value as number);
              });
         new NumbersTokenizer(elem.getAttribute("y") || "")
             .all().forEach(function(token) {
-                text.addY(token.value);
+                if (token != null)
+                    text.addY(token.value as number);
              });
         new NumbersTokenizer(elem.getAttribute("dx") || "")
             .all().forEach(function(token) {
-                text.addDX(token.value);
+                if (token != null)
+                    text.addDX(token.value as number);
              });
         new NumbersTokenizer(elem.getAttribute("dy") || "")
             .all().forEach(function(token) {
-                text.addDY(token.value);
+                if (token != null)
+                    text.addDY(token.value as number);
              });
         new NumbersTokenizer(elem.getAttribute("rotation") || "")
             .all().forEach(function(token) {
-                text.addRotation(token.value);
+                if (token != null)
+                    text.addRotation(token.value as number);
              });
         // text.textLength = parseFloat(elem.getAttribute("textLength")) || -1;
     }
@@ -94,13 +94,13 @@ export class TextNodeProcessor extends BlockProcessor {
 }
 
 export class TSpanNodeProcessor extends BlockProcessor {
-    get validChildren() {
+    validChildren() {
         return base.descriptiveElements
                 .concat(["a", "altGlyph", "animate", "animateColor",
                          "set", "tref", "tspan" ]);
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

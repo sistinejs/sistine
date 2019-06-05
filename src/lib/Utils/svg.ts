@@ -1,16 +1,16 @@
 import { Geom } from "../Geom/index"
 import { toRadians } from "../Geom/utils"
-import { Int } from "../Core/types"
+import { Int, Nullable } from "../Core/types"
 
-function isDigit(ch : string) : boolean {
-    return "0123456789".indexOf(ch) >= 0;
+function isDigit(ch : Nullable<string>) : boolean {
+    return ch != null && "0123456789".indexOf(ch) >= 0;
 }
 
-function isIdentCharisDigit(ch : string) : boolean {
-    return "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(ch) >= 0;
+function isIdentChar(ch : Nullable<string>) : boolean {
+    return ch != null && "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(ch) >= 0;
 }
 
-export const PATH_COMMANDS = {
+export const PATH_COMMANDS : any = {
     'z': {command: 'z', name: "closePath", isRelative: true},
     'Z': {command: 'Z', name: "closePath", isRelative: false},
     'm': {command: 'm', name: "moveTo", isRelative: true},
@@ -47,19 +47,17 @@ class Token {
 }
 
 class Iterator {
-    constructor() {
-        this._current = null;
-    }
+    protected _current : any = null;
 
-    all() {
-        var out = [];
+    all() : Token[] {
+        var out : Token[] = [];
         while (this.hasNext()) {
-            out.push(this.next());
+            out.push(this.next() as Token);
         }
         return out;
     }
 
-    next() {
+    next() : Nullable<Token> {
         var out = this.peek();
         this._current = null;
         return out;
@@ -77,7 +75,6 @@ export class Tokenizer extends Iterator {
     private _input : string
     private _pos : Int
     private L : Int
-    private _current : any = null;
     private _currCol : Int = 0;
     private _currLine : Int = 0;
     constructor(input : string) {
@@ -90,10 +87,10 @@ export class Tokenizer extends Iterator {
         this._currLine = 0;
     }
 
-    allValues() {
+    allValues() : any[] {
         var out = [];
         while (this.hasNext()) {
-            out.push(this.next().value);
+            out.push((this.next() as Token).value);
         }
         return out;
     }
@@ -131,9 +128,10 @@ export class Tokenizer extends Iterator {
             this._skipSpaces();
         }
 
-        if (".0123456789".indexOf(this._currch()) < 0) {
+        var currch = this._currch() as string;
+        if (".0123456789".indexOf(currch) < 0) {
             var msg = "Expected digit or '.' but found " + currch + ".";
-            this._throw(this._currLine, this._currRow, msg);
+            this._throw(this._currLine, this._currLine , msg);
         }
         // get all digits if we can
         out += this._readDigits();
@@ -162,8 +160,7 @@ export class Tokenizer extends Iterator {
     /**
      * Ensures that the next token is a number.
      */
-    ensureToken(toktype, peekOnly) {
-        var peekOnly = peekOnly || false;
+    ensureToken(toktype : any, peekOnly : boolean = false) {
         var out = this.peek();
         var foundType = "EOF";
         if (out != null) {
@@ -179,7 +176,7 @@ export class Tokenizer extends Iterator {
         return out.value;
     }
 
-    _throw(line, col, msg) {
+    _throw(line : Int, col : Int, msg : string) {
         throw new Error("Line " + line + ", Col: " + col + ": " + msg);
     }
 
@@ -200,7 +197,7 @@ export class Tokenizer extends Iterator {
         this._pos++;
     }
 
-    _isSpaceChar(c) { return ",\n\r\t ".indexOf(c) >= 0; }
+    _isSpaceChar(c : string) { return ",\n\r\t ".indexOf(c) >= 0; }
 
     _skipSpaces() { 
         while (this._pos < this.L) {
@@ -210,7 +207,11 @@ export class Tokenizer extends Iterator {
         }
     }
 
-    _readWhile(func) {
+    _readToken(_line : Int, _col : Int) : Nullable<Token> {
+        return null;
+    }
+
+    _readWhile(func : (ch : string) => boolean) {
         var out = "";
         while (this._pos < this.L) {
             var c = this._input[this._pos];
@@ -229,7 +230,7 @@ export class Tokenizer extends Iterator {
         return this._readWhile(isIdentChar);
     }
 
-    _currch() {
+    _currch() : Nullable<string> {
         if (this._pos < this.L) {
             return this._input[this._pos];
         }
@@ -253,9 +254,9 @@ export class Tokenizer extends Iterator {
 }
 
 export class PathDataTokenizer extends Tokenizer {
-    _readToken(line, col) {
+    _readToken(line : Int, col : Int) : Nullable<Token> {
         var out = null;
-        var c = this._currch();
+        var c = this._currch() as string;
         if (c in PATH_COMMANDS) {
             out = new Token("COMMAND", PATH_COMMANDS[c], line, col);
             this._advance();
@@ -269,10 +270,11 @@ export class PathDataTokenizer extends Tokenizer {
 }
 
 export class PathDataParser extends Iterator {
-    constructor(input) {
+    private _tokenizer : PathDataTokenizer;
+    private _last : Nullable<string> = null;
+    constructor(input : string) {
         super();
         this._tokenizer = new PathDataTokenizer(input);
-        this._last = null;
     }
 
     peek() {
@@ -288,7 +290,7 @@ export class PathDataParser extends Iterator {
                 }
                 currCommand = this._last;
             } else {
-                currCommand = tokenizer.next().value;
+                currCommand = (tokenizer.next() as Token).value as any;
             }
             this._last = currCommand;
             var args = [];
@@ -349,8 +351,8 @@ export class PathDataParser extends Iterator {
 }
 
 export class TransformTokenizer extends Tokenizer {
-    _isSpaceChar(c) { return "(),\n\r\t ".indexOf(c) >= 0; }
-    _readToken(line, col) {
+    _isSpaceChar(c : string) { return "(),\n\r\t ".indexOf(c) >= 0; }
+    _readToken(line : Int, col : Int) : Nullable<Token> {
         var c = this._currch();
         var out = null;
         if (isIdentChar(c)) {
@@ -365,7 +367,8 @@ export class TransformTokenizer extends Tokenizer {
 }
 
 export class TransformParser extends Iterator {
-    constructor(input) {
+    private _tokenizer : TransformTokenizer;
+    constructor(input : string) {
         super();
         this._tokenizer = new TransformTokenizer(input);
     }
@@ -374,7 +377,7 @@ export class TransformParser extends Iterator {
         if (this._current == null) {
             var tokenizer = this._tokenizer;
             if (!tokenizer.hasNext()) return null;
-            var token = tokenizer.next();
+            var token = tokenizer.next() as Token;
             var tokValue = token.value.toLowerCase();
             if (tokValue == "matrix") {
                 var a = tokenizer.ensureNumber();
@@ -387,7 +390,7 @@ export class TransformParser extends Iterator {
             } else if (tokValue == "translate") {
                 var tx = tokenizer.ensureNumber();
                 var ty = 0;
-                var token = tokenizer.peek();
+                token = tokenizer.peek();
                 if (token != null && token.type == "NUMBER") {
                     ty = tokenizer.ensureNumber();
                 }
@@ -395,7 +398,7 @@ export class TransformParser extends Iterator {
             } else if (tokValue == "scale") {
                 var sx = tokenizer.ensureNumber();
                 var sy = sx;
-                var token = tokenizer.peek();
+                token = tokenizer.peek();
                 if (token != null && token.type == "NUMBER") {
                     sy = tokenizer.ensureNumber();
                 }
@@ -410,7 +413,7 @@ export class TransformParser extends Iterator {
                 var sy = tokenizer.ensureNumber();
                 this._current = {'name': "skew", 'args': [0, toRadians(sy)]};
             } else {
-                tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
+                tokenizer._throw(token.line, token.column, "Invalid token: " + token.type + " - " + token.value);
             }
         }
         return this._current;
@@ -418,16 +421,15 @@ export class TransformParser extends Iterator {
 }
 
 export class NumbersTokenizer extends Tokenizer {
-    _readToken(line, col) {
-        var out = null;
-        var c = this._currch();
+    _readToken(line : Int, col : Int) : Nullable<Token> {
         var number = this._tokenizeNumber();
         return new Token("NUMBER", number, line, col);
     }
 }
 
 export class NumbersParser extends Iterator {
-    constructor(input) {
+    private _tokenizer : NumbersTokenizer
+    constructor(input : string) {
         super();
         this._tokenizer = new NumbersTokenizer(input);
     }
@@ -440,7 +442,7 @@ export class NumbersParser extends Iterator {
             if (token.type != "NUMBER") {
                 throw new Error("Expected Number.  Found: " + token.type);
             }
-            this._current = tokenizer.next().value;
+            this._current = (tokenizer.next() as Token).value;
         }
         return this._current;
     }

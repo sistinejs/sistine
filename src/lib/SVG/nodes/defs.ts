@@ -1,14 +1,9 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
 import { Utils } from "../../Utils/index"
-import { Builtins } from "../../Builtins/index"
-import { Int, Nullable, Element } from "../../Core/base"
-import { NumbersTokenizer, PathDataParser, TransformParser } from "../../Utils/svg"
-import { Point, Length, Bounds } from "../../Geom/models"
+import { Int, Nullable } from "../../Core/types"
+import { Element } from "../../Core/base"
 
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export class DefsNodeProcessor extends base.NodeProcessor {
     validChildren() {
@@ -35,11 +30,14 @@ export class DefsNodeProcessor extends base.NodeProcessor {
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
         var loader = this.loader;
-        Utils.DOM.forEachChild(elem, function(child : HTMLElement, index : Int) {
+        Utils.DOM.forEachChild(elem, function(child : HTMLElement, _index : Int) {
             var item = loader.processElement(child, parent);
             var id = child.getAttribute("id");
-            if (parent != null) parent.addDef(id, item);
-            if (item && item.removeFromParent) item.removeFromParent();
+            if (id != null && parent != null) {
+                parent.addDef(id, item);
+                if (item && item.removeFromParent) item.removeFromParent();
+            }
+            return true;
         });
         return parent;
     }
