@@ -3,11 +3,11 @@ import * as base from "./base"
 import { Int, Nullable } from "../../Core/types"
 
 export class TitleNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return "*";
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.coreAttributes.concat([ "class", "style"]);
     }
 
@@ -17,11 +17,11 @@ export class TitleNodeProcessor extends base.NodeProcessor {
 }
 
 export class DescNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return "*";
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.coreAttributes.concat([ "class", "style"]);
     }
 

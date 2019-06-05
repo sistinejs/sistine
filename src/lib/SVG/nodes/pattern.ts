@@ -16,7 +16,7 @@ const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export class PatternNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.descriptiveElements
                 .concat(base.animationElements)
                 // .concat(base.paintServerElements)
@@ -27,7 +27,7 @@ export class PatternNodeProcessor extends base.NodeProcessor {
                          "mask", "script", "style", "switch", "text", "video", "view"])
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.coreAttributes
                 .concat(base.presentationAttributes)
                 .concat(base.xlinkAttributes)

@@ -9,14 +9,14 @@ import { forEachChild } from "../../Utils/dom";
 const Length = Geom.Models.Length;
 
 abstract class GradientNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.descriptiveElements
                 .concat(["animate", "animateTransform", "set", "stop"]);
     }
 
     abstract newGradient(elem : HTMLElement) : Gradient;
 
-    get validAttributes() {
+    validAttributes() {
         return base.coreAttributes
                 .concat(base.presentationAttributes)
                 .concat(base.xlinkAttributes)
@@ -25,7 +25,7 @@ abstract class GradientNodeProcessor extends base.NodeProcessor {
                           "spreadMethod", "xlink:href"])
     }
 
-    processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
+    processElement(elem : HTMLElement, parent : Nullable<Element>) : Gradient {
         var out = this.newGradient(elem);
         var id = this.ensureAttribute(elem, "id");
         var gradientUnits = elem.getAttribute("gradientUnits") || "objectBoundingBox";
@@ -34,7 +34,7 @@ abstract class GradientNodeProcessor extends base.NodeProcessor {
         if (parent != null) parent.addDef(id, out);
 
         var self = this;
-        forEachChild(elem, function(child : HTMLElement, index : Int) {
+        forEachChild(elem, function(child : HTMLElement, _index : Int) {
             if (child.tagName == "set") {
                 throw new Error("Cannot process elem: " + child.tagName);
             } else if (child.tagName == "stop") {
@@ -68,10 +68,11 @@ abstract class GradientNodeProcessor extends base.NodeProcessor {
             } else if (child.tagName == "animateColor") {
                 throw new Error("Cannot process elem: " + child.tagName);
             }
+            return true;
         });
     }
 
-    getDecimal(elem, attrib, defaultValue) {
+    getDecimal(elem : HTMLElement, attrib : string, defaultValue : any) {
         var val = Length.parse(elem.getAttribute(attrib) || defaultValue);
         if (val.isAbsolute) {
             return val.value;
@@ -82,8 +83,8 @@ abstract class GradientNodeProcessor extends base.NodeProcessor {
 }
 
 export class LinearGradientNodeProcessor extends GradientNodeProcessor {
-    get validAttributes() {
-        return super.validAttributes.concat([ "x1", "y1", "x2", "y2" ]);
+    validAttributes() {
+        return super.validAttributes().concat([ "x1", "y1", "x2", "y2" ]);
     }
 
     newGradient(elem : HTMLElement) : Gradient {
@@ -96,8 +97,8 @@ export class LinearGradientNodeProcessor extends GradientNodeProcessor {
 }
 
 export class RadialGradientNodeProcessor extends GradientNodeProcessor {
-    get validAttributes() {
-        return super.validAttributes.concat([ "cx", "cy", "r", "fx", "fy" ]);
+    validAttributes() {
+        return super.validAttributes().concat([ "cx", "cy", "r", "fx", "fy" ]);
     }
 
     newGradient(elem : HTMLElement) : Gradient {

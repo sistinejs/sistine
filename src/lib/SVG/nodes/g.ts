@@ -15,7 +15,7 @@ const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export class GNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.animationElements
                 .concat(base.descriptiveElements)
                 .concat(base.shapeElements)
@@ -27,7 +27,7 @@ export class GNodeProcessor extends base.NodeProcessor {
                          "switch", "text", "view" ]);
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

@@ -5,7 +5,7 @@ import * as base from "./base"
 import { Int, Nullable } from "../Core/types"
 
 export class ANodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.animationElements
                 .concat(base.descriptiveElements)
                 .concat(base.shapeElements)
@@ -16,7 +16,7 @@ export class ANodeProcessor extends base.NodeProcessor {
                          "text", "view"]);
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

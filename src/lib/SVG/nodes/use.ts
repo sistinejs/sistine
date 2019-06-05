@@ -5,12 +5,12 @@ import * as base from "./base"
 import { Int, Nullable } from "../../Core/types"
 
 export class UseNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.animationElements
                 .concat(base.descriptiveElements)
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

@@ -19,7 +19,7 @@ export class Property<T> {
     inherit : boolean
     value : Nullable<T>
     protected _lastUpdated : Timestamp;
-    constructor(name : string, value? : Nullable<T>) {
+    constructor(name : string, value : Nullable<T> = null) {
         this.name = name;
         this.inherit = value === undefined || value === null;
         this.set(value);

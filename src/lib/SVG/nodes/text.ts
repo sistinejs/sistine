@@ -39,14 +39,14 @@ class BlockProcessor extends base.NodeProcessor {
 }
 
 export class TextNodeProcessor extends BlockProcessor {
-    get validChildren() : Array<string> {
+    validChildren() : Array<string> {
         return base.animationElements
                 .concat(base.descriptiveElements)
                 .concat(base.textContentChildElements)
                 .concat(["a"]);
     }
 
-    get validAttributes() : Array<string> {
+    validAttributes() : Array<string> {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

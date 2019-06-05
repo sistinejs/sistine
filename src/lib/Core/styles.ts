@@ -85,8 +85,7 @@ export class Gradient extends Style {
         this._stops = [];
     }
 
-    addStop(stop : number, color : any, index : Int) {
-        index = index || -1;
+    addStop(stop : number, color : any, index : Int = -1) {
         if (index < 0) {
             this._stops.push([stop, color]);
         } else {

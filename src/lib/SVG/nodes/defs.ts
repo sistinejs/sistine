@@ -11,7 +11,7 @@ const forEachChild = Utils.DOM.forEachChild;
 const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export class DefsNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.animationElements
                 .concat(base.descriptiveElements)
                 .concat(base.shapeElements)
@@ -23,7 +23,7 @@ export class DefsNodeProcessor extends base.NodeProcessor {
                          "script", "style", "switch", "text", "view" ]);
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

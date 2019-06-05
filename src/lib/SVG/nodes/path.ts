@@ -9,11 +9,11 @@ import { PathDataParser } from "../../Utils/svg"
 const CM = layouts.defaultCM;
 
 export class PathNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.animationElements.concat(base.descriptiveElements);
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

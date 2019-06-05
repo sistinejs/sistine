@@ -8,11 +8,11 @@ import { Element } from "../../Core/base"
 const CM = layouts.defaultCM;
 
 export class EllipseNodeProcessor extends base.NodeProcessor {
-    get validChildren() {
+    validChildren() {
         return base.animationElements.concat(base.descriptiveElements);
     }
 
-    get validAttributes() {
+    validAttributes() {
         return base.conditionalProcessingAttributes
                 .concat(base.coreAttributes)
                 .concat(base.graphicalEventAttributes)

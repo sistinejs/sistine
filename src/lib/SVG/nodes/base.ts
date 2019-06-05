@@ -1,13 +1,7 @@
 
 import { Utils } from "../../Utils/index"
-import * as models from "../models"
 import { Element } from "../../Core/base"
-import { PathDataParser, TransformParser, NumbersTokenizer } from "../../Utils/svg"
-import { Bounds, Length, Point } from "../../Geom/models"
-import { Int, Nullable } from "../Core/types"
-
 const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
 
 export const conditionalProcessingAttributes = [
     "requiredFeatures", "requiredExtensions", "systemLanguage"
@@ -15,7 +9,7 @@ export const conditionalProcessingAttributes = [
 export const coreAttributes = [
     "id", "xml:base", "xml:lang", "xml:space"
 ];
-export const documentEventAttributes = [
+export const documentEventAttributes : string[] = [
     "onunload", "onabort", "onerror", "onresize", "onscroll", "onzoom"
 ];
 export const graphicalEventAttributes = [
@@ -118,19 +112,19 @@ export class NodeProcessor {
     get hasStyles() { return false; }
     get hasTransforms() { return false; }
 
-    get validChildren()  : Array<string> {
+    validChildren()  : Array<string> {
         return [];
     }
 
-    get validAttributes() : Array<string> {
+    validAttributes() : Array<string> {
         return [];
     }
 
-    getLength(elem, attrib) {
+    getLength(elem : HTMLElement, attrib : string) {
         return Length.parse(elem.getAttribute(attrib) || 0);
     }
 
-    processChildrenOf(elem, parent) {
+    processChildrenOf(elem : HTMLElement, parent : Element) {
         var loader = this.loader;
         forEachChild(elem, function(child, index) {
             loader.processElement(child, parent);
