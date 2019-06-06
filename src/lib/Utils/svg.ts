@@ -33,7 +33,7 @@ export const PATH_COMMANDS : any = {
     'S': {command: 'S', name: "smoothCubicCurve", isRelative: false},
 }
 
-class Token {
+export class Token {
     type : any;
     value : any;
     line : Int;

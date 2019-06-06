@@ -231,9 +231,9 @@ export class NodeProcessor {
                 var command = p.next();
                 if (command != null) {
                     if (command.name == "matrix") {
-                        shape.transform.apply(shape, command.args);
+                        (shape as Shape).transform.apply(shape, command.args);
                     } else {
-                        shape[command.name].apply(shape, command.args);
+                        (shape as any)[command.name].apply(shape, command.args);
                     }
                 }
             }
@@ -243,7 +243,7 @@ export class NodeProcessor {
     ensureAttribute(elem : HTMLElement, attrib : string) {
         var value = elem.getAttribute(attrib) || null;
         if (value == null) {
-            throw new ("Element MUST have ID");
+            throw new Error("Element MUST have ID");
         }
         return value;
     }
