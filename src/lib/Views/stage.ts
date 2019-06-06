@@ -152,6 +152,10 @@ export class Stage extends EventSource {
         }
     }
 
+    set tabIndex(value : Int) {
+        this.element.attr("tabindex", value);
+    }
+
     set cursor(c : string) {
         c = c || "auto";
         if (c in this.cursorMap) {
