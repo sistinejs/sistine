@@ -3,8 +3,9 @@ import { Int, Nullable} from "./types"
 import { Shape } from "./models"
 import { Styleable } from "./mixins"
 import { Length } from "../Geom/models"
+import { Element } from "./base"
 
-export class Style {
+export class Style extends Element {
     protected _realValue : any = null;
     protected _context : any = null;
     protected _relativeToBounds = true;
@@ -13,6 +14,7 @@ export class Style {
     protected _shapeW : Nullable<number>
     protected _shapeH : Nullable<number>
     constructor() {
+        super();
         this._realValue = null;
         this._context = null;
         this._relativeToBounds = true;

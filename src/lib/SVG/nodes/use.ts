@@ -1,8 +1,8 @@
 
 import { Core } from "../../Core/index"
-import { Element } from "../../Core/base"
 import * as base from "./base"
-import { Int, Nullable } from "../../Core/types"
+import { Element } from "../../Core/base"
+import { Nullable } from "../../Core/types"
 
 export class UseNodeProcessor extends base.NodeProcessor {
     validChildren() {
@@ -25,6 +25,8 @@ export class UseNodeProcessor extends base.NodeProcessor {
         if (href == null) {
             throw new Error("Use needs a xlink:href attribute.");
         }
+
+        if (parent == null) return null;
 
         // Get and clone the source pointed by href
         var source = this.getRef(parent, href);

@@ -1,19 +1,7 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
-import { Geom } from "../../Geom/index"
-import { Utils } from "../../Utils/index"
-import { Bundles } from "../../Bundles/index"
-import * as models from "../models"
-import * as layouts from "../layouts"
-import { Int, Nullable } from "../../Core/types"
-
-const CM = layouts.defaultCM;
-const Bounds = Geom.Models.Bounds;
-const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
+import { Element } from "../../Core/base"
+import { Nullable } from "../../Core/types"
 
 export class PatternNodeProcessor extends base.NodeProcessor {
     validChildren() {

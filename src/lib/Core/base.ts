@@ -211,14 +211,16 @@ export class Element extends EventSource {
     /**
      * Returns if the element has any children.
      */
-    hasChildren() : boolean { return false; }
+    hasChildren() : boolean { return this._children.length > 0; } 
 
     /**
      * Returns the child count of this element.
      */
-    childCount() : Int { return 0; }
+    childCount() : Int { return this._children.length; } 
 
-    childAtIndex(i : Int) : Nullable<Element> { return null; }
+    get children : Element[] { return this._children; }
+
+    childAtIndex(i : Int) : Nullable<Element> { return this._children[i]; }
 
     /**
      * Returns the parent of this eleemnt.

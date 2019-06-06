@@ -1,14 +1,9 @@
 
 import * as base from "./base"
-import { Geom } from "../../Geom/index"
-import { Utils } from "../../Utils/index"
 import * as models from "../models"
-import { Int, Nullable } from "../../Core/types"
-
-const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
+import { Nullable } from "../../Core/types"
+import { Element } from "../../Core/base"
+import { forEachAttribute } from "../../Utils/dom"
 
 export class SVGNodeProcessor extends base.NodeProcessor {
     validChildren() {
@@ -56,19 +51,20 @@ export class SVGNodeProcessor extends base.NodeProcessor {
                 viewBox.width = parseFloat(value[2]);
                 viewBox.height = parseFloat(value[3]);
             } else if (attrib.startsWith("xmlns:") ||
-                        [ "xmlns", "baseprofile" ].indexOf(attrib) >= 0 ||
+                        ([ "xmlns", "baseprofile" ]).indexOf(attrib) >= 0 ||
                         attrib.startsWith("sodipodi:") ||
                         attrib.startsWith("inkscape:")) {
                     // ignore list
                 console.log("Ignoring attribute: ", attrib, " = ", value);
-            } else if (self.validAttributes.indexOf(attrib) >= 0) {
+            } else if (self.validAttributes().indexOf(attrib) >= 0) {
                 // Valid attribute, do nothing
             } else {
                 throw new Error("Cannot process attribute: " + attrib);
             }
         });
         out.setBounds(bounds);
-        out.viewBox = viewBox;
+        if (viewBox != null)
+            out.viewBox = viewBox;
         this.processChildrenOf(elem, out);
         return out;
     }

@@ -5,7 +5,7 @@ import { Element } from "../../Core/base"
 import { Shape } from "../../Core/models"
 import { SVGLoader } from "../loader"
 import { Bounds, Length } from "../../Geom/models"
-import { Token, TransformParser } from "../../Utils/svg"
+import { TransformParser } from "../../Utils/svg"
 
 const forEachChild = Utils.DOM.forEachChild;
 
@@ -58,7 +58,7 @@ export const shapeElements = [
 export const structuralElements = [ "defs", "g", "svg", "symbol", "use" ];
 export const gradientElements = [ "linearGradient", "radialGradient" ];
 
-function getAttribute(elem : HTMLElement, attrib : string) {
+export function getAttribute(elem : HTMLElement, attrib : string) {
     var value = elem.getAttribute(attrib);
     for (var i = 2;i < arguments.length;i++) {
         value = arguments[i](value);
@@ -66,7 +66,7 @@ function getAttribute(elem : HTMLElement, attrib : string) {
     return value;
 }
 
-function getAttributeOrStyle(elem : HTMLElement, attribName : string, cssStyles : any, styleName : string) {
+export function getAttributeOrStyle(elem : HTMLElement, attribName : string, cssStyles : any, styleName : string) {
     return elem.getAttribute(attribName) || cssStyles[styleName];
 }
 

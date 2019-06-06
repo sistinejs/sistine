@@ -1,5 +1,5 @@
 
-export const DefaultCursorMap = {
+export const DefaultCursorMap : any = {
     rotate: 'url("./assets/cursors/rotate.png")',
 }
 

@@ -1,7 +1,7 @@
 
 import * as base from "./base"
 import * as models from "../models"
-import { Int, Nullable } from "../../Core/types"
+import { Nullable } from "../../Core/types"
 import { Group } from "../../Core/models"
 import { Element } from "../../Core/base"
 import { forEachAttribute } from "../../Utils/dom"

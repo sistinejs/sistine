@@ -179,8 +179,8 @@ export class Pane {
         var finalWidth = ($parent.width()  as number) - horiz_padding;
         elem.height(finalHeight);
         elem.width(finalWidth);
-        elem[0].width = finalWidth;
-        elem[0].height = finalHeight;
+        (elem[0] as any).width = finalWidth;
+        (elem[0] as any).height = finalHeight;
         this.viewBoundsChanged();
     }
 
@@ -272,7 +272,7 @@ export class ShapesPane extends Pane {
         shape.revertStyles(ctx);
         shape.revertTransforms(ctx);
         if (belongsToPane && stage.selection.contains(shape)) {
-            shape.controller.drawControls(ctx);
+            (shape as any).controller.drawControls(ctx);
         }
         // if (belongsToPane && stage.selection.contains(shape)) shape.drawControls(ctx);
     }
@@ -280,7 +280,7 @@ export class ShapesPane extends Pane {
     _ensureParentTransform(ctx : any, shape : Shape) {
         if (shape) {
             this._ensureParentTransform(ctx, shape.parent as Shape);
-            var angle = shape.get("angle") as number;
+            var angle = (shape as any).get("angle") as number;
             var cx = shape.boundingBox.centerX;
             var cy = shape.boundingBox.centerY;
             ctx.translate(cx, cy);

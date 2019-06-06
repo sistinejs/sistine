@@ -1,7 +1,8 @@
 
 import * as base from "./base"
 
-import { Int, Nullable } from "../../Core/types"
+import { Nullable } from "../../Core/types"
+import { Element } from "../../Core/base"
 
 export class SymbolNodeProcessor extends base.NodeProcessor {
     validChildren() {
@@ -25,7 +26,7 @@ export class SymbolNodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
-        null.a = 3;
+        throw new Error("Invalid");
         return null;
     }
 }

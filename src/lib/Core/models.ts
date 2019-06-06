@@ -68,10 +68,6 @@ export class Group extends Shape {
         this._bounds = configs.bounds || new Bounds();
     }
 
-    childAtIndex(i : Int) : Nullable<Element> { return this._children[i]; } 
-    hasChildren() : boolean { return this._children.length > 0; } 
-    childCount() : Int { return this._children.length; } 
-
     _setBounds(newBounds : Nullable<Bounds>) {
         this._bounds = newBounds == null ? null : newBounds.copy();
     }

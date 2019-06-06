@@ -1,8 +1,6 @@
-import { Element } from "../../Core/base"
-
 import * as base from "./base"
-
-import { Int, Nullable } from "../Core/types"
+import { Nullable } from "../../Core/types"
+import { Element } from "../../Core/base"
 
 export class ANodeProcessor extends base.NodeProcessor {
     validChildren() {
@@ -27,7 +25,9 @@ export class ANodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
-        this.processChildrenOf(elem, parent);
+        if (parent != null) {
+            this.processChildrenOf(elem, parent);
+        }
         return null;
     }
 }

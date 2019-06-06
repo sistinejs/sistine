@@ -6,8 +6,6 @@ import { Nullable } from "../../Core/types"
 import { Element } from "../../Core/base"
 import { PathDataParser } from "../../Utils/svg"
 
-const CM = layouts.defaultCM;
-
 export class PathNodeProcessor extends base.NodeProcessor {
     validChildren() {
         return base.animationElements.concat(base.descriptiveElements);
@@ -57,7 +55,7 @@ export class PathNodeProcessor extends base.NodeProcessor {
                 throw new Error("Invalid path function: " + command.name);
             }
             var func = (funcs as any)[command.name] as string;
-            shape[func].apply(shape, command.args);
+            (shape as any)[func].apply(shape, command.args);
         }
     }
 }

@@ -16,6 +16,9 @@ export class ShapeIndex {
     private _scene : Nullable<Scene> = null;
     private _shapeIndexes : { [key:string] : Int } = {};
     private _allShapes : Array<Nullable<Shape>> = [];
+    constructor(scene : Scene) {
+        this.scene = scene;
+    }
 
     get scene() { return this._scene; }
     set scene(s) {
@@ -123,13 +126,13 @@ export class ShapeIndex {
     /**
      * Given a coordinate (x,y) returns the topmost shape that contains this point.
      */
-    getShapeAt(x: number, y: number, root?: Nullable<Shape>) {
+    getShapeAt(x: number, y: number, root?: Nullable<Shape>) : Nullable<Shape> {
         root = root || this._scene;
         if (root != null) {
             for (var i = 0;i < root.childCount();i++) {
                 var shape = root.childAtIndex(i);
                 if ((shape as Shape).containsPoint(x, y)) {
-                    return shape;
+                    return shape as Shape;
                 }
             }
         }
@@ -147,7 +150,7 @@ export class ShapeIndex {
         this.add(shape);
         for (var index in shape.children) {
             var child = shape.children[index];
-            this._reIndexShape(child);
+            this._reIndexShape(child as Shape);
         }
     }
 }

@@ -216,22 +216,22 @@ export class DefaultState extends StageState {
     _onKeyDown(eventType : string, source : any, event : JQueryEventObject) {
         if (event.key == "ArrowLeft") {
             this.stage.selection.forEach(function(shape) {
-                shape.move(-1, 0);
+                (shape as any).move(-1, 0);
                 return true;
             });
         } else if (event.key == "ArrowUp") {
             this.stage.selection.forEach(function(shape) {
-                shape.move(0, -1);
+                (shape as any).move(0, -1);
                 return true;
             });
         } else if (event.key == "ArrowDown") {
             this.stage.selection.forEach(function(shape) {
-                shape.move(0, 1);
+                (shape as any).move(0, 1);
                 return true;
             });
         } else if (event.key == "ArrowRight") {
             this.stage.selection.forEach(function(shape) {
-                shape.move(1, 0);
+                (shape as any).move(1, 0);
                 return true;
             });
         } else {
@@ -253,7 +253,7 @@ export class DefaultState extends StageState {
         // See if first any existing items in our selection can handle this "down"
         var hitShape : Nullable<Shape> = null;
         selection.forEach<DefaultState>(function(shape, self : DefaultState) {
-            var controller = shape.controller;
+            var controller = (shape as any).controller;
             var currHitInfo = controller.getHitInfo(currPoint.x, currPoint.y);
             if (currHitInfo != null) {
                 self.stage.cursor = currHitInfo.cursor;
@@ -268,7 +268,8 @@ export class DefaultState extends StageState {
         if (hitShape == null || downPoint == null) {
             selection.clear();
         } else {
-            this.downHitInfo = hitShape.controller.getHitInfo(downPoint.x, downPoint.y);
+            var controller = (hitShape as any).controller;
+            this.downHitInfo = controller.getHitInfo(downPoint.x, downPoint.y);
             if (this.selectingMultiple) {
                 selection.toggleMembership(hitShape);
             } else if ( ! selection.contains(hitShape)) {
@@ -289,7 +290,7 @@ export class DefaultState extends StageState {
 
         // Mouse is not primed for "creating" an object
         selection.forEach(function(shape, self : DefaultState) {
-            var controller = shape.controller;
+            var controller = (shape as any).controller;
             var currHitInfo = controller.getHitInfo(currPoint.x, currPoint.y);
             if (currHitInfo != null) {
                 self.stage.cursor = currHitInfo.cursor;
@@ -300,12 +301,15 @@ export class DefaultState extends StageState {
         if (downPoint != null) {
             // We are in a position to "transform" the entry pressed
             var shapesFound = false;
-            selection.forEach(function(shape, self) {
+            var downX = downPoint.x;
+            var downY = downPoint.y;
+            selection.forEach(function(shape : Shape, self : DefaultState) {
                 shapesFound = true;
                 var savedInfo = selection.getSavedInfo(shape);
-                shape.controller.applyHitChanges(self.downHitInfo, savedInfo,
-                                                 downPoint.x, downPoint.y,
-                                                 currPoint.x, currPoint.y);
+                var controller = (shape as any).controller;
+                controller.applyHitChanges(self.downHitInfo, savedInfo,
+                                           downX, downY,
+                                           currPoint.x, currPoint.y);
             }, this);
             stage.paneNeedsRepaint("edit");
             if ( ! shapesFound ) {
@@ -329,7 +333,8 @@ export class DefaultState extends StageState {
             var hitShape = shapeIndex.getShapeAt(currPoint.x, currPoint.y);
             var selection = this.stage.selection;
             selection.clear();
-            selection.toggleMembership(hitShape);
+            if (hitShape != null)
+                selection.toggleMembership(hitShape);
         }
     }
 }
