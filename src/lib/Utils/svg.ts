@@ -1,4 +1,4 @@
-import { Geom } from "../Geom/index"
+import { Point } from "../Geom/models"
 import { toRadians } from "../Geom/utils"
 import { Int, Nullable } from "../Core/types"
 
@@ -46,18 +46,18 @@ class Token {
     }
 }
 
-class Iterator {
-    protected _current : any = null;
+class Iterator<T> {
+    protected _current : Nullable<T> = null;
 
-    all() : Token[] {
-        var out : Token[] = [];
+    all() : T[] {
+        var out : Array<T> = [];
         while (this.hasNext()) {
-            out.push(this.next() as Token);
+            out.push(this.next() as T);
         }
         return out;
     }
 
-    next() : Nullable<Token> {
+    next() : Nullable<T> {
         var out = this.peek();
         this._current = null;
         return out;
@@ -68,10 +68,10 @@ class Iterator {
         return this._current != null;
     }
 
-    peek() { return null; }
+    peek() : Nullable<T> { return null; }
 }
 
-export class Tokenizer extends Iterator {
+export class Tokenizer extends Iterator<Token> {
     private _input : string
     private _pos : Int
     private L : Int
@@ -87,7 +87,7 @@ export class Tokenizer extends Iterator {
         this._currLine = 0;
     }
 
-    allValues() : any[] {
+    allValues() {
         var out = [];
         while (this.hasNext()) {
             out.push((this.next() as Token).value);
@@ -98,6 +98,58 @@ export class Tokenizer extends Iterator {
     peekType() {
         var out = this.peek();
         return out == null ? null : out.type;
+    }
+
+    /**
+     * Ensures that a token of a given type is returned.
+     */
+    ensureToken(toktype : any, peekOnly : boolean = false) : Nullable<Token> {
+        var out = this.peek();
+        var foundType = "EOF";
+        if (out != null) {
+            foundType = out.type;
+        }
+        if (foundType != toktype) {
+            var msg = "Expected token type (" + toktype + ") but found (" + foundType + ") instead.";
+            if (out != null)
+                this._throw(out.line, out.column, msg);
+        }
+        if (!peekOnly) {
+            this.next();
+        }
+        return out == null ? null : out.value;
+    }
+
+    ensureNumber() : Nullable<number> { 
+        var token = this.ensureToken("NUMBER");
+        if (token == null) return null;
+        return token.value as number;
+    }
+    ensurePoint() : Nullable<Point> {
+        var x = this.ensureNumber();
+        if (x == null) return null;
+        var y = this.ensureNumber();
+        if (y == null) return null;
+        return new Point(x, y);
+    }
+
+    _throw(line : Int, col : Int, msg : string) {
+        throw new Error("Line " + line + ", Col: " + col + ": " + msg);
+    }
+
+    peek() : Nullable<Token> {
+        while (this._current == null) {
+            this._skipSpaces();
+            var c = this._currch();
+            if (c == null) {
+                break ;
+            }
+
+            var line = this._currLine;
+            var col = this._currCol;
+            this._current = this._readToken(line, col);
+        }
+        return this._current;
     }
 
     /**
@@ -118,7 +170,7 @@ export class Tokenizer extends Iterator {
      *  sign: "+" | "-"
      *  digit-sequence: [0-9]+
      */
-    _tokenizeNumber() {
+    _tokenizeNumber() : number {
         var c = this._currch();
         var out = "";
         var isFloat = false;
@@ -155,36 +207,6 @@ export class Tokenizer extends Iterator {
             isFloat = true;
         }
         return isFloat ? parseFloat(out) : parseInt(out);
-    }
-
-    /**
-     * Ensures that the next token is a number.
-     */
-    ensureToken(toktype : any, peekOnly : boolean = false) {
-        var out = this.peek();
-        var foundType = "EOF";
-        if (out != null) {
-            foundType = out.type;
-        }
-        if (foundType != toktype) {
-            var msg = "Expected token type (" + toktype + ") but found (" + foundType + ") instead.";
-            this._throw(out.line, out.column, msg);
-        }
-        if (!peekOnly) {
-            this.next();
-        }
-        return out.value;
-    }
-
-    _throw(line : Int, col : Int, msg : string) {
-        throw new Error("Line " + line + ", Col: " + col + ": " + msg);
-    }
-
-    ensureNumber() { return this.ensureToken("NUMBER"); }
-    ensurePoint() {
-        var x = this.ensureNumber();
-        var y = this.ensureNumber();
-        return new Geom.Models.Point(x, y);
     }
 
     _advance() {
@@ -236,21 +258,6 @@ export class Tokenizer extends Iterator {
         }
         return null;
     }
-
-    peek() {
-        while (this._current == null) {
-            this._skipSpaces();
-            var c = this._currch();
-            if (c == null) {
-                break ;
-            }
-
-            var line = this._currLine;
-            var col = this._currCol;
-            this._current = this._readToken(line, col);
-        }
-        return this._current;
-    }
 }
 
 export class PathDataTokenizer extends Tokenizer {
@@ -269,7 +276,12 @@ export class PathDataTokenizer extends Tokenizer {
     }
 }
 
-export class PathDataParser extends Iterator {
+export class NameAndArgs {
+    name: string;
+    args : any[];
+}
+
+export class PathDataParser extends Iterator<NameAndArgs> {
     private _tokenizer : PathDataTokenizer;
     private _last : Nullable<string> = null;
     constructor(input : string) {
@@ -277,11 +289,12 @@ export class PathDataParser extends Iterator {
         this._tokenizer = new PathDataTokenizer(input);
     }
 
-    peek() {
+    peek() : Nullable<NameAndArgs> {
         if (this._current == null) {
             var tokenizer = this._tokenizer;
             if (!tokenizer.hasNext()) return null;
             var token = tokenizer.peek();
+            if (token == null) return null;
             var currCommand = null;
             if (token.type == "NUMBER") {
                 // then use the "last command as is
@@ -293,10 +306,10 @@ export class PathDataParser extends Iterator {
                 currCommand = (tokenizer.next() as Token).value as any;
             }
             this._last = currCommand;
-            var args = [];
+            var args : any[] = [];
             if (currCommand.name == "closePath") {
             } else if (currCommand.name == "moveTo") {
-                var point = tokenizer.ensurePoint();
+                var point = tokenizer.ensurePoint() as Point;
                 args = [point.x, point.y];
             } else if (currCommand.name == "lineTo") {
                 var point = tokenizer.ensurePoint();
@@ -341,7 +354,7 @@ export class PathDataParser extends Iterator {
                 var y2 = tokenizer.ensureNumber();
                 args = [ x1, y1, x2, y2 ];
             } else {
-                tokenizer._throw(token.line, token.col, "Invalid token: " + token.type + " - " + token.value);
+                tokenizer._throw(token.line, token.column, "Invalid token: " + token.type + " - " + token.value);
             }
             args.push(currCommand.isRelative);
             this._current = {'name': currCommand.name, 'args': args};
@@ -366,18 +379,18 @@ export class TransformTokenizer extends Tokenizer {
     }
 }
 
-export class TransformParser extends Iterator {
+export class TransformParser extends Iterator<NameAndArgs> {
     private _tokenizer : TransformTokenizer;
     constructor(input : string) {
         super();
         this._tokenizer = new TransformTokenizer(input);
     }
 
-    peek() {
+    peek() : Nullable<NameAndArgs> {
         if (this._current == null) {
             var tokenizer = this._tokenizer;
-            if (!tokenizer.hasNext()) return null;
-            var token = tokenizer.next() as Token;
+            var token : Nullable<Token> = tokenizer.next();
+            if (token == null) return null;
             var tokValue = token.value.toLowerCase();
             if (tokValue == "matrix") {
                 var a = tokenizer.ensureNumber();
@@ -392,25 +405,25 @@ export class TransformParser extends Iterator {
                 var ty = 0;
                 token = tokenizer.peek();
                 if (token != null && token.type == "NUMBER") {
-                    ty = tokenizer.ensureNumber();
+                    ty = tokenizer.ensureNumber() as number;
                 }
                 this._current = {'name': "translate", 'args': [tx, ty]};
             } else if (tokValue == "scale") {
-                var sx = tokenizer.ensureNumber();
+                var sx = tokenizer.ensureNumber() as number;
                 var sy = sx;
                 token = tokenizer.peek();
                 if (token != null && token.type == "NUMBER") {
-                    sy = tokenizer.ensureNumber();
+                    sy = tokenizer.ensureNumber() as number;
                 }
                 this._current = {'name': "scale", 'args': [sx, sy]};
             } else if (tokValue == "rotate") {
-                var theta = tokenizer.ensureNumber();
+                var theta = tokenizer.ensureNumber() as number;
                 this._current = {'name': "rotate", 'args': [toRadians(theta)]};
             } else if (tokValue == "skewx") {
-                var sx = tokenizer.ensureNumber();
+                var sx = tokenizer.ensureNumber() as number;
                 this._current = {'name': "skew", 'args': [toRadians(sx), 0]};
             } else if (tokValue == "skewy") {
-                var sy = tokenizer.ensureNumber();
+                var sy = tokenizer.ensureNumber() as number;
                 this._current = {'name': "skew", 'args': [0, toRadians(sy)]};
             } else {
                 tokenizer._throw(token.line, token.column, "Invalid token: " + token.type + " - " + token.value);
@@ -427,18 +440,18 @@ export class NumbersTokenizer extends Tokenizer {
     }
 }
 
-export class NumbersParser extends Iterator {
+export class NumbersParser extends Iterator<number> {
     private _tokenizer : NumbersTokenizer
     constructor(input : string) {
         super();
         this._tokenizer = new NumbersTokenizer(input);
     }
 
-    peek() {
+    peek() : Nullable<number> {
         if (this._current == null) {
             var tokenizer = this._tokenizer;
-            if (!tokenizer.hasNext()) return null;
             var token = tokenizer.peek();
+            if (token == null) return null;
             if (token.type != "NUMBER") {
                 throw new Error("Expected Number.  Found: " + token.type);
             }

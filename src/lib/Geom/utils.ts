@@ -22,7 +22,7 @@ export interface CurveBounds  {
     tvalues : Array<number>;
 };
 
-export function toRadians(degrees : number) {
+export function toRadians(degrees : number) : number {
     return degrees * PI / 180.0
 }
 

@@ -1,18 +1,10 @@
 
 import * as base from "./base"
-import { Core } from "../../Core/index"
-import { Geom } from "../../Geom/index"
-import { Utils } from "../../Utils/index"
 import * as models from "../models"
 import { Int, Nullable } from "../../Core/types"
-
-const NumbersTokenizer = Utils.SVG.NumbersTokenizer;
-const PathDataParser = Utils.SVG.PathDataParser;
-const TransformParser = Utils.SVG.TransformParser;
-const Length = Geom.Models.Length;
-const Point = Geom.Models.Point;
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
+import { Group } from "../../Core/models"
+import { Element } from "../../Core/base"
+import { forEachAttribute } from "../../Utils/dom"
 
 export class GNodeProcessor extends base.NodeProcessor {
     validChildren() {
@@ -36,7 +28,7 @@ export class GNodeProcessor extends base.NodeProcessor {
     }
 
     processElement(elem : HTMLElement, parent : Nullable<Element>) : Nullable<Element> {
-        var out = new Core.Models.Group();
+        var out = new Group();
         var bounds = parent ? new Bounds() : this.configs.bounds.copy();
         var viewBox = null;
         this.processStyleAttributes(elem, out);
@@ -44,21 +36,21 @@ export class GNodeProcessor extends base.NodeProcessor {
         this.processTransformAttributes(elem, out);
         this.processMetaAttributes(elem, out);
         var self = this;
-        forEachAttribute(elem, function(attrib, value) {
+        forEachAttribute(elem, function(attrib : string, value : any) {
             if ([ "xmlns" ].indexOf(attrib) >= 0 ||
                 attrib.startsWith("sodipodi:") ||
                 attrib.startsWith("inkscape:")) {
                     // ignore list
                 console.log("Ignoring attribute: ", attrib, " = ", value);
-            } else if (self.validAttributes.indexOf(attrib) >= 0) {
+            } else if (self.validAttributes().indexOf(attrib) >= 0) {
                 // Valid attribute, do nothing
             } else {
                 throw new Error("Cannot process attribute: " + attrib);
             }
         });
         out.setBounds(bounds);
-        out.viewBox = viewBox;
-        parent.add(out);
+        if (viewBox != null) out.viewBox = viewBox;
+        if (parent != null) parent.add(out);
         this.processChildrenOf(elem, out);
         return out;
     }

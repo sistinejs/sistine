@@ -1,5 +1,5 @@
 
-import { Int } from "../Core/types"
+import { Int, Undefined } from "../Core/types"
 
 const fontMetrics : { [key : string] : any } = {
 }
@@ -73,7 +73,7 @@ export function fillChildComponent(elem : JQuery<HTMLElement>) {
     elem.width(finalWidth);
 }
 
-export function forEachChild(elem : HTMLElement, visitor : (child : Element, index : Int) => boolean) {
+export function forEachChild(elem : HTMLElement, visitor : (child : Element, index : Int) => Undefined<boolean>) {
     var children = elem.children;
     var L = children.length;
     for (var i = 0;i < L;i++) {
@@ -83,7 +83,7 @@ export function forEachChild(elem : HTMLElement, visitor : (child : Element, ind
     }
 }
 
-export function forEachNode(elem : HTMLElement, visitor : (child : ChildNode, index : Int) => boolean) {
+export function forEachNode(elem : HTMLElement, visitor : (child : ChildNode, index : Int) => Undefined<boolean>) {
     var children = elem.childNodes;
     var L = children.length;
     for (var i = 0;i < L;i++) {
@@ -93,7 +93,7 @@ export function forEachNode(elem : HTMLElement, visitor : (child : ChildNode, in
     }
 }
 
-export function forEachAttribute(elem : HTMLElement, visitor : (name : string, value : any) => boolean) {
+export function forEachAttribute(elem : HTMLElement, visitor : (name : string, value : any) => Undefined<boolean>) {
     var nodeNameMap = elem.attributes;
     for (var i = 0;i < nodeNameMap.length; i++) {
         var attrib = nodeNameMap[i];

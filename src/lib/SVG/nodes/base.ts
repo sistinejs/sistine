@@ -1,6 +1,12 @@
 
 import { Utils } from "../../Utils/index"
+import { Nullable } from "../../Core/types"
 import { Element } from "../../Core/base"
+import { Shape } from "../../Core/models"
+import { SVGLoader } from "../loader"
+import { Bounds, Length } from "../../Geom/models"
+import { Token, TransformParser } from "../../Utils/svg"
+
 const forEachChild = Utils.DOM.forEachChild;
 
 export const conditionalProcessingAttributes = [
@@ -52,7 +58,7 @@ export const shapeElements = [
 export const structuralElements = [ "defs", "g", "svg", "symbol", "use" ];
 export const gradientElements = [ "linearGradient", "radialGradient" ];
 
-function getAttribute(elem, attrib) {
+function getAttribute(elem : HTMLElement, attrib : string) {
     var value = elem.getAttribute(attrib);
     for (var i = 2;i < arguments.length;i++) {
         value = arguments[i](value);
@@ -60,15 +66,15 @@ function getAttribute(elem, attrib) {
     return value;
 }
 
-function getAttributeOrStyle(elem, attribName, cssStyles, styleName) {
+function getAttributeOrStyle(elem : HTMLElement, attribName : string, cssStyles : any, styleName : string) {
     return elem.getAttribute(attribName) || cssStyles[styleName];
 }
 
 /**
  * Processing of different kinds of attributes.
  */
-function parseCSSStyles(value) {
-    var out = {};
+function parseCSSStyles(value : string) {
+    var out : any = {};
     if (value && value != null) {
         var values = value.split(";");
         values.forEach(function(elem) {
@@ -87,10 +93,11 @@ function parseCSSStyles(value) {
     return out;
 }
 
-function parseList(value, delimiter) {
-    var out = [];
+function parseList(value : string | null, delimiter : string) {
+    if (value == null) return [];
+    var out : string[] = [];
     var values = (value || "").split(delimiter);
-    values.forEach(function(v) {
+    values.forEach(function(v : string) {
         v = v.trim();
         if (v.length > 0) {
             out.push(v);
@@ -101,7 +108,7 @@ function parseList(value, delimiter) {
 
 export class NodeProcessor {
     loader : any;
-    constructor(loader) {
+    constructor(loader : SVGLoader) {
         this.loader = loader;
     }
 
@@ -140,23 +147,29 @@ export class NodeProcessor {
     /**
      * Processing of different kinds of attributes.
      */
-    processStyleAttributes(elem, shape) {
-        var cssStyles = parseCSSStyles(elem.getAttribute("style"));
+    processStyleAttributes(elem : HTMLElement, element : Nullable<Element>) {
+        var attrib = elem.getAttribute("style");
+        var cssStyles = parseCSSStyles(attrib as string);
+        var shape = element as Shape;
         shape.fillRule = getAttributeOrStyle(elem, "fill-rule", cssStyles, "fill-rule");
         shape.fillOpacity = getAttributeOrStyle(elem, "fill-opacity", cssStyles, "fill-opacity");
-        shape.fillStyle = this.processUrl(shape, getAttributeOrStyle(elem, "fill", cssStyles, "fill"));
-        shape.strokeStyle = this.processUrl(shape, getAttributeOrStyle(elem, "stroke", cssStyles, "stroke"));
-        shape.lineWidth = getAttributeOrStyle(elem, "stroke-width", cssStyles, "stroke-width");
+        shape.setFillStyle(this.processUrl(shape, getAttributeOrStyle(elem, "fill", cssStyles, "fill")));
+        shape.setStrokeStyle(this.processUrl(shape, getAttributeOrStyle(elem, "stroke", cssStyles, "stroke")));
+        shape.setLineWidth(getAttributeOrStyle(elem, "stroke-width", cssStyles, "stroke-width"));
         shape.lineCap = getAttributeOrStyle(elem, "stroke-linecap", cssStyles, "stroke-linecap");
         shape.lineJoin = getAttributeOrStyle(elem, "stroke-linejoin", cssStyles, "stroke-linejoin");
-        shape.miterLimit = elem.getAttribute("stroke-miterlimit");
+        shape.miterLimit = parseFloat(elem.getAttribute("stroke-miterlimit") as string);
         shape.strokeOpacity = getAttributeOrStyle(elem, "stroke-opacity", cssStyles, "stroke-opacity");
         shape.dashArray = parseList(elem.getAttribute("stroke-dasharray"), ",").map(parseFloat);
-        shape.dashOffset = elem.getAttribute("stroke-dashoffset");
+
+        var dashOffset = elem.getAttribute("stroke-dashoffset");
+        if (dashOffset != null) {
+            shape.dashOffset = parseFloat(dashOffset);
+        }
         return shape;
     }
 
-    processUrl(shape, value) {
+    processUrl(shape : Element, value : string)  {
         if (value == null) return value;
         value = value.trim();
         if (!value.startsWith("url(")) {
@@ -172,7 +185,7 @@ export class NodeProcessor {
         return this.getRef(shape, value);
     }
 
-    getRef(shape, value) {
+    getRef(shape : Element, value : string) {
         // Look for a definition to use
         var id = value;
         if (!id.startsWith("#")) {
@@ -186,47 +199,48 @@ export class NodeProcessor {
         return target;
     }
 
-    processMetaAttributes(elem, shape) {
+    processMetaAttributes(elem : HTMLElement, shape : Element) {
         if (elem.hasAttribute("version")) {
-            shape.setMiscData("version", elem.getAttribute("version"));
+            shape.setMetaData("version", elem.getAttribute("version"));
         }
         if (elem.hasAttribute("baseProfile")) {
-            shape.setMiscData("baseProfile", elem.getAttribute("baseProfile"));
+            shape.setMetaData("baseProfile", elem.getAttribute("baseProfile"));
         }
     }
 
-    processBoundsAttributes(elem, bounds) {
+    processBoundsAttributes(elem : HTMLElement, bounds : Bounds) {
         if (elem.hasAttribute("x")) {
-            bounds.x = elem.getAttribute("x");
+            bounds.x = parseFloat(elem.getAttribute("x") as string);
         }
         if (elem.hasAttribute("y")) {
-            bounds.y = elem.getAttribute("y");
+            bounds.y = parseFloat(elem.getAttribute("y") as string);
         }
         if (elem.hasAttribute("width")) {
-            bounds.width = elem.getAttribute("width");
+            bounds.width = parseFloat(elem.getAttribute("width") as string);
         }
         if (elem.hasAttribute("height")) {
-            bounds.height = elem.getAttribute("height");
+            bounds.height = parseFloat(elem.getAttribute("height") as string);
         }
     }
 
-    processTransformAttributes(elem : HTMLElement, shape : Nullable<Element>, attribName? : string) {
-        var attribName = attribName || "transform";
-        var attribValue = elem.getAttribute("transform");
+    processTransformAttributes(elem : HTMLElement, shape : Nullable<Element>, attribName : string = "transform") {
+        var attribValue = elem.getAttribute(attribName);
         if (attribValue) {
             var p = new TransformParser(attribValue);
             while (p.hasNext()) {
                 var command = p.next();
-                if (command.name == "matrix") {
-                    shape.transform.apply(shape, command.args);
-                } else {
-                    shape[command.name].apply(shape, command.args);
+                if (command != null) {
+                    if (command.name == "matrix") {
+                        shape.transform.apply(shape, command.args);
+                    } else {
+                        shape[command.name].apply(shape, command.args);
+                    }
                 }
             }
         }
     }
 
-    ensureAttribute(elem, attrib) {
+    ensureAttribute(elem : HTMLElement, attrib : string) {
         var value = elem.getAttribute(attrib) || null;
         if (value == null) {
             throw new ("Element MUST have ID");

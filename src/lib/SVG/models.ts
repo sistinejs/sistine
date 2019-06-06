@@ -11,7 +11,6 @@ enum Alignment {
 }
 
 export class SVG extends Group {
-    private _viewBox : Bounds
     private _preserveAspectRatio = false;
     private _xAlign : Alignment
     private _yAlign : Alignment
@@ -23,12 +22,6 @@ export class SVG extends Group {
         this._xAlign = (configs.xalign.toLowerCase() as Alignment || Alignment.Mid)
         this._yAlign = (configs.yalign.toLowerCase() as Alignment || Alignment.Mid)
         this._meetOrSlice = configs.meetOrSlice || "meet";
-    }
-
-    get viewBox() { return this._viewBox; } 
-    set viewBox(vb) {
-        this._viewBox = vb;
-        this.markTransformed();
     }
 
     applyTransforms(ctx : any) {

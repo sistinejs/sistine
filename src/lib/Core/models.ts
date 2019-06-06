@@ -1,12 +1,9 @@
 
 import * as mixins from "./mixins";
-import * as base from "./base";
 import * as events from "./events";
-import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
+import { Element } from "../Core/base"
 import { Int, Nullable } from "../Core/types"
-
-type Element = base.Element;
+import { Bounds } from "../Geom/models"
 
 /**
  * Holds information about the instance of a shape.
@@ -26,7 +23,7 @@ export class Shape extends mixins.Styleable {
     /**
      * A easy wrapper to control shape dimensions by just setting its bounds.
      */
-    setBounds(newBounds : geom.Bounds) : boolean {
+    setBounds(newBounds : Bounds) : boolean {
         if (this.canSetBounds(newBounds)) {
             var oldBounds = this.boundingBox.copy();
             var event = new events.BoundsChanged(this, oldBounds, newBounds);
@@ -38,8 +35,8 @@ export class Shape extends mixins.Styleable {
         }
         return false;
     }
-    canSetBounds(newBounds: geom.Bounds) : boolean { return true; }
-    _setBounds(newBounds : geom.Bounds) {
+    canSetBounds(newBounds: Bounds) : boolean { return true; }
+    _setBounds(newBounds : Bounds) {
         throw Error("Not Implemented");
     }
 
@@ -64,17 +61,18 @@ export class Shape extends mixins.Styleable {
  * can extend this to performing layouts etc on child chapes.
  */
 export class Group extends Shape {
-    protected _bounds : Nullable<geom.Bounds>;
+    protected _bounds : Nullable<Bounds>;
+    protected _viewBox = new Bounds();
     constructor(configs? : any) {
         super((configs = configs || {}));
-        this._bounds = configs.bounds || new geom.Bounds();
+        this._bounds = configs.bounds || new Bounds();
     }
 
     childAtIndex(i : Int) : Nullable<Element> { return this._children[i]; } 
     hasChildren() : boolean { return this._children.length > 0; } 
     childCount() : Int { return this._children.length; } 
 
-    _setBounds(newBounds : Nullable<geom.Bounds>) {
+    _setBounds(newBounds : Nullable<Bounds>) {
         this._bounds = newBounds == null ? null : newBounds.copy();
     }
 
@@ -82,12 +80,18 @@ export class Group extends Shape {
         if (this._bounds) {
             return this._bounds.copy();
         } else {
-            var out = new geom.Bounds(0, 0, 0, 0);
+            var out = new Bounds(0, 0, 0, 0);
             for (var i = 0;i < this._children.length;i++) {
                 out.union((this._children[i] as Shape).boundingBox);
             }
             return out;
         }
+    }
+
+    get viewBox() { return this._viewBox; } 
+    set viewBox(vb) {
+        this._viewBox = vb;
+        this.markTransformed();
     }
 }
 
