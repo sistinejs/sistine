@@ -6,7 +6,7 @@ import * as Utils from "../Utils/index"
  * Decides how text should be rendered.
  */
 class Layout {
-    constructor(configs : any) {
+    constructor(configs? : any) {
     }
 
     /**
@@ -22,8 +22,8 @@ class Layout {
  * characters already in the text.
  */
 class PreformattedLayout extends Layout {
-    constructor(configs) {
-        super();
+    constructor(configs? : any) {
+        super(configs);
     }
 }
 

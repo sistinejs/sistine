@@ -40,12 +40,12 @@ export class ConstraintManager implements EventHandler {
             for (var key in attribs) {
                 var attrib : any = attribs[key];
                 if (attrib.dimension == 1) {
-                    target.set(key, attrib.value * width);
+                    (target as any).set(key, attrib.value * width);
                 } else if (attrib.dimension == 2) {
-                    target.set(key, attrib.value * height);
+                    (target as any).set(key, attrib.value * height);
                 } else {
                     var lsquared = width * width + height * height;
-                    target.set(key , Math.sqrt(lsquared / 2.0));
+                    (target as any).set(key , Math.sqrt(lsquared / 2.0));
                 }
             }
         }
@@ -81,7 +81,7 @@ export class ConstraintManager implements EventHandler {
 
         if (length != null) {
             if (length.isAbsolute) {
-                target.set(attrib, length.pixelValue);
+                (target as any).set(attrib, length.pixelValue);
             } else {
                 this._addConstraint(target, attrib, {
                     value: length.value / 100.0,

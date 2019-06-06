@@ -51,7 +51,7 @@ export class Selection extends EventSource {
                 this._shapes.push(shape);
             }
             this._shapesByUUID[shape.uuid] = shape;
-            this._savedInfos[shape.uuid] = shape.controller.snapshotFor();
+            this._savedInfos[shape.uuid] = (shape as any).controller.snapshotFor();
             this.triggerOn("ShapesSelected", event);
         }
     }
@@ -76,7 +76,7 @@ export class Selection extends EventSource {
     checkpointShapes(hitInfo : HitInfo) {
         // Updated the save info for all selected shapes
         this.forEach<Selection>(function(shape : Shape, self : Selection) {
-            self._savedInfos[shape.uuid] = shape.controller.snapshotFor(hitInfo);
+            self._savedInfos[shape.uuid] = (shape as any).controller.snapshotFor(hitInfo);
             return true;
         }, this);
     }
@@ -191,7 +191,7 @@ export class Selection extends EventSource {
                 newParent.setBounds(currBounds);
                 currGroup.shapes.forEach(function(child : Shape, _index : Int) {
                     newParent.add(child);
-                    child.setLocation(child.boundingBox.x - currBounds.x, child.boundingBox.y - currBounds.y);
+                    (child as any).setLocation(child.boundingBox.x - currBounds.x, child.boundingBox.y - currBounds.y);
                 });
                 this.add(newParent);
             }
@@ -213,7 +213,7 @@ export class Selection extends EventSource {
                     if (newParent != null)
                         newParent.add(child);
                     if (child instanceof Shape) {
-                        child.setLocation(lBounds.x + child.boundingBox.x,
+                        (child as any).setLocation(lBounds.x + child.boundingBox.x,
                                           lBounds.y + child.boundingBox.y);
                         selection.add(child);
                     }

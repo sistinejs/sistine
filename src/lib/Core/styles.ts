@@ -59,7 +59,7 @@ export class Style extends Element {
                 shape.boundingBox.height != this._shapeH;
     }
 
-    _createStyle(shape : Shape, ctx : any) : any {
+    _createStyle(shape : Styleable, ctx : any) : any {
         return null;
     }
 }
@@ -71,7 +71,7 @@ export class Literal extends Style {
         this._value = value;
     }
 
-    _createStyle(shape : Shape, ctx : any) : any {
+    _createStyle(shape : Styleable, ctx : any) : any {
         return this._value;
     }
 
@@ -163,7 +163,7 @@ export class RadialGradient extends Gradient {
         this.r1 = Length.parse(r1);
     }
 
-    _createStyle(shape : Shape, ctx : any) {
+    _createStyle(shape : Styleable, ctx : any) {
         var x0, y0, r0, x1, y1, r1;
         var boundsX, boundsY, boundsW, boundsH;
         if (this._relativeToBounds || !shape.hasParent) {

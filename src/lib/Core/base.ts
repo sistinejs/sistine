@@ -218,7 +218,7 @@ export class Element extends EventSource {
      */
     childCount() : Int { return this._children.length; } 
 
-    get children : Element[] { return this._children; }
+    get children() : Element[] { return this._children; }
 
     childAtIndex(i : Int) : Nullable<Element> { return this._children[i]; }
 
