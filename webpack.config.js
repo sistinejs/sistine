@@ -105,7 +105,7 @@ module.exports = (env, options) => {
         libraryTarget: 'umd',
         libraryExport: 'default',
         path: path.resolve(__dirname, 'dist'),
-        filename: '/index.js'
+        filename: 'index.js'
     };
     if (options.debug) {
         output.filename = "[name].js";
@@ -195,11 +195,11 @@ module.exports = (env, options) => {
                 }
             ]
         },
-        plugins: plugins
+        plugins: plugins,
+        resolve: { extensions: ['.js', '.jsx', '.ts', '.tsx'] }
     };
     if (options.debug || options.dev) {
         webpack_configs.devtool = 'inline-source-map';
-        webpack_configs.resolve = { extensions: ['.js', '.jsx', '.ts', '.tsx'] };
         webpack_configs.devServer = {
             hot: true,
             before: function(app, server) {
