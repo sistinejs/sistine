@@ -34,13 +34,13 @@ module.exports = (env, options) => {
         new HtmlWebpackPlugin({
             title: "Demo List Page",
             myPageHeader: "Demo List",
-            template: path.resolve(__dirname, 'src/demos/index.ejs'),
+            template: path.resolve(__dirname, 'src/demos/index.html'),
         }),
         new HtmlWebpackPlugin({
             inject: "head",
             title: "SVG Comparison Demo",
             myPageHeader: "SVG Comparison Demo",
-            template: path.resolve(__dirname, 'src/demos/svgcmp/index.ejs'),
+            template: path.resolve(__dirname, 'src/demos/svgcmp/index.html'),
             filename: "svgcmp.html"
         }),
         new HtmlWebpackPlugin({
