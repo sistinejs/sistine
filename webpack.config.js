@@ -44,7 +44,6 @@ module.exports = (env, options) => {
             filename: "svgcmp.html"
         }),
         new HtmlWebpackPlugin({
-            hash: true,
             title: "Painting Application Demo",
             myPageHeader: "Painting Application Demo",
             template: path.resolve(__dirname, 'src/demos/paint/index.ejs'),
@@ -52,7 +51,7 @@ module.exports = (env, options) => {
         }),
         new HtmlWebpackTagsPlugin({
             files: [ "svgcmp.html" ],
-            assets: [
+            tags: [
                 "./src/ext/spectrum/spectrum.css",
                 "./src/ext/slider/jquery.limitslider.js",
                 "./src/ext/spectrum/spectrum.js",
@@ -92,10 +91,7 @@ module.exports = (env, options) => {
             ],
             append: true
         }),
-        new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery"
-        }),
+        // new webpack.ProvidePlugin({ $: "jquery", jQuery: "jquery" }),
         new webpack.HotModuleReplacementPlugin()
     ];
     if (!isDevelopment) {
@@ -120,7 +116,8 @@ module.exports = (env, options) => {
             rules: [
                 // The rule for rendering index.html from an ejs template.
                 {
-                  test: /\/src\/demos\/.*index.ejs$/,
+                  // test: /\/src\/demos\/.*index.ejs$/,
+                  test: /\/src\/.*index.ejs$/,
                   use: [{
                     loader: 'extract-loader'
                   },

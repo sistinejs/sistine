@@ -312,7 +312,7 @@ export class PathDataParser extends Iterator<NameAndArgs> {
                 var point = tokenizer.ensurePoint() as Point;
                 args = [point.x, point.y];
             } else if (currCommand.name == "lineTo") {
-                var point = tokenizer.ensurePoint();
+                var point = tokenizer.ensurePoint() as Point;
                 args = [point.x, point.y];
             } else if (currCommand.name == "hlineTo") {
                 var value = tokenizer.ensureNumber();

@@ -93,7 +93,11 @@ export class StateMachine {
   handle(eventType: any, source: EventSource, eventData: any) {
     if (this._currentState == null) return;
 
-    var nextState = this._currentState.handle(eventType, source, eventData);
+    var nextState: any = this._currentState.handle(
+      eventType,
+      source,
+      eventData
+    );
     if (nextState != null) {
       if (nextState == "") {
         if (this._rootState != null) {

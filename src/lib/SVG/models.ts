@@ -1,5 +1,4 @@
 
-import { Point, Bounds } from "../Geom/models"
 import { Shape, Group } from "../Core/models"
 import { ShapeController } from "../Core/controller"
 

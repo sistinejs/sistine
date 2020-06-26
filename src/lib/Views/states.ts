@@ -1,10 +1,10 @@
 
 import { State, EventType, EventSource } from "../Core/events"
-import { Int, Nullable } from "../Core/types"
+import { Nullable } from "../Core/types"
 import { Shape } from "../Core/models"
 import { Stage } from "./stage"
 import { Pane, BGPane } from "./panes"
-import { Point } from "../Geom/models"
+import { Point, Bounds } from "../Geom/models"
 
 export class StageState extends State {
     stage : Stage
