@@ -1,10 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
-const HTMLWebpackPlugin = require('html-webpack-plugin');
-const HTMLWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
-// const CleanWebpackPlugin = require("clean-webpack-plugin");
+// const CopyPlugin = require('copy-webpack-plugin');
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 // Read Samples first
 function readdir(path) {
@@ -23,29 +26,31 @@ function readdir(path) {
 
 module.exports = (env, options) => {
     console.log("Options: ", options);
+    var isDevelopment = options.mode == "development"
     var plugins = [
         // new uglifyJsPlugin(),
-        // new CleanWebpackPlugin('dist'),
-        new HTMLWebpackPlugin({
+        // new BundleAnalyzerPlugin(),
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin({
             title: "Demo List Page",
             myPageHeader: "Demo List",
             template: path.resolve(__dirname, 'src/demos/index.ejs'),
         }),
-        new HTMLWebpackPlugin({
+        new HtmlWebpackPlugin({
             inject: "head",
             title: "SVG Comparison Demo",
             myPageHeader: "SVG Comparison Demo",
             template: path.resolve(__dirname, 'src/demos/svgcmp/index.ejs'),
             filename: "svgcmp.html"
         }),
-        new HTMLWebpackPlugin({
+        new HtmlWebpackPlugin({
             hash: true,
             title: "Painting Application Demo",
             myPageHeader: "Painting Application Demo",
             template: path.resolve(__dirname, 'src/demos/paint/index.ejs'),
             filename: "paint.html"
         }),
-        new HTMLWebpackIncludeAssetsPlugin({
+        new HtmlWebpackTagsPlugin({
             files: [ "svgcmp.html" ],
             assets: [
                 "./src/ext/spectrum/spectrum.css",
@@ -57,9 +62,9 @@ module.exports = (env, options) => {
             ],
             append: true
         }),
-        new HTMLWebpackIncludeAssetsPlugin({
+        new HtmlWebpackTagsPlugin({
             files: [ "paint.html" ],
-            assets: [
+            tags: [
                 "./src/ext/spectrum/spectrum.css",
                 "./src/ext/slider/jquery.limitslider.js",
                 "./src/ext/spectrum/spectrum.js",
@@ -93,11 +98,8 @@ module.exports = (env, options) => {
         }),
         new webpack.HotModuleReplacementPlugin()
     ];
-    if (options.mode == "production") {
+    if (!isDevelopment) {
         plugins.splice(0, 0, new uglifyJsPlugin());
-    } else if (options.debug) {
-        const CleanWebpackPlugin = require("clean-webpack-plugin");
-        plugins.splice(0, 0, new CleanWebpackPlugin('dist'));
     }
 
     var output = {
@@ -107,7 +109,7 @@ module.exports = (env, options) => {
         path: path.resolve(__dirname, 'dist'),
         filename: 'index.js'
     };
-    if (options.debug) {
+    if (isDevelopment) {
         output.filename = "[name].js";
     }
 
@@ -125,7 +127,7 @@ module.exports = (env, options) => {
                   {
                     loader: 'html-loader',
                     options: {
-                      interpolate: 'require'
+                      // interpolate: 'require'
                     }
                   },
                   {
@@ -181,12 +183,22 @@ module.exports = (env, options) => {
                     use: ['ts-loader']
                 },
                 {
-                    test: /\.scss$/,
-                    use: [
-                        'style-loader', 
-                        'css-loader', 
-                        'postcss-loader', 
-                        'sass-loader'
+                    test: /\.module\.s(a|c)ss$/,
+                    loader: [
+                      isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
+                      {
+                        loader: 'css-loader',
+                        options: {
+                          modules: true,
+                          sourceMap: isDevelopment
+                        }
+                      },
+                      {
+                        loader: 'sass-loader',
+                        options: {
+                          sourceMap: isDevelopment
+                        }
+                      }
                     ]
                 },
                 {
@@ -196,9 +208,11 @@ module.exports = (env, options) => {
             ]
         },
         plugins: plugins,
-        resolve: { extensions: ['.js', '.jsx', '.ts', '.tsx'] }
+        resolve: {
+            extensions: ['.js', '.jsx', '.ts', '.tsx', '.scss']
+        }
     };
-    if (options.debug || options.dev) {
+    if (isDevelopment) {
         webpack_configs.devtool = 'inline-source-map';
         webpack_configs.devServer = {
             hot: true,

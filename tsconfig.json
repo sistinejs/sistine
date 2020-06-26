@@ -1,15 +1,23 @@
 {
+    "exclude": [
+        "node_modules/*",
+        "dist/*"
+    ],
   "compilerOptions": {
+    "skipLibCheck": true,
+    "sourceMap": true,
     "outDir": "./dist/",
     "noImplicitAny": true,
     "module": "es6",
     "target": "es5",
-    "jsx": "react",
-    "allowJs": true,
+    "allowJs": false,
     "strictNullChecks": true,
-    "typeRoots": [ "node_modules/types" ],
-    "types": [ "jquery" ],
-    "lib":[ "es2015", "dom" ],
+    "typeRoots": [ 
+        "node_modules/types"
+    ],
+    "types": [ "jquery", "node" ],
+    "lib":[ "es2015", "dom", "esnext" ],
+    "experimentalDecorators": true,
     "plugins": [
       { "name": "typescript-tslint-plugin" }
     ]
