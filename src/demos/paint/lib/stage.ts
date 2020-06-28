@@ -15,7 +15,7 @@ function getTestSvgUrl(base) {
     // return "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/" + base;
 }
 
-function addSampleShapes() {
+export function addSampleShapes() {
     // addSampleShapes1();
     addSampleShapes2();
 }
