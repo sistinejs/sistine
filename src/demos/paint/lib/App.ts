@@ -7,6 +7,7 @@ import { LayoutPropertiesPanel } from "./components/LayoutPropertiesPanel";
 import { StrokePropertiesPanel } from "./components/StrokePropertiesPanel";
 import { FillPropertiesPanel } from "./components/FillPropertiesPanel";
 import { TextPropertiesPanel } from "./components/TextPropertiesPanel";
+import { RootUIState } from "./actions";
 
 export class App {
   scene: Sistine.Core.Models.Scene;
@@ -22,8 +23,8 @@ export class App {
     this.scene = new Sistine.Core.Models.Scene();
     this.stage = this._setupStage();
     this.sidebar = this._setupSidebar();
-    this.shapesPanel = new ShapesPanel("#shapespanel_accordian");
-    this.toolbar = new Toolbar("#toolbar_div");
+    this.shapesPanel = new ShapesPanel(this, "#shapespanel_accordian");
+    this.toolbar = new Toolbar(this, "#toolbar_div");
 
     this._setupSplitBar();
     this._setupMenus();
@@ -51,26 +52,30 @@ export class App {
 
   _setupSplitBar() {
     var self = this;
-    $("#splitbar").draggable({
+    ($("#splitbar") as any).draggable({
       axis: "x",
-      drag: function (event) {
+      drag: function (event: any) {
         self._layoutElements();
       },
     });
   }
 
   _setupSidebar(): Sidebar {
-    this.sidebar = new Sidebar("#sidebar_panel_div");
+    this.sidebar = new Sidebar(this, "#sidebar_panel_div");
     this.layoutPropertiesPanel = new LayoutPropertiesPanel(
+      this,
       "#SBPanel_LayoutProperties"
     );
     this.strokePropertiesPanel = new StrokePropertiesPanel(
+      this,
       "#SBPanel_StrokeProperties"
     );
     this.fillPropertiesPanel = new FillPropertiesPanel(
+      this,
       "#SBPanel_FillProperties"
     );
     this.textPropertiesPanel = new TextPropertiesPanel(
+      this,
       "#SBPanel_TextProperties"
     );
     return this.sidebar;

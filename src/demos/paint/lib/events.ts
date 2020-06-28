@@ -59,7 +59,7 @@ export function connectEventHandlers(theApp: App) {
     var currentStyle =
       theApp.strokePropertiesPanel.paintStylePanel.currentStyle;
     console.log(eventType, event, "Style: ", currentStyle);
-    selection.forEach(function (shape) {
+    selection.forEach(function (shape: any) {
       if (currentStyle.copy) {
         currentStyle = currentStyle.copy();
       }
