@@ -1,20 +1,12 @@
 
 import * as corebase from "../Core/base"
 import * as geom from "../Geom/models"
-import { Utils } from "../Utils/index"
-import { Builtins } from "../Builtins/index"
 import * as svgutils from "../Utils/svg"
 import * as models from "./models"
 import { Nodes } from "./nodes"
-import { Int, Nullable } from "../Core/types"
+import { Nullable } from "../Core/types"
 
 const Bounds = geom.Bounds;
-const NumbersTokenizer = svgutils.NumbersTokenizer;
-const PathDataParser = svgutils.PathDataParser;
-const TransformParser = svgutils.TransformParser;
-const Point = geom.Point;
-const forEachChild = Utils.DOM.forEachChild;
-const forEachAttribute = Utils.DOM.forEachAttribute;
 
 let elementProcessors : { [key: string]: string } = {
     "defs": "DefsNodeProcessor",

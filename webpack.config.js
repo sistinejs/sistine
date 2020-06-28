@@ -34,6 +34,7 @@ module.exports = (env, options) => {
         new HtmlWebpackPlugin({
             title: "Demo List Page",
             myPageHeader: "Demo List",
+            chunks: ['home'],
             template: path.resolve(__dirname, 'src/demos/index.html'),
         }),
         new HtmlWebpackPlugin({
@@ -41,13 +42,15 @@ module.exports = (env, options) => {
             title: "SVG Comparison Demo",
             myPageHeader: "SVG Comparison Demo",
             template: path.resolve(__dirname, 'src/demos/svgcmp/index.html'),
-            filename: "svgcmp.html"
+            filename: "svgcmp.html",
+            chunks: ['svgcmp']
         }),
         new HtmlWebpackPlugin({
             title: "Painting Application Demo",
             myPageHeader: "Painting Application Demo",
             template: path.resolve(__dirname, 'src/demos/paint/index.ejs'),
-            filename: "paint.html"
+            filename: "paint.html",
+            chunks: ['paint']
         }),
         new HtmlWebpackTagsPlugin({
             files: [ "svgcmp.html" ],
@@ -103,14 +106,22 @@ module.exports = (env, options) => {
         libraryTarget: 'umd',
         libraryExport: 'default',
         path: path.resolve(__dirname, 'dist'),
-        filename: 'index.js'
+        publicPath: "/static",
+        filename: 'index.[name].js'
     };
-    if (isDevelopment) {
-        output.filename = "[name].js";
-    }
 
     var webpack_configs = {
-        entry: './src/index.ts',
+        entry: {
+            lib: './src/index.ts',
+            demos: './src/demos/index.ts',
+            svgcmp: './src/demos/svgcmp/index.ts',
+            paint: './src/demos/paint/index.ts',
+        },
+        optimization: {
+            splitChunks: {
+                chunks: 'all'
+            },
+        },
         output: output,
         module: {
             rules: [

@@ -87,7 +87,7 @@ export class Stage extends EventSource {
     touchState : TouchState = new TouchState();
     selection : Selection = new Selection();
     animFrameId : number = 0;
-    constructor(divId : string, scene : Scene, configs? : any) {
+    constructor(divId : string, scene? : Scene, configs? : any) {
         super();
         configs = configs || {};
         configs.x = configs.x || 0;
