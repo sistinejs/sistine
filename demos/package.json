@@ -69,6 +69,7 @@
   },
   "scripts": {
     "test": "jest --coverage",
+    "devbuild": "webpack --mode=development",
     "build": "webpack",
     "start": "webpack-dev-server",
     "dev": "webpack-dev-server --mode=development",

@@ -35,65 +35,67 @@ module.exports = (env, options) => {
             title: "Demo List Page",
             myPageHeader: "Demo List",
             chunks: ['home'],
-            template: path.resolve(__dirname, 'demos/index.html'),
+            template: path.resolve(__dirname, 'src/index.html'),
         }),
         new HtmlWebpackPlugin({
             inject: "head",
             title: "SVG Comparison Demo",
             myPageHeader: "SVG Comparison Demo",
-            template: path.resolve(__dirname, 'demos/svgcmp/index.html'),
+            template: path.resolve(__dirname, 'src/svgcmp/index.html'),
             filename: "svgcmp.html",
             chunks: ['svgcmp']
-        }),
-        new HtmlWebpackPlugin({
-            title: "Painting Application Demo",
-            myPageHeader: "Painting Application Demo",
-            template: path.resolve(__dirname, 'demos/paint/index.ejs'),
-            filename: "paint.html",
-            chunks: ['paint']
         }),
         new HtmlWebpackTagsPlugin({
             files: [ "svgcmp.html" ],
             tags: [
-                "./demos/ext/spectrum/spectrum.css",
-                "./demos/ext/slider/jquery.limitslider.js",
-                "./demos/ext/spectrum/spectrum.js",
+                "./src/ext/spectrum/spectrum.css",
+                "./src/ext/slider/jquery.limitslider.js",
+                "./src/ext/spectrum/spectrum.js",
 
-                "./demos/svgcmp/css/svgcmp.css",
-                "./demos/svgcmp/scripts/svgcmp.js",
+                "./src/svgcmp/css/svgcmp.css",
+                "./src/svgcmp/scripts/svgcmp.js",
             ],
             append: true
+        }),
+        /*
+        new HtmlWebpackPlugin({
+            title: "Painting Application Demo",
+            myPageHeader: "Painting Application Demo",
+            template: path.resolve(__dirname, 'src/paint/index.html'),
+            filename: "paint.html",
+            chunks: ['paint']
         }),
         new HtmlWebpackTagsPlugin({
             files: [ "paint.html" ],
             tags: [
-                "./demos/ext/spectrum/spectrum.css",
-                "./demos/ext/slider/jquery.limitslider.js",
-                "./demos/ext/spectrum/spectrum.js",
+                "./src/ext/spectrum/spectrum.css",
+                "./src/ext/slider/jquery.limitslider.js",
+                "./src/ext/spectrum/spectrum.js",
 
-                "./demos/paint/css/paint.css",
-                "./demos/paint/css/sidebars.css",
-                "./demos/paint/css/menubar.css",
-                "./demos/paint/css/toolbars.css",
-                "./demos/paint/css/panels.css",
-                "./demos/paint/scripts/App.js",
-                "./demos/paint/scripts/components/Panel.js",
-                "./demos/paint/scripts/components/ShapesPanel.js",
-                "./demos/paint/scripts/components/Toolbar.js",
-                "./demos/paint/scripts/components/NumericSlider.js",
-                "./demos/paint/scripts/components/FillPropertiesPanel.js",
-                "./demos/paint/scripts/components/TextPropertiesPanel.js",
-                "./demos/paint/scripts/components/LayoutPropertiesPanel.js",
-                "./demos/paint/scripts/components/StrokePropertiesPanel.js",
-                "./demos/paint/scripts/components/PaintStylePanel.js",
-                "./demos/paint/scripts/components/GradientStylePanel.js",
-                "./demos/paint/scripts/components/Sidebar.js",
-                "./demos/paint/scripts/events.js",
-                "./demos/paint/scripts/actions.js",
-                "./demos/paint/scripts/stage.js",
+                "./src/paint/css/paint.css",
+                "./src/paint/css/sidebars.css",
+                "./src/paint/css/menubar.css",
+                "./src/paint/css/toolbars.css",
+                "./src/paint/css/panels.css",
+                "./src/paint/scripts/App.js",
+                "./src/paint/scripts/components/Panel.js",
+                "./src/paint/scripts/components/ShapesPanel.js",
+                "./src/paint/scripts/components/Toolbar.js",
+                "./src/paint/scripts/components/NumericSlider.js",
+                "./src/paint/scripts/components/FillPropertiesPanel.js",
+                "./src/paint/scripts/components/TextPropertiesPanel.js",
+                "./src/paint/scripts/components/LayoutPropertiesPanel.js",
+                "./src/paint/scripts/components/StrokePropertiesPanel.js",
+                "./src/paint/scripts/components/PaintStylePanel.js",
+                "./src/paint/scripts/components/GradientStylePanel.js",
+                "./src/paint/scripts/components/Sidebar.js",
+                "./src/paint/scripts/events.js",
+                "./src/paint/scripts/actions.js",
+                "./src/paint/scripts/stage.js",
             ],
             append: true
         }),
+        */
         // new webpack.ProvidePlugin({ $: "jquery", jQuery: "jquery" }),
         new webpack.HotModuleReplacementPlugin()
     ];
@@ -103,9 +105,9 @@ module.exports = (env, options) => {
 
     var webpack_configs = {
         entry: {
-            demos: './demos/index.ts',
-            svgcmp: './demos/svgcmp/index.ts',
-            paint: './demos/paint/index.ts',
+            demos: './src/index.ts',
+            // svgcmp: './src/svgcmp/index.ts',
+            // paint: './src/paint/index.ts',
         },
         optimization: {
             splitChunks: {
@@ -113,19 +115,15 @@ module.exports = (env, options) => {
             },
         },
         output: {
-            library: 'Sistine',
-            libraryTarget: 'umd',
-            libraryExport: 'default',
             path: path.resolve(__dirname, 'dist'),
-            publicPath: "/static",
-            filename: 'index.[name].js'
+            filename: '[name].js'
         },
         module: {
             rules: [
                 // The rule for rendering index.html from an ejs template.
                 {
                   // test: /\/src\/demos\/.*index.ejs$/,
-                  test: /\/src\/.*index.ejs$/,
+                  test: /.*index.ejs$/,
                   use: [{
                     loader: 'extract-loader'
                   },
