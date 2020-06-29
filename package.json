@@ -67,6 +67,7 @@
     "jquery": "^3.4.1"
   },
   "scripts": {
+    "test": "jest --coverage",
     "build": "webpack",
     "start": "webpack-dev-server",
     "dev": "webpack-dev-server --mode=development",
