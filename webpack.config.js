@@ -30,6 +30,7 @@ module.exports = (_env, options) => {
             library: 'Sistine',
             libraryTarget: 'umd',
             libraryExport: 'default',
+            umdNamedDefine: true,
             // publicPath: "/static",
         },
         optimization: {

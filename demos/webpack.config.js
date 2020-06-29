@@ -101,18 +101,8 @@ module.exports = (env, options) => {
         plugins.splice(0, 0, new uglifyJsPlugin());
     }
 
-    var output = {
-        library: 'Sistine',
-        libraryTarget: 'umd',
-        libraryExport: 'default',
-        path: path.resolve(__dirname, 'dist'),
-        publicPath: "/static",
-        filename: 'index.[name].js'
-    };
-
     var webpack_configs = {
         entry: {
-            lib: './src/index.ts',
             demos: './demos/index.ts',
             svgcmp: './demos/svgcmp/index.ts',
             paint: './demos/paint/index.ts',
@@ -122,7 +112,14 @@ module.exports = (env, options) => {
                 chunks: 'all'
             },
         },
-        output: output,
+        output: {
+            library: 'Sistine',
+            libraryTarget: 'umd',
+            libraryExport: 'default',
+            path: path.resolve(__dirname, 'dist'),
+            publicPath: "/static",
+            filename: 'index.[name].js'
+        },
         module: {
             rules: [
                 // The rule for rendering index.html from an ejs template.
