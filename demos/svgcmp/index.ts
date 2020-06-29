@@ -6,8 +6,8 @@ import { loadFromURL } from "../../lib/SVG/loader";
 import { SVG } from "../../lib/SVG/models";
 
 const DATASET_URLS = {
-  default: "/dir/src/demos/svgcmp/testsuites/samples/",
-  "svg1.1": "/dir/src/demos/svgcmp/testsuites/svg1.1/svg/",
+  default: "/dir/demos/svgcmp/testsuites/samples/",
+  "svg1.1": "/dir/demos/svgcmp/testsuites/svg1.1/svg/",
 };
 
 export class App {
@@ -72,7 +72,7 @@ export class App {
         style: "single",
       },
       ajax: {
-        url: "/dir/src/demos/svgcmp/testsuites/samples/",
+        url: "/dir/demos/svgcmp/testsuites/samples/",
         dataSrc: function (json: any) {
           var entries = json.entries;
           return entries.map(function (entry: any) {
