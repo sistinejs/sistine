@@ -2,7 +2,8 @@
   "exclude": [
     "node_modules/*",
     "dist/*",
-    "demos/*"
+    "demos/*",
+    "__tests__/*"
   ],
   "compilerOptions": {
     "esModuleInterop": true,

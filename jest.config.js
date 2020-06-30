@@ -1,21 +1,7 @@
-/*
-module.exports = {
-  "roots": [
-    "<rootDir>"
-  ],
-  "transform": {
-    '^.+\\.tsx?$': 'ts-jest',
-    // "\\.(css|less|scss)$": "./jest/stub-transformer.js"
-  },
-  // testRegex: '(/.*|(\\.|/)(test|spec))\\.tsx?$',
-  testRegex: '(/tests/.*|(\\.|/))\\.tsx?$',
-  moduleFileExtensions: ['ts', 'tsx', 'js'],
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-}
-*/
 
 module.exports = {
+    // Enable all of this if "tests" folder is used instead of "__tests__"
+  /*
   "roots": [
     "<rootDir>"
   ],
@@ -28,5 +14,6 @@ module.exports = {
   },
   testRegex: "(/tests/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  */
 };
 
