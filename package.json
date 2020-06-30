@@ -1,7 +1,6 @@
 {
   "name": "Sistine",
   "version": "0.0.1",
-  "main": "dist/sistine.js",
   "repository": "https://github.com/sistinejs/sistine",
   "license": "APACHE",
   "private": true,
