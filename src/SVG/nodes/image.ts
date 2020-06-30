@@ -1,6 +1,6 @@
 
 import * as base from "./base"
-import { Builtins } from "../../Builtins/index"
+import Builtins from "../../Builtins/index"
 import * as layouts from "../layouts"
 import { Nullable } from "../../Core/types"
 import { Element } from "../../Core/base"

@@ -1,6 +1,6 @@
 
-import { BasicShapes } from './BasicShapes/index';
+import * as BasicShapes from './BasicShapes/index';
 
-export const Bundles = {
-    "BasicShapes": BasicShapes,
+export default {
+    "BasicShapes": BasicShapes
 }

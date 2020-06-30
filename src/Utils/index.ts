@@ -6,7 +6,7 @@ import * as svg from "./svg"
 import * as dlist from "./dlist"
 import * as logging from "./logging"
 
-export const Utils = {
+export default {
     String: string,
     Arrays: arrays,
     DOM: dom,

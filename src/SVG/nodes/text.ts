@@ -2,7 +2,7 @@
 import * as base from "./base"
 
 import * as textmodels from "../../Text/models"
-import { Utils } from "../../Utils/index"
+import Utils from "../../Utils/index"
 import { Element } from "../../Core/base"
 import { NumbersTokenizer } from "../../Utils/svg"
 import { Int, Nullable } from "../../Core/types"

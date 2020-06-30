@@ -1,13 +1,11 @@
 
-import { Utils } from "../../Utils/index"
+import { forEachChild } from "../../Utils/dom"
 import { Nullable } from "../../Core/types"
 import { Element } from "../../Core/base"
 import { Shape } from "../../Core/models"
 import { SVGLoader } from "../loader"
 import { Bounds, Length } from "../../Geom/models"
 import { TransformParser } from "../../Utils/svg"
-
-const forEachChild = Utils.DOM.forEachChild;
 
 export const conditionalProcessingAttributes = [
     "requiredFeatures", "requiredExtensions", "systemLanguage"

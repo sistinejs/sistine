@@ -1,6 +1,6 @@
 
 import * as base from "./base"
-import { Utils } from "../../Utils/index"
+import  Utils from "../../Utils/index"
 import { Int, Nullable } from "../../Core/types"
 import { Element } from "../../Core/base"
 

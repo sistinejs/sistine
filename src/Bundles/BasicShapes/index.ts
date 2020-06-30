@@ -14,7 +14,7 @@ import * as RightBlockArrow from "./RightBlockArrow"
 import * as LeftChevron from "./LeftChevron"
 import * as RightChevron from "./RightChevron"
 
-export const BasicShapes = {
+export default {
     "Triangle": Triangle.Triangle,
     "Square": Square.Square,
     "Polygon": Polygon.Polygon,

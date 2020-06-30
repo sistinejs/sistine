@@ -8,7 +8,7 @@ import * as Rectangle from "./Rectangle"
 import * as Image from "./Image"
 import * as Ellipse from "./Ellipse"
 
-export const Builtins = {
+export default {
     "Line": Line.Line,
     "Arc": Arc.Arc,
     "QuadCurve": QuadCurve.QuadCurve,

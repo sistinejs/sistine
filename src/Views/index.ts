@@ -5,7 +5,7 @@ import { Stage } from "./stage"
 import { ShapeIndex } from "./shapeindex"
 import * as states from "./states"
 
-export const Views = {
+export default {
     Cursors: cursors,
     Panes: panes,
     Stage: Stage,

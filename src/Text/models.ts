@@ -2,12 +2,10 @@
 
 import { Shape } from "../Core/models"
 import { ShapeController } from "../Core/controller"
-import { Utils } from "../Utils/index"
+import * as Arrays from "../Utils/arrays"
 import * as corebase from "../Core/base"
 import * as geom from "../Geom/models"
 import { Int, Nullable } from "../Core/types"
-
-const Arrays = Utils.Arrays;
 
 export const DEFAULT_CONTROL_SIZE = 5;
 export const CHUNK_TYPE_PLAIN = 0;
