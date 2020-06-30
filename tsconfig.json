@@ -1,23 +1,25 @@
 {
-    "exclude": [
-        "node_modules/*",
-        "dist/*",
-        "demos/*"
-    ],
+  "exclude": [
+    "node_modules/*",
+    "dist/*",
+    "demos/*"
+  ],
   "compilerOptions": {
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "declaration": true,
     "outDir": "./dist/",
     "noImplicitAny": true,
+    "noFallthroughCasesInSwitch": true,
+    // "noImplicitReturns": true,
+    // "noUnusedLocals": true,
     "module": "es6",
     "target": "es5",
     "allowJs": false,
     "strictNullChecks": true,
-    "typeRoots": [ 
-        "node_modules/types"
-    ],
-    "types": [ "jquery", "node" ],
+    // "typeRoots": [ "node_modules/types" ],
+    "types": [ "jquery", "node", "jest" ],
     "lib":[ "es2015", "dom", "esnext" ],
     "experimentalDecorators": true,
     "plugins": [

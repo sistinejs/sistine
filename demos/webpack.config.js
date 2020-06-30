@@ -48,9 +48,9 @@ module.exports = (env, options) => {
         new HtmlWebpackTagsPlugin({
             files: [ "svgcmp.html" ],
             tags: [
-                "./src/ext/spectrum/spectrum.css",
-                "./src/ext/slider/jquery.limitslider.js",
-                "./src/ext/spectrum/spectrum.js",
+                "./ext/spectrum/spectrum.css",
+                "./ext/slider/jquery.limitslider.js",
+                "./ext/spectrum/spectrum.js",
 
                 "./src/svgcmp/css/svgcmp.css",
                 "./src/svgcmp/scripts/svgcmp.js",
@@ -106,7 +106,7 @@ module.exports = (env, options) => {
     var webpack_configs = {
         entry: {
             demos: './src/index.ts',
-            // svgcmp: './src/svgcmp/index.ts',
+            svgcmp: './src/svgcmp/index.ts',
             // paint: './src/paint/index.ts',
         },
         optimization: {
