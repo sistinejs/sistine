@@ -1,5 +1,5 @@
 
-import * as BasicShapes from './BasicShapes/index';
+import BasicShapes from './BasicShapes/index';
 
 export default {
     "BasicShapes": BasicShapes

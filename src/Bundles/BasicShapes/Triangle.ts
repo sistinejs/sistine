@@ -59,3 +59,4 @@ export class Triangle extends Shape {
  */
 export class TriangleController extends ShapeController<Triangle> {
 }
+

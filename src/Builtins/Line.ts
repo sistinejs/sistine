@@ -1,7 +1,7 @@
 
 import { Shape } from "../Core/models"
 import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
-import { Bounds, Length } from "../Geom/models"
+import { Bounds } from "../Geom/models"
 
 export class Line extends Shape {
     private created : boolean = false
