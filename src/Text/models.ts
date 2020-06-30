@@ -1,10 +1,10 @@
 
 
-import { Core } from "../Core/index"
+import { Shape } from "../Core/models"
+import { ShapeController } from "../Core/controller"
 import { Utils } from "../Utils/index"
 import * as corebase from "../Core/base"
 import * as geom from "../Geom/models"
-import * as geomutils from "../Geom/utils"
 import { Int, Nullable } from "../Core/types"
 
 const Arrays = Utils.Arrays;
@@ -18,7 +18,7 @@ export const CHUNK_TYPE_SPAN = 2;
  * Defines a block of text with certain parameters.  Each block should be 
  * layoutable on its own but also can contain a hierarchy of other blocks.
  */
-export class Block extends Core.Models.Shape {
+export class Block extends Shape {
     readonly xCoords : Array<number> = [];
     readonly yCoords : Array<number> = [];
     readonly dxValues : Array<number> = [];
@@ -128,7 +128,7 @@ export class Text extends Block {
     }
 }
 
-export class TextController extends Core.Controller.ShapeController<Text> {
+export class TextController extends ShapeController<Text> {
 }
 
 class LayoutEngine {

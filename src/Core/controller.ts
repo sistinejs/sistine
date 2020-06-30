@@ -1,5 +1,4 @@
 
-import * as events from "./events";
 import * as geom from "../Geom/models";
 import * as geomutils from "../Geom/utils";
 import { Int, Nullable } from "../Core/types"
@@ -8,8 +7,8 @@ import { Shape } from "./models"
 export const DEFAULT_CONTROL_SIZE = 5;
 
 export interface HitInfoSnapshot {
-    boundingBox : geom.Bounds
-    [key : string] : any
+    boundingBox : geom.Bounds;
+    [key : string] : any;
 };
 
 export const HitType = {

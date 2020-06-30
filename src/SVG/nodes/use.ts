@@ -1,5 +1,5 @@
 import { Bounds } from "../../Geom/models";
-import { Core } from "../../Core/index";
+import { Group } from "../../Core/models";
 import * as base from "./base";
 import { Element } from "../../Core/base";
 import { Nullable } from "../../Core/types";
@@ -44,7 +44,7 @@ export class UseNodeProcessor extends base.NodeProcessor {
     var source = this.getRef(parent, href);
     var sourceCopy = source.clone();
 
-    var out = new Core.Models.Group();
+    var out = new Group();
 
     var bounds = parent ? new Bounds() : this.configs.bounds.copy();
     out.setBounds(bounds);

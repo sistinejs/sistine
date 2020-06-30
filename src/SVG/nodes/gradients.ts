@@ -1,12 +1,10 @@
 
 import * as base from "./base"
-import { Geom } from "../../Geom/index"
+import { Length } from "../../Geom/models"
 import { Element } from "../../Core/base"
 import { Int, Nullable } from "../../Core/types"
 import { Gradient, LinearGradient, RadialGradient } from "../../Core/styles"
 import { forEachChild } from "../../Utils/dom";
-
-const Length = Geom.Models.Length;
 
 abstract class GradientNodeProcessor extends base.NodeProcessor {
     validChildren() {

@@ -1,5 +1,5 @@
-// import * as Sistine from "../../src";
-import * as Sistine from "Sistine";
+import * as Sistine from "../../src";
+// import * as Sistine from "Sistine";
 
 console.log("Sistine: ", Sistine);
 

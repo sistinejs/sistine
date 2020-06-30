@@ -1,8 +1,8 @@
-import { Core } from "../Core"
 import { DEFAULT_CONTROL_SIZE, ShapeController, ControlPoint, HitType, HitInfo, HitInfoSnapshot } from "../Core/controller";
 import { Bounds } from "../Geom/models"
+import { Shape } from "../Core/models"
 
-export class Arc extends Core.Models.Shape {
+export class Arc extends Shape {
     private created : boolean = false
     private _x0 : number = 0;
     private _y0 : number = 0;

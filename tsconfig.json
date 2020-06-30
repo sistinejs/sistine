@@ -22,7 +22,7 @@
     // "typeRoots": [ "node_modules/types" ],
     "types": [ "jquery", "node", "jest" ],
     "lib":[ "es2015", "dom", "esnext" ],
-    "experimentalDecorators": true,
+    // "experimentalDecorators": true,
     "plugins": [
       { "name": "typescript-tslint-plugin" }
     ]

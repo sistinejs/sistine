@@ -7,7 +7,7 @@ import { Selection } from "./selection"
 import * as styles from "./styles"
 import { Path } from "./paths"
 
-export const Core = {
+export default {
     Controller : controller,
     Events : events,
     Base: base,

@@ -2,7 +2,7 @@
 import * as models from "./models"
 import * as layouts from "./layouts"
 
-export const Text = {
+export default {
     Text : models.Text,
     Block: models.Block,
     Layouts: layouts
