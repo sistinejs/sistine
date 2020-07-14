@@ -3,5 +3,5 @@
 **/webpack.config.js
 node_modules
 src
-tests
+__tests__
 demos
