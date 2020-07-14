@@ -1,4 +1,4 @@
-import { Sistine } from "../../../../lib/index";
+import { fillChildComponent } from "../../../../src/Utils/dom";
 import { Panel } from "./Panel";
 
 export class Toolbar extends Panel {
@@ -13,14 +13,9 @@ export class Toolbar extends Panel {
       $tbbutton.attr("title", label);
 
       var buttonId = tbbutton.id.replace(/TB_/, "");
-      var buttonImage = $(
-        "<img src = '" +
-          "./src/demos/paint/icons/toolbar/" +
-          buttonId +
-          ".png' />"
-      );
+      var buttonImage = $("<img src = '" + "./src/demos/paint/icons/toolbar/" + buttonId + ".png' />");
       $tbbutton.button({ iconPosition: "top" }).append(buttonImage);
-      Sistine.Utils.DOM.fillChildComponent(buttonImage);
+      fillChildComponent(buttonImage);
 
       var eventId = "on" + buttonId;
       $tbbutton.click(function (event: any) {

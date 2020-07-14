@@ -134,11 +134,11 @@ export class StrokePropertiesPanel extends Panel {
   }
 
   get lineJoin() {
-    return this.find("input[name=lineJoinType]:checked").val();
+    return this.find("input[name=lineJoinType]:checked").val() as (string | null);
   }
 
   get lineCap() {
-    return this.find("input[name=lineCapType]:checked").val();
+    return this.find("input[name=lineCapType]:checked").val() as (string | null);
   }
 
   get dashOffset() {

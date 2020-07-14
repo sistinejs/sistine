@@ -1,20 +1,20 @@
-import { Sistine } from "../../../../lib/index";
-import { App } from "../App"
+import { EventSource } from "../../../../src/Core/events";
+import { App } from "../App";
 
 const PanelGUIDs = { value: 1 };
 
-export class Panel extends Sistine.Core.Events.EventSource {
+export class Panel extends EventSource {
   _uniqueID: number;
   _elemSelector: string;
   _rootElement: any;
   _enabled: boolean;
   _lastModifiedAt: number;
   _lastCreatedAt: number;
-  app : App
+  app: App;
 
-  constructor(app : App, elemSelector: string, configs?: any) {
+  constructor(app: App, elemSelector: string, configs?: any) {
     super();
-    this.app = app
+    this.app = app;
     this._uniqueID = PanelGUIDs.value++;
     this._elemSelector = elemSelector;
     this._rootElement = $(elemSelector);
