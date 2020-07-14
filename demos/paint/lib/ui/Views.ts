@@ -1,7 +1,7 @@
 declare var Handlebars: any;
 import { ensureElement } from "./utils";
 // import { findElement } from "../ui/utils";
-import { Nullable } from "../../../../lib/Core/types";
+import { Nullable } from "../../../../src/Core/types";
 
 declare const BCDefaults: any;
 
@@ -16,12 +16,7 @@ export class View<EntityType> {
   protected renderAsTemplate = true;
   entityName = "entity";
 
-  constructor(
-    elem_or_id: any,
-    entityName: Nullable<string>,
-    entity: Nullable<EntityType>,
-    configs: any = null
-  ) {
+  constructor(elem_or_id: any, entityName: Nullable<string>, entity: Nullable<EntityType>, configs: any = null) {
     configs = configs || {};
     this._entity = entity;
     this.configs = configs;
@@ -128,8 +123,7 @@ export class View<EntityType> {
 
   renderedTemplate(viewParams: any = null) {
     viewParams = this.enrichViewParams(viewParams || {});
-    if (!(this.entityName in viewParams))
-      viewParams[this.entityName] = this._entity;
+    if (!(this.entityName in viewParams)) viewParams[this.entityName] = this._entity;
     var template = Handlebars.compile(this.template());
     return template(viewParams);
   }

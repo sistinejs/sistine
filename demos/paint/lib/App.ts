@@ -1,5 +1,4 @@
 // TODO: how to actually refer to a library instead of a hardcoded path?
-import { Sistine } from "../../../lib/index";
 import { Toolbar } from "./components/Toolbar";
 import { Sidebar } from "./components/Sidebar";
 import { ShapesPanel } from "./components/ShapesPanel";
@@ -8,10 +7,12 @@ import { StrokePropertiesPanel } from "./components/StrokePropertiesPanel";
 import { FillPropertiesPanel } from "./components/FillPropertiesPanel";
 import { TextPropertiesPanel } from "./components/TextPropertiesPanel";
 import { RootUIState } from "./actions";
+import { Scene } from "../../../src/Core/models";
+import { Stage } from "../../../src/Views/stage";
 
 export class App {
-  scene: Sistine.Core.Models.Scene;
-  stage: Sistine.Views.Stages.Stage;
+  scene: Scene;
+  stage: Stage;
   sidebar: Sidebar;
   layoutPropertiesPanel: LayoutPropertiesPanel;
   strokePropertiesPanel: StrokePropertiesPanel;
@@ -20,7 +21,7 @@ export class App {
   shapesPanel: ShapesPanel;
   toolbar: Toolbar;
   constructor() {
-    this.scene = new Sistine.Core.Models.Scene();
+    this.scene = new Scene();
     this.stage = this._setupStage();
     this.sidebar = this._setupSidebar();
     this.shapesPanel = new ShapesPanel(this, "#shapespanel_accordian");
@@ -39,8 +40,8 @@ export class App {
     return this.stage.eventMachine;
   }
 
-  _setupStage(): Sistine.Views.Stages.Stage {
-    this.stage = new Sistine.Views.Stage("stage_div", this.scene);
+  _setupStage(): Stage {
+    this.stage = new Stage("stage_div", this.scene);
     this.stage.isEditable = true;
     this.stage.showBackground = true;
 
@@ -62,22 +63,10 @@ export class App {
 
   _setupSidebar(): Sidebar {
     this.sidebar = new Sidebar(this, "#sidebar_panel_div");
-    this.layoutPropertiesPanel = new LayoutPropertiesPanel(
-      this,
-      "#SBPanel_LayoutProperties"
-    );
-    this.strokePropertiesPanel = new StrokePropertiesPanel(
-      this,
-      "#SBPanel_StrokeProperties"
-    );
-    this.fillPropertiesPanel = new FillPropertiesPanel(
-      this,
-      "#SBPanel_FillProperties"
-    );
-    this.textPropertiesPanel = new TextPropertiesPanel(
-      this,
-      "#SBPanel_TextProperties"
-    );
+    this.layoutPropertiesPanel = new LayoutPropertiesPanel(this, "#SBPanel_LayoutProperties");
+    this.strokePropertiesPanel = new StrokePropertiesPanel(this, "#SBPanel_StrokeProperties");
+    this.fillPropertiesPanel = new FillPropertiesPanel(this, "#SBPanel_FillProperties");
+    this.textPropertiesPanel = new TextPropertiesPanel(this, "#SBPanel_TextProperties");
     return this.sidebar;
   }
 
@@ -112,7 +101,7 @@ export class App {
       function () {
         $(this).removeClass("ui-state-hover");
         $("ul", $(this)).hide();
-      }
+      },
     );
     $(".menu li ul").each(function () {
       ($(this) as any).menu();

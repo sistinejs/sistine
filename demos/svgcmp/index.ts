@@ -1,13 +1,9 @@
-const Sistine = require("../../../dist/lib.sistine");
-
-/*
-import { Shape } from "../../lib/Core/models";
-import { Bounds } from "../../lib/Geom/models";
-import { Stage } from "../../lib/Views/stage";
-import { Utils } from "../../lib/Utils/index";
-import { loadFromURL } from "../../lib/SVG/loader";
-import { SVG } from "../../lib/SVG/models";
-*/
+import { Shape } from "../../src/Core/models";
+import { Bounds } from "../../src/Geom/models";
+import { Stage } from "../../src/Views/stage";
+import Utils from "../../src/Utils/index";
+import { loadFromURL } from "../../src/SVG/loader";
+import { SVG } from "../../src/SVG/models";
 
 const DATASET_URLS = {
   default: "/dir/demos/svgcmp/testsuites/samples/",
@@ -108,9 +104,7 @@ export class App {
       self.applySearch();
     }
     $("#svg_samples_dataset").on("change", function () {
-      var dataset: string = $(this)
-        .find("option:selected")
-        .attr("value") as string;
+      var dataset: string = $(this).find("option:selected").attr("value") as string;
       self.selectDataSet(dataset);
     });
     $("#svg_filter").on("keyup", function () {

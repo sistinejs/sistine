@@ -1,4 +1,4 @@
-import { Sistine } from "../../../lib/index";
+import Sistine from "../../../src/index";
 import { App } from "./App";
 
 declare var theApp: App;
@@ -24,9 +24,7 @@ export function addSampleShapes() {
 }
 
 function addSampleShapes1() {
-  var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1)
-    .addStop(0, "black")
-    .addStop(1, "white");
+  var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1).addStop(0, "black").addStop(1, "white");
   addShape(BasicShapes, "Triangle", {
     p0: new Point(140, 150),
     p1: new Point(80, 280),
@@ -35,16 +33,7 @@ function addSampleShapes1() {
     fillStyle: grd1,
   });
 
-  var grd2 = new Sistine.Core.Styles.RadialGradient(
-    0.5,
-    0.5,
-    0.2,
-    0.5,
-    0.5,
-    0.5
-  )
-    .addStop(0, "red")
-    .addStop(1, "blue");
+  var grd2 = new Sistine.Core.Styles.RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5).addStop(0, "red").addStop(1, "blue");
   addShape(BuiltinShapes, "Circle", {
     center: new Point(200, 200),
     radius: 100,
@@ -92,7 +81,7 @@ function addSampleShapes2() {
     },
     function (shape) {
       theApp.scene.add(shape);
-    }
+    },
   );
 }
 

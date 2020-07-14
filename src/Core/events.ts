@@ -72,7 +72,7 @@ export class StateMachine {
    * @param {State} state  State being registered.  If another State with the same name exists, then a {DuplicateError} is thrown.
    * @param {Bool} isRoot  Whether the new state is a root state.
    */
-  registerState(state: State, isRoot: boolean) {
+  registerState(state: State, isRoot: boolean = false) {
     var name = state.name;
     if (name in this._states) {
       throw Error("State '" + name + "' already registered.");

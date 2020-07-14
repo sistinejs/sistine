@@ -1,19 +1,20 @@
-import { Sistine } from "../../../lib/index";
+import { State, EventSource, Event } from "../../../src/Core/events"
+import { Stage } from "../../../src/Views/stage"
+import { DefaultState, ViewPortPanningState, ViewPortZoomingState, CreatingShapeState } from "../../../src/Views/states"
 import { App } from "./App";
 
-export class RootUIState extends Sistine.Core.Events.State {
+export class RootUIState extends State {
   app: App;
-  stage: Sistine.Views.Stages.Stage;
+  stage: Stage;
   constructor(app: App) {
     super();
     this.app = app;
     this.stage = app.stage;
     var machine = this.app.eventMachine;
-    var States = Sistine.Views.States;
-    var defaultState = new States.DefaultState(this.stage);
-    var vpPanningState = new States.ViewPortPanningState(this.stage);
-    var vpZoomingState = new States.ViewPortZoomingState(this.stage);
-    var creatingShapeState = new States.CreatingShapeState(this.stage);
+    var defaultState = new DefaultState(this.stage);
+    var vpPanningState = new ViewPortPanningState(this.stage);
+    var vpZoomingState = new ViewPortZoomingState(this.stage);
+    var creatingShapeState = new CreatingShapeState(this.stage);
     machine.registerState(defaultState);
     machine.registerState(vpPanningState);
     machine.registerState(vpZoomingState);
@@ -22,8 +23,8 @@ export class RootUIState extends Sistine.Core.Events.State {
 
   handle(
     eventType: string,
-    source: Sistine.Core.Events.EventSource,
-    event: Sistine.Core.Events.Event
+    source: EventSource,
+    event: Event
   ) {
     if (source == this.stage) {
       this.app.eventMachine.enter("DefaultState");
