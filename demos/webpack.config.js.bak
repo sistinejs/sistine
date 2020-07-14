@@ -1,48 +1,48 @@
-const fs = require('fs');
-const path = require('path');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
-// const CopyPlugin = require('copy-webpack-plugin');
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const fs = require("fs");
+const path = require("path");
+const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlWebpackTagsPlugin = require("html-webpack-tags-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const uglifyJsPlugin = require("uglifyjs-webpack-plugin");
+// const CopyPlugin = require("copy-webpack-plugin");
+// const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 // Read Samples first
 function readdir(path) {
-  var items = fs.readdirSync(path);
+  const items = fs.readdirSync(path);
   return items.map(function(item) {
-    var file = path;
+    const file = path;
     if (item.startsWith("/") || file.endsWith("/")) {
       file += item;
     } else {
-      file += ('/' + item);
+      file += ("/" + item);
     }
-    var stats = fs.statSync(file);
-    return {'file': file, 'name': item, 'stats': stats};
+    const stats = fs.statSync(file);
+    return {"file": file, "name": item, "stats": stats};
   });
 }
 
 module.exports = (_env, options) => {
   console.log("Options: ", options);
-  var isDevelopment = options.mode == "development"
-  var plugins = [
+  const isDevelopment = options.mode == "development"
+  const plugins = [
     // new uglifyJsPlugin(),
     // new BundleAnalyzerPlugin(),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: "Demo List Page",
       myPageHeader: "Demo List",
-      chunks: ['home'],
-      template: path.resolve(__dirname, 'src/index.html'),
+      chunks: ["home"],
+      template: path.resolve(__dirname, "src/index.html"),
     }),
     new HtmlWebpackPlugin({
       title: "SVG Comparison Demo",
       myPageHeader: "SVG Comparison Demo",
-      template: path.resolve(__dirname, 'src/svgcmp/index.html'),
+      template: path.resolve(__dirname, "src/svgcmp/index.html"),
       filename: "svgcmp.html",
-      chunks: ['svgcmp']
+      chunks: ["svgcmp"]
     }),
     new HtmlWebpackTagsPlugin({
       files: [ "svgcmp.html" ],
@@ -60,9 +60,9 @@ module.exports = (_env, options) => {
     new HtmlWebpackPlugin({
       title: "Painting Application Demo",
       myPageHeader: "Painting Application Demo",
-      template: path.resolve(__dirname, 'src/paint/index.html'),
+      template: path.resolve(__dirname, "src/paint/index.html"),
       filename: "paint.html",
-      chunks: ['paint']
+      chunks: ["paint"]
     }),
     new HtmlWebpackTagsPlugin({
       files: [ "paint.html" ],
@@ -102,20 +102,20 @@ module.exports = (_env, options) => {
     plugins.splice(0, 0, new uglifyJsPlugin());
   }
 
-  var webpack_configs = {
+  const webpackConfigs = {
     entry: {
-      demos: './src/index.ts',
-      svgcmp: './src/svgcmp/index.ts',
-      // paint: './src/paint/index.ts',
+      demos: "./src/index.ts",
+      svgcmp: "./src/svgcmp/index.ts",
+      // paint: "./src/paint/index.ts",
     },
     optimization: {
       splitChunks: {
-        chunks: 'all'
+        chunks: "all"
       },
     },
     output: {
-      path: path.resolve(__dirname, 'dist'),
-      filename: '[name].js'
+      path: path.resolve(__dirname, "dist"),
+      filename: "[name].js"
     },
     module: {
       rules: [
@@ -124,21 +124,21 @@ module.exports = (_env, options) => {
           // test: /\/src\/demos\/.*index.ejs$/,
           test: /.*index.ejs$/,
           use: [{
-          loader: 'extract-loader'
+          loader: "extract-loader"
           },
           {
-          loader: 'html-loader',
+          loader: "html-loader",
           options: {
-            // interpolate: 'require'
+            // interpolate: "require"
           }
           },
           {
-          loader: 'render-template-loader',
+          loader: "render-template-loader",
           options: {
-            engine: 'ejs',
+            engine: "ejs",
             locals: {
-            title: 'Render Template Loader',
-            desc: 'Rendering templates with a Webpack loader since 2017'
+            title: "Render Template Loader",
+            desc: "Rendering templates with a Webpack loader since 2017"
             },
             engineOptions: function (info) {
             // Ejs wants a filename for partials rendering.
@@ -152,24 +152,24 @@ module.exports = (_env, options) => {
         {
           test: /\.hbs$/,
           use: [{
-          loader: 'file-loader?name=[name]-[ext].html'
+          loader: "file-loader?name=[name]-[ext].html"
           },
           {
-          loader: 'extract-loader'
+          loader: "extract-loader"
           },
           {
-          loader: 'render-template-loader',
+          loader: "render-template-loader",
           options: {
-            engine: 'handlebars',
+            engine: "handlebars",
             init: function (engine, info) {
             engine.registerPartial(
-              'body',
-              fs.readFileSync('./src/body.hbs').toString()
+              "body",
+              fs.readFileSync("./src/body.hbs").toString()
             )
             },
             locals: {
-            title: 'Rendered with Handlebars!',
-            desc: 'Partials Support'
+            title: "Rendered with Handlebars!",
+            desc: "Partials Support"
             },
           }
           }]
@@ -177,26 +177,26 @@ module.exports = (_env, options) => {
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          use: ['babel-loader']
+          use: ["babel-loader"]
         },
         {
           test: /\.ts$/,
           exclude: /node_modules/,
-          use: ['ts-loader']
+          use: ["ts-loader"]
         },
         {
           test: /\.module\.s(a|c)ss$/,
           loader: [
-            isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
+            isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
             {
-            loader: 'css-loader',
+            loader: "css-loader",
             options: {
               modules: true,
               sourceMap: isDevelopment
             }
             },
             {
-            loader: 'sass-loader',
+            loader: "sass-loader",
             options: {
               sourceMap: isDevelopment
             }
@@ -205,29 +205,29 @@ module.exports = (_env, options) => {
         },
         {
           test: /\.(png|svg|jpg|gif)$/,
-          use: [ 'url-loader' ]
+          use: [ "url-loader" ]
         }
       ]
     },
     plugins: plugins,
     resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.scss']
+      extensions: [".js", ".jsx", ".ts", ".tsx", ".scss"]
     }
   };
   if (isDevelopment) {
-    webpack_configs.devtool = 'inline-source-map';
-    webpack_configs.devServer = {
+    webpackConfigs.devtool = "inline-source-map";
+    webpackConfigs.devServer = {
       hot: true,
       before: function(app, server) {
         app.get(/\/dir\/.*/, function(req, res) {
-          var path = "./" + req.path.substr(5);
+          const path = "./" + req.path.substr(5);
           console.log("Listing dir: ", path);
-          var listing = readdir(path);
+          const listing = readdir(path);
           res.json({ entries: listing });
         });
       }
     }
   }
-  return webpack_configs;
+  return webpackConfigs;
 };
 
