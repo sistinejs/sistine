@@ -1,26 +1,24 @@
-
-:root {
-    --header-height: 60px;
-    --svg-samples-div-width: 400px;
-    --footer-height: 30px;
-    --split-bar-width: 10px;
-}
+$header_height: 60px;
+$svg_samples_div_width: 400px;
+$footer_height: 30px;
+$split_bar_width: 10px;
 
 #header_div {
     position: absolute;
     top: 0px;
     left: 0px;
     right: 0px;
-    height: var(--header-height);
-    border: solid 0px green;
+    height: $header_height;
+  background: red;
+    border: solid 1px green;
 }
 
 #footer_div {
     position: absolute;
     bottom: 0px;
-    left: var(--svg-samples-div-width);
+    left: $svg_samples_div_width;
     right: 0px;
-    height: var(--footer-height);
+    height: $footer_height;
     border: solid 1px blue;
 }
 
@@ -28,27 +26,27 @@
     position: absolute;
     bottom: 0;
     left: 0px;
-    height: var(--footer-height);
-    width: var(--svg-samples-div-width);
-    border: solid 1px green;
+    height: $footer_height;
+    width: $svg_samples_div_width;
+    border: solid 2px green;
     overflow: scroll;
 }
 
 #svg_samples_div {
     position: absolute;
-    top: var(--header-height);
-    bottom: var(--footer-height);
+    top: $header_height;
+    bottom: $footer_height;
     left: 0px;
-    width: var(--svg-samples-div-width);
+    width: $svg_samples_div_width;
     border: solid 1px green;
     overflow: scroll;
 }
 
 #center_div {
     position: absolute;
-    top: var(--header-height);
-    bottom: var(--footer-height);
-    left: var(--svg-samples-div-width);
+    top: $header_height;
+    bottom: $footer_height;
+    left: $svg_samples_div_width;
     right: 0px;
     border: solid 1px green;
 }
@@ -59,7 +57,7 @@
     top: 0px;
     bottom: 0px;
     left: 50%;
-    width: var(--split-bar-width);
+    width: $split_bar_width;
     background-color: gray;
 }
 

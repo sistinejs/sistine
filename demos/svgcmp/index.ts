@@ -1,3 +1,4 @@
+import "./styles/global";
 import { App } from "./src/app";
 
 $(document).ready(function () {

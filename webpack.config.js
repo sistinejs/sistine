@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
+const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const HtmlWebpackTagsPlugin = require("html-webpack-tags-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
@@ -13,7 +14,7 @@ const uglifyJsPlugin = require("uglifyjs-webpack-plugin");
 function readdir(path) {
   const items = fs.readdirSync(path);
   return items.map(function(item) {
-    const file = path;
+    let file = path;
     if (item.startsWith("/") || file.endsWith("/")) {
       file += item;
     } else {
@@ -31,6 +32,12 @@ module.exports = (_env, options) => {
     // new uglifyJsPlugin(),
     // new BundleAnalyzerPlugin(),
     new CleanWebpackPlugin(),
+    new CopyPlugin([
+      {
+        from: path.resolve(__dirname, "demos/ext/"),
+        to: "demos/ext/"
+      }
+    ]),
     new HtmlWebpackPlugin({
       title: "Demo List Page",
       myPageHeader: "Demo List",
@@ -46,18 +53,6 @@ module.exports = (_env, options) => {
       filename: path.resolve(__dirname, "dist/demos/svgcmp/index.html"),
       template: path.resolve(__dirname, "demos/svgcmp/index.html"),
       chunks: ["svgcmp"]
-    }),
-    new HtmlWebpackTagsPlugin({
-      files: [ "svgcmp.html" ],
-      tags: [
-        "./ext/spectrum/spectrum.css",
-        "./ext/slider/jquery.limitslider.js",
-        "./ext/spectrum/spectrum.js",
-
-        "./demos/svgcmp/css/svgcmp.css",
-        "./demos/svgcmp/scripts/svgcmp.js",
-      ],
-      append: true
     }),
     new HtmlWebpackPlugin({
       inject: false,
@@ -108,7 +103,7 @@ module.exports = (_env, options) => {
 
   var webpackConfigs = {
     entry: {
-      lib: "./src/index.ts",
+      Sistine: "./src/index.ts",
       demos: "./demos/index.ts",
       svgcmp: "./demos/svgcmp/index.ts",
       paint: "./demos/paint/index.ts",
@@ -121,10 +116,10 @@ module.exports = (_env, options) => {
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: "[name].js",
-      library: "Sistine",
-      // libraryTarget: "umd",
-      libraryTarget: "this",
-      libraryExport: "default",
+      library: "[name]",
+      libraryTarget: "umd",
+      // libraryTarget: "this",
+      // libraryExport: "[name]",
       umdNamedDefine: true,
       publicPath: "/static",
     },
@@ -176,35 +171,15 @@ module.exports = (_env, options) => {
           use: ["ts-loader"]
         },
         {
-          test: /\.module\.s(a|c)ss$/,
+          test: /\.s(a|c)ss$/,
           loader: [
             isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
-            {
-              loader: "css-loader",
-              options: {
-                modules: true,
-                sourceMap: isDevelopment
-              }
-            },
+            "css-loader",
             {
               loader: "sass-loader",
               options: {
                 sourceMap: isDevelopment
               }
-            }
-          ]
-        },
-        {
-          test: /\.s(a|c)ss$/,
-          exclude: /\.module.(s(a|c)ss)$/,
-          loader: [
-            isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
-            "css-loader",
-            {
-            loader: "sass-loader",
-            options: {
-              sourceMap: isDevelopment
-            }
             }
           ]
         },
@@ -216,7 +191,7 @@ module.exports = (_env, options) => {
     },
     plugins: plugins,
     resolve: {
-      extensions: [".js", ".jsx", ".ts", ".tsx", ".scss"]
+      extensions: [".js", ".jsx", ".ts", ".tsx", ".scss", ".sass"]
     }
   };
   if (isDevelopment) {
