@@ -32,9 +32,7 @@ export class PaintStylePanel extends Panel {
       },
     });
 
-    this.gradientStylePanel = new GradientStylePanel(
-      this.subselector("#gradientStyleDiv")
-    );
+    this.gradientStylePanel = new GradientStylePanel(this.app, this.subselector("#gradientStyleDiv"));
     this.gradientStylePanel.eventHub.chain(this.eventHub);
   }
 

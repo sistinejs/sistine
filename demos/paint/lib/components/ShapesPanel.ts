@@ -1,4 +1,4 @@
-import { Sistine } from "../../../../lib/index";
+import { fillChildComponent } from "../../../../src/Utils/dom";
 import { Panel } from "./Panel";
 
 declare var shapeDefaults: any;
@@ -23,10 +23,7 @@ export class ShapesPanel extends Panel {
         // Toggle the panel's header
         currHeader
           .toggleClass("ui-corner-all", isPanelSelected)
-          .toggleClass(
-            "accordion-header-active ui-state-active ui-corner-top",
-            !isPanelSelected
-          )
+          .toggleClass("accordion-header-active ui-state-active ui-corner-top", !isPanelSelected)
           .attr("aria-selected", (!isPanelSelected).toString());
 
         // Toggle the panel's icon
@@ -59,14 +56,9 @@ export class ShapesPanel extends Panel {
       $sbbutton.attr("title", label);
 
       var shapeId = sbbutton.id.replace(/SB_/, "");
-      var buttonImage = $(
-        "<img src = '" +
-          "./src/demos/paint/icons/shapes/" +
-          shapeId +
-          ".png' />"
-      );
+      var buttonImage = $("<img src = '" + "./src/demos/paint/icons/shapes/" + shapeId + ".png' />");
       $sbbutton.button({ iconPosition: "top" }).append(buttonImage);
-      Sistine.Utils.DOM.fillChildComponent(buttonImage);
+      fillChildComponent(buttonImage);
 
       // Setup highlighter!
       $sbbutton
@@ -79,10 +71,7 @@ export class ShapesPanel extends Panel {
         .click(function (event: any) {
           // Add the shape on the canvas at the center
           var id = event.currentTarget.id.replace(/SB_/, "");
-          var TheBundle = eval(
-            event.currentTarget.getAttribute("bundle") ||
-              "Sistine.Bundles.BasicShapes"
-          );
+          var TheBundle = eval(event.currentTarget.getAttribute("bundle") || "Sistine.Bundles.BasicShapes");
           var configs = Object.assign({}, shapeDefaults);
           var newShape = new TheBundle[id](configs);
           this.app.eventMachine.enter("CreatingShapeState", newShape);

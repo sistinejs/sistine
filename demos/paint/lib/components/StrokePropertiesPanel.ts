@@ -17,10 +17,7 @@ export class StrokePropertiesPanel extends Panel {
   setupElements() {
     var self = this;
 
-    this.paintStylePanel = new PaintStylePanel(
-      this.app,
-      this.subselector("#paintStylePanelTab")
-    );
+    this.paintStylePanel = new PaintStylePanel(this.app, this.subselector("#paintStylePanelTab"));
     this.paintStylePanel.eventHub.chain(this.eventHub);
 
     this.dashOffsetSlider = new NumericSlider(this.app, "#dashOffsetSlider", {
@@ -58,28 +55,13 @@ export class StrokePropertiesPanel extends Panel {
 
   _setupLineJoinTypeControls() {
     var self = this;
-    this.find("label[for=lineJoinBevel]").attr(
-      "for",
-      "lineJoinBevel" + this.uniqueid
-    );
-    this.find("label[for=lineJoinMiterType]").attr(
-      "for",
-      "lineJoinMiterType" + this.uniqueid
-    );
-    this.find("label[for=lineJoinRoundType]").attr(
-      "for",
-      "lineJoinRoundType" + this.uniqueid
-    );
+    this.find("label[for=lineJoinBevel]").attr("for", "lineJoinBevel" + this.uniqueid);
+    this.find("label[for=lineJoinMiterType]").attr("for", "lineJoinMiterType" + this.uniqueid);
+    this.find("label[for=lineJoinRoundType]").attr("for", "lineJoinRoundType" + this.uniqueid);
 
     this.find("#lineJoinBevel").attr("id", "lineJoinBevel" + this.uniqueid);
-    this.find("#lineJoinMiterType").attr(
-      "id",
-      "lineJoinMiterType" + this.uniqueid
-    );
-    this.find("#lineJoinRoundType").attr(
-      "id",
-      "lineJoinRoundType" + this.uniqueid
-    );
+    this.find("#lineJoinMiterType").attr("id", "lineJoinMiterType" + this.uniqueid);
+    this.find("#lineJoinRoundType").attr("id", "lineJoinRoundType" + this.uniqueid);
 
     (this.find("input[name='lineJoinType']") as any).checkboxradio();
     this.lineJoinBevel = this.find("#lineJoinBevel" + this.uniqueid);
@@ -95,30 +77,15 @@ export class StrokePropertiesPanel extends Panel {
 
   _setupLineCapTypeControls() {
     var self = this;
-    this.find("label[for=lineCapButt]").attr(
-      "for",
-      "lineCapButt" + this.uniqueid
-    );
-    this.find("label[for=lineCapSquareType]").attr(
-      "for",
-      "lineCapSquareType" + this.uniqueid
-    );
-    this.find("label[for=lineCapRoundType]").attr(
-      "for",
-      "lineCapRoundType" + this.uniqueid
-    );
+    this.find("label[for=lineCapButt]").attr("for", "lineCapButt" + this.uniqueid);
+    this.find("label[for=lineCapSquareType]").attr("for", "lineCapSquareType" + this.uniqueid);
+    this.find("label[for=lineCapRoundType]").attr("for", "lineCapRoundType" + this.uniqueid);
 
     this.find("#lineCapButt").attr("id", "lineCapButt" + this.uniqueid);
-    this.find("#lineCapSquareType").attr(
-      "id",
-      "lineCapSquareType" + this.uniqueid
-    );
-    this.find("#lineCapRoundType").attr(
-      "id",
-      "lineCapRoundType" + this.uniqueid
-    );
+    this.find("#lineCapSquareType").attr("id", "lineCapSquareType" + this.uniqueid);
+    this.find("#lineCapRoundType").attr("id", "lineCapRoundType" + this.uniqueid);
 
-    this.find("input[name='lineCapType']").checkboxradio();
+    (this.find("input[name='lineCapType']") as any).checkboxradio();
     this.lineCapButt = this.find("#lineCapButt" + this.uniqueid);
     this.lineCapSquare = this.find("#lineCapSquare" + this.uniqueid);
     this.lineCapRound = this.find("#lineCapRound" + this.uniqueid);
@@ -134,11 +101,11 @@ export class StrokePropertiesPanel extends Panel {
   }
 
   get lineJoin() {
-    return this.find("input[name=lineJoinType]:checked").val() as (string | null);
+    return this.find("input[name=lineJoinType]:checked").val() as string | null;
   }
 
   get lineCap() {
-    return this.find("input[name=lineCapType]:checked").val() as (string | null);
+    return this.find("input[name=lineCapType]:checked").val() as string | null;
   }
 
   get dashOffset() {

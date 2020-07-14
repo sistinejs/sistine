@@ -1,17 +1,17 @@
-import Sistine from "../../../src/index";
+import Core from "../../../src/Core";
+import { loadFromURL } from "../../../src/SVG/loader";
+import BasicShapes from "../../../src/Bundles/index";
+import BuiltinShapes from "../../../src/Builtins/index";
+import { Point, Bounds } from "../../../src/Geom/models";
+import { LinearGradient, RadialGradient } from "../../../src/Core/styles";
 import { App } from "./App";
 
 declare var theApp: App;
-var BasicShapes = Sistine.Bundles.BasicShapes;
-var BuiltinShapes = Sistine.Builtins;
 
 export const shapeDefaults = {
   strokeStyle: "black",
   lineWidth: 2,
 };
-
-var Point = Sistine.Geom.Models.Point;
-var Bounds = Sistine.Geom.Models.Bounds;
 
 function getTestSvgUrl(base: string): string {
   return "/src/demos/svgcmp/samples/" + base;
@@ -24,7 +24,7 @@ export function addSampleShapes() {
 }
 
 function addSampleShapes1() {
-  var grd1 = new Sistine.Core.Styles.LinearGradient(0, 0, 1, 1).addStop(0, "black").addStop(1, "white");
+  var grd1 = new LinearGradient(0, 0, 1, 1).addStop(0, "black").addStop(1, "white");
   addShape(BasicShapes, "Triangle", {
     p0: new Point(140, 150),
     p1: new Point(80, 280),
@@ -33,7 +33,7 @@ function addSampleShapes1() {
     fillStyle: grd1,
   });
 
-  var grd2 = new Sistine.Core.Styles.RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5).addStop(0, "red").addStop(1, "blue");
+  var grd2 = new RadialGradient(0.5, 0.5, 0.2, 0.5, 0.5, 0.5).addStop(0, "red").addStop(1, "blue");
   addShape(BuiltinShapes, "Circle", {
     center: new Point(200, 200),
     radius: 100,
@@ -53,7 +53,7 @@ function addSampleShapes1() {
     fillStyle: "blue",
   });
 
-  var path = addShape(Sistine.Core, "Path");
+  var path = addShape(Core, "Path");
   path.moveTo(100, 100);
   path.lineTo(100, 200);
   path.quadraticCurveTo(300, 400, 325, 475);
@@ -74,13 +74,13 @@ function addSampleShapes1() {
 }
 
 function addSampleShapes2() {
-  Sistine.SVG.Loader.loadFromURL(
+  loadFromURL(
     getTestSvgUrl("acid.svg"),
     {
       bounds: new Bounds(0, 0, 300, 300),
     },
     function (shape) {
-      theApp.scene.add(shape);
+      theApp.scene.add(shape!);
     },
   );
 }

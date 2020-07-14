@@ -1,5 +1,5 @@
-import { Sistine } from "../../../../lib/index";
-import { Nullable } from "../../../../lib/Core/types";
+import { fillChildComponent } from "../../../../src/Utils/dom";
+import { Nullable } from "../../../../src/Core/types";
 import { Panel } from "./Panel";
 
 export class Sidebar extends Panel {
@@ -29,25 +29,20 @@ export class Sidebar extends Panel {
 
       var buttonId = sbbutton.id.replace(/SB_/, "");
       var iconId = "tb_icon_" + buttonId;
-      var buttonImage = $(
-        "<img src = '" +
-          "./src/demos/paint/icons/toolbar/" +
-          buttonId +
-          ".png' />"
-      );
+      var buttonImage = $("<img src = '" + "./src/demos/paint/icons/toolbar/" + buttonId + ".png' />");
       $sbbutton
         .button({
           iconPosition: "top",
         })
         .append(buttonImage);
-      Sistine.Utils.DOM.fillChildComponent(buttonImage);
+      fillChildComponent(buttonImage);
       $sbbutton.click(
         (function (buttonId) {
           return function (_event: any) {
             var handler = "on" + buttonId;
             ((self as any)[handler] as any)();
           };
-        })(buttonId)
+        })(buttonId),
       );
     });
   }
