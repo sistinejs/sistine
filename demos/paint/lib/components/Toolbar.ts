@@ -19,7 +19,7 @@ export class Toolbar extends Panel {
 
       var eventId = "on" + buttonId;
       $tbbutton.click(function (event: any) {
-        self.eventMachine.handle(eventId, self, event);
+        self.app.eventMachine.handle(eventId, self, event);
       });
     });
   }
