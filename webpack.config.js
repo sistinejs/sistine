@@ -59,15 +59,15 @@ module.exports = (_env, options) => {
       ],
       append: true
     }),
-    /*
     new HtmlWebpackPlugin({
       inject: false,
       title: "Painting Application Demo",
       myPageHeader: "Painting Application Demo",
       filename: path.resolve(__dirname, "dist/demos/paint/index.html"),
-      template: path.resolve(__dirname, "demos/paint/index.html"),
+      template: path.resolve(__dirname, "demos/paint/index.hbs"),
       chunks: ["paint"]
     }),
+    /*
     new HtmlWebpackTagsPlugin({
       files: [ "paint.html" ],
       tags: [
@@ -111,7 +111,7 @@ module.exports = (_env, options) => {
       lib: "./src/index.ts",
       demos: "./demos/index.ts",
       svgcmp: "./demos/svgcmp/index.ts",
-      // paint: "./demos/paint/index.ts",
+      paint: "./demos/paint/index.ts",
     },
     optimization: {
       splitChunks: {
@@ -120,16 +120,49 @@ module.exports = (_env, options) => {
     },
     output: {
       path: path.resolve(__dirname, "dist"),
-      filename: "sistine.js",
+      filename: "[name].js",
       library: "Sistine",
-      libraryTarget: "umd",
+      // libraryTarget: "umd",
+      libraryTarget: "this",
       libraryExport: "default",
       umdNamedDefine: true,
-      // publicPath: "/static",
+      publicPath: "/static",
     },
     module: {
       rules: [
         // The rule for rendering page-hbs.html from a handlebars template.
+        {
+          test: /\.hbs$/,
+          loader: "handlebars-loader",
+            /*
+          use: [{
+              loader: "file-loader?name=[name]-[ext].html"
+            },
+            {
+              loader: "extract-loader"
+            },
+            {
+              loader: "handlebars-loader"
+            },
+            {
+              loader: "render-template-loader",
+              options: {
+                engine: "handlebars",
+                init: function (engine, info) {
+                engine.registerPartial(
+                  "body",
+                  fs.readFileSync("./src/body.hbs").toString()
+                )
+                },
+                locals: {
+                title: "Rendered with Handlebars!",
+                desc: "Partials Support"
+                },
+              }
+            }
+          ]
+            */
+        },
         {
           test: /\.js$/,
           exclude: /node_modules/,
