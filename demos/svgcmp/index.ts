@@ -1,4 +1,5 @@
-import "./styles/global";
+import "./styles/global.scss";
+
 import { App } from "./src/app";
 
 $(document).ready(function () {

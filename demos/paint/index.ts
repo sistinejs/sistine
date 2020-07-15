@@ -1,4 +1,4 @@
-import "./styles/global";
+// import "./styles/global";
 
 import { App } from "./lib/App";
 import { addSampleShapes } from "./lib/stage";

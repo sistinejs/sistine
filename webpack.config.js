@@ -128,8 +128,7 @@ module.exports = (_env, options) => {
         // The rule for rendering page-hbs.html from a handlebars template.
         {
           test: /\.hbs$/,
-          loader: "handlebars-loader",
-            /*
+          // loader: "handlebars-loader",
           use: [{
               loader: "file-loader?name=[name]-[ext].html"
             },
@@ -143,20 +142,21 @@ module.exports = (_env, options) => {
               loader: "render-template-loader",
               options: {
                 engine: "handlebars",
+                /*
                 init: function (engine, info) {
-                engine.registerPartial(
-                  "body",
-                  fs.readFileSync("./src/body.hbs").toString()
-                )
+                  engine.registerPartial(
+                    "body",
+                    fs.readFileSync("./src/body.hbs").toString()
+                  )
                 },
+                */
                 locals: {
-                title: "Rendered with Handlebars!",
-                desc: "Partials Support"
+                  title: "Rendered with Handlebars!",
+                  desc: "Partials Support"
                 },
               }
             }
           ]
-            */
         },
         {
           test: /\.js$/,
@@ -170,9 +170,11 @@ module.exports = (_env, options) => {
           ],
           use: ["ts-loader"]
         },
+        /*
         {
           test: /\.s(a|c)ss$/,
-          loader: [
+          exclude: /\.module.(s(a|c)ss)$/,
+          use: [
             isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
             "css-loader",
             {
@@ -180,6 +182,38 @@ module.exports = (_env, options) => {
               options: {
                 sourceMap: isDevelopment
               }
+            }
+          ]
+        },
+        */
+        {
+          test: /\.css$/,
+          use: [
+            'style-loader',
+            'css-loader',
+          ]
+        },
+        {
+          test: /\.s(a|c)ss$/,
+          exclude: /\.module.(s(a|c)ss)$/,
+        	use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[path]/[name].css',
+              }
+            },
+            {
+              loader: 'extract-loader'
+            },
+            {
+              loader: 'css-loader?-url'
+            },
+            {
+              loader: 'postcss-loader'
+            },
+            {
+              loader: 'sass-loader'
             }
           ]
         },
@@ -191,7 +225,7 @@ module.exports = (_env, options) => {
     },
     plugins: plugins,
     resolve: {
-      extensions: [".js", ".jsx", ".ts", ".tsx", ".scss", ".sass"]
+      extensions: [ ".js", ".jsx", ".ts", ".tsx", ".scss", ".sass", ".css" ]
     }
   };
   if (isDevelopment) {
@@ -199,8 +233,23 @@ module.exports = (_env, options) => {
     webpackConfigs.devServer = {
       hot: true,
       serveIndex: true,
+      writeToDisk: true,
+      contentBase: [
+        path.join(__dirname, "dist"),
+        path.join(__dirname, "demos/ext"),
+      ],
+      contentBasePublicPath: [
+        "/dist",
+        "/demos/ext"
+      ],
       before: function(app, server) {
         app.get(/\/dir\/.*/, function(req, res) {
+          const path = "./" + req.path.substr(5);
+          console.log("Listing dir: ", path);
+          const listing = readdir(path);
+          res.json({ entries: listing });
+        });
+        app.get(/\/\/.*/, function(req, res) {
           const path = "./" + req.path.substr(5);
           console.log("Listing dir: ", path);
           const listing = readdir(path);
