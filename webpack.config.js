@@ -4,10 +4,9 @@ const webpack = require("webpack");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const HtmlWebpackTagsPlugin = require("html-webpack-tags-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const uglifyJsPlugin = require("uglifyjs-webpack-plugin");
-// const CopyPlugin = require("copy-webpack-plugin");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 // Read Samples first
@@ -129,14 +128,15 @@ module.exports = (_env, options) => {
         {
           test: /\.hbs$/,
           // loader: "handlebars-loader",
-          use: [{
-              loader: "file-loader?name=[name]-[ext].html"
+          use: [
+            {
+              loader: "file-loader?name=[name]-[ext].html",
             },
             {
-              loader: "extract-loader"
+              loader: "extract-loader",
             },
             {
-              loader: "handlebars-loader"
+              loader: "handlebars-loader",
             },
             {
               loader: "render-template-loader",
@@ -152,25 +152,22 @@ module.exports = (_env, options) => {
                 */
                 locals: {
                   title: "Rendered with Handlebars!",
-                  desc: "Partials Support"
+                  desc: "Partials Support",
                 },
-              }
-            }
-          ]
+              },
+            },
+          ],
         },
         {
           test: /\.js$/,
           exclude: /node_modules/,
-          use: ["babel-loader"]
+          use: ["babel-loader"],
         },
         {
           test: /\.ts$/,
-          exclude: [
-            /node_modules/,
-          ],
-          use: ["ts-loader"]
+          exclude: [/node_modules/],
+          use: ["ts-loader"],
         },
-        /*
         {
           test: /\.s(a|c)ss$/,
           exclude: /\.module.(s(a|c)ss)$/,
@@ -185,14 +182,7 @@ module.exports = (_env, options) => {
             }
           ]
         },
-        */
-        {
-          test: /\.css$/,
-          use: [
-            'style-loader',
-            'css-loader',
-          ]
-        },
+        /*
         {
           test: /\.s(a|c)ss$/,
           exclude: /\.module.(s(a|c)ss)$/,
@@ -201,7 +191,7 @@ module.exports = (_env, options) => {
               loader: 'file-loader',
               options: {
                 name: '[path]/[name].css',
-              }
+              },
             },
             {
               loader: 'extract-loader'
@@ -215,6 +205,14 @@ module.exports = (_env, options) => {
             {
               loader: 'sass-loader'
             }
+          ]
+        },
+        */
+        {
+          test: /\.css$/,
+          use: [
+            'style-loader',
+            'css-loader',
           ]
         },
         {
